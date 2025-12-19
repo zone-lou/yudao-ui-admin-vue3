@@ -414,7 +414,7 @@
             <div>
               <el-divider content-position="left">跳过表达式</el-divider>
               <el-form-item prop="skipExpression">
-                <el-input v-model="configForm.skipExpression" type="textarea"  />
+                <el-input v-model="configForm.skipExpression" type="textarea" />
               </el-form-item>
             </div>
           </el-form>
@@ -600,6 +600,7 @@ const { formType, fieldsPermissionConfig, formFieldOptions, getNodeConfigFormFie
   useFormFieldsPermission(FieldPermissionType.READ)
 // 表单内用户字段选项, 必须是必填和用户选择器
 const userFieldOnFormOptions = computed(() => {
+  console.log(formFieldOptions,'这是什么')
   // 固定添加发起人 ID 字段
   formFieldOptions.unshift({
     field: ProcessVariableEnum.START_USER_ID,

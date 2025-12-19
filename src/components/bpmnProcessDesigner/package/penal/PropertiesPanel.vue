@@ -240,6 +240,7 @@ const initFormOnChanged = (element) => {
     bpmnInstances().bpmnElement = activatedElement
     bpmnElement.value = activatedElement
     elementId.value = activatedElement.id
+    console.log(activatedElement.type.split(':')[1],'dsahflkahdslkfhladsh')
     elementType.value = activatedElement.type.split(':')[1] || ''
     elementBusinessObject.value = JSON.parse(JSON.stringify(activatedElement.businessObject))
     conditionFormVisible.value = !!(

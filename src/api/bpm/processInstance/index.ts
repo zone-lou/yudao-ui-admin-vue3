@@ -99,6 +99,16 @@ export const getNextApprovalNodes = async (params: any) => {
   return await request.get({ url: '/bpm/process-instance/get-next-approval-nodes', params })
 }
 
+// 获取下一个可以选择的流程节点
+export const getNextSelectNode = async (params: any) => {
+  return await request.get({ url: '/bpm/process-instance/get-next-select-nodes', params })
+}
+
+// 获取节点可选用户列表
+export const getSelectUserOptions = async (params: any) => {
+  return await request.get({ url: '/bpm/user-select/get-user-list', params })
+}
+
 // 获取表单字段权限
 export const getFormFieldsPermission = async (params: any) => {
   return await request.get({ url: '/bpm/process-instance/get-form-fields-permission', params })

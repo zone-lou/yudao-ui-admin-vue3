@@ -334,6 +334,12 @@ export function useNodeForm(nodeType: NodeType) {
     ) {
       showText = `发起人连续部门负责人`
     }
+    // 手动选择
+    if (
+      configForm.value?.candidateStrategy === CandidateStrategy.MANUAL_SELECTED
+    ) {
+      showText = `手动选择`
+    }
     // 流程表达式
     if (configForm.value?.candidateStrategy === CandidateStrategy.EXPRESSION) {
       showText = `流程表达式：${configForm.value.expression}`

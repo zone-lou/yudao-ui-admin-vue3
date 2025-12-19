@@ -296,29 +296,54 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
-        path: 'oa/leave/create',
-        component: () => import('@/views/bpm/oa/leave/create.vue'),
+        path: 'leave/create',
+        component: () => import('@/views/bpm/leave/create.vue'),
         name: 'OALeaveCreate',
         meta: {
           noCache: true,
           hidden: true,
           canTo: true,
           title: '发起 OA 请假',
-          activeMenu: '/bpm/oa/leave'
+          activeMenu: '/bpm/leave_oa'
         }
       },
       {
-        path: 'oa/leave/detail',
-        component: () => import('@/views/bpm/oa/leave/detail.vue'),
+        path: 'leave/detail',
+        component: () => import('@/views/bpm/leave/detail.vue'),
         name: 'OALeaveDetail',
         meta: {
           noCache: true,
           hidden: true,
           canTo: true,
           title: '查看 OA 请假',
-          activeMenu: '/bpm/oa/leave'
+          activeMenu: '/bpm/leave_oa'
         }
       },
+      {
+        path: 'receivedoc/create',
+        component: () => import('@/views/bpm/receivedoc/create.vue'),
+        name: 'OAReceiveDocCreate',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '发起收文',
+          activeMenu: '/bpm/receivedoc/create'
+        }
+      },
+      {
+        path: 'receivedoc/detail',
+        component: () => import('@/views/bpm/receivedoc/detail.vue'),
+        name: 'OAReceiveDocDetail',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '收文详情',
+          activeMenu: '/bpm/receivedoc/detail'
+        }
+      },
+
       {
         path: 'manager/model/create',
         component: () => import('@/views/bpm/model/form/index.vue'),
