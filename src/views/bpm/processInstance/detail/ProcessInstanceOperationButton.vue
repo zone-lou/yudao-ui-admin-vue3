@@ -45,9 +45,47 @@
             />
           </el-form-item>
           <el-form-item
+            label="下一节点"
+            prop="nextNode"
+            v-if="currentNode.candidateStrategy === CandidateStrategy.MANUAL_SELECTED"
+          >
+            <el-select
+              v-model="selectNode"
+              placeholder="请选择下一节点"
+              @change="nodeChange"
+              value-key="conditionExpression"
+              :empty-values="[null, undefined]"
+            >
+              <el-option
+                v-for="dict in nextNodes"
+                :key="dict.conditionExpression"
+                :label="dict.taskName"
+                :value="dict"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item
+            label="下一节点审批人"
+            prop="nextNode"
+            v-if="currentNode.candidateStrategy === CandidateStrategy.MANUAL_SELECTED"
+          >
+            <el-select
+              v-model="tempNextUserSelectAssignees"
+              placeholder="请选择审批人"
+              :multiple="multipleFlag"
+            >
+              <el-option
+                v-for="dict in selectUserOptions"
+                :key="dict.id"
+                :label="dict.nickname"
+                :value="dict.id"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item
             label="下一个节点的审批人"
             prop="nextAssignees"
-            v-if="nextAssigneesActivityNode.length > 0"
+            v-if="nextAssigneesActivityNode.length > 0 && currentNode.candidateStrategy !== CandidateStrategy.MANUAL_SELECTED"
           >
             <div class="ml-10px -mt-15px -mb-35px">
               <ProcessInstanceTimeline
@@ -545,6 +583,8 @@ const props = defineProps<{
   normalForm: any // 流程表单 formCreate
   normalFormApi: any // 流程表单 formCreate Api
   writableFields: string[] // 流程表单可以编辑的字段
+  currentNode: any
+  nextNodes: any
 }>()
 
 const formLoading = ref(false) // 表单加载中
@@ -572,6 +612,10 @@ const reasonRequire = ref()
 const approveFormRef = ref<FormInstance>()
 const signRef = ref()
 const approveSignFormRef = ref()
+const selectNode = ref()
+const tempNextUserSelectAssignees = ref()
+const selectUserOptions = ref([])
+const multipleFlag = ref(false)
 const nextAssigneesActivityNode = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([]) // 下一个审批节点信息
 const nextAssigneesTimelineRef = ref() // 下一个节点审批人时间线组件的引用
 const approveReasonForm = reactive({
@@ -588,7 +632,19 @@ const approveReasonRule = computed(() => {
     nextAssignees: [{ required: true, message: '审批人不能为空', trigger: 'blur' }]
   }
 })
+const nodeChange = async (val) => {
+  await getSelectUsers(val.extensionProperties)
+}
 
+const getSelectUsers = async (item) => {
+  const data = await ProcessInstanceApi.getSelectUserOptions({
+    // TODO 小北：可以支持 processDefinitionKey 查询
+    chooseRule: item.choose_rule,
+    ruleValue: item.rule_value
+  })
+  multipleFlag.value = item.multiple_flag === '1'
+  selectUserOptions.value = data
+}
 // 拒绝表单
 const rejectFormRef = ref<FormInstance>()
 const rejectReasonForm = reactive({
@@ -728,6 +784,7 @@ const closePopover = (type: string, formRef: FormInstance | undefined) => {
 
 /** 流程通过时，根据表单变量查询新的流程节点，判断下一个节点类型是否为自选审批人 */
 const initNextAssigneesFormField = async () => {
+  console.log(runningTask.value, 'dsdsldsdsf')
   // 获取修改的流程变量, 暂时只支持流程表单
   const variables = getUpdatedProcessInstanceVariables()
   const data = await ProcessInstanceApi.getNextApprovalNodes({
@@ -811,6 +868,16 @@ const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => 
       if (runningTask.value.signEnable) {
         data.signPicUrl = approveReasonForm.signPicUrl
       }
+      if (props.currentNode.candidateStrategy === CandidateStrategy.MANUAL_SELECTED) {
+        data.nextNode = selectNode.value.conditionExpression
+        data.nextNodeAssignees = {}
+        console.log(selectNode.value, '选定的节点')
+        if (selectNode.value.extensionProperties.multiple_flag === '1') {
+          data.nextNodeAssignees[selectNode.value.taskDefKey] = tempNextUserSelectAssignees.value
+        } else {
+          data.nextNodeAssignees[selectNode.value.taskDefKey] = [tempNextUserSelectAssignees.value]
+        }
+      }
       // 多表单处理，并且有额外的 approveForm 表单，需要校验 + 拼接到 data 表单里提交
       // TODO 芋艿 任务有多表单这里要如何处理，会和可编辑的字段冲突
       const formCreateApi = approveFormFApi.value
@@ -819,6 +886,7 @@ const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => 
         // @ts-ignore
         data.variables = approveForm.value.value
       }
+      console.log(data)
       await TaskApi.approveTask(data)
       popOverVisible.value.approve = false
       nextAssigneesActivityNode.value = []

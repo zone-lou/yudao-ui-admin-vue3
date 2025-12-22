@@ -53,6 +53,13 @@ export type ApprovalNodeInfo = {
   tasks: ApprovalTaskInfo[]
 }
 
+export type NextNode = {
+  conditionExpression: string
+  extensionProperties: any
+  taskDefKey: string
+  taskName:string
+}
+
 export const getProcessInstanceMyPage = async (params: any) => {
   return await request.get({ url: '/bpm/process-instance/my-page', params })
 }
@@ -102,6 +109,10 @@ export const getNextApprovalNodes = async (params: any) => {
 // 获取下一个可以选择的流程节点
 export const getNextSelectNode = async (params: any) => {
   return await request.get({ url: '/bpm/process-instance/get-next-select-nodes', params })
+}
+
+export const getCurrentNodes = async (params: any) => {
+  return await request.get({ url: '/bpm/process-instance/get-current-node', params })
 }
 
 // 获取节点可选用户列表

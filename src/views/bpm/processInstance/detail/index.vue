@@ -118,6 +118,8 @@
             ref="operationButtonRef"
             :process-instance="processInstance"
             :process-definition="processDefinition"
+            :currentNode="currentNode"
+            :nextNodes="nextNodes"
             :userOptions="userOptions"
             :normal-form="detailForm"
             :normal-form-api="fApi"
@@ -146,7 +148,7 @@ import ProcessInstanceSimpleViewer from './ProcessInstanceSimpleViewer.vue'
 import ProcessInstanceTaskList from './ProcessInstanceTaskList.vue'
 import ProcessInstanceOperationButton from './ProcessInstanceOperationButton.vue'
 import ProcessInstanceTimeline from './ProcessInstanceTimeline.vue'
-import { FieldPermissionType } from '@/components/SimpleProcessDesignerV2/src/consts'
+import { FieldPermissionType, NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { TaskStatusEnum } from '@/api/bpm/task'
 import runningSvg from '@/assets/svgs/bpm/running.svg'
 import approveSvg from '@/assets/svgs/bpm/approve.svg'
@@ -194,7 +196,24 @@ const getDetail = () => {
 /** 加载流程实例 */
 const BusinessFormComponent = ref<any>(null) // 异步组件
 /** 获取审批详情 */
-const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([]) // 审批节点信息
+const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])
+
+const nextNodes = ref<ProcessInstanceApi.NextNode[]>([])
+
+const currentNode = ref<ProcessInstanceApi.ApprovalNodeInfo>() // 审批节点信息
+
+const getNextApprovalNodes = async () => {
+  const data = await ProcessInstanceApi.getNextSelectNode({
+    processInstanceId: props.id,
+    // TODO 小北：可以支持 processDefinitionKey 查询
+    activityId: props.activityId,
+    taskId: props.taskId
+    // 解决 GET 无法传递对象的问题，后端 String 再转 JSON
+  })
+
+  nextNodes.value = data
+}
+
 const getApprovalDetail = async () => {
   processInstanceLoading.value = true
   try {
@@ -254,6 +273,15 @@ const getApprovalDetail = async () => {
 
     // 获取待办任务显示操作按钮
     operationButtonRef.value?.loadTodoTask(data.todoTask)
+
+    // 找到需要审批任务的策略
+    currentNode.value = activityNodes.value.find(
+      (item) => item.id === data.todoTask.taskDefinitionKey
+    )
+    if (data.todoTask) {
+      // 获取当前节点信息
+      await getNextApprovalNodes()
+    }
   } finally {
     processInstanceLoading.value = false
   }

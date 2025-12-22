@@ -306,7 +306,6 @@ const submitForm = async () => {
       data.nextNodeAssignees[formData.value.nextNode.taskDefKey] =
         formData.value.tempNextUserSelectAssignees
     } else if (formData.value.tempNextUserSelectAssignees) {
-      console.log(formData.value.tempNextUserSelectAssignees,'sdfjdsjsa')
       data.nextNodeAssignees[formData.value.nextNode.taskDefKey] = [formData.value.tempNextUserSelectAssignees]
     }
     data.selectNode = formData.value.nextNode.conditionExpression
