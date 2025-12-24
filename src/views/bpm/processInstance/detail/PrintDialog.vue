@@ -150,7 +150,6 @@ const fallbackToDefault = () => {
 
 defineExpose({ open })
 
-// ... 以下保持不变 ...
 const parseFormFields = () => {
   if (!printData.value) return
   const formFieldsObj = decodeFields(
