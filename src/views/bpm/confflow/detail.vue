@@ -1,50 +1,56 @@
 <template>
   <div>
     <el-descriptions :column="2" border size="large">
-      <el-descriptions-item label="收文编号" label-align="center" align="center" width="120px">
-        {{ detailData.receiveDocNumber }}
+      <el-descriptions-item label="会议名称" label-align="center" align="center" :span="2">
+        {{ detailData.title }}
       </el-descriptions-item>
 
-      <el-descriptions-item label="收文日期" label-align="center" align="center" width="120px">
-        {{ formatDate(detailData.receiveTime) }}
+      <el-descriptions-item label="申请人" label-align="center" align="center">
+        {{ detailData.userName }}
       </el-descriptions-item>
 
-      <el-descriptions-item label="来文字号" label-align="center" align="center">
-        <dict-tag :type="DICT_TYPE.BPM_DOC_NUM_TYPE" :value="detailData.sendDocNumber" />
+      <el-descriptions-item label="申请部门" label-align="center" align="center">
+        {{ detailData.deptName }}
       </el-descriptions-item>
 
-      <el-descriptions-item label="单位类别" label-align="center" align="center">
-        <dict-tag :type="DICT_TYPE.BPM_RECEICE_CLASS" :value="detailData.docSecondClass" />
+      <el-descriptions-item label="申请日期" label-align="center" align="center">
+        {{ formatDate(detailData.applyDate) }}
       </el-descriptions-item>
 
-      <el-descriptions-item label="文件类别" label-align="center" align="center">
-        <dict-tag :type="DICT_TYPE.BPM_DOC_CLASS" :value="detailData.docClass" />
+      <el-descriptions-item label="会议时间" label-align="center" align="center">
+        {{ formatDate(detailData.startDate) }}
       </el-descriptions-item>
 
-      <el-descriptions-item label="紧急程度" label-align="center" align="center">
-        <dict-tag :type="DICT_TYPE.BPM_EMERGENCY_DEGREE" :value="detailData.urgencyDegree" />
+      <el-descriptions-item label="会议地点" label-align="center" align="center" :span="2">
+        {{ detailData.venue }}
       </el-descriptions-item>
 
-      <el-descriptions-item label="来文单位" label-align="center" align="center" :span="2">
-        <dict-tag
-          :type="DICT_TYPE.BPM_RECEICE_DOC_UNIT"
-          :value="formatCommaData(detailData.sendDept)"
-        />
+      <el-descriptions-item label="召集单位及召集人" label-align="center" align="center" :span="2">
+        {{ detailData.joinUnit || '无' }}
       </el-descriptions-item>
 
-      <el-descriptions-item label="主办办结时间" label-align="center" align="center">
-        {{ formatDate(detailData.zhubandate) }}
+      <el-descriptions-item label="我局参会科室" label-align="center" align="center">
+        {{ detailData.offerUnit || '无' }}
       </el-descriptions-item>
 
-      <el-descriptions-item label="协办办结时间" label-align="center" align="center">
-        {{ formatDate(detailData.xiebandate) }}
+      <el-descriptions-item label="我局参会人员" label-align="center" align="center">
+        {{ detailData.offerPerson || '无' }}
       </el-descriptions-item>
 
-      <el-descriptions-item label="文件标题" label-align="center" align="center" :span="2">
-        {{ detailData.subject }}
+      <el-descriptions-item
+        label="参会人员情况及建议"
+        label-align="center"
+        align="center"
+        :span="2"
+      >
+        {{ detailData.situation || '无' }}
       </el-descriptions-item>
 
-      <el-descriptions-item label="收文附件" label-align="center" align="center" :span="2">
+      <el-descriptions-item label="提议内容" label-align="center" align="left" :span="2">
+        <div class="editor-content-view" v-html="detailData.content || '无'"></div>
+      </el-descriptions-item>
+
+      <el-descriptions-item label="附件" label-align="center" align="center" :span="2">
         <div v-if="fileList.length > 0">
           <el-table :data="fileList" border style="width: 100%" size="small">
             <el-table-column label="文件名" prop="name" show-overflow-tooltip />
@@ -100,13 +106,12 @@
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE } from '@/utils/dict'
 import { dateUtil } from '@/utils/dateUtil'
-import { ReceiveDocApi, ReceiveDoc } from '@/api/bpm/receivedoc' // 引入你的API定义
+import { ConfflowApi, Confflow } from '@/api/bpm/confflow' // 引入API
 import { propTypes } from '@/utils/propTypes'
-import { Document } from '@element-plus/icons-vue' // 引入图标
+import { Document } from '@element-plus/icons-vue'
 
-defineOptions({ name: 'BpmReceiveDocDetail' })
+defineOptions({ name: 'BpmConfflowDetail' })
 
 const props = defineProps({
   id: propTypes.number.def(undefined)
@@ -114,8 +119,7 @@ const props = defineProps({
 
 const { query } = useRoute()
 const detailLoading = ref(false)
-// 使用 Partial<ReceiveDoc> 因为初始状态可能是空对象
-const detailData = ref<Partial<ReceiveDoc>>({})
+const detailData = ref<Partial<Confflow>>({})
 
 // --- 附件相关状态 ---
 const fileList = ref<any[]>([])
@@ -130,74 +134,43 @@ const getInfo = async () => {
 
   detailLoading.value = true
   try {
-    const res = await ReceiveDocApi.getReceiveDoc(queryId)
+    const res = await ConfflowApi.getConfflow(queryId)
     detailData.value = res
-    // 处理附件路径 (attachFilePath)
     processFileList(res.attachFilePath)
   } finally {
     detailLoading.value = false
   }
 }
 
-/** * 处理附件字符串
- * 后端 API 定义 attachFilePath 为 string，可能是逗号分隔的
- */
+/** 处理附件字符串 */
 const processFileList = (pathStr: string | undefined) => {
   if (!pathStr) {
     fileList.value = []
     return
   }
-
-  // 兼容处理：防止某些情况后端返回了数组，或者字符串
   const paths = Array.isArray(pathStr) ? pathStr : pathStr.split(',')
 
   fileList.value = paths
     .map((url) => {
       if (!url) return null
-      // 提取文件名: 截取最后一个 / 之后的内容，并进行URL解码（防止文件名乱码）
       const rawName = url.substring(url.lastIndexOf('/') + 1)
       const name = decodeURIComponent(rawName)
-      // 提取后缀
       const ext = name.substring(name.lastIndexOf('.') + 1).toLowerCase()
       return { name, url, ext }
     })
     .filter(Boolean)
 }
 
-/** 格式化日期 (兼容 API 中的 string | Dayjs) */
+/** 格式化日期 */
 const formatDate = (val: any) => {
   if (!val) return ''
-  // create.vue 中使用了 value-format="x" (时间戳)，这里做一下兼容
   return dateUtil(val).format('YYYY-MM-DD')
-}
-
-/** * 格式化多选数据 (DictTag可能需要数组或逗号字符串)
- * API 中 sendDept 是 string 类型
- */
-const formatCommaData = (val: any) => {
-  if (Array.isArray(val)) return val
-  if (typeof val === 'string' && val.indexOf(',') !== -1) {
-    // 如果是纯数字逗号分隔 "1,2,3"，DictTag 可能需要数字数组才能正确匹配 value
-    const arr = val.split(',')
-    // 尝试判断是否全是数字，如果是则转为 number[]
-    if (arr.every((i) => !isNaN(Number(i)))) {
-      return arr.map(Number)
-    }
-    return arr
-  }
-  // 单个值的情况，如果是数字字符串 "1"，转为数字 1
-  if (typeof val === 'string' && !isNaN(Number(val))) {
-    return Number(val)
-  }
-  return val
 }
 
 /** 处理预览 */
 const handlePreview = (file: any) => {
   const { url, ext } = file
-  // 常见图片格式
   const imgExts = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp']
-  // 浏览器原生支持预览的格式
   const officeExts = ['pdf', 'txt']
 
   if (imgExts.includes(ext)) {
@@ -209,7 +182,6 @@ const handlePreview = (file: any) => {
     previewUrl.value = url
     previewVisible.value = true
   } else {
-    // 暂不支持的类型
     previewType.value = 'other'
     previewVisible.value = true
   }
@@ -226,10 +198,8 @@ const handleDownload = (file: any) => {
   document.body.removeChild(link)
 }
 
-/** 提供 open 方法给父组件调用 (例如在弹窗模式下) */
 defineExpose({ open: getInfo })
 
-/** 初始化 */
 onMounted(() => {
   getInfo()
 })
@@ -258,6 +228,16 @@ onMounted(() => {
 
   p {
     margin-top: 10px;
+  }
+}
+
+/* 简单的富文本样式重置，防止内容溢出 */
+.editor-content-view {
+  overflow-wrap: break-word;
+  word-break: break-all;
+
+  :deep(img) {
+    max-width: 100%;
   }
 }
 </style>

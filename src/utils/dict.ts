@@ -154,9 +154,12 @@ export enum DICT_TYPE {
   BPM_PROCESS_LISTENER_VALUE_TYPE = 'bpm_process_listener_value_type',
   BPM_LEAVE_TYPE = 'leave_type',
   BPM_RECEICE_CLASS = 'receive_class',
+  BPM_RECEICE_DOC_UNIT = 'receive_doc_unit',
+  BPM_DOC_NUM_TYPE = 'doc_num_type',
   BPM_DOC_CLASS = 'doc_class',
   BPM_EMERGENCY_DEGREE = 'emergency_degree',
-  BPM_AGENCY_NAME = 'emergency_name',
+  BPM_AGENCY_NAME = 'agency_name',
+  BPM_PRINT_CLASS = 'print_class',
 
   // ========== PAY 模块 ==========
   PAY_CHANNEL_CODE = 'pay_channel_code', // 支付渠道编码类型

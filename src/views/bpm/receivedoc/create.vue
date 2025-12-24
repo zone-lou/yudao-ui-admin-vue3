@@ -24,12 +24,19 @@
           <el-row>
             <el-col :span="12">
               <el-form-item label="来文字号" prop="sendDocNumber">
-                <el-input v-model="formData.sendDocNumber" placeholder="请输入来文字号" />
+                <el-select v-model="formData.sendDocNumber" placeholder="请输入来文字号">
+                  <el-option
+                    v-for="dict in getIntDictOptions(DICT_TYPE.BPM_DOC_NUM_TYPE)"
+                    :key="dict.value"
+                    :label="formatSendDocNumberLabel(dict.label)"
+                    :value="dict.value"
+                  />
+                </el-select>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="文件类别" prop="docSecondClass">
-                <el-select v-model="formData.docSecondClass" placeholder="请选择文件类别">
+              <el-form-item label="单位类别" prop="docSecondClass">
+                <el-select v-model="formData.docSecondClass" placeholder="请选择单位类别">
                   <el-option
                     v-for="dict in getIntDictOptions(DICT_TYPE.BPM_RECEICE_CLASS)"
                     :key="dict.value"
@@ -42,8 +49,8 @@
           </el-row>
           <el-row>
             <el-col :span="12">
-              <el-form-item label="单位类别" prop="docClass">
-                <el-select v-model="formData.docClass" placeholder="请选择单位类别">
+              <el-form-item label="文件类别" prop="docClass">
+                <el-select v-model="formData.docClass" placeholder="请选择文件类别">
                   <el-option
                     v-for="dict in getIntDictOptions(DICT_TYPE.BPM_DOC_CLASS)"
                     :key="dict.value"
@@ -69,9 +76,9 @@
           <el-row>
             <el-col :span="12">
               <el-form-item label="来文单位" prop="sendDept">
-                <el-select v-model="formData.sendDept" placeholder="请选择来文单位">
+                <el-select v-model="formData.sendDept" placeholder="请选择来文单位" multiple>
                   <el-option
-                    v-for="dict in getIntDictOptions(DICT_TYPE.BPM_AGENCY_NAME)"
+                    v-for="dict in getIntDictOptions(DICT_TYPE.BPM_RECEICE_DOC_UNIT)"
                     :key="dict.value"
                     :label="dict.label"
                     :value="dict.value"
@@ -146,7 +153,7 @@
               type="textarea"
             />
           </el-form-item>
-          <el-form-item label="下一审批节点" prop="nextNode">
+          <el-form-item label="下一审批节点" prop="nextNode" required>
             <el-select
               v-model="formData.nextNode"
               placeholder="请选择下一节点"
@@ -162,7 +169,7 @@
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="审批人" prop="remark">
+          <el-form-item label="审批人" prop="remark" required>
             <el-select
               v-model="formData.tempNextUserSelectAssignees"
               placeholder="请选择审批人"
@@ -213,7 +220,7 @@ import {
 import { ReceiveDoc, ReceiveDocApi } from '@/api/bpm/receivedoc'
 import { useUserStore } from '@/store/modules/user'
 import { getUserProfile } from '@/api/system/user/profile'
-
+import { dateUtil } from '@/utils/dateUtil'
 defineOptions({ name: 'BpmReceiveDocCreate' })
 
 const userStore = useUserStore()
@@ -229,7 +236,7 @@ const multipleFlag = ref(false)
 const formData = ref({
   id: undefined,
   docClass: undefined,
-  sendDept: undefined,
+  sendDept: [],
   sendDocNumber: undefined,
   receiveDocNumber: undefined,
   receiveTime: undefined,
@@ -242,7 +249,7 @@ const formData = ref({
   xiebandate: undefined,
   nextNode: '',
   nextUserSelectAssignees: {},
-  tempNextUserSelectAssignees: undefined,
+  tempNextUserSelectAssignees: undefined
 })
 
 const nextNodeOptions = ref([])
@@ -251,7 +258,9 @@ const nextNodeSelectAssignees = ref({})
 
 const formRules = reactive({
   subject: [{ required: true, message: '标题不能为空', trigger: 'blur' }],
-  receiveDocNumber: [{ required: true, message: '收文编号不能为空', trigger: 'blur' }]
+  receiveDocNumber: [{ required: true, message: '收文编号不能为空', trigger: 'blur' }],
+  nextNode: [{ required: true, message: '下一审批节点不能为空', trigger: 'change' }],
+  tempNextUserSelectAssignees: [{ required: true, message: '审批人不能为空', trigger: 'change' }]
 })
 const formRef = ref()
 
@@ -296,6 +305,10 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = { ...formData.value } as unknown as ReceiveDoc
+    // 将来文单位数组转换为逗号分隔的字符串
+    if (Array.isArray(data.sendDept)) {
+      data.sendDept = data.sendDept.join(',')
+    }
     data.nextNodeAssignees = {}
     // 审批相关：设置指定审批人
     if (startUserSelectTasks.value?.length > 0) {
@@ -306,7 +319,9 @@ const submitForm = async () => {
       data.nextNodeAssignees[formData.value.nextNode.taskDefKey] =
         formData.value.tempNextUserSelectAssignees
     } else if (formData.value.tempNextUserSelectAssignees) {
-      data.nextNodeAssignees[formData.value.nextNode.taskDefKey] = [formData.value.tempNextUserSelectAssignees]
+      data.nextNodeAssignees[formData.value.nextNode.taskDefKey] = [
+        formData.value.tempNextUserSelectAssignees
+      ]
     }
     data.selectNode = formData.value.nextNode.conditionExpression
 
@@ -323,13 +338,14 @@ const submitForm = async () => {
 
 /** 审批相关：获取审批详情 */
 const getApprovalDetail = async () => {
+  if (!processDefinitionId.value) return
   try {
     const data = await ProcessInstanceApi.getApprovalDetail({
       processDefinitionId: processDefinitionId.value,
       // TODO 小北：可以支持 processDefinitionKey 查询
       activityId: NodeId.START_USER_NODE_ID,
       processVariablesStr: JSON.stringify({
-        next_node: formData.value.nextNode.conditionExpression
+        PROCESS_NEXT_NODE: formData.value.nextNode.conditionExpression
       }) // 解决 GET 无法传递对象的问题，后端 String 再转 JSON
     })
 
@@ -379,6 +395,7 @@ const selectUserConfirm = (id: string, userList: any[]) => {
 
 /** 初始化 */
 onMounted(async () => {
+  formData.value.receiveTime = dateUtil().format('YYYY-MM-DD')
   // TODO @小北：这里可以简化，统一通过 getApprovalDetail 处理么？
   const processDefinitionDetail = await DefinitionApi.getProcessDefinition(
     undefined,
@@ -406,6 +423,15 @@ onMounted(async () => {
   }
 })
 
+/**
+ * 格式化来文字号显示文本
+ * 显示格式为: 标签[当前年份]号
+ */
+const formatSendDocNumberLabel = (label: string) => {
+  const year = new Date().getFullYear()
+  return `${label}[${year}]号`
+}
+
 /** 审批相关：预测流程节点会因为输入的参数值而产生新的预测结果值，所以需重新预测一次, formData.value可改成实际业务中的特定字段 */
 watch(
   formData.value,
@@ -423,6 +449,31 @@ watch(
   },
   {
     immediate: true
+  }
+)
+
+/**
+ * 自动生成收文编号
+ * 编号格式: 当前年份-文件类别选项键值-随机四位数
+ */
+const generateReceiveDocNumber = () => {
+  const year = new Date().getFullYear()
+  // 如果没有选择单位类别，则使用默认值
+  const category =
+    formData.value.docSecondClass !== undefined
+      ? formData.value.docSecondClass.toString()
+      : 'DEFAULT'
+  // 生成4位随机数
+  const randomNumber = Math.floor(1000 + Math.random() * 9000)
+  formData.value.receiveDocNumber = `${year}-${category}-${randomNumber}`
+}
+
+// 监听单位类别(docSecondClass)变化，自动更新收文编号
+watch(
+  () => formData.value.docSecondClass,
+  (newVal) => {
+    // 当单位类别发生变化时，自动生成新的收文编号
+    generateReceiveDocNumber()
   }
 )
 </script>

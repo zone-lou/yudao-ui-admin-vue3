@@ -264,7 +264,7 @@ const getApprovalDetail = async () => {
         }
       })
     } else {
-      // 注意：data.processDefinition.formCustomViewPath 是组件的全路径，例如说：/crm/contract/detail/index.vue
+      // 注意：data.processDefinition.formCustomViewPath 是组件的全路径
       BusinessFormComponent.value = registerComponent(data.processDefinition.formCustomViewPath)
     }
 
@@ -274,14 +274,18 @@ const getApprovalDetail = async () => {
     // 获取待办任务显示操作按钮
     operationButtonRef.value?.loadTodoTask(data.todoTask)
 
-    // 找到需要审批任务的策略
-    currentNode.value = activityNodes.value.find(
-      (item) => item.id === data.todoTask.taskDefinitionKey
-    )
+    // 【修复代码开始】-------------------------------------------------------
+    // 只有当存在待办任务时，才去匹配当前节点和获取下一节点信息
     if (data.todoTask) {
+      currentNode.value = activityNodes.value.find(
+        (item) => item.id === data.todoTask.taskDefinitionKey
+      )
       // 获取当前节点信息
       await getNextApprovalNodes()
+    } else {
+      currentNode.value = undefined
     }
+    // 【修复代码结束】-------------------------------------------------------
   } finally {
     processInstanceLoading.value = false
   }

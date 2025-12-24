@@ -12,12 +12,12 @@
           <el-row>
             <el-col :span="12">
               <el-form-item label="申请人" prop="applyDate">
-                <el-input v-model="nickname" placeholder="请选择申请人"  disabled/>
+                <el-input v-model="nickname" placeholder="请选择申请人" disabled />
               </el-form-item>
             </el-col>
             <el-col :span="12">
               <el-form-item label="所在科室" prop="applyDate">
-                <el-input v-model="deptName" placeholder="请选择所在科室"  disabled/>
+                <el-input v-model="deptName" placeholder="请选择所在科室" disabled />
               </el-form-item>
             </el-col>
           </el-row>
@@ -47,9 +47,7 @@
                     </el-select>
                   </el-col>
                 </el-row>
-
               </el-form-item>
-
             </el-col>
             <el-col :span="12">
               <el-form-item label="结束时间" prop="qxjEndDate">
@@ -98,7 +96,12 @@
           </el-row>
 
           <el-form-item label="事假理由" prop="sjReason">
-            <el-input v-model="formData.sjReason" placeholder="请输入事假理由" :autosize="{ minRows: 2, maxRows: 4 }" type="textarea" />
+            <el-input
+              v-model="formData.sjReason"
+              placeholder="请输入事假理由"
+              :autosize="{ minRows: 2, maxRows: 4 }"
+              type="textarea"
+            />
           </el-form-item>
 
           <el-form-item label="文件地址" prop="filepath">
@@ -124,27 +127,25 @@
       </ContentWrap>
     </el-col>
   </el-row>
-
 </template>
 
 <script setup lang="ts">
-
-import {DICT_TYPE, getIntDictOptions} from "@/utils/dict";
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as DefinitionApi from '@/api/bpm/definition'
 import ProcessInstanceTimeline from '@/views/bpm/processInstance/detail/ProcessInstanceTimeline.vue'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { CandidateStrategy, NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { ApprovalNodeInfo } from '@/api/bpm/processInstance'
-import {leave, leaveApi} from '@/api/bpm/leave'
+import { leave, leaveApi } from '@/api/bpm/leave'
 import dayjs from 'dayjs'
-import {useUserStore} from "@/store/modules/user";
-import {getUserProfile} from "@/api/system/user/profile";
+import { useUserStore } from '@/store/modules/user'
+import { getUserProfile } from '@/api/system/user/profile'
 
 defineOptions({ name: 'BpmLeaveCreate' })
 
 const userStore = useUserStore()
-const nickname = computed(()=>userStore.user.nickname)
+const nickname = computed(() => userStore.user.nickname)
 const deptName = ref('')
 
 const message = useMessage() // 消息弹窗
@@ -161,9 +162,9 @@ const formData = ref({
   qxjType: undefined,
   sjReason: undefined,
   totalTs: 0,
-  filepath: undefined,
+  filepath: undefined, // 现在可以是数组或字符串
   startPeriod: undefined,
-  endPeriod: undefined,
+  endPeriod: undefined
 })
 
 const formRules = reactive({
@@ -174,13 +175,28 @@ const formRules = reactive({
 })
 const formRef = ref()
 
+// 新增：需要上传文件的假种类型（病假2、婚假3、哺乳假5、探亲假7、独生子女陪护假11）
+const requiredFileTypes = [2, 3, 5, 7, 11]
+
+// 新增：根据假种动态设置文件上传必填规则
+watch(
+  () => formData.value.qxjType,
+  (newVal) => {
+    if (requiredFileTypes.includes(newVal)) {
+      formRules.filepath = [{ required: true, message: '请上传必要文件', trigger: 'change' }]
+    } else {
+      delete formRules.filepath
+    }
+  },
+  { immediate: true }
+)
+
 const processDefineKey = 'oa_leave' // 流程定义 Key
 const startUserSelectTasks = ref([]) // 发起人需要选择审批人的用户任务列表
 const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据
 const tempStartUserSelectAssignees = ref({}) // 历史发起人选择审批人的数据，用于每次表单变更时，临时保存
 const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([]) // 审批节点信息
 const processDefinitionId = ref('')
-
 
 const AM = 1
 const PM = 2
@@ -199,7 +215,7 @@ const getRoleLevel = (roleStr: string): number => {
 
 const maxPermissionRole = computed(() => {
   // 1. 过滤出只包含 grade_ 的角色
-  const gradeRoles = userStore.roles.filter(r => r.startsWith('grade_'))
+  const gradeRoles = userStore.roles.filter((r) => r.startsWith('grade_'))
 
   if (gradeRoles.length === 0) return 'grade_3'
 
@@ -210,25 +226,30 @@ const maxPermissionRole = computed(() => {
 })
 
 const days_condition4 = computed(() => {
-  if(maxPermissionRole.value === "grade_3" && duration.value<=1){
-    return "4_6"
-  }else{
-    return "4_3"
+  if (maxPermissionRole.value === 'grade_3' && duration.value <= 1) {
+    return '4_6'
+  } else {
+    return '4_3'
   }
 })
 
-const days_condition3 = computed(()=>{
-  if((maxPermissionRole.value === "grade_3" && duration.value>1 && duration.value<30 )||(maxPermissionRole.value === "grade_7" && duration.value<=7)){
-    return "3_6"
+const days_condition3 = computed(() => {
+  if (
+    (maxPermissionRole.value === 'grade_3' && duration.value > 1 && duration.value < 30) ||
+    (maxPermissionRole.value === 'grade_7' && duration.value <= 7)
+  ) {
+    return '3_6'
   }
-  if(maxPermissionRole.value === "grade_11" || (maxPermissionRole.value === "grade_7" && duration.value>7)||(maxPermissionRole.value === "grade_3" && duration.value>30)){
-    return "3_5"
-  }
-  else return ""
+  if (
+    maxPermissionRole.value === 'grade_11' ||
+    (maxPermissionRole.value === 'grade_7' && duration.value > 7) ||
+    (maxPermissionRole.value === 'grade_3' && duration.value > 30)
+  ) {
+    return '3_5'
+  } else return ''
 })
 
-
-// 核心：计算时长逻辑
+// 核心：计算时长逻辑（已修改节假日处理逻辑）
 const calculateDuration = () => {
   duration.value = 0
   errorMsg.value = ''
@@ -252,26 +273,40 @@ const calculateDuration = () => {
     }
   }
 
-  // 3. 计算天数差
-  // diffDays 是纯粹的日期差（例如周一到周三 = 2）
-  const diffDays = end.diff(start, 'day')
+  // 3. 计算有效工作日天数（排除周末）
+  let totalDays = 0
+  let currentDate = start.clone()
+  const isHoliday = (date: dayjs.Dayjs) => date.day() === 0 || date.day() === 6 // 周日或周六
 
-  // 4. 加上起止当天的修正值
-  // 基础时长 = 日期差 + 1 (因为是闭区间，周一到周一算1天)
-  let total = diffDays + 1
-
-  // 修正开始时间：如果是下午开始，减去0.5天
-  if (formData.value.startPeriod === PM) {
-    total -= 0.5
+  while (currentDate.isBefore(end) || currentDate.isSame(end)) {
+    // 跳过周末
+    if (!isHoliday(currentDate)) {
+      // 开始日期的特殊处理
+      if (currentDate.isSame(start)) {
+        if (formData.value.startPeriod === PM) {
+          totalDays += 0.5
+        } else {
+          totalDays += 1
+        }
+      }
+      // 结束日期的特殊处理
+      else if (currentDate.isSame(end)) {
+        if (formData.value.endPeriod === AM) {
+          totalDays += 0.5
+        } else {
+          totalDays += 1
+        }
+      }
+      // 中间日期
+      else {
+        totalDays += 1
+      }
+    }
+    currentDate = currentDate.add(1, 'day')
   }
 
-  // 修正结束时间：如果是上午结束，减去0.5天
-  if (formData.value.endPeriod === AM) {
-    total -= 0.5
-  }
-
-  duration.value = total
-  formData.value.totalTs = total
+  duration.value = totalDays
+  formData.value.totalTs = totalDays
 }
 
 const submitForm = async () => {
@@ -279,8 +314,7 @@ const submitForm = async () => {
   if (!formRef) return
   calculateDuration()
   if (errorMsg.value) return
-  const valid = await formRef.value.validate()
-  if (!valid) return
+
   // 1.2 审批相关：校验指定审批人
   if (startUserSelectTasks.value?.length > 0) {
     for (const userTask of startUserSelectTasks.value) {
@@ -295,7 +329,14 @@ const submitForm = async () => {
   // 2. 提交请求
   formLoading.value = true
   try {
+    // 创建数据副本
     const data = { ...formData.value } as unknown as leave
+
+    // 新增：将文件路径数组转换为逗号分隔的字符串
+    if (Array.isArray(data.filepath)) {
+      data.filepath = data.filepath.join(',')
+    }
+
     // 审批相关：设置指定审批人
     if (startUserSelectTasks.value?.length > 0) {
       data.startUserSelectAssignees = startUserSelectAssignees.value
@@ -308,7 +349,6 @@ const submitForm = async () => {
   } finally {
     formLoading.value = false
   }
-
 }
 
 /** 审批相关：获取审批详情 */
@@ -318,7 +358,11 @@ const getApprovalDetail = async () => {
       processDefinitionId: processDefinitionId.value,
       // TODO 小北：可以支持 processDefinitionKey 查询
       activityId: NodeId.START_USER_NODE_ID,
-      processVariablesStr: JSON.stringify({role_condition:maxPermissionRole.value, days_condition4: days_condition4.value,days_condition3:days_condition3.value }) // 解决 GET 无法传递对象的问题，后端 String 再转 JSON
+      processVariablesStr: JSON.stringify({
+        role_condition: maxPermissionRole.value,
+        days_condition4: days_condition4.value,
+        days_condition3: days_condition3.value
+      }) // 解决 GET 无法传递对象的问题，后端 String 再转 JSON
     })
 
     if (!data) {
@@ -352,13 +396,6 @@ const getApprovalDetail = async () => {
 /** 审批相关：选择发起人 */
 const selectUserConfirm = (id: string, userList: any[]) => {
   startUserSelectAssignees.value[id] = userList?.map((item: any) => item.id)
-}
-
-
-const daysDifference = () => {
-  const oneDay = 24 * 60 * 60 * 1000 // 一天的毫秒数
-  const diffTime = Math.abs(Number(formData.value.qxjStartDate) - Number(formData.value.qxjEndDate))
-  return Math.floor(diffTime / oneDay)
 }
 
 /** 初始化 */
@@ -406,21 +443,17 @@ watch(
     immediate: true
   }
 )
-watch (
-  ()=>[
+watch(
+  () => [
     formData.value.qxjStartDate,
     formData.value.qxjEndDate,
     formData.value.startPeriod,
-    formData.value.endPeriod,
+    formData.value.endPeriod
   ],
-  ()=>{
+  () => {
     calculateDuration()
   }
 )
 </script>
 
-
-
-<style scoped lang="scss">
-
-</style>
+<style scoped lang="scss"></style>

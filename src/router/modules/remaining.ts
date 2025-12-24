@@ -343,7 +343,30 @@ const remainingRouter: AppRouteRecordRaw[] = [
           activeMenu: '/bpm/receivedoc/detail'
         }
       },
-
+      {
+        path: 'confflow/create',
+        component: () => import('@/views/bpm/confflow/create.vue'),
+        name: 'OAconfflowCreate',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '会议报告单',
+          activeMenu: '/bpm/confflow_oa'
+        }
+      },
+      {
+        path: 'confflow/detail',
+        component: () => import('@/views/bpm/confflow/detail.vue'),
+        name: 'OAconfflowDetail',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '查看会议报告单',
+          activeMenu: '/bpm/confflow_oa'
+        }
+      },
       {
         path: 'manager/model/create',
         component: () => import('@/views/bpm/model/form/index.vue'),
