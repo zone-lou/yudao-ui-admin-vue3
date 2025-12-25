@@ -67,7 +67,10 @@
           <el-form-item
             label="下一节点审批人"
             prop="nextNode"
-            v-if="currentNode.candidateStrategy === CandidateStrategy.MANUAL_SELECTED"
+            v-if="
+              currentNode.candidateStrategy === CandidateStrategy.MANUAL_SELECTED &&
+              selectNode?.taskDefKey !== 'end'
+            "
           >
             <el-select
               v-model="tempNextUserSelectAssignees"
@@ -85,7 +88,10 @@
           <el-form-item
             label="下一个节点的审批人"
             prop="nextAssignees"
-            v-if="nextAssigneesActivityNode.length > 0 && currentNode.candidateStrategy !== CandidateStrategy.MANUAL_SELECTED"
+            v-if="
+              nextAssigneesActivityNode.length > 0 &&
+              currentNode.candidateStrategy !== CandidateStrategy.MANUAL_SELECTED
+            "
           >
             <div class="ml-10px -mt-15px -mb-35px">
               <ProcessInstanceTimeline
@@ -633,7 +639,9 @@ const approveReasonRule = computed(() => {
   }
 })
 const nodeChange = async (val) => {
-  await getSelectUsers(val.extensionProperties)
+  if (val.taskDefKey !== 'end') {
+    await getSelectUsers(val.extensionProperties)
+  }
 }
 
 const getSelectUsers = async (item) => {
@@ -868,16 +876,7 @@ const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => 
       if (runningTask.value.signEnable) {
         data.signPicUrl = approveReasonForm.signPicUrl
       }
-      if (props.currentNode.candidateStrategy === CandidateStrategy.MANUAL_SELECTED) {
-        data.nextNode = selectNode.value.conditionExpression
-        data.nextNodeAssignees = {}
-        console.log(selectNode.value, '选定的节点')
-        if (selectNode.value.extensionProperties.multiple_flag === '1') {
-          data.nextNodeAssignees[selectNode.value.taskDefKey] = tempNextUserSelectAssignees.value
-        } else {
-          data.nextNodeAssignees[selectNode.value.taskDefKey] = [tempNextUserSelectAssignees.value]
-        }
-      }
+
       // 多表单处理，并且有额外的 approveForm 表单，需要校验 + 拼接到 data 表单里提交
       // TODO 芋艿 任务有多表单这里要如何处理，会和可编辑的字段冲突
       const formCreateApi = approveFormFApi.value
@@ -885,6 +884,24 @@ const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => 
         await formCreateApi.validate()
         // @ts-ignore
         data.variables = approveForm.value.value
+      }
+      if (props.currentNode.candidateStrategy === CandidateStrategy.MANUAL_SELECTED) {
+        if (selectNode.value.conditionExpression) {
+          data.nextNode = selectNode.value.conditionExpression.value
+          data.variables[selectNode.value.conditionExpression.key] =
+            selectNode.value.conditionExpression.value
+        }
+        data.nextNodeAssignees = {}
+        console.log(selectNode.value, '选定的节点')
+        if (selectNode.value.extensionProperties) {
+          if (selectNode.value.extensionProperties.multiple_flag === '1') {
+            data.nextNodeAssignees[selectNode.value.taskDefKey] = tempNextUserSelectAssignees.value
+          } else {
+            data.nextNodeAssignees[selectNode.value.taskDefKey] = [
+              tempNextUserSelectAssignees.value
+            ]
+          }
+        }
       }
       console.log(data)
       await TaskApi.approveTask(data)

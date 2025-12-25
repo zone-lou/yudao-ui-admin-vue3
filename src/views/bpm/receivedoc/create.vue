@@ -264,7 +264,7 @@ const formRules = reactive({
 })
 const formRef = ref()
 
-const processDefineKey = 'receice_doc_v2' // 流程定义 Key
+const processDefineKey = 'receice_doc_v2_copy' // 流程定义 Key
 const startUserSelectTasks = ref([]) // 发起人需要选择审批人的用户任务列表
 const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据
 const tempStartUserSelectAssignees = ref({}) // 历史发起人选择审批人的数据，用于每次表单变更时，临时保存
@@ -323,7 +323,12 @@ const submitForm = async () => {
         formData.value.tempNextUserSelectAssignees
       ]
     }
-    data.selectNode = formData.value.nextNode.conditionExpression
+    data.selectNode = formData.value.nextNode.conditionExpression.value
+    data.processVariablesStr = JSON.stringify({
+      [formData.value.nextNode.conditionExpression.key]:
+        formData.value.nextNode.conditionExpression.value
+    })
+
 
     console.log(data, '请求数据')
     await ReceiveDocApi.createReceiveDoc(data)
@@ -345,8 +350,9 @@ const getApprovalDetail = async () => {
       // TODO 小北：可以支持 processDefinitionKey 查询
       activityId: NodeId.START_USER_NODE_ID,
       processVariablesStr: JSON.stringify({
-        PROCESS_NEXT_NODE: formData.value.nextNode.conditionExpression
-      }) // 解决 GET 无法传递对象的问题，后端 String 再转 JSON
+        [formData.value.nextNode.conditionExpression.key]:
+          formData.value.nextNode.conditionExpression.value
+      })
     })
 
     if (!data) {
