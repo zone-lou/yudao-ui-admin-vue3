@@ -6,7 +6,7 @@
           <el-col :xl="12" :lg="12" :md="12" :sm="24" :xs="24">
             <div class="flex items-center">
               <el-avatar :src="avatar" :size="70" class="mr-16px">
-                <img src="@/assets/imgs/avatar.gif" alt="" />
+                <img src="../../assets/imgs/avatar.gif" alt="" />
               </el-avatar>
               <div>
                 <div class="text-20px">
@@ -160,7 +160,7 @@
           <div v-for="(item, index) in notice" :key="`dynamics-${index}`">
             <div class="flex items-center">
               <el-avatar :src="avatar" :size="35" class="mr-16px">
-                <img src="@/assets/imgs/avatar.gif" alt="" />
+                <img src="../../assets/imgs/avatar.gif" alt="" />
               </el-avatar>
               <div>
                 <div class="text-14px">
@@ -222,31 +222,31 @@ let projects = reactive<Project[]>([])
 const getProject = async () => {
   const data = [
     {
-      name: 'ruoyi-vue-pro',
+      name: '请销假',
       icon: 'simple-icons:springboot',
-      message: 'github.com/YunaiV/ruoyi-vue-pro',
-      personal: 'Spring Boot 单体架构',
+      message: '请销假申请',
+      personal: '全体员工',
       time: new Date('2025-01-02'),
       color: '#6DB33F'
     },
     {
-      name: 'yudao-ui-admin-vue3',
+      name: '因公外出',
       icon: 'ep:element-plus',
-      message: 'github.com/yudaocode/yudao-ui-admin-vue3',
-      personal: 'Vue3 + element-plus 管理后台',
+      message: '因公外出申请',
+      personal: '全体员工',
       time: new Date('2025-02-03'),
       color: '#409EFF'
     },
     {
-      name: 'yudao-ui-mall-uniapp',
+      name: '电子公告',
       icon: 'icon-park-outline:mall-bag',
-      message: 'github.com/yudaocode/yudao-ui-mall-uniapp',
+      message: '发起电子公告',
       personal: 'Vue3 + uniapp 商城手机端',
       time: new Date('2025-03-04'),
       color: '#ff4d4f'
     },
     {
-      name: 'yudao-cloud',
+      name: '收文',
       icon: 'material-symbols:cloud-outline',
       message: 'github.com/YunaiV/yudao-cloud',
       personal: 'Spring Cloud 微服务架构',
@@ -254,7 +254,7 @@ const getProject = async () => {
       color: '#1890ff'
     },
     {
-      name: 'yudao-ui-admin-vben',
+      name: '发文',
       icon: 'devicon:antdesign',
       message: 'github.com/yudaocode/yudao-ui-admin-vben',
       personal: 'Vue3 + vben5(antd) 管理后台',
@@ -262,7 +262,7 @@ const getProject = async () => {
       color: '#e18525'
     },
     {
-      name: 'yudao-ui-admin-uniapp',
+      name: '会议报告',
       icon: 'ant-design:mobile',
       message: 'github.com/yudaocode/yudao-ui-admin-uniapp',
       personal: 'Vue3 + uniapp 管理手机端',
@@ -290,15 +290,15 @@ const getNotice = async () => {
       date: new Date()
     },
     {
-      title: '全部开源，个人与企业可 100% 直接使用，无需授权',
-      type: '开源免授权',
-      keys: ['无需授权'],
+      title: '使用 Flowable，支持动态表单、在线设计流程、会签 / 或签、多种任务分配方式',
+      type: '工作流',
+      keys: ['在线设计'],
       date: new Date()
     },
     {
-      title: '国内使用最广泛的快速开发平台，远超 10w+ 企业使用',
-      type: '广泛企业认可',
-      keys: ['最广泛', '10w+'],
+      title: '数据库可使用 MySQL、Oracle、PostgreSQL、SQL Server、MariaDB、国产达梦 DM、TiDB 等',
+      type: '支持信创',
+      keys: ['人大金仓', '达梦'],
       date: new Date()
     }
   ]
@@ -317,31 +317,31 @@ const getShortcut = async () => {
       color: '#1fdaca'
     },
     {
-      name: '商城中心',
+      name: '发起流程',
       icon: 'ep:shop',
       url: '/mall/home',
       color: '#ff6b6b'
     },
     {
-      name: 'AI 大模型',
+      name: '待办任务',
       icon: 'tabler:ai',
       url: '/ai/chat',
       color: '#7c3aed'
     },
     {
-      name: 'ERP 系统',
+      name: '已办任务',
       icon: 'simple-icons:erpnext',
       url: '/erp/home',
       color: '#3fb27f'
     },
     {
-      name: 'CRM 系统',
+      name: '抄送我的',
       icon: 'simple-icons:civicrm',
       url: '/crm/backlog',
       color: '#4daf1bc9'
     },
     {
-      name: 'IoT 物联网',
+      name: '通知公告',
       icon: 'fa-solid:hdd',
       url: '/iot/home',
       color: '#1a73e8'
