@@ -223,51 +223,51 @@ const getProject = async () => {
   const data = [
     {
       name: '请销假',
-      icon: 'simple-icons:springboot',
-      message: '请销假申请',
+      icon: 'mdi:calendar-remove',
+      message: '在线填写病假、事假、年假等各类请假单',
       personal: '全体员工',
       time: new Date('2025-01-02'),
-      color: '#6DB33F'
+      color: '#F56C6C'
     },
     {
       name: '因公外出',
-      icon: 'ep:element-plus',
-      message: '因公外出申请',
+      icon: 'mdi:briefcase-clock',
+      message: '因公外出地点登记、事由说明及打卡报备',
       personal: '全体员工',
       time: new Date('2025-02-03'),
       color: '#409EFF'
     },
     {
       name: '电子公告',
-      icon: 'icon-park-outline:mall-bag',
-      message: '发起电子公告',
-      personal: 'Vue3 + uniapp 商城手机端',
+      icon: 'mdi:bullhorn',
+      message: '内部红头文件、新闻动态及紧急通知发布',
+      personal: '全体员工',
       time: new Date('2025-03-04'),
-      color: '#ff4d4f'
+      color: '#E6A23C'
     },
     {
       name: '收文',
-      icon: 'material-symbols:cloud-outline',
-      message: 'github.com/YunaiV/yudao-cloud',
-      personal: 'Spring Cloud 微服务架构',
+      icon: 'mdi:file-export',
+      message: '内部公文拟稿、核稿、签发及归档全流程',
+      personal: '科室/管理层',
       time: new Date('2025-04-05'),
-      color: '#1890ff'
+      color: '#17A2B8'
     },
     {
       name: '发文',
-      icon: 'devicon:antdesign',
-      message: 'github.com/yudaocode/yudao-ui-admin-vben',
-      personal: 'Vue3 + vben5(antd) 管理后台',
+      icon: 'mdi:file-export',
+      message: '内部公文拟稿、核稿、签发及归档全流程',
+      personal: '科室/管理层',
       time: new Date('2025-05-06'),
-      color: '#e18525'
+      color: '#673AB7'
     },
     {
       name: '会议报告',
-      icon: 'ant-design:mobile',
-      message: 'github.com/yudaocode/yudao-ui-admin-uniapp',
-      personal: 'Vue3 + uniapp 管理手机端',
+      icon: 'mdi:presentation',
+      message: '会议纪要录入及决议事项跟进',
+      personal: '科室/管理层',
       time: new Date('2025-06-01'),
-      color: '#2979ff'
+      color: '#FF9800'
     }
   ]
   projects = Object.assign(projects, data)
