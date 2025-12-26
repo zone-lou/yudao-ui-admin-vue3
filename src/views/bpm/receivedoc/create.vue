@@ -17,7 +17,13 @@
             </el-col>
             <el-col :span="12">
               <el-form-item label="收文日期" prop="receiveTime">
-                <el-input v-model="formData.receiveTime" placeholder="请选择收文日期" />
+                <el-date-picker
+                  v-model="formData.receiveTime"
+                  type="date"
+                  value-format="x"
+                  placeholder="请选择收文日期"
+                  style="width: 100%"
+                />
               </el-form-item>
             </el-col>
           </el-row>
@@ -400,7 +406,7 @@ const selectUserConfirm = (id: string, userList: any[]) => {
 
 /** 初始化 */
 onMounted(async () => {
-  formData.value.receiveTime = dateUtil().format('YYYY-MM-DD')
+  formData.value.receiveTime = Date.now()
   // TODO @小北：这里可以简化，统一通过 getApprovalDetail 处理么？
   const processDefinitionDetail = await DefinitionApi.getProcessDefinition(
     undefined,
