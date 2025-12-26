@@ -274,7 +274,6 @@ const getApprovalDetail = async () => {
     // 获取待办任务显示操作按钮
     operationButtonRef.value?.loadTodoTask(data.todoTask)
 
-    // 【修复代码开始】-------------------------------------------------------
     // 只有当存在待办任务时，才去匹配当前节点和获取下一节点信息
     if (data.todoTask) {
       currentNode.value = activityNodes.value.find(
@@ -285,7 +284,6 @@ const getApprovalDetail = async () => {
     } else {
       currentNode.value = undefined
     }
-    // 【修复代码结束】-------------------------------------------------------
   } finally {
     processInstanceLoading.value = false
   }

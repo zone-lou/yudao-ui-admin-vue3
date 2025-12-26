@@ -3,9 +3,9 @@
     :class="prefixCls"
     class="relative h-[100%] lt-md:px-10px lt-sm:px-10px lt-xl:px-10px lt-xl:px-10px"
   >
-    <div class="relative mx-auto h-full flex">
+    <div class="relative mx-auto h-full flex home-bg">
       <div
-        :class="`${prefixCls}__left flex-1 bg-gray-500 bg-opacity-20 relative p-30px lt-xl:hidden overflow-x-hidden overflow-y-auto`"
+        :class="`${prefixCls}__left flex-1  bg-opacity-20 relative p-30px lt-xl:hidden overflow-x-hidden overflow-y-auto`"
       >
         <!-- 左上角的 logo + 系统标题 -->
         <div class="relative flex items-center text-white">
@@ -19,7 +19,7 @@
             enter-active-class="animate__animated animate__bounceInLeft"
             tag="div"
           >
-            <img key="1" alt="" class="w-350px" src="@/assets/svgs/login-box-bg.svg" />
+            <img key="1" alt="" class="w-350px" src="@/assets/imgs/yiwu.png" />
             <div key="2" class="text-3xl text-white">{{ t('login.welcome') }}</div>
             <div key="3" class="mt-5 text-14px font-normal text-white">
               {{ t('login.message') }}
@@ -33,11 +33,11 @@
         <!-- 右上角的主题、语言选择 -->
         <div
           class="flex items-center justify-between at-2xl:justify-end at-xl:justify-end"
-          style="color: var(--el-text-color-primary);"
+          style="color: var(--el-text-color-primary)"
         >
           <div class="flex items-center at-2xl:hidden at-xl:hidden">
             <img alt="" class="mr-10px h-48px w-48px" src="@/assets/imgs/yiwu.png" />
-            <span class="text-20px font-bold" >{{ underlineToHump(appStore.getTitle) }}</span>
+            <span class="text-20px font-bold">{{ underlineToHump(appStore.getTitle) }}</span>
           </div>
           <div class="flex items-center justify-end space-x-10px h-48px">
             <ThemeSwitch />
@@ -75,7 +75,14 @@ import { useAppStore } from '@/store/modules/app'
 import { ThemeSwitch } from '@/layout/components/ThemeSwitch'
 import { LocaleDropdown } from '@/layout/components/LocaleDropdown'
 
-import { LoginForm, MobileForm, QrCodeForm, RegisterForm, SSOLoginVue, ForgetPasswordForm } from './components'
+import {
+  LoginForm,
+  MobileForm,
+  QrCodeForm,
+  RegisterForm,
+  SSOLoginVue,
+  ForgetPasswordForm
+} from './components'
 
 defineOptions({ name: 'Login' })
 
@@ -99,11 +106,33 @@ $prefix-cls: #{$namespace}-login;
       z-index: -1;
       width: 100%;
       height: 100%;
-      background-image: url('@/assets/svgs/login-bg.svg');
+      // background-image: url('@/assets/svgs/login-bg.svg');
       background-position: center;
       background-repeat: no-repeat;
       content: '';
     }
+  }
+
+  .home-bg {
+    height: 100vh;
+    background-color: #def1f9;
+  }
+
+  .home-bg::before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background-image: url('/home-bg.png');
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    background-size: cover;
+    content: '';
+    opacity: 0.3;
+    filter: brightness(0.7) contrast(1);
   }
 }
 </style>

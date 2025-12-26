@@ -169,7 +169,7 @@
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="审批人" prop="remark" required>
+          <el-form-item label="审批人" prop="tempNextUserSelectAssignees" required>
             <el-select
               v-model="formData.tempNextUserSelectAssignees"
               placeholder="请选择审批人"
@@ -328,7 +328,6 @@ const submitForm = async () => {
       [formData.value.nextNode.conditionExpression.key]:
         formData.value.nextNode.conditionExpression.value
     })
-
 
     console.log(data, '请求数据')
     await ReceiveDocApi.createReceiveDoc(data)

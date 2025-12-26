@@ -68,43 +68,15 @@
         {{ detailData.remark || '无' }}
       </el-descriptions-item>
     </el-descriptions>
-
-    <el-dialog
-      v-model="previewVisible"
-      title="文件预览"
-      width="800px"
-      destroy-on-close
-      append-to-body
-    >
-      <div class="preview-container">
-        <img
-          v-if="previewType === 'image'"
-          :src="previewUrl"
-          alt="preview"
-          style="max-width: 100%"
-        />
-        <iframe
-          v-else-if="previewType === 'iframe'"
-          :src="previewUrl"
-          width="100%"
-          height="600px"
-          frameborder="0"
-        ></iframe>
-        <div v-else class="unsupported-preview">
-          <el-icon :size="40" color="#909399"><Document /></el-icon>
-          <p>该文件类型暂不支持在线预览，请下载查看。</p>
-        </div>
-      </div>
-    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { DICT_TYPE } from '@/utils/dict'
 import { dateUtil } from '@/utils/dateUtil'
-import { ReceiveDocApi, ReceiveDoc } from '@/api/bpm/receivedoc' // 引入你的API定义
+import { ReceiveDocApi, ReceiveDoc } from '@/api/bpm/receivedoc'
 import { propTypes } from '@/utils/propTypes'
-import { Document } from '@element-plus/icons-vue' // 引入图标
+import { Base64 } from 'js-base64' // 关键：需要安装 npm install js-base64
 
 defineOptions({ name: 'BpmReceiveDocDetail' })
 
@@ -114,14 +86,13 @@ const props = defineProps({
 
 const { query } = useRoute()
 const detailLoading = ref(false)
-// 使用 Partial<ReceiveDoc> 因为初始状态可能是空对象
 const detailData = ref<Partial<ReceiveDoc>>({})
 
 // --- 附件相关状态 ---
 const fileList = ref<any[]>([])
-const previewVisible = ref(false)
-const previewUrl = ref('')
-const previewType = ref('image') // image | iframe | other
+// const previewVisible = ref(false) // 已移除
+// const previewUrl = ref('') // 已移除
+// const previewType = ref('image') // 已移除
 
 /** 获取详情数据 */
 const getInfo = async () => {
@@ -132,87 +103,82 @@ const getInfo = async () => {
   try {
     const res = await ReceiveDocApi.getReceiveDoc(queryId)
     detailData.value = res
-    // 处理附件路径 (attachFilePath)
     processFileList(res.attachFilePath)
   } finally {
     detailLoading.value = false
   }
 }
 
-/** * 处理附件字符串
- * 后端 API 定义 attachFilePath 为 string，可能是逗号分隔的
- */
+/** 处理附件字符串 */
 const processFileList = (pathStr: string | undefined) => {
   if (!pathStr) {
     fileList.value = []
     return
   }
-
-  // 兼容处理：防止某些情况后端返回了数组，或者字符串
   const paths = Array.isArray(pathStr) ? pathStr : pathStr.split(',')
 
   fileList.value = paths
     .map((url) => {
       if (!url) return null
-      // 提取文件名: 截取最后一个 / 之后的内容，并进行URL解码（防止文件名乱码）
       const rawName = url.substring(url.lastIndexOf('/') + 1)
       const name = decodeURIComponent(rawName)
-      // 提取后缀
       const ext = name.substring(name.lastIndexOf('.') + 1).toLowerCase()
       return { name, url, ext }
     })
     .filter(Boolean)
 }
 
-/** 格式化日期 (兼容 API 中的 string | Dayjs) */
+/** 格式化日期 */
 const formatDate = (val: any) => {
   if (!val) return ''
-  // create.vue 中使用了 value-format="x" (时间戳)，这里做一下兼容
   return dateUtil(val).format('YYYY-MM-DD')
 }
 
-/** * 格式化多选数据 (DictTag可能需要数组或逗号字符串)
- * API 中 sendDept 是 string 类型
- */
+/** 格式化多选数据 */
 const formatCommaData = (val: any) => {
   if (Array.isArray(val)) return val
   if (typeof val === 'string' && val.indexOf(',') !== -1) {
-    // 如果是纯数字逗号分隔 "1,2,3"，DictTag 可能需要数字数组才能正确匹配 value
     const arr = val.split(',')
-    // 尝试判断是否全是数字，如果是则转为 number[]
     if (arr.every((i) => !isNaN(Number(i)))) {
       return arr.map(Number)
     }
     return arr
   }
-  // 单个值的情况，如果是数字字符串 "1"，转为数字 1
   if (typeof val === 'string' && !isNaN(Number(val))) {
     return Number(val)
   }
   return val
 }
 
-/** 处理预览 */
+/**
+ * 处理预览 (修改版)
+ * 逻辑：使用 Base64 编码文件地址，拼接预览服务地址，打开新窗口
+ */
 const handlePreview = (file: any) => {
-  const { url, ext } = file
-  // 常见图片格式
-  const imgExts = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp']
-  // 浏览器原生支持预览的格式
-  const officeExts = ['pdf', 'txt']
-
-  if (imgExts.includes(ext)) {
-    previewType.value = 'image'
-    previewUrl.value = url
-    previewVisible.value = true
-  } else if (officeExts.includes(ext)) {
-    previewType.value = 'iframe'
-    previewUrl.value = url
-    previewVisible.value = true
-  } else {
-    // 暂不支持的类型
-    previewType.value = 'other'
-    previewVisible.value = true
+  if (!file || !file.url) {
+    return
   }
+
+  // 1. 准备基础数据
+  const kkBaseUrl = 'http://192.168.50.239:8012'
+  let fullUrl = file.url
+
+  // 【注意】如果 file.url 是相对路径 (如 /admin-api/file/...)，
+  // 你可能需要在这里补全当前系统的域名，否则预览服务可能访问不到文件。
+  // 例如：
+  // if (fullUrl.startsWith('/')) {
+  //    fullUrl = window.location.origin + fullUrl
+  // }
+
+  // 2. 将文件链接进行 Base64 编码 (使用 js-base64 库处理，支持中文更友好)
+  const encodedUrl = Base64.encode(fullUrl)
+
+  // 3. 拼接最终预览地址
+  // 格式: http://kk-ip:8012/onlinePreview?url=base64_string
+  const previewUrl = `${kkBaseUrl}/onlinePreview?url=${encodeURIComponent(encodedUrl)}`
+
+  // 4. 打开新窗口预览
+  window.open(previewUrl, '_blank')
 }
 
 /** 处理下载 */
@@ -226,10 +192,8 @@ const handleDownload = (file: any) => {
   document.body.removeChild(link)
 }
 
-/** 提供 open 方法给父组件调用 (例如在弹窗模式下) */
 defineExpose({ open: getInfo })
 
-/** 初始化 */
 onMounted(() => {
   getInfo()
 })
@@ -240,24 +204,5 @@ onMounted(() => {
   font-weight: bold;
   color: #606266;
   background-color: #f5f7fa;
-}
-
-.preview-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: 300px;
-  background-color: #f5f7fa;
-  border-radius: 4px;
-}
-
-.unsupported-preview {
-  color: #909399;
-  text-align: center;
-
-  p {
-    margin-top: 10px;
-  }
 }
 </style>

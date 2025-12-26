@@ -36,7 +36,7 @@
               :rule="approveForm.rule"
             />
           </el-card>
-          <el-form-item :label="`${nodeTypeName}意见`" prop="reason">
+          <el-form-item :label="`${nodeTypeName}意见`" prop="reason" required>
             <el-input
               v-model="approveReasonForm.reason"
               :placeholder="`请输入${nodeTypeName}意见`"
@@ -46,8 +46,8 @@
           </el-form-item>
           <el-form-item
             label="下一节点"
-            prop="nextNode"
             v-if="currentNode.candidateStrategy === CandidateStrategy.MANUAL_SELECTED"
+            required
           >
             <el-select
               v-model="selectNode"
@@ -66,11 +66,11 @@
           </el-form-item>
           <el-form-item
             label="下一节点审批人"
-            prop="nextNode"
             v-if="
               currentNode.candidateStrategy === CandidateStrategy.MANUAL_SELECTED &&
               selectNode?.taskDefKey !== 'end'
             "
+            required
           >
             <el-select
               v-model="tempNextUserSelectAssignees"
@@ -862,6 +862,26 @@ const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => 
     }
 
     if (pass) {
+      // 如果是“手动选择”节点策略
+      if (props.currentNode.candidateStrategy === CandidateStrategy.MANUAL_SELECTED) {
+        // 1. 校验下一节点
+        if (!selectNode.value) {
+          message.warning('请选择下一节点!')
+          return // 阻止提交
+        }
+
+        // 2. 校验审批人（非结束节点）
+        if (selectNode.value.taskDefKey !== 'end') {
+          if (
+            !tempNextUserSelectAssignees.value ||
+            (Array.isArray(tempNextUserSelectAssignees.value) &&
+              tempNextUserSelectAssignees.value.length === 0)
+          ) {
+            message.warning('下一节点审批人不能为空!')
+            return // 阻止提交
+          }
+        }
+      }
       const nextAssigneesValid = validateNextAssignees()
       if (!nextAssigneesValid) return
       const variables = getUpdatedProcessInstanceVariables()

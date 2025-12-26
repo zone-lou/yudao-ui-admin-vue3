@@ -95,6 +95,20 @@
             </el-col>
           </el-row>
 
+          <el-row>
+            <el-col :span="12">
+              <el-form-item label="申请日期" prop="applyDate">
+                <el-date-picker
+                  v-model="formData.applyDate"
+                  type="date"
+                  value-format="x"
+                  placeholder="请选择申请日期"
+                  style="width: 100%"
+                />
+              </el-form-item>
+            </el-col>
+          </el-row>
+
           <el-form-item label="事假理由" prop="sjReason">
             <el-input
               v-model="formData.sjReason"

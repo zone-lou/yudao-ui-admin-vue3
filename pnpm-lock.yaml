@@ -86,6 +86,9 @@ importers:
       highlight.js:
         specifier: ^11.9.0
         version: 11.10.0
+      js-base64:
+        specifier: ^3.7.8
+        version: 3.7.8
       jsencrypt:
         specifier: ^3.3.2
         version: 3.3.2
@@ -3643,6 +3646,9 @@ packages:
   jmespath@0.16.0:
     resolution: {integrity: sha512-9FzQjJ7MATs1tSpnco1K6ayiYE3figslrXA72G2HQ/n76RzvYlofyi5QM+iX4YRs/pu3yzxlVQSST23+dMDknw==}
     engines: {node: '>= 0.6.0'}
+
+  js-base64@3.7.8:
+    resolution: {integrity: sha512-hNngCeKxIUQiEUN3GPJOkz4wF/YvdUdbNL9hsBcMQTkKzboD7T/q3OYOuuPZLUE6dBxSGpwhk5mwuDud7JVAow==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -8989,6 +8995,8 @@ snapshots:
   jiti@2.4.2: {}
 
   jmespath@0.16.0: {}
+
+  js-base64@3.7.8: {}
 
   js-tokens@4.0.0: {}
 

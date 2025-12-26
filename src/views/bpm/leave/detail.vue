@@ -4,7 +4,7 @@
       {{ nickname }}
     </el-descriptions-item>
     <el-descriptions-item label="所在科室" label-align="center" align="center" width="150px">
-      {{ deptName }}
+      {{ detailData.deptName }}
     </el-descriptions-item>
     <el-descriptions-item label="请假类型" label-align="center" align="center" width="150px">
       <dict-tag :type="DICT_TYPE.BPM_LEAVE_TYPE" :value="detailData.qxjType" />
