@@ -16,13 +16,15 @@
       {{ formatDate(detailData.qxjStartDate) }}
     </el-descriptions-item>
     <el-descriptions-item label="时段" label-align="center" align="center" width="150px">
-      {{ detailData.startPeriod === 1 ? '上午' : '下午' }}
+      {{ getPeriod(detailData.qxjStartDate) }}
     </el-descriptions-item>
+
     <el-descriptions-item label="请假结束至" label-align="center" align="center" width="150px">
       {{ formatDate(detailData.qxjEndDate) }}
     </el-descriptions-item>
+
     <el-descriptions-item label="时段" label-align="center" align="center" width="150px">
-      {{ detailData.endPeriod === 1 ? '上午' : '下午' }}
+      {{ getPeriod(detailData.qxjEndDate) }}
     </el-descriptions-item>
     <el-descriptions-item label="请假天数" label-align="center" align="center" width="150px">
       {{ detailData.totalTs }}
@@ -315,6 +317,14 @@ const getInfo = async () => {
   }
 }
 defineExpose({ open: getInfo }) // 提供 open 方法，用于打开弹窗
+
+// 新增：根据时间戳判断上午/下午
+const getPeriod = (val: any) => {
+  if (!val) return ''
+  const date = new Date(val)
+  const hours = date.getHours()
+  return hours < 12 ? '上午' : '下午'
+}
 
 /** 初始化 **/
 onMounted(() => {

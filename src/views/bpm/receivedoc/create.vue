@@ -329,7 +329,7 @@ const submitForm = async () => {
         formData.value.tempNextUserSelectAssignees
       ]
     }
-    data.selectNode = formData.value.nextNode.conditionExpression.value
+    // data.selectNode = formData.value.nextNode.conditionExpression.value
     data.processVariablesStr = JSON.stringify({
       [formData.value.nextNode.conditionExpression.key]:
         formData.value.nextNode.conditionExpression.value

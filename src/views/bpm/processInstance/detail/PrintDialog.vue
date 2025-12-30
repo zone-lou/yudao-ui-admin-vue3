@@ -72,72 +72,100 @@ const preparePrintData = (rawData: any) => {
   console.log('【打印调试】原始业务数据 (rawData):', rawData)
   const data = { ...rawData }
 
+  // 🟢 1. 定义内部辅助函数：根据时间戳计算时段
+  const getPeriod = (val: any) => {
+    if (!val) return ''
+    const date = new Date(val)
+    const hours = date.getHours()
+    return hours < 12 ? '上午' : '下午'
+  }
+
   // ==================== 【通用】 基础字段 ====================
-  data.createTime = formatD(rawData.createTime)
-  data.applyDate = rawData.createTime ? dateUtil(rawData.createTime).format('YYYY-MM-DD') : ''
+  if (rawData.createTime) data.createTime = formatD(rawData.createTime)
+
+  const baseDate = rawData.checkDate || rawData.applyDate || rawData.createTime
+  data.applyDate = baseDate ? dateUtil(baseDate).format('YYYY-MM-DD') : ''
+
   data.startUser = printData.value.processInstance?.startUser?.nickname || ''
   data.deptName = rawData.deptName || printData.value.processInstance?.startUser?.deptName || ''
   data.printUser = userName.value
   data.printDate = formatD(new Date())
 
   // ==================== 【收文流程】 专属逻辑 ====================
-  // 1. 时间格式化
-  if (rawData.receiveTime) data.receiveTime = formatD(rawData.receiveTime)
-  if (rawData.zhubandate) data.zhubandate = formatD(rawData.zhubandate)
-  if (rawData.xiebandate) data.xiebandate = formatD(rawData.xiebandate)
+  if (rawData.receiveDocNumber || rawData.sendDocNumber) {
+    if (rawData.receiveTime) data.receiveTime = formatD(rawData.receiveTime)
+    if (rawData.zhubandate) data.zhubandate = formatD(rawData.zhubandate)
+    if (rawData.xiebandate) data.xiebandate = formatD(rawData.xiebandate)
 
-  // 2. 字典回显
-  if (rawData.urgencyDegree) {
-    data.urgencyDegree = getDictLabel(DICT_TYPE.BPM_EMERGENCY_DEGREE, rawData.urgencyDegree)
-  }
-  if (rawData.sendDocNumber) {
-    data.sendDocNumber = getDictLabel(DICT_TYPE.BPM_DOC_NUM_TYPE, rawData.sendDocNumber)
-  }
-  // 3. 来文单位 (多选处理)
-  if (rawData.sendDept) {
-    try {
-      const arr =
-        typeof rawData.sendDept === 'string'
-          ? rawData.sendDept.split(',')
-          : Array.isArray(rawData.sendDept)
-            ? rawData.sendDept
-            : [rawData.sendDept]
-      data.sendDept = arr
-        .map((v: any) => getDictLabel(DICT_TYPE.BPM_RECEICE_DOC_UNIT, v))
-        .filter(Boolean)
-        .join('、')
-    } catch (err) {
-      data.sendDept = rawData.sendDept
+    if (rawData.urgencyDegree) {
+      data.urgencyDegree = getDictLabel(DICT_TYPE.BPM_EMERGENCY_DEGREE, rawData.urgencyDegree)
     }
+    if (rawData.sendDocNumber) {
+      data.sendDocNumber = getDictLabel(DICT_TYPE.BPM_DOC_NUM_TYPE, rawData.sendDocNumber)
+    }
+    if (rawData.sendDept) {
+      try {
+        const arr =
+          typeof rawData.sendDept === 'string'
+            ? rawData.sendDept.split(',')
+            : Array.isArray(rawData.sendDept)
+              ? rawData.sendDept
+              : [rawData.sendDept]
+        data.sendDept = arr
+          .map((v: any) => getDictLabel(DICT_TYPE.BPM_RECEICE_DOC_UNIT, v))
+          .filter(Boolean)
+          .join('、')
+      } catch (err) {
+        data.sendDept = rawData.sendDept
+      }
+    }
+    data.supervisionMark = rawData.zhubandate || rawData.xiebandate ? '✔' : ''
   }
-
-  // 4. 监督监管标记
-  data.supervisionMark = rawData.zhubandate || rawData.xiebandate ? '✔' : ''
 
   // ==================== 【请假流程】 专属逻辑 ====================
-  // 1. 请假类型
-  if (rawData.qxjType) {
-    data.leaveType = getDictLabel(DICT_TYPE.BPM_LEAVE_TYPE, rawData.qxjType)
+  if (rawData.qxjStartDate || rawData.qxjType) {
+    if (rawData.qxjType) {
+      data.leaveType = getDictLabel(DICT_TYPE.BPM_LEAVE_TYPE, rawData.qxjType)
+    }
+
+    // 🟢 时间与时段 (修改点：加入 getPeriod 计算)
+    if (rawData.qxjStartDate) {
+      data.startTime = dateUtil(rawData.qxjStartDate).format('YYYY-MM-DD')
+      data.startSession = getPeriod(rawData.qxjStartDate)
+    }
+    if (rawData.qxjEndDate) {
+      data.endTime = dateUtil(rawData.qxjEndDate).format('YYYY-MM-DD')
+      data.endSession = getPeriod(rawData.qxjEndDate)
+    }
+
+    if (rawData.totalTs) data.leaveDays = rawData.totalTs
+    if (rawData.sjReason) data.reason = rawData.sjReason
   }
 
-  // 2. 时间与时段 (将时间戳格式化)
-  if (rawData.qxjStartDate) {
-    data.startTime = dateUtil(rawData.qxjStartDate).format('YYYY-MM-DD')
+  // ==================== 【因公外出流程】 专属逻辑 ====================
+  if (rawData.checkBegin || rawData.reason) {
+    data.leaveType = '因公外出'
+
+    // 🟢 时间与时段 (修改点：加入 getPeriod 计算)
+    if (rawData.checkBegin) {
+      data.startTime = dateUtil(rawData.checkBegin).format('YYYY-MM-DD')
+      data.startSession = getPeriod(rawData.checkBegin)
+    }
+    if (rawData.checkEnd) {
+      data.endTime = dateUtil(rawData.checkEnd).format('YYYY-MM-DD')
+      data.endSession = getPeriod(rawData.checkEnd)
+    }
+
+    if (rawData.days) data.leaveDays = rawData.days
+    if (rawData.reason) data.reason = rawData.reason
   }
-  data.startSession = rawData.startPeriod === 1 ? '上午' : '下午'
 
-  if (rawData.qxjEndDate) {
-    data.endTime = dateUtil(rawData.qxjEndDate).format('YYYY-MM-DD')
-  }
-  data.endSession = rawData.endPeriod === 1 ? '上午' : '下午'
+  // ==================== 【通用】 附件处理 ====================
+  // 🟢 注意：已移除了原先依赖 rawData.startPeriod 的通用逻辑，防止冲突
 
-  // 3. 其他字段
-  if (rawData.totalTs) data.leaveDays = rawData.totalTs
-  if (rawData.sjReason) data.reason = rawData.sjReason
-
-  // 4. 附件名称处理 (请假通常用 filepath)
-  if (rawData.filepath) {
-    const pathStr = rawData.filepath
+  const fileSource = rawData.filepath || rawData.attachFilePath
+  if (fileSource) {
+    const pathStr = fileSource
     const files =
       typeof pathStr === 'string' ? pathStr.split(',') : Array.isArray(pathStr) ? pathStr : []
     data.fileNames = files
@@ -153,22 +181,19 @@ const preparePrintData = (rawData: any) => {
   // ==================== 【审批任务】 统一处理 ====================
   const tasks = printData.value.tasks || []
 
+  // ... (审批任务逻辑保持不变，为节省篇幅略去，请保留原文件中的审批逻辑代码) ...
   // ----------------- A. 收文任务匹配 -----------------
-
-  // A1. 主任拟办 (单条)
   const niBanTask = tasks.find((t: any) => t.name === '主任拟办' && t.approveName)
   if (niBanTask) {
     data.nibanContent = niBanTask.content || '同意'
     data.nibanHandler = niBanTask.approveName
     data.nibanDate = formatD(niBanTask.approveDate)
   } else {
-    // 兼容旧数据或回显备注
     data.nibanContent = rawData.remark || ''
     data.nibanHandler = ''
     data.nibanDate = ''
   }
 
-  // A2. 局长批示 (单条)
   const directorTask = tasks.find((t: any) => t.name === '局长批示' && t.approveName)
   if (directorTask) {
     data.directorContent = directorTask.content || '同意'
@@ -180,7 +205,6 @@ const preparePrintData = (rawData: any) => {
     data.directorDate = ''
   }
 
-  // A3. 列表类 (动态表格)
   const leaderTasks = tasks.filter((t: any) => t.name === '局领导批示' && t.approveName)
   data.leaderSectionHtml = buildDynamicSectionHtml('分管领导批示', leaderTasks, 3)
 
@@ -191,9 +215,7 @@ const preparePrintData = (rawData: any) => {
   const readerTasks = tasks.filter((t: any) => readerNames.includes(t.name) && t.approveName)
   data.readerSectionHtml = buildDynamicSectionHtml('阅办者', readerTasks, 3)
 
-  // ----------------- B. 请假任务匹配 -----------------
-
-  // B1. 科室负责人
+  // ----------------- B. 请假/公出 任务匹配 -----------------
   const deptHeadTask =
     tasks.find((t: any) => t.name.includes('科室') && t.name.includes('负责人') && t.approveName) ||
     tasks.find((t: any) => t.name === '部门经理' && t.approveName)
@@ -203,7 +225,6 @@ const preparePrintData = (rawData: any) => {
     data.deptHeadDate = formatD(deptHeadTask.approveDate)
   }
 
-  // B2. 办公室
   const officeTask = tasks.find((t: any) => t.name.includes('办公室') && t.approveName)
   if (officeTask) {
     data.officeContent = officeTask.content || '已核实'
@@ -211,7 +232,6 @@ const preparePrintData = (rawData: any) => {
     data.officeDate = formatD(officeTask.approveDate)
   }
 
-  // B3. 分管领导
   const deputyLeaderTask = tasks.find((t: any) => t.name.includes('分管领导') && t.approveName)
   if (deputyLeaderTask) {
     data.deputyLeaderContent = deputyLeaderTask.content || '同意'
@@ -219,7 +239,6 @@ const preparePrintData = (rawData: any) => {
     data.deputyLeaderDate = formatD(deputyLeaderTask.approveDate)
   }
 
-  // B4. 主要领导
   const mainLeaderTask = tasks.find((t: any) => t.name.includes('主要领导') && t.approveName)
   if (mainLeaderTask) {
     data.mainLeaderContent = mainLeaderTask.content || '同意'

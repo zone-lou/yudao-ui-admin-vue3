@@ -320,6 +320,30 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
+        path: 'timeexplain/create',
+        component: () => import('@/views/bpm/timeexplain/create.vue'),
+        name: 'OAtimeexplainCreate',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '发起 OA 公出',
+          activeMenu: '/bpm/timeexplain_oa'
+        }
+      },
+      {
+        path: 'timeexplain/detail',
+        component: () => import('@/views/bpm/timeexplain/detail.vue'),
+        name: 'OAtimeexplainDetail',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '查看 OA 公出',
+          activeMenu: '/bpm/timeexplain_oa'
+        }
+      },
+      {
         path: 'receivedoc/create',
         component: () => import('@/views/bpm/receivedoc/create.vue'),
         name: 'OAReceiveDocCreate',

@@ -1,7 +1,7 @@
 <template>
   <el-row :gutter="20">
     <el-col :span="16">
-      <ContentWrap title="请假申请信息">
+      <ContentWrap title="公出申请信息">
         <el-form
           ref="formRef"
           :model="formData"
@@ -24,37 +24,11 @@
 
           <el-row>
             <el-col :span="12">
-              <el-form-item label="请假类型" prop="qxjType">
-                <el-select v-model="formData.qxjType" placeholder="请选择请假类型">
-                  <el-option
-                    v-for="dict in getIntDictOptions(DICT_TYPE.BPM_LEAVE_TYPE)"
-                    :key="dict.value"
-                    :label="dict.label"
-                    :value="dict.value"
-                  />
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="申请日期" prop="applyDate">
-                <el-date-picker
-                  v-model="formData.applyDate"
-                  type="date"
-                  value-format="x"
-                  placeholder="请选择申请日期"
-                  style="width: 100%"
-                />
-              </el-form-item>
-            </el-col>
-          </el-row>
-
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="开始时间" prop="qxjStartDate">
+              <el-form-item label="开始时间" prop="checkBegin">
                 <el-row style="width: 100%">
                   <el-col :span="16">
                     <el-date-picker
-                      v-model="formData.qxjStartDate"
+                      v-model="formData.checkBegin"
                       type="date"
                       value-format="x"
                       placeholder="选择开始时间"
@@ -76,11 +50,11 @@
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="结束时间" prop="qxjEndDate">
+              <el-form-item label="结束时间" prop="checkEnd">
                 <el-row style="width: 100%">
                   <el-col :span="16">
                     <el-date-picker
-                      v-model="formData.qxjEndDate"
+                      v-model="formData.checkEnd"
                       type="date"
                       value-format="x"
                       placeholder="选择结束时间"
@@ -105,18 +79,29 @@
 
           <el-row>
             <el-col :span="12">
-              <el-form-item label="请假天数" prop="totalTs">
-                <el-input v-model="formData.totalTs" placeholder="自动计算" disabled>
+              <el-form-item label="共计天数" prop="days">
+                <el-input v-model="formData.days" placeholder="自动计算" disabled>
                   <template #append>天</template>
                 </el-input>
               </el-form-item>
             </el-col>
+            <el-col :span="12">
+              <el-form-item label="登记日期" prop="checkDate">
+                <el-date-picker
+                  v-model="formData.checkDate"
+                  type="date"
+                  value-format="x"
+                  placeholder="请选择登记日期"
+                  style="width: 100%"
+                />
+              </el-form-item>
+            </el-col>
           </el-row>
 
-          <el-form-item label="请假事由" prop="sjReason">
+          <el-form-item label="原因说明" prop="reason">
             <el-input
-              v-model="formData.sjReason"
-              placeholder="请输入请假事由"
+              v-model="formData.reason"
+              placeholder="请输入公出/外出原因"
               :autosize="{ minRows: 2, maxRows: 4 }"
               type="textarea"
             />
@@ -155,13 +140,12 @@ import ProcessInstanceTimeline from '@/views/bpm/processInstance/detail/ProcessI
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { CandidateStrategy, NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { ApprovalNodeInfo } from '@/api/bpm/processInstance'
-import { leaveApi, leave } from '@/api/bpm/leave' // 确保引用了请假API
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { TimeExplain, TimeExplainApi } from '@/api/bpm/timeexplain'
 import dayjs from 'dayjs'
 import { useUserStore } from '@/store/modules/user'
 import { getUserProfile } from '@/api/system/user/profile'
 
-defineOptions({ name: 'BpmLeaveCreate' })
+defineOptions({ name: 'BpmTimeExplainCreate' })
 
 const userStore = useUserStore()
 const nickname = computed(() => userStore.user.nickname)
@@ -176,30 +160,27 @@ const formLoading = ref(false)
 // 表单数据
 const formData = ref({
   id: undefined,
-  applyDate: undefined,
-  qxjType: undefined,
-  qxjStartDate: undefined,
-  qxjEndDate: undefined,
-  sjReason: undefined,
-  totalTs: 0,
+  checkDate: undefined,
+  checkBegin: undefined,
+  checkEnd: undefined,
+  reason: undefined,
+  days: 0,
   filepath: undefined,
-  spzt: undefined, // 审批状态
-  userid: undefined,
+  status: 0,
   startPeriod: 1,
   endPeriod: 2
 })
 
 const formRules = reactive({
-  qxjType: [{ required: true, message: '请假类型不能为空', trigger: 'change' }],
-  qxjStartDate: [{ required: true, message: '开始时间不能为空', trigger: 'blur' }],
-  qxjEndDate: [{ required: true, message: '结束时间不能为空', trigger: 'blur' }],
-  sjReason: [{ required: true, message: '请假事由不能为空', trigger: 'blur' }],
-  applyDate: [{ required: true, message: '申请日期不能为空', trigger: 'blur' }]
+  checkBegin: [{ required: true, message: '开始时间不能为空', trigger: 'blur' }],
+  checkEnd: [{ required: true, message: '结束时间不能为空', trigger: 'blur' }],
+  reason: [{ required: true, message: '原因说明不能为空', trigger: 'blur' }],
+  checkDate: [{ required: true, message: '登记时间不能为空', trigger: 'blur' }]
 })
 const formRef = ref()
 
 // 流程配置
-const processDefineKey = 'oa_leave' // 请假流程 Key (需确认)
+const processDefineKey = 'oa_out'
 const startUserSelectTasks = ref([])
 const startUserSelectAssignees = ref({})
 const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])
@@ -208,13 +189,13 @@ const processDefinitionId = ref('')
 const AM = 1
 const PM = 2
 
-// 时长计算逻辑 (复用公出逻辑)
+// 时长计算逻辑
 const calculateDuration = () => {
-  formData.value.totalTs = 0
-  if (!formData.value.qxjStartDate || !formData.value.qxjEndDate) return
+  formData.value.days = 0
+  if (!formData.value.checkBegin || !formData.value.checkEnd) return
 
-  const start = dayjs(formData.value.qxjStartDate).startOf('day')
-  const end = dayjs(formData.value.qxjEndDate).startOf('day')
+  const start = dayjs(formData.value.checkBegin).startOf('day')
+  const end = dayjs(formData.value.checkEnd).startOf('day')
 
   if (end.isBefore(start)) {
     message.error('结束日期不能早于开始日期')
@@ -243,12 +224,13 @@ const calculateDuration = () => {
     currentDate = currentDate.add(1, 'day')
   }
 
+  // 修正同一天情况
   if (start.isSame(end) && !isHoliday(start)) {
     if (formData.value.startPeriod === AM && formData.value.endPeriod === AM) totalDays = 0.5
     else if (formData.value.startPeriod === PM && formData.value.endPeriod === PM) totalDays = 0.5
     else if (formData.value.startPeriod === AM && formData.value.endPeriod === PM) totalDays = 1
   }
-  formData.value.totalTs = totalDays
+  formData.value.days = totalDays
 }
 
 const submitForm = async () => {
@@ -269,19 +251,17 @@ const submitForm = async () => {
 
   formLoading.value = true
   try {
-    const data = { ...formData.value } as unknown as leave
-    // 处理附件
+    const data = { ...formData.value } as unknown as TimeExplain
     if (Array.isArray(data.filepath)) {
       data.filepath = data.filepath.join(',')
     }
-    // 选人
     if (startUserSelectTasks.value?.length > 0) {
       // @ts-ignore
       data.startUserSelectAssignees = startUserSelectAssignees.value
     }
 
-    await leaveApi.createleave(data)
-    message.success('请假申请发起成功')
+    await TimeExplainApi.createTimeExplain(data)
+    message.success('公出申请发起成功')
 
     // 【关键修改】关闭当前 Tab 并跳转回“我的请求”列表
     delView(unref(currentRoute))
@@ -313,7 +293,7 @@ const selectUserConfirm = (id: string, userList: any[]) => {
 }
 
 onMounted(async () => {
-  formData.value.applyDate = Date.now()
+  formData.value.checkDate = Date.now()
   const res = await getUserProfile()
   if (res.dept) deptName.value = res.dept.name
   else if (res.users && res.users.dept) deptName.value = res.users.dept.name
@@ -323,7 +303,7 @@ onMounted(async () => {
     processDefineKey
   )
   if (!processDefinitionDetail) {
-    message.error('请假流程未配置，请检查 Key: ' + processDefineKey)
+    message.error('公出流程未配置，请检查 Key: ' + processDefineKey)
     return
   }
   processDefinitionId.value = processDefinitionDetail.id

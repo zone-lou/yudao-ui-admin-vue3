@@ -261,7 +261,11 @@ const submitForm = async () => {
         formData.value.tempNextUserSelectAssignees
       ]
     }
-    data.selectNode = formData.value.nextNode.conditionExpression
+    // data.selectNode = formData.value.nextNode.conditionExpression
+    data.processVariablesStr = JSON.stringify({
+      [formData.value.nextNode.conditionExpression.key]:
+        formData.value.nextNode.conditionExpression.value
+    })
 
     // 调用新增接口
     await ConfflowApi.createConfflow(data)
@@ -277,13 +281,15 @@ const submitForm = async () => {
 
 /** 审批相关：获取审批详情 */
 const getApprovalDetail = async () => {
+  debugger
   if (!processDefinitionId.value) return
   try {
     const data = await ProcessInstanceApi.getApprovalDetail({
       processDefinitionId: processDefinitionId.value,
       activityId: NodeId.START_USER_NODE_ID,
       processVariablesStr: JSON.stringify({
-        PROCESS_NEXT_NODE: formData.value.nextNode.conditionExpression
+        [formData.value.nextNode.conditionExpression.key]:
+          formData.value.nextNode.conditionExpression.value
       })
     })
 
