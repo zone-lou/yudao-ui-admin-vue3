@@ -72,12 +72,37 @@ const preparePrintData = (rawData: any) => {
   console.log('【打印调试】原始业务数据 (rawData):', rawData)
   const data = { ...rawData }
 
-  // 🟢 1. 定义内部辅助函数：根据时间戳计算时段
+  // 1. 辅助函数：根据时间戳计算时段
   const getPeriod = (val: any) => {
     if (!val) return ''
     const date = new Date(val)
     const hours = date.getHours()
     return hours < 12 ? '上午' : '下午'
+  }
+
+  // 2. 辅助函数：构建嵌套表格行 (会议报告单专用)
+  // 【关键修复】这里使用了 sub-content 类，配合 HTML 中的 CSS 确保边框显示
+  const buildNestedRows = (tasks: any[]) => {
+    if (!tasks || tasks.length === 0) {
+      // 空行占位
+      return `
+        <tr>
+            <td class="sub-content"></td>
+            <td class="sub-content" style="text-align: center;"></td>
+            <td class="sub-content" style="text-align: center;"></td>
+        </tr>`
+    }
+    return tasks
+      .map(
+        (t) => `
+        <tr>
+            <td class="sub-content">${t.content || ''}</td>
+            <td class="sub-content" style="text-align: center;">${t.approveName || ''}</td>
+            <td class="sub-content" style="text-align: center;">${t.approveDate ? formatD(t.approveDate) : ''}</td>
+        </tr>
+    `
+      )
+      .join('')
   }
 
   // ==================== 【通用】 基础字段 ====================
@@ -122,56 +147,47 @@ const preparePrintData = (rawData: any) => {
     data.supervisionMark = rawData.zhubandate || rawData.xiebandate ? '✔' : ''
   }
 
-  // ==================== 【请假流程】 专属逻辑 ====================
-  if (rawData.qxjStartDate || rawData.qxjType) {
-    if (rawData.qxjType) {
-      data.leaveType = getDictLabel(DICT_TYPE.BPM_LEAVE_TYPE, rawData.qxjType)
-    }
-
-    // 🟢 时间与时段 (修改点：加入 getPeriod 计算)
+  // ==================== 【请假/公出流程】 专属逻辑 ====================
+  if (rawData.qxjStartDate || rawData.qxjType || rawData.checkBegin || rawData.reason) {
+    // 请假
     if (rawData.qxjStartDate) {
+      data.leaveType = getDictLabel(DICT_TYPE.BPM_LEAVE_TYPE, rawData.qxjType)
       data.startTime = dateUtil(rawData.qxjStartDate).format('YYYY-MM-DD')
       data.startSession = getPeriod(rawData.qxjStartDate)
-    }
-    if (rawData.qxjEndDate) {
       data.endTime = dateUtil(rawData.qxjEndDate).format('YYYY-MM-DD')
       data.endSession = getPeriod(rawData.qxjEndDate)
+      data.leaveDays = rawData.totalTs
+      data.reason = rawData.sjReason
     }
-
-    if (rawData.totalTs) data.leaveDays = rawData.totalTs
-    if (rawData.sjReason) data.reason = rawData.sjReason
-  }
-
-  // ==================== 【因公外出流程】 专属逻辑 ====================
-  if (rawData.checkBegin || rawData.reason) {
-    data.leaveType = '因公外出'
-
-    // 🟢 时间与时段 (修改点：加入 getPeriod 计算)
+    // 公出
     if (rawData.checkBegin) {
+      data.leaveType = '因公外出'
       data.startTime = dateUtil(rawData.checkBegin).format('YYYY-MM-DD')
       data.startSession = getPeriod(rawData.checkBegin)
-    }
-    if (rawData.checkEnd) {
       data.endTime = dateUtil(rawData.checkEnd).format('YYYY-MM-DD')
       data.endSession = getPeriod(rawData.checkEnd)
+      data.leaveDays = rawData.days
+      data.reason = rawData.reason
     }
+  }
 
-    if (rawData.days) data.leaveDays = rawData.days
-    if (rawData.reason) data.reason = rawData.reason
+  // ==================== 【会议报告流程】 专属逻辑 ====================
+  if (rawData.venue && rawData.title) {
+    // 1. 基础字段
+    if (rawData.startDate) {
+      data.startDate = dateUtil(rawData.startDate).format('YYYY-MM-DD HH:mm')
+    }
+    // title, venue, joinUnit, offerUnit, offerPerson, content, situation 自动映射
   }
 
   // ==================== 【通用】 附件处理 ====================
-  // 🟢 注意：已移除了原先依赖 rawData.startPeriod 的通用逻辑，防止冲突
-
   const fileSource = rawData.filepath || rawData.attachFilePath
   if (fileSource) {
     const pathStr = fileSource
     const files =
       typeof pathStr === 'string' ? pathStr.split(',') : Array.isArray(pathStr) ? pathStr : []
     data.fileNames = files
-      .map((f: string) => {
-        return decodeURIComponent(f.substring(f.lastIndexOf('/') + 1))
-      })
+      .map((f: string) => decodeURIComponent(f.substring(f.lastIndexOf('/') + 1)))
       .filter(Boolean)
       .join('，')
   } else {
@@ -181,48 +197,12 @@ const preparePrintData = (rawData: any) => {
   // ==================== 【审批任务】 统一处理 ====================
   const tasks = printData.value.tasks || []
 
-  // ... (审批任务逻辑保持不变，为节省篇幅略去，请保留原文件中的审批逻辑代码) ...
-  // ----------------- A. 收文任务匹配 -----------------
+  // --- 收文/请假 ---
   const niBanTask = tasks.find((t: any) => t.name === '主任拟办' && t.approveName)
   if (niBanTask) {
     data.nibanContent = niBanTask.content || '同意'
     data.nibanHandler = niBanTask.approveName
     data.nibanDate = formatD(niBanTask.approveDate)
-  } else {
-    data.nibanContent = rawData.remark || ''
-    data.nibanHandler = ''
-    data.nibanDate = ''
-  }
-
-  const directorTask = tasks.find((t: any) => t.name === '局长批示' && t.approveName)
-  if (directorTask) {
-    data.directorContent = directorTask.content || '同意'
-    data.directorHandler = directorTask.approveName
-    data.directorDate = formatD(directorTask.approveDate)
-  } else {
-    data.directorContent = ''
-    data.directorHandler = ''
-    data.directorDate = ''
-  }
-
-  const leaderTasks = tasks.filter((t: any) => t.name === '局领导批示' && t.approveName)
-  data.leaderSectionHtml = buildDynamicSectionHtml('分管领导批示', leaderTasks, 3)
-
-  const opinionTasks = tasks.filter((t: any) => t.name === '领导意见' && t.approveName)
-  data.leaderOpinionHtml = buildDynamicSectionHtml('领导意见', opinionTasks, 3)
-
-  const readerNames = ['主办科室', '协办科室', '办公室转发']
-  const readerTasks = tasks.filter((t: any) => readerNames.includes(t.name) && t.approveName)
-  data.readerSectionHtml = buildDynamicSectionHtml('阅办者', readerTasks, 3)
-
-  // ----------------- B. 请假/公出 任务匹配 -----------------
-  const deptHeadTask =
-    tasks.find((t: any) => t.name.includes('科室') && t.name.includes('负责人') && t.approveName) ||
-    tasks.find((t: any) => t.name === '部门经理' && t.approveName)
-  if (deptHeadTask) {
-    data.deptHeadContent = deptHeadTask.content || '同意'
-    data.deptHeadHandler = deptHeadTask.approveName
-    data.deptHeadDate = formatD(deptHeadTask.approveDate)
   }
 
   const officeTask = tasks.find((t: any) => t.name.includes('办公室') && t.approveName)
@@ -232,19 +212,72 @@ const preparePrintData = (rawData: any) => {
     data.officeDate = formatD(officeTask.approveDate)
   }
 
-  const deputyLeaderTask = tasks.find((t: any) => t.name.includes('分管领导') && t.approveName)
-  if (deputyLeaderTask) {
-    data.deputyLeaderContent = deputyLeaderTask.content || '同意'
-    data.deputyLeaderHandler = deputyLeaderTask.approveName
-    data.deputyLeaderDate = formatD(deputyLeaderTask.approveDate)
+  // --- 通用/会议报告 ---
+
+  // 1. 科室负责人 (通用)
+  const deptHeadTask =
+    tasks.find((t: any) => t.name.includes('科室') && t.name.includes('负责人') && t.approveName) ||
+    tasks.find((t: any) => t.name === '部门经理' && t.approveName)
+  if (deptHeadTask) {
+    data.deptHeadContent = deptHeadTask.content || '同意'
+    data.deptHeadHandler = deptHeadTask.approveName
+    data.deptHeadDate = formatD(deptHeadTask.approveDate)
+  } else {
+    data.deptHeadContent = ''
+    data.deptHeadHandler = ''
+    data.deptHeadDate = ''
   }
 
-  const mainLeaderTask = tasks.find((t: any) => t.name.includes('主要领导') && t.approveName)
+  // 2. 分管领导 (根据是否有 venue 判断是否为会议报告单)
+  const deputyLeaderTasks = tasks.filter((t: any) => t.name.includes('分管领导') && t.approveName)
+
+  if (rawData.venue && rawData.title) {
+    // 会议报告单：使用嵌套表格生成多行 HTML
+    data.deputyLeaderRows = buildNestedRows(deputyLeaderTasks)
+  } else {
+    // 收文/请假：使用标准处理
+    data.leaderSectionHtml = buildDynamicSectionHtml('分管领导批示', deputyLeaderTasks, 3)
+
+    const lastDeputy =
+      deputyLeaderTasks.length > 0 ? deputyLeaderTasks[deputyLeaderTasks.length - 1] : null
+    if (lastDeputy) {
+      data.deputyLeaderContent = lastDeputy.content || '同意'
+      data.deputyLeaderHandler = lastDeputy.approveName
+      data.deputyLeaderDate = formatD(lastDeputy.approveDate)
+    } else {
+      data.deputyLeaderContent = ''
+      data.deputyLeaderHandler = ''
+      data.deputyLeaderDate = ''
+    }
+  }
+
+  // 3. 局长/主要领导
+  const mainLeaderTask = tasks.find(
+    (t: any) => (t.name.includes('主要领导') || t.name.includes('局长')) && t.approveName
+  )
   if (mainLeaderTask) {
+    data.directorContent = mainLeaderTask.content || '同意'
     data.mainLeaderContent = mainLeaderTask.content || '同意'
+    data.directorHandler = mainLeaderTask.approveName
+    data.directorDate = formatD(mainLeaderTask.approveDate)
     data.mainLeaderHandler = mainLeaderTask.approveName
     data.mainLeaderDate = formatD(mainLeaderTask.approveDate)
+  } else {
+    data.directorContent = ''
+    data.directorHandler = ''
+    data.directorDate = ''
+    data.mainLeaderContent = ''
+    data.mainLeaderHandler = ''
+    data.mainLeaderDate = ''
   }
+
+  // 4. 收文其他
+  const opinionTasks = tasks.filter((t: any) => t.name === '领导意见' && t.approveName)
+  data.leaderOpinionHtml = buildDynamicSectionHtml('领导意见', opinionTasks, 3)
+
+  const readerNames = ['主办科室', '协办科室', '办公室转发']
+  const readerTasks = tasks.filter((t: any) => readerNames.includes(t.name) && t.approveName)
+  data.readerSectionHtml = buildDynamicSectionHtml('阅办者', readerTasks, 3)
 
   return data
 }

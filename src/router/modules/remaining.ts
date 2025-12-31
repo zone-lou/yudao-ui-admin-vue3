@@ -344,6 +344,30 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
+        path: 'electric/create',
+        component: () => import('@/views/bpm/electric/create.vue'),
+        name: 'OAelectricCreate',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '发起电子公告',
+          activeMenu: '/bpm/oa_electric'
+        }
+      },
+      {
+        path: 'electric/detail',
+        component: () => import('@/views/bpm/electric/detail.vue'),
+        name: 'OAelectricDetail',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '查看电子公告',
+          activeMenu: '/bpm/oa_electric'
+        }
+      },
+      {
         path: 'receivedoc/create',
         component: () => import('@/views/bpm/receivedoc/create.vue'),
         name: 'OAReceiveDocCreate',
