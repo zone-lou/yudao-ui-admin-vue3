@@ -160,6 +160,16 @@ export enum DICT_TYPE {
   BPM_EMERGENCY_DEGREE = 'emergency_degree',
   BPM_AGENCY_NAME = 'agency_name',
   BPM_PRINT_CLASS = 'print_class',
+  BPM_XZFY_CLASS1 = 'xzfy_class1',
+  BPM_XZFY_CLASS2 = 'xzfy_class2',
+  BPM_XZFY_CLASS3 = 'xzfy_class3',
+  BPM_XZSS_CLASS1 = 'xzss_class1',
+  BPM_XZSS_CLASS2 = 'xzss_class2',
+  BPM_XZSS_CLASS3 = 'xzss_class3',
+  BPM_XZSS_CLASS4 = 'xzss_class4',
+  BPM_XZSS_CLASS5 = 'xzss_class5',
+  BPM_DEGREE_OF_SECRECY = 'degree_of_secrecy',
+  BPM_SENDDOC_SIGN = 'senddoc_sign',
 
   // ========== PAY 模块 ==========
   PAY_CHANNEL_CODE = 'pay_channel_code', // 支付渠道编码类型

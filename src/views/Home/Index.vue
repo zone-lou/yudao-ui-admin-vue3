@@ -159,14 +159,12 @@
         <el-skeleton :loading="loading" animated>
           <div v-for="(item, index) in notice" :key="`dynamics-${index}`">
             <div class="flex items-center">
-              <el-avatar :src="avatar" :size="35" class="mr-16px">
+              <!-- <el-avatar :src="avatar" :size="35" class="mr-16px">
                 <img src="../../assets/imgs/avatar.gif" alt="" />
-              </el-avatar>
+              </el-avatar> -->
               <div>
                 <div class="text-14px">
-                  <Highlight :keys="item.keys.map((v) => t(v))">
-                    {{ item.type }} : {{ item.title }}
-                  </Highlight>
+                  <Highlight :keys="item.keys.map((v) => t(v))"> ·{{ item.title }} </Highlight>
                 </div>
                 <div class="mt-16px text-12px text-gray-400">
                   {{ formatTime(item.date, 'yyyy-MM-dd') }}
@@ -278,26 +276,26 @@ let notice = reactive<Notice[]>([])
 const getNotice = async () => {
   const data = [
     {
-      title: '系统支持 JDK 8/17/21，Vue 2/3',
-      type: '技术兼容性',
+      title: '2025年全国保密宣传教育月 | 共筑保密防线 公民人人有责',
+      type: '',
       keys: ['JDK', 'Vue'],
       date: new Date()
     },
     {
-      title: '后端提供 Spring Boot 2.7/3.2 + Cloud 双架构',
-      type: '架构灵活性',
+      title: '《中华人民共和国保守国家秘密法实施条例》修订版9月1日实施',
+      type: '',
       keys: ['Boot', 'Cloud'],
       date: new Date()
     },
     {
-      title: '使用 Flowable，支持动态表单、在线设计流程、会签 / 或签、多种任务分配方式',
-      type: '工作流',
+      title: '2024年全国保密宣传教育月 | 贯彻落实保密法，你我都是护密人',
+      type: '',
       keys: ['在线设计'],
       date: new Date()
     },
     {
-      title: '数据库可使用 MySQL、Oracle、PostgreSQL、SQL Server、MariaDB、国产达梦 DM、TiDB 等',
-      type: '支持信创',
+      title: '中华人民共和国保守国家秘密法',
+      type: '',
       keys: ['人大金仓', '达梦'],
       date: new Date()
     }

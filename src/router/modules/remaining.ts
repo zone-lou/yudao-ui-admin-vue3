@@ -368,6 +368,54 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
+        path: 'xzfy/create',
+        component: () => import('@/views/bpm/xzfy/create.vue'),
+        name: 'OAxzfyCreate',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '发起行政复议',
+          activeMenu: '/bpm/oa_review'
+        }
+      },
+      {
+        path: 'xzfy/detail',
+        component: () => import('@/views/bpm/xzfy/detail.vue'),
+        name: 'OAxzfyDetail',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '查看行政复议',
+          activeMenu: '/bpm/oa_review'
+        }
+      },
+      {
+        path: 'xzss/create',
+        component: () => import('@/views/bpm/xzss/create.vue'),
+        name: 'OAxzssCreate',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '发起行政诉讼',
+          activeMenu: '/bpm/oa_lawsuit'
+        }
+      },
+      {
+        path: 'xzss/detail',
+        component: () => import('@/views/bpm/xzss/detail.vue'),
+        name: 'OAxzssDetail',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '查看行政诉讼',
+          activeMenu: '/bpm/oa_lawsuit'
+        }
+      },
+      {
         path: 'receivedoc/create',
         component: () => import('@/views/bpm/receivedoc/create.vue'),
         name: 'OAReceiveDocCreate',
@@ -389,6 +437,30 @@ const remainingRouter: AppRouteRecordRaw[] = [
           canTo: true,
           title: '收文详情',
           activeMenu: '/bpm/receivedoc/detail'
+        }
+      },
+      {
+        path: 'senddoc/create',
+        component: () => import('@/views/bpm/senddoc/create.vue'),
+        name: 'OAsenddocCreate',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '发起发文',
+          activeMenu: '/bpm/senddoc/create'
+        }
+      },
+      {
+        path: 'senddoc/detail',
+        component: () => import('@/views/bpm/senddoc/detail.vue'),
+        name: 'OAsenddocDetail',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '发文详情',
+          activeMenu: '/bpm/senddoc/detail'
         }
       },
       {

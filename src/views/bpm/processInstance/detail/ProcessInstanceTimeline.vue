@@ -1,6 +1,6 @@
 <!-- 审批详情的右侧：审批流 -->
 <template>
-  <el-timeline class="pt-20px">
+  <el-timeline class="p-20px">
     <!-- 遍历每个审批节点 -->
     <el-timeline-item
       v-for="(activity, index) in activityNodes"
