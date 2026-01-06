@@ -1,60 +1,60 @@
 <template>
-  <div>
-    <el-card shadow="never">
-      <el-skeleton :loading="loading" animated>
-        <el-row :gutter="16" justify="space-between">
-          <el-col :xl="12" :lg="12" :md="12" :sm="24" :xs="24">
-            <div class="flex items-center">
-              <el-avatar :src="avatar" :size="70" class="mr-16px">
-                <img src="../../assets/imgs/avatar.gif" alt="" />
-              </el-avatar>
-              <div>
-                <div class="text-20px">
-                  {{ t('workplace.welcome') }} {{ username }} {{ t('workplace.happyDay') }}
-                </div>
-                <div class="mt-10px text-14px text-gray-500">
-                  {{ t('workplace.toady') }}，20℃ - 32℃！
-                </div>
-              </div>
-            </div>
-          </el-col>
-          <el-col :xl="12" :lg="12" :md="12" :sm="24" :xs="24">
-            <div class="h-70px flex items-center justify-end lt-sm:mt-10px">
-              <div class="px-8px text-right">
-                <div class="mb-16px text-14px text-gray-400">{{ t('workplace.project') }}</div>
-                <CountTo
-                  class="text-20px"
-                  :start-val="0"
-                  :end-val="totalSate.project"
-                  :duration="2600"
-                />
-              </div>
-              <el-divider direction="vertical" />
-              <div class="px-8px text-right">
-                <div class="mb-16px text-14px text-gray-400">{{ t('workplace.toDo') }}</div>
-                <CountTo
-                  class="text-20px"
-                  :start-val="0"
-                  :end-val="totalSate.todo"
-                  :duration="2600"
-                />
-              </div>
-              <el-divider direction="vertical" border-style="dashed" />
-              <div class="px-8px text-right">
-                <div class="mb-16px text-14px text-gray-400">{{ t('workplace.access') }}</div>
-                <CountTo
-                  class="text-20px"
-                  :start-val="0"
-                  :end-val="totalSate.access"
-                  :duration="2600"
-                />
-              </div>
-            </div>
-          </el-col>
-        </el-row>
-      </el-skeleton>
-    </el-card>
-  </div>
+  <!--  <div>-->
+  <!--    <el-card shadow="never">-->
+  <!--      <el-skeleton :loading="loading" animated>-->
+  <!--        <el-row :gutter="16" justify="space-between">-->
+  <!--          <el-col :xl="12" :lg="12" :md="12" :sm="24" :xs="24">-->
+  <!--            <div class="flex items-center">-->
+  <!--              <el-avatar :src="avatar" :size="70" class="mr-16px">-->
+  <!--                <img src="../../assets/imgs/avatar.gif" alt="" />-->
+  <!--              </el-avatar>-->
+  <!--              <div>-->
+  <!--                <div class="text-20px">-->
+  <!--                  {{ t('workplace.welcome') }} {{ username }} {{ t('workplace.happyDay') }}-->
+  <!--                </div>-->
+  <!--                <div class="mt-10px text-14px text-gray-500">-->
+  <!--                  {{ t('workplace.toady') }}，20℃ - 32℃！-->
+  <!--                </div>-->
+  <!--              </div>-->
+  <!--            </div>-->
+  <!--          </el-col>-->
+  <!--          <el-col :xl="12" :lg="12" :md="12" :sm="24" :xs="24">-->
+  <!--            <div class="h-70px flex items-center justify-end lt-sm:mt-10px">-->
+  <!--              <div class="px-8px text-right">-->
+  <!--                <div class="mb-16px text-14px text-gray-400">{{ t('workplace.project') }}</div>-->
+  <!--                <CountTo-->
+  <!--                  class="text-20px"-->
+  <!--                  :start-val="0"-->
+  <!--                  :end-val="totalSate.project"-->
+  <!--                  :duration="2600"-->
+  <!--                />-->
+  <!--              </div>-->
+  <!--              <el-divider direction="vertical" />-->
+  <!--              <div class="px-8px text-right">-->
+  <!--                <div class="mb-16px text-14px text-gray-400">{{ t('workplace.toDo') }}</div>-->
+  <!--                <CountTo-->
+  <!--                  class="text-20px"-->
+  <!--                  :start-val="0"-->
+  <!--                  :end-val="totalSate.todo"-->
+  <!--                  :duration="2600"-->
+  <!--                />-->
+  <!--              </div>-->
+  <!--              <el-divider direction="vertical" border-style="dashed" />-->
+  <!--              <div class="px-8px text-right">-->
+  <!--                <div class="mb-16px text-14px text-gray-400">{{ t('workplace.access') }}</div>-->
+  <!--                <CountTo-->
+  <!--                  class="text-20px"-->
+  <!--                  :start-val="0"-->
+  <!--                  :end-val="totalSate.access"-->
+  <!--                  :duration="2600"-->
+  <!--                />-->
+  <!--              </div>-->
+  <!--            </div>-->
+  <!--          </el-col>-->
+  <!--        </el-row>-->
+  <!--      </el-skeleton>-->
+  <!--    </el-card>-->
+  <!--  </div>-->
 
   <el-row class="mt-8px" :gutter="8" justify="space-between">
     <el-col :xl="16" :lg="16" :md="24" :sm="24" :xs="24" class="mb-8px">
@@ -309,38 +309,38 @@ let shortcut = reactive<Shortcut[]>([])
 const getShortcut = async () => {
   const data = [
     {
-      name: '首页',
-      icon: 'ion:home-outline',
+      name: '日历',
+      icon: 'ion:calendar-outline',
       url: '/',
       color: '#1fdaca'
     },
     {
       name: '发起流程',
-      icon: 'ep:shop',
+      icon: 'ion:add-circle-outline',
       url: '/mall/home',
       color: '#ff6b6b'
     },
     {
       name: '待办任务',
-      icon: 'tabler:ai',
+      icon: 'ion:checkbox-outline',
       url: '/ai/chat',
       color: '#7c3aed'
     },
     {
       name: '已办任务',
-      icon: 'simple-icons:erpnext',
+      icon: 'ion:checkmark-circle-outline',
       url: '/erp/home',
       color: '#3fb27f'
     },
     {
       name: '抄送我的',
-      icon: 'simple-icons:civicrm',
+      icon: 'ion:mail-outline',
       url: '/crm/backlog',
       color: '#4daf1bc9'
     },
     {
-      name: '通知公告',
-      icon: 'fa-solid:hdd',
+      name: '报表',
+      icon: 'ion:stats-chart-outline',
       url: '/iot/home',
       color: '#1a73e8'
     }
@@ -351,11 +351,12 @@ const getShortcut = async () => {
 // 用户来源
 const getUserAccessSource = async () => {
   const data = [
-    { value: 335, name: 'analysis.directAccess' },
-    { value: 310, name: 'analysis.mailMarketing' },
-    { value: 234, name: 'analysis.allianceAdvertising' },
-    { value: 135, name: 'analysis.videoAdvertising' },
-    { value: 1548, name: 'analysis.searchEngines' }
+    { value: 19, name: '电子公告' },
+    { value: 18, name: '请销假审批' },
+    { value: 2, name: '行政诉讼' },
+    { value: 3, name: '行政复议' },
+    { value: 245, name: '收文' },
+    { value: 9, name: '会议报告单' }
   ]
   set(
     pieOptionsData,
@@ -374,13 +375,13 @@ const barOptionsData = reactive<EChartsOption>(barOptions) as EChartsOption
 // 周活跃量
 const getWeeklyUserActivity = async () => {
   const data = [
-    { value: 13253, name: 'analysis.monday' },
-    { value: 34235, name: 'analysis.tuesday' },
-    { value: 26321, name: 'analysis.wednesday' },
-    { value: 12340, name: 'analysis.thursday' },
-    { value: 24643, name: 'analysis.friday' },
-    { value: 1322, name: 'analysis.saturday' },
-    { value: 1324, name: 'analysis.sunday' }
+    { value: 13067, name: '收文' },
+    { value: 250, name: '发文' },
+    { value: 1139, name: '电子公告' },
+    { value: 2265, name: '请销假审批' },
+    { value: 480, name: '行政诉讼' },
+    { value: 185, name: '行政复议' },
+    { value: 1665, name: '会议报告单' }
   ]
   set(
     barOptionsData,

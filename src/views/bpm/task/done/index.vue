@@ -1,5 +1,4 @@
 <template>
-
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
@@ -265,6 +264,9 @@ const handleWithdraw = (row: any) => {
   })
 }
 
+onActivated(() => {
+  getList()
+})
 /** 初始化 **/
 onMounted(async () => {
   await getList()

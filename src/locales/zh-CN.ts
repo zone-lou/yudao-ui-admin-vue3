@@ -188,7 +188,7 @@ export default {
     allianceAdvertising: '收文',
     videoAdvertising: '发文',
     searchEngines: '会议报告单',
-    weeklyUserActivity: '每周用户活跃量',
+    weeklyUserActivity: '历史办件数量',
     activeQuantity: '活跃量',
     monday: '周一',
     tuesday: '周二',

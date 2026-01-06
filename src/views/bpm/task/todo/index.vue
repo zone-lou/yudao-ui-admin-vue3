@@ -226,6 +226,10 @@ const handleAudit = (row: any) => {
   })
 }
 
+onActivated(() => {
+  getList()
+})
+
 /** 初始化 **/
 onMounted(async () => {
   await getList()
