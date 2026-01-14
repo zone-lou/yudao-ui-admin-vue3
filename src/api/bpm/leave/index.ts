@@ -14,6 +14,13 @@ export interface leave {
           userid: number; // 申请用户
           filepath: string; // 文件地址
   }
+export interface LeaveSummaryVO {
+  year?: number
+  month?: number
+  deptId?: number
+  userId?: number
+  qxjType?: number
+}
 
 // 假期申请审批 API
 export const leaveApi = {
@@ -50,5 +57,13 @@ export const leaveApi = {
   // 导出假期申请审批 Excel
   exportleave: async (params) => {
     return await request.download({ url: `/bpm/leave/export-excel`, params })
+  },
+
+  getLeaveSummary: async (params: LeaveSummaryVO) => {
+    return await request.get({ url: '/bpm/leave/summary', params })
+  },
+
+  getLeaveDetailList: async (params: LeaveSummaryVO) => {
+    return await request.get({ url: '/bpm/leave/detail-list', params })
   }
 }

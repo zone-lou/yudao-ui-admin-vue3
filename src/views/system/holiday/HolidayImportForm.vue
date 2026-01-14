@@ -41,12 +41,11 @@
   </Dialog>
 </template>
 <script lang="ts" setup>
-import * as DutyApi from '@/api/system/dutystaff'
 import { getAccessToken, getTenantId } from '@/utils/auth'
 import download from '@/utils/download'
-import { UserVO } from '@/api/system/user'
+import { HolidayApi } from '@/api/system/holiday'
 
-defineOptions({ name: 'SystemDutyImportForm' })
+defineOptions({ name: 'SystemHolidayImportForm' })
 
 const message = useMessage() // 消息弹窗
 
@@ -54,11 +53,10 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
 const uploadRef = ref()
 const importUrl =
-  import.meta.env.VITE_BASE_URL + import.meta.env.VITE_API_URL + '/system/duty/staff/import'
+  import.meta.env.VITE_BASE_URL + import.meta.env.VITE_API_URL + '/system/holiday/import'
 const uploadHeaders = ref() // 上传 Header 头
 const fileList = ref([]) // 文件列表
 const updateSupport = ref(0) // 是否更新已经存在的用户数据
-
 
 /** 打开弹窗 */
 const open = () => {
@@ -94,17 +92,17 @@ const submitFormSuccess = (response: any) => {
   }
   // 拼接提示语
   const data = response.data
-  let text = '上传成功数量：' + data.createDutyNames.length + ';'
-  for (let username of data.createDutyNames) {
+  let text = '上传成功数量：' + data.createHolidayNames.length + ';'
+  for (let username of data.createHolidayNames) {
     text += '< ' + username + ' >'
   }
-  // text += '更新成功数量：' + data.updateUsernames.length + ';'
-  // for (const username of data.updateUsernames) {
-  //   text += '< ' + username + ' >'
-  // }
-  text += '插入失败数量：' + Object.keys(data.failureDutyNames).length + ';'
-  for (const username in data.failureDutyNames) {
-    text += '< ' + username + ': ' + data.failureDutyNames[username] + ' >'
+  text += '更新成功数量：' + data.updateHolidayNames.length + ';'
+  for (const username of data.updateHolidayNames) {
+    text += '< ' + username + ' >'
+  }
+  text += '插入失败数量：' + Object.keys(data.failureHolidayNames).length + ';'
+  for (const username in data.failureHolidayNames) {
+    text += '< ' + username + ': ' + data.failureHolidayNames[username] + ' >'
   }
   message.alert(text)
   formLoading.value = false
@@ -134,9 +132,7 @@ const handleExceed = (): void => {
 
 /** 下载模板操作 */
 const importTemplate = async () => {
-  const res = await DutyApi.StaffApi.importDutyTemplate()
-  download.excel(res, '值班导入模版.xls')
+  const res = await HolidayApi.importHolidayTemplate()
+  download.excel(res, '节假日导入模版.xls')
 }
-
-
 </script>

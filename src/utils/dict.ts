@@ -133,6 +133,7 @@ export enum DICT_TYPE {
 
   // ========== INFRA 模块 ==========
   INFRA_BOOLEAN_STRING = 'infra_boolean_string',
+  INFRA_BOOLEAN_INT = 'infra_boolean_int',
   INFRA_JOB_STATUS = 'infra_job_status',
   INFRA_JOB_LOG_STATUS = 'infra_job_log_status',
   INFRA_API_ERROR_LOG_PROCESS_STATUS = 'infra_api_error_log_process_status',
