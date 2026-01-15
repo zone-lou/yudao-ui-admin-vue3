@@ -130,6 +130,14 @@
       <el-table-column
         :formatter="dateFormatter"
         align="center"
+        label="截止时间"
+        prop="dueDate"
+        width="180"
+      />
+
+      <el-table-column
+        :formatter="dateFormatter"
+        align="center"
         label="发起时间"
         prop="processInstance.createTime"
         width="180"
