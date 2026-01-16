@@ -57,6 +57,16 @@ const layout = computed(() => appStore.getLayout)
     >
       <div class="absolute left-[10%] top-0 h-full w-[33%] bg-gray-200"></div>
     </div>
+    <div
+      :class="[
+        `${prefixCls}__top-sub-menu`,
+        'relative w-56px h-48px cursor-pointer bg-gray-300',
+        {
+          'is-acitve': layout === 'topSubMenu'
+        }
+      ]"
+      @click="appStore.setLayout('topSubMenu')"
+    ></div>
   </div>
 </template>
 
@@ -158,6 +168,34 @@ $prefix-cls: #{$namespace}-layout-radio-picker;
       top: 0;
       left: 0;
       width: 10%;
+      height: 100%;
+      background-color: #fff;
+      border-radius: 4px 0 0 4px;
+      content: '';
+    }
+  }
+
+  &__top-sub-menu {
+    border: 2px solid #e5e7eb;
+    border-radius: 4px;
+
+    &::before {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      width: 100%;
+      height: 33%;
+      background-color: #273352;
+      border-radius: 4px 4px 0 0;
+      content: '';
+    }
+
+    &::after {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 33%;
       height: 100%;
       background-color: #fff;
       border-radius: 4px 0 0 4px;

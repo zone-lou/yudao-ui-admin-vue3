@@ -62,12 +62,7 @@
         <template #header>
           <div class="h-3 flex justify-between">
             <span>{{ t('workplace.project') }}</span>
-            <el-link
-              type="primary"
-              :underline="false"
-              href="https://github.com/yudaocode"
-              target="_blank"
-            >
+            <el-link type="primary" :underline="false" @click="router.push('/bpm/task/create')">
               {{ t('action.more') }}
             </el-link>
           </div>

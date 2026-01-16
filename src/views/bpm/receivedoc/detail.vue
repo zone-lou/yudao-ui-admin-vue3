@@ -76,7 +76,7 @@ import { DICT_TYPE } from '@/utils/dict'
 import { dateUtil } from '@/utils/dateUtil'
 import { ReceiveDocApi, ReceiveDoc } from '@/api/bpm/receivedoc'
 import { propTypes } from '@/utils/propTypes'
-import { Base64 } from 'js-base64' // 关键：需要安装 npm install js-base64
+import { Base64 } from 'js-base64'
 
 defineOptions({ name: 'BpmReceiveDocDetail' })
 
@@ -90,9 +90,6 @@ const detailData = ref<Partial<ReceiveDoc>>({})
 
 // --- 附件相关状态 ---
 const fileList = ref<any[]>([])
-// const previewVisible = ref(false) // 已移除
-// const previewUrl = ref('') // 已移除
-// const previewType = ref('image') // 已移除
 
 /** 获取详情数据 */
 const getInfo = async () => {
@@ -101,31 +98,37 @@ const getInfo = async () => {
 
   detailLoading.value = true
   try {
+    // 1. 获取主表详情
     const res = await ReceiveDocApi.getReceiveDoc(queryId)
     detailData.value = res
-    processFileList(res.attachFilePath)
+
+    // 2. 获取附件列表 (修改点：调用 list-by-receive-doc-id 接口)
+    // 注意：根据之前的 index.ts 定义，getReceiveDocXmGuid 对应的 url 是 list-by-receive-doc-id?xmGuid=...
+    // 这里的参数传 queryId (收文的 ID)
+    const attachData = await ReceiveDocApi.getReceiveDocXmGuid(queryId)
+
+    if (attachData && Array.isArray(attachData)) {
+      fileList.value = attachData.map((item: any) => {
+        // 映射后端字段
+        const name = item.attachFileName || ''
+        const url = item.fileUrl || ''
+        // 计算扩展名
+        const ext =
+          name.lastIndexOf('.') > -1 ? name.substring(name.lastIndexOf('.') + 1).toLowerCase() : ''
+
+        return {
+          name: name,
+          url: url,
+          ext: ext,
+          id: item.id // 附件记录ID
+        }
+      })
+    } else {
+      fileList.value = []
+    }
   } finally {
     detailLoading.value = false
   }
-}
-
-/** 处理附件字符串 */
-const processFileList = (pathStr: string | undefined) => {
-  if (!pathStr) {
-    fileList.value = []
-    return
-  }
-  const paths = Array.isArray(pathStr) ? pathStr : pathStr.split(',')
-
-  fileList.value = paths
-    .map((url) => {
-      if (!url) return null
-      const rawName = url.substring(url.lastIndexOf('/') + 1)
-      const name = decodeURIComponent(rawName)
-      const ext = name.substring(name.lastIndexOf('.') + 1).toLowerCase()
-      return { name, url, ext }
-    })
-    .filter(Boolean)
 }
 
 /** 格式化日期 */
@@ -151,7 +154,7 @@ const formatCommaData = (val: any) => {
 }
 
 /**
- * 处理预览 (修改版)
+ * 处理预览
  * 逻辑：使用 Base64 编码文件地址，拼接预览服务地址，打开新窗口
  */
 const handlePreview = (file: any) => {
@@ -159,22 +162,13 @@ const handlePreview = (file: any) => {
     return
   }
 
-  // 1. 准备基础数据
   const kkBaseUrl = 'http://192.168.50.239:8012'
   let fullUrl = file.url
 
-  // 【注意】如果 file.url 是相对路径 (如 /admin-api/file/...)，
-  // 你可能需要在这里补全当前系统的域名，否则预览服务可能访问不到文件。
-  // 例如：
-  // if (fullUrl.startsWith('/')) {
-  //    fullUrl = window.location.origin + fullUrl
-  // }
-
-  // 2. 将文件链接进行 Base64 编码 (使用 js-base64 库处理，支持中文更友好)
+  // 2. 将文件链接进行 Base64 编码
   const encodedUrl = Base64.encode(fullUrl)
 
   // 3. 拼接最终预览地址
-  // 格式: http://kk-ip:8012/onlinePreview?url=base64_string
   const previewUrl = `${kkBaseUrl}/onlinePreview?url=${encodeURIComponent(encodedUrl)}`
 
   // 4. 打开新窗口预览

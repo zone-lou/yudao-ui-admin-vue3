@@ -44,3 +44,7 @@ export const createFile = (data: any) => {
 export const updateFile = (data: any, onUploadProgress?: Function) => {
   return request.upload({ url: '/infra/file/upload', data, onUploadProgress })
 }
+// 上传文件并返回文件信息
+export const uploadReturnInfo = (data: any, onUploadProgress?: Function) => {
+  return request.upload({ url: '/infra/file/uploadReturnInfo', data, onUploadProgress })
+}

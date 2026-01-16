@@ -64,10 +64,10 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="诉讼类型：1一审，2二审，3再审，如果多次，继续记录" prop="ssLx">
+      <el-form-item label="诉讼类型" prop="ssLx">
         <el-input
           v-model="queryParams.ssLx"
-          placeholder="请输入诉讼类型：1一审，2二审，3再审，如果多次，继续记录"
+          placeholder="请输入诉讼类型"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
@@ -206,11 +206,11 @@
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
         <el-button
-            type="danger"
-            plain
-            :disabled="isEmpty(checkedIds)"
-            @click="handleDeleteBatch"
-            v-hasPermi="['bpm:xzss:delete']"
+          type="danger"
+          plain
+          :disabled="isEmpty(checkedIds)"
+          @click="handleDeleteBatch"
+          v-hasPermi="['bpm:xzss:delete']"
         >
           <Icon icon="ep:delete" class="mr-5px" /> 批量删除
         </el-button>
@@ -221,14 +221,14 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table
-        row-key="id"
-        v-loading="loading"
-        :data="list"
-        :stripe="true"
-        :show-overflow-tooltip="true"
-        @selection-change="handleRowCheckboxChange"
+      row-key="id"
+      v-loading="loading"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
+      @selection-change="handleRowCheckboxChange"
     >
-    <el-table-column type="selection" width="55" />
+      <el-table-column type="selection" width="55" />
       <!-- 子表的列表 -->
       <el-table-column type="expand">
         <template #default="scope">
@@ -253,7 +253,7 @@
       <el-table-column label="被告" align="center" prop="bsqr" />
       <el-table-column label="第三人" align="center" prop="dsr" />
       <el-table-column label="土地坐落" align="center" prop="tdZl" />
-      <el-table-column label="诉讼类型：1一审，2二审，3再审，如果多次，继续记录" align="center" prop="ssLx" />
+      <el-table-column label="诉讼类型" align="center" prop="ssLx" />
       <el-table-column label="类别一" align="center" prop="lb1" />
       <el-table-column label="类别二" align="center" prop="lb2" />
       <el-table-column label="类别三" align="center" prop="lb3" />
@@ -424,16 +424,16 @@ const handleDeleteBatch = async () => {
   try {
     // 删除的二次确认
     await message.delConfirm()
-    await XzssApi.deleteXzssList(checkedIds.value);
-    checkedIds.value = [];
+    await XzssApi.deleteXzssList(checkedIds.value)
+    checkedIds.value = []
     message.success(t('common.delSuccess'))
-    await getList();
+    await getList()
   } catch {}
 }
 
 const checkedIds = ref<number[]>([])
 const handleRowCheckboxChange = (records: Xzss[]) => {
-  checkedIds.value = records.map((item) => item.id!);
+  checkedIds.value = records.map((item) => item.id!)
 }
 
 /** 导出按钮操作 */

@@ -38,6 +38,9 @@ const renderLayout = () => {
     case 'cutMenu':
       const { renderCutMenu } = useRenderLayout()
       return renderCutMenu()
+    case 'topSubMenu':
+      const { renderTopSubMenu } = useRenderLayout()
+      return renderTopSubMenu()
     default:
       break
   }

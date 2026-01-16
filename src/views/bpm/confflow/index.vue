@@ -8,7 +8,7 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="申请人ID" prop="userId">
+      <!-- <el-form-item label="申请人ID" prop="userId">
         <el-input
           v-model="queryParams.userId"
           placeholder="请输入申请人ID"
@@ -16,7 +16,7 @@
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="申请人" prop="userName">
         <el-input
           v-model="queryParams.userName"
@@ -26,7 +26,7 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="申请人部门ID" prop="deptId">
+      <!-- <el-form-item label="申请人部门ID" prop="deptId">
         <el-input
           v-model="queryParams.deptId"
           placeholder="请输入申请人部门ID"
@@ -34,7 +34,7 @@
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="申请人部门" prop="deptName">
         <el-input
           v-model="queryParams.deptName"
@@ -66,7 +66,7 @@
           class="!w-220px"
         />
       </el-form-item>
-      <el-form-item label="备注" prop="remark">
+      <!-- <el-form-item label="备注" prop="remark">
         <el-input
           v-model="queryParams.remark"
           placeholder="请输入备注"
@@ -74,7 +74,7 @@
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="会议地点" prop="venue">
         <el-input
           v-model="queryParams.venue"
@@ -105,11 +105,11 @@
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
         <el-button
-            type="danger"
-            plain
-            :disabled="isEmpty(checkedIds)"
-            @click="handleDeleteBatch"
-            v-hasPermi="['bpm:confflow:delete']"
+          type="danger"
+          plain
+          :disabled="isEmpty(checkedIds)"
+          @click="handleDeleteBatch"
+          v-hasPermi="['bpm:confflow:delete']"
         >
           <Icon icon="ep:delete" class="mr-5px" /> 批量删除
         </el-button>
@@ -120,14 +120,14 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table
-        row-key="id"
-        v-loading="loading"
-        :data="list"
-        :stripe="true"
-        :show-overflow-tooltip="true"
-        @selection-change="handleRowCheckboxChange"
+      row-key="id"
+      v-loading="loading"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
+      @selection-change="handleRowCheckboxChange"
     >
-    <el-table-column type="selection" width="55" />
+      <el-table-column type="selection" width="55" />
       <el-table-column label="申请人ID" align="center" prop="userId" />
       <el-table-column label="申请人" align="center" prop="userName" />
       <el-table-column label="申请人部门ID" align="center" prop="deptId" />
@@ -273,16 +273,16 @@ const handleDeleteBatch = async () => {
   try {
     // 删除的二次确认
     await message.delConfirm()
-    await ConfflowApi.deleteConfflowList(checkedIds.value);
-    checkedIds.value = [];
+    await ConfflowApi.deleteConfflowList(checkedIds.value)
+    checkedIds.value = []
     message.success(t('common.delSuccess'))
-    await getList();
+    await getList()
   } catch {}
 }
 
 const checkedIds = ref<number[]>([])
 const handleRowCheckboxChange = (records: Confflow[]) => {
-  checkedIds.value = records.map((item) => item.id!);
+  checkedIds.value = records.map((item) => item.id!)
 }
 
 /** 导出按钮操作 */

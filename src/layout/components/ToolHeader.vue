@@ -60,7 +60,7 @@ export default defineComponent({
           'dark:bg-[var(--el-bg-color)]'
         ]}
       >
-        {layout.value !== 'top' ? (
+        {layout.value !== 'top' && layout.value !== 'topSubMenu' ? (
           <div class="h-full flex items-center">
             {hamburger.value && layout.value !== 'cutMenu' ? (
               <Collapse class="custom-hover" color="var(--top-header-text-color)"></Collapse>
@@ -70,23 +70,27 @@ export default defineComponent({
         ) : undefined}
         <div class="h-full flex items-center">
           {/* {hasTenantVisitPermission.value ? <TenantVisit /> : undefined} */}
-          {screenfull.value ? (
+          {/* {screenfull.value ? (
             <Screenfull class="custom-hover" color="var(--top-header-text-color)"></Screenfull>
-          ) : undefined}
-          {search.value ? (
+          ) : undefined} */}
+          {/* {search.value ? (
             <RouterSearch isModal={false} color="var(--top-header-text-color)" />
-          ) : undefined}
-          {size.value ? (
+          ) : undefined} */}
+          {/* {size.value ? (
             <SizeDropdown class="custom-hover" color="var(--top-header-text-color)"></SizeDropdown>
-          ) : undefined}
-          {locale.value ? (
+          ) : undefined} */}
+          {/* {locale.value ? (
             <LocaleDropdown
               class="custom-hover"
               color="var(--top-header-text-color)"
             ></LocaleDropdown>
-          ) : undefined}
+          ) : undefined} */}
           {message.value ? (
-            <Message class="custom-hover" color="var(--top-header-text-color)"></Message>
+            <Message
+              class="custom-hover"
+              style="font-size: 1px;"
+              color="var(--top-header-text-color)"
+            ></Message>
           ) : undefined}
           <UserInfo></UserInfo>
         </div>

@@ -4,6 +4,9 @@ import { Menu } from '@/layout/components/Menu'
 import { TabMenu } from '@/layout/components/TabMenu'
 import { TagsView } from '@/layout/components/TagsView'
 import { Logo } from '@/layout/components/Logo'
+import { LayoutMixTopMenu } from '@/layout/components/LayoutMixTopMenu'
+import { Collapse } from '@/layout/components/Collapse'
+import { usePermissionStore } from '@/store/modules/permission'
 import AppView from './AppView.vue'
 import ToolHeader from './ToolHeader.vue'
 import { ElScrollbar } from 'element-plus'
@@ -179,8 +182,9 @@ export const useRenderLayout = () => {
     return (
       <>
         <div
+          style="background-image: var(--top-header-bg-img);"
           class={[
-            'flex items-center justify-between bg-[var(--top-header-bg-color)] relative',
+            'flex items-center justify-between  relative',
             {
               'layout-border__bottom': !tagsView.value
             }
@@ -285,10 +289,100 @@ export const useRenderLayout = () => {
     )
   }
 
+  const renderTopSubMenu = () => {
+    const permissionStore = usePermissionStore()
+    const showSidebar = computed(() => permissionStore.getMenuTabRouters.length > 0)
+
+    return (
+      <>
+        <div
+          style="background-image: var(--top-header-bg-img);"
+          class={[
+            'flex items-center justify-between relative',
+            {
+              'layout-border__bottom': !tagsView.value
+            }
+          ]}
+        >
+          {logo.value ? <Logo class="custom-hover"></Logo> : undefined}
+          <LayoutMixTopMenu class="flex-1 "></LayoutMixTopMenu>
+          <ToolHeader></ToolHeader>
+        </div>
+        <div class="absolute left-0 top-[var(--logo-height)] h-[calc(100%-var(--logo-height))] w-full flex">
+          {showSidebar.value ? (
+            <div class="flex-col h-full border-r border-[var(--el-border-color)]">
+              <div
+                class={[
+                  'flex items-center font-bold text-12px text-[var(--left-menu-text-color)] bg-[var(--left-menu-bg-color)] select-none',
+                  collapse.value ? 'justify-center' : 'justify-between pl-4 pr-4'
+                ]}
+                style="height: var(--tags-view-height); border-bottom: 1px solid var(--el-border-color);"
+              >
+                {!collapse.value ? (
+                  <span class="whitespace-nowrap overflow-hidden">
+                    {permissionStore.getSidebarTitle}
+                  </span>
+                ) : undefined}
+                <Collapse color="var(--left-menu-text-color)"></Collapse>
+              </div>
+              <Menu class="relative !border-r-0 !h-[calc(100%-var(--tags-view-height))]"></Menu>
+            </div>
+          ) : undefined}
+          <div
+            class={[
+              `${prefixCls}-content`,
+              'h-[100%]',
+              {
+                'w-[calc(100%-var(--left-menu-min-width))] left-[var(--left-menu-min-width)]':
+                  collapse.value && showSidebar.value,
+                'w-[calc(100%-var(--left-menu-max-width))] left-[var(--left-menu-max-width)]':
+                  !collapse.value && showSidebar.value,
+                'w-full left-0': !showSidebar.value
+              }
+            ]}
+            style="transition: all var(--transition-time-02);"
+          >
+            <ElScrollbar
+              v-loading={pageLoading.value}
+              class={[
+                `${prefixCls}-content-scrollbar`,
+                {
+                  '!h-[calc(100%-var(--tags-view-height))] mt-[calc(var(--tags-view-height))]':
+                    fixedHeader.value && tagsView.value
+                }
+              ]}
+            >
+              {tagsView.value ? (
+                <TagsView
+                  class={[
+                    'layout-border__bottom absolute',
+                    {
+                      '!fixed top-0 left-0 z-10': fixedHeader.value,
+                      'w-[calc(100%-var(--left-menu-min-width))] !left-[var(--left-menu-min-width)] mt-[var(--logo-height)]':
+                        collapse.value && fixedHeader.value && showSidebar.value,
+                      'w-[calc(100%-var(--left-menu-max-width))] !left-[var(--left-menu-max-width)] mt-[var(--logo-height)]':
+                        !collapse.value && fixedHeader.value && showSidebar.value,
+                      'w-full !left-0 mt-[var(--logo-height)]':
+                        fixedHeader.value && !showSidebar.value
+                    }
+                  ]}
+                  style="transition: width var(--transition-time-02), left var(--transition-time-02);"
+                ></TagsView>
+              ) : undefined}
+
+              <AppView></AppView>
+            </ElScrollbar>
+          </div>
+        </div>
+      </>
+    )
+  }
+
   return {
     renderClassic,
     renderTopLeft,
     renderTop,
-    renderCutMenu
+    renderCutMenu,
+    renderTopSubMenu
   }
 }

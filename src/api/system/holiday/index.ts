@@ -1,13 +1,13 @@
 import request from '@/config/axios'
-import type { Dayjs } from 'dayjs';
+import type { Dayjs } from 'dayjs'
 
 /** 节假日信息 */
 export interface Holiday {
-          id: number; // 节假日内码
-          settingDate: string | Dayjs; // 设置日期
-          isworkday: number; // 是否是工作日
-          holiDesc: string; // 假日描述
-  }
+  id: number // 节假日内码
+  settingDate: string | Dayjs // 设置日期
+  isworkday: number // 是否是工作日
+  holiDesc: string // 假日描述
+}
 
 // 节假日 API
 export const HolidayApi = {
@@ -47,7 +47,12 @@ export const HolidayApi = {
   },
 
   // 节假日导入模板
-  importHolidayTemplate:()=>{
+  importHolidayTemplate: () => {
     return request.download({ url: '/system/holiday/get-import-template' })
+  },
+
+  // 获取节假日汇总
+  getHolidaySummary: async (year: string) => {
+    return await request.get({ url: `/system/holiday/get-all-summary`, params: { year } })
   }
 }

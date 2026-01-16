@@ -57,11 +57,12 @@ const toDocument = () => {
 <template>
   <ElDropdown class="custom-hover" :class="prefixCls" trigger="click">
     <div class="flex items-center">
-      <ElAvatar :src="avatar" alt="" class="w-[calc(var(--logo-height)-25px)] rounded-[50%]" />
+      <!-- <ElAvatar :src="avatar" alt="" class="w-[calc(var(--logo-height)-25px)] rounded-[50%]" /> -->
       <span class="pl-[5px] text-14px text-[var(--top-header-text-color)] <lg:hidden">
         {{ userName }}
       </span>
     </div>
+
     <template #dropdown>
       <ElDropdownMenu>
         <ElDropdownItem>
@@ -73,13 +74,16 @@ const toDocument = () => {
           <Icon icon="ep:lock" />
           <div @click="lockScreen">{{ t('lock.lockScreen') }}</div>
         </ElDropdownItem>
-        <ElDropdownItem divided @click="loginOut">
+        <!-- <ElDropdownItem divided @click="loginOut">
           <Icon icon="ep:switch-button" />
           <div>{{ t('common.loginOut') }}</div>
-        </ElDropdownItem>
+        </ElDropdownItem> -->
       </ElDropdownMenu>
     </template>
   </ElDropdown>
+  <div class="custom-hover logout-btn" @click="loginOut">
+    <Icon icon="ep:switch-button" style="color: white" />
+  </div>
 
   <LockDialog v-if="dialogVisible" v-model="dialogVisible" />
 
@@ -106,5 +110,21 @@ const toDocument = () => {
 .fade-bottom-leave-to {
   opacity: 0;
   transform: translateY(10%);
+}
+
+.logout-btn {
+  position: relative;
+
+  &::before {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 1px; // 边框线宽度
+    height: 20px; // 边框线高度，可根据需要调整
+    background-color: white;
+    border-radius: 1px; // 可选，使边框线更圆润
+    content: '';
+    transform: translateY(-50%);
+  }
 }
 </style>

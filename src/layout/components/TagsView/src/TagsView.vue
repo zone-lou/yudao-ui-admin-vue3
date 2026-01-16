@@ -138,7 +138,7 @@ const moveToCurrentTag = async () => {
 const tagLinksRefs = useTemplateRefsList<RouterLinkProps>()
 
 const moveToTarget = (currentTag: RouteLocationNormalizedLoaded) => {
-  const wrap$ = unref(scrollbarRef)?.wrapRef
+  const wrap$ = unref(unref(scrollbarRef)?.wrapRef)
   let firstTag: Nullable<RouterLinkProps> = null
   let lastTag: Nullable<RouterLinkProps> = null
 
@@ -235,24 +235,17 @@ const scroll = ({ scrollLeft }) => {
 
 // 移动到某个位置
 const move = (to: number) => {
-  const wrap$ = unref(scrollbarRef)?.wrapRef
+  const wrap$ = unref(unref(scrollbarRef)?.wrapRef)
+  const scrollLeftNumberVal = unref(scrollLeftNumber)
+  if (!wrap$) return
+
   const { start } = useScrollTo({
     el: wrap$!,
     position: 'scrollLeft',
-    to: unref(scrollLeftNumber) + to,
+    to: scrollLeftNumberVal + to,
     duration: 500
   })
   start()
-}
-
-const canShowIcon = (item: RouteLocationNormalizedLoaded) => {
-  if (
-    (item?.matched?.[1]?.meta?.icon && unref(tagsViewIcon)) ||
-    (item?.meta?.affix && unref(tagsViewIcon) && item?.meta?.icon)
-  ) {
-    return true
-  }
-  return false
 }
 
 const closeTabOnMouseMidClick = (e: MouseEvent, item) => {
@@ -376,7 +369,7 @@ watch(
             <div>
               <router-link :ref="tagLinksRefs.set" v-slot="{ navigate }" :to="{ ...item }" custom>
                 <div
-                  :class="`h-full flex items-center justify-center whitespace-nowrap pl-15px ${prefixCls}__item--label`"
+                  :class="`h-full flex items-center justify-center whitespace-nowrap pl-15px select-none ${prefixCls}__item--label`"
                   @click="navigate"
                 >
                   <Icon

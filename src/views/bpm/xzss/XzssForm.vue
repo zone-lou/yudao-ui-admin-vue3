@@ -36,8 +36,8 @@
       <el-form-item label="土地坐落" prop="tdZl">
         <el-input v-model="formData.tdZl" placeholder="请输入土地坐落" />
       </el-form-item>
-      <el-form-item label="诉讼类型：1一审，2二审，3再审，如果多次，继续记录" prop="ssLx">
-        <el-input v-model="formData.ssLx" placeholder="请输入诉讼类型：1一审，2二审，3再审，如果多次，继续记录" />
+      <el-form-item label="诉讼类型" prop="ssLx">
+        <el-input v-model="formData.ssLx" placeholder="请输入诉讼类型" />
       </el-form-item>
       <el-form-item label="复议项目主键" prop="fyGuid">
         <el-input v-model="formData.fyGuid" placeholder="请输入复议项目主键" />

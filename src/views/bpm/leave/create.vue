@@ -25,7 +25,11 @@
           <el-row>
             <el-col :span="12">
               <el-form-item label="请假类型" prop="qxjType">
-                <el-select v-model="formData.qxjType" placeholder="请选择请假类型">
+                <el-select
+                  v-model="formData.qxjType"
+                  placeholder="请选择请假类型"
+                  @change="calculateDuration"
+                >
                   <el-option
                     v-for="dict in getIntDictOptions(DICT_TYPE.BPM_LEAVE_TYPE)"
                     :key="dict.value"
@@ -156,6 +160,7 @@ import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { CandidateStrategy, NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { ApprovalNodeInfo } from '@/api/bpm/processInstance'
 import { leaveApi, leave } from '@/api/bpm/leave' // 确保引用了请假API
+import { HolidayApi } from '@/api/system/holiday' // 节假日API
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import dayjs from 'dayjs'
 import { useUserStore } from '@/store/modules/user'
@@ -208,13 +213,32 @@ const processDefinitionId = ref('')
 const AM = 1
 const PM = 2
 
-// 时长计算逻辑 (复用公出逻辑)
-const calculateDuration = () => {
+// 节假日缓存
+const holidayCache = ref<Record<string, { workDay: string; restDay: string }>>({})
+
+// 获取节假日数据
+const getHolidayData = async (year: string) => {
+  if (holidayCache.value[year]) return holidayCache.value[year]
+  try {
+    const res = await HolidayApi.getHolidaySummary(year)
+    if (res) {
+      holidayCache.value[year] = res
+      return res
+    }
+  } catch (e) {
+    console.error('获取节假日失败', e)
+  }
+  return null
+}
+
+// 核心计算逻辑
+const calculateDuration = async () => {
   formData.value.totalTs = 0
-  if (!formData.value.qxjStartDate || !formData.value.qxjEndDate) return
+  if (!formData.value.qxjStartDate || !formData.value.qxjEndDate || !formData.value.qxjType) return
 
   const start = dayjs(formData.value.qxjStartDate).startOf('day')
   const end = dayjs(formData.value.qxjEndDate).startOf('day')
+  const year = start.format('YYYY')
 
   if (end.isBefore(start)) {
     message.error('结束日期不能早于开始日期')
@@ -226,13 +250,93 @@ const calculateDuration = () => {
     return
   }
 
+  // 1. 获取请假类型配置（是否包含节假日）
+  const dictOptions = getIntDictOptions(DICT_TYPE.BPM_LEAVE_TYPE)
+  const currentDict = dictOptions.find((i) => i.value === formData.value.qxjType)
+  // 备注包含 "包含节假日" 则为日历日模式，否则为工作日模式
+  // @ts-ignore
+  const isCalendarDayMode = currentDict?.remark?.includes('包含节假日')
+
+  // 2. 如果需要排除节假日，确保有节假日数据
+  let holidayInfo: any = null
+  if (!isCalendarDayMode) {
+    const res = await getHolidayData(year)
+    // 兼容 API 返回数组的情况
+    if (Array.isArray(res) && res.length > 0) {
+      holidayInfo = res[0]
+    } else {
+      holidayInfo = res
+    }
+    console.log('请假计算 - 年份:', year, '节假日数据(处理后):', holidayInfo)
+
+    // 如果跨年... (省略逻辑，暂不改动)
+
+    // 如果跨年，可能需要获取下一年的？这里暂只取开始时间的年份，通常请假不会跨太久，或者后端API支持。
+    // 严谨做法：Check if end year != start year, fetch both.
+    const endYear = end.format('YYYY')
+    if (endYear !== year) {
+      // 简单处理：合并数据或分别查询。为简单起见，如果年份不同，再查一次
+      const endHolidayInfo = await getHolidayData(endYear)
+      if (endHolidayInfo) {
+        // 合并 workDay 和 restDay 字符串
+        if (!holidayInfo) holidayInfo = endHolidayInfo
+        else {
+          holidayInfo = {
+            workDay: holidayInfo.workDay + ',' + endHolidayInfo.workDay,
+            restDay: holidayInfo.restDay + ',' + endHolidayInfo.restDay
+          }
+        }
+      }
+    }
+  }
+
+  // 判断某天是否为工作日
+  const isWorkDay = (date: dayjs.Dayjs) => {
+    const dateStr = date.format('YYYY-MM-DD')
+
+    // 模式1：日历日模式（包含节假日） -> 每一天都算工作日（即都要计入请假）
+    if (isCalendarDayMode) {
+      console.log(dateStr, '日历日模式-计入')
+      return true
+    }
+
+    // 模式2：工作日模式（排除节假日）
+    // 优先：API返回的精准设定
+    const isForceWork = holidayInfo?.workDay?.includes && holidayInfo.workDay.includes(dateStr)
+    const isForceRest = holidayInfo?.restDay?.includes && holidayInfo.restDay.includes(dateStr)
+
+    if (isForceWork) {
+      console.log(dateStr, '调休工作日-计入')
+      return true
+    }
+    if (isForceRest) {
+      console.log(dateStr, '法定节假日-排除')
+      return false
+    }
+
+    // 兜底：周六周日为休息
+    const day = date.day()
+    if (day === 0 || day === 6) {
+      console.log(dateStr, '周末-排除')
+      return false
+    }
+
+    console.log(dateStr, '普通工作日-计入')
+    return true
+  }
+
   let totalDays = 0
   let currentDate = start.clone()
-  const isHoliday = (date: dayjs.Dayjs) => date.day() === 0 || date.day() === 6
 
   while (currentDate.isBefore(end) || currentDate.isSame(end)) {
-    if (!isHoliday(currentDate)) {
-      if (currentDate.isSame(start)) {
+    if (isWorkDay(currentDate)) {
+      if (currentDate.isSame(start) && currentDate.isSame(end)) {
+        // 同一天
+        if (formData.value.startPeriod === AM && formData.value.endPeriod === AM) totalDays += 0.5
+        else if (formData.value.startPeriod === PM && formData.value.endPeriod === PM)
+          totalDays += 0.5
+        else totalDays += 1
+      } else if (currentDate.isSame(start)) {
         totalDays += formData.value.startPeriod === PM ? 0.5 : 1
       } else if (currentDate.isSame(end)) {
         totalDays += formData.value.endPeriod === AM ? 0.5 : 1
@@ -243,11 +347,6 @@ const calculateDuration = () => {
     currentDate = currentDate.add(1, 'day')
   }
 
-  if (start.isSame(end) && !isHoliday(start)) {
-    if (formData.value.startPeriod === AM && formData.value.endPeriod === AM) totalDays = 0.5
-    else if (formData.value.startPeriod === PM && formData.value.endPeriod === PM) totalDays = 0.5
-    else if (formData.value.startPeriod === AM && formData.value.endPeriod === PM) totalDays = 1
-  }
   formData.value.totalTs = totalDays
 }
 

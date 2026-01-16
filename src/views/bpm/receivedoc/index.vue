@@ -1,6 +1,5 @@
 <template>
   <ContentWrap>
-    <!-- 搜索工作栏 -->
     <el-form
       class="-mb-15px"
       :model="queryParams"
@@ -47,15 +46,6 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="收文编号" prop="receiveDocNumber">
-        <el-input
-          v-model="queryParams.receiveDocNumber"
-          placeholder="请输入收文编号"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
       <el-form-item label="收文日期" prop="receiveTime">
         <el-date-picker
           v-model="queryParams.receiveTime"
@@ -65,15 +55,6 @@
           end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
           class="!w-220px"
-        />
-      </el-form-item>
-      <el-form-item label="主题" prop="subject">
-        <el-input
-          v-model="queryParams.subject"
-          placeholder="请输入主题"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="紧急程度" prop="urgencyDegree">
@@ -112,7 +93,7 @@
         <el-button
           type="primary"
           plain
-          @click="openForm('create')"
+          @click="handleCreate"
           v-hasPermi="['bpm:receive-doc:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
@@ -139,7 +120,6 @@
     </el-form>
   </ContentWrap>
 
-  <!-- 列表 -->
   <ContentWrap>
     <el-table
       row-key="id"
@@ -150,61 +130,74 @@
       @selection-change="handleRowCheckboxChange"
     >
       <el-table-column type="selection" width="55" />
-      <el-table-column label="单位类别" align="center" prop="docClass">
+      <el-table-column label="单位类别" align="center" prop="docClass" width="120">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.RECEIVE_CLASS" :value="scope.row.docClass" />
+          <dict-tag :type="DICT_TYPE.BPM_RECEICE_CLASS" :value="scope.row.docClass" />
         </template>
       </el-table-column>
+
+      <el-table-column label="收文编号" align="center" prop="receiveDocNumber" min-width="180">
+        <template #default="scope">
+          <div class="flex items-center justify-center">
+            <span>{{ scope.row.receiveDocNumber }}</span>
+            <el-tag
+              v-if="!scope.row.processInstanceId"
+              type="warning"
+              size="small"
+              effect="plain"
+              class="ml-2"
+            >
+              草稿
+            </el-tag>
+            <el-tag v-else type="success" size="small" effect="plain" class="ml-2"> 流程中 </el-tag>
+          </div>
+        </template>
+      </el-table-column>
+
       <el-table-column label="来文单位" align="center" prop="sendDept">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.AGENCY_NAME" :value="scope.row.sendDept" />
+          <dict-tag :type="DICT_TYPE.BPM_AGENCY_NAME" :value="scope.row.sendDept" />
         </template>
       </el-table-column>
       <el-table-column label="来文字号" align="center" prop="sendDocNumber" />
-      <el-table-column label="收文编号" align="center" prop="receiveDocNumber" />
       <el-table-column
         label="收文日期"
         align="center"
         prop="receiveTime"
         :formatter="dateFormatter"
-        width="180px"
+        width="120px"
       />
-      <el-table-column label="主题" align="center" prop="subject" />
-      <el-table-column label="紧急程度" align="center" prop="urgencyDegree">
+      <el-table-column label="主题" align="center" prop="subject" show-overflow-tooltip />
+      <el-table-column label="紧急程度" align="center" prop="urgencyDegree" width="100">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.EMERGENCY_DEGREE" :value="scope.row.urgencyDegree" />
+          <dict-tag :type="DICT_TYPE.BPM_EMERGENCY_DEGREE" :value="scope.row.urgencyDegree" />
         </template>
       </el-table-column>
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="文件类别" align="center" prop="docSecondClass">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.DOC_CLASS" :value="scope.row.docSecondClass" />
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="主办办结时间"
-        align="center"
-        prop="zhubandate"
-        :formatter="dateFormatter"
-        width="180px"
-      />
-      <el-table-column
-        label="协办办结时间"
-        align="center"
-        prop="xiebandate"
-        :formatter="dateFormatter"
-        width="180px"
-      />
-      <el-table-column label="操作" align="center" min-width="120px">
+
+      <el-table-column label="操作" align="center" width="180px" fixed="right">
         <template #default="scope">
           <el-button
+            v-if="!scope.row.processInstanceId"
             link
             type="primary"
-            @click="openForm('update', scope.row.id)"
+            @click="handleEdit(scope.row.id)"
             v-hasPermi="['bpm:receive-doc:update']"
           >
             编辑
           </el-button>
+
+          <el-button v-else link type="primary" @click="handleDetail(scope.row)"> 详情 </el-button>
+
+          <el-button
+            v-if="scope.row.processInstanceId"
+            link
+            type="warning"
+            @click="handleEdit(scope.row.id)"
+            v-hasPermi="['bpm:receive-doc:update']"
+          >
+            修改
+          </el-button>
+
           <el-button
             link
             type="danger"
@@ -216,7 +209,7 @@
         </template>
       </el-table-column>
     </el-table>
-    <!-- 分页 -->
+
     <Pagination
       :total="total"
       v-model:page="queryParams.pageNo"
@@ -224,9 +217,6 @@
       @pagination="getList"
     />
   </ContentWrap>
-
-  <!-- 表单弹窗：添加/修改 -->
-  <ReceiveDocForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
@@ -235,13 +225,14 @@ import { isEmpty } from '@/utils/is'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { ReceiveDocApi, ReceiveDoc } from '@/api/bpm/receivedoc'
-import ReceiveDocForm from './ReceiveDocForm.vue'
+import { useRouter } from 'vue-router'
 
 /** 收文 列表 */
 defineOptions({ name: 'ReceiveDoc' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
+const router = useRouter()
 
 const loading = ref(true) // 列表的加载中
 const list = ref<ReceiveDoc[]>([]) // 列表的数据
@@ -285,10 +276,27 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 添加/修改操作 */
-const formRef = ref()
-const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id)
+/** 新增操作 - 跳转到 create 页面 */
+const handleCreate = () => {
+  router.push({
+    name: 'OAReceiveDocCreate'
+  })
+}
+
+/** 编辑操作 - 跳转到 create 页面 */
+const handleEdit = (id: number) => {
+  router.push({
+    name: 'OAReceiveDocCreate',
+    query: { id }
+  })
+}
+
+// 修改点：详情跳转逻辑改为跳转到流程详情页
+const handleDetail = (row: any) => {
+  router.push({
+    name: 'BpmProcessInstanceDetail',
+    query: { id: row.processInstanceId }
+  })
 }
 
 /** 删除按钮操作 */

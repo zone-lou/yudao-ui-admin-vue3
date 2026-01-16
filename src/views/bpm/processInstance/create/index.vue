@@ -19,7 +19,7 @@
       v-loading="loading"
     >
       <el-row v-if="filteredProcessDefinitionList?.length" :gutter="20" class="!flex-nowrap">
-        <el-col :span="5">
+        <!-- <el-col :span="5">
           <div class="flex flex-col">
             <div
               v-for="category in availableCategories"
@@ -31,7 +31,7 @@
               {{ category.name }}
             </div>
           </div>
-        </el-col>
+        </el-col> -->
         <el-col :span="19">
           <el-scrollbar ref="scrollWrapper" height="700" @scroll="handleScroll">
             <div
@@ -303,13 +303,13 @@ onMounted(() => {
   justify-content: center;
 }
 
-.process-definition-container::before {
-  position: absolute;
-  left: 20.8%;
-  height: 100%;
-  border-left: 1px solid #e6e6e6;
-  content: '';
-}
+// .process-definition-container::before {
+//   position: absolute;
+//   left: 20.8%;
+//   height: 100%;
+//   border-left: 1px solid #e6e6e6;
+//   content: '';
+// }
 
 :deep() {
   .definition-item-card {

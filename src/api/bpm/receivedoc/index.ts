@@ -1,5 +1,5 @@
 import request from '@/config/axios'
-import type { Dayjs } from 'dayjs';
+import type { Dayjs } from 'dayjs'
 
 /** 收文信息 */
 export interface ReceiveDoc {
@@ -17,7 +17,10 @@ export interface ReceiveDoc {
   zhubandate: string | Dayjs // 主办办结时间
   xiebandate: string | Dayjs // 协办办结时间
 }
-
+export interface ReceiveDocSign {
+  docClass: string // 单位类别
+  year: string | Dayjs // 收文年份
+}
 // 收文 API
 export const ReceiveDocApi = {
   // 查询收文分页
@@ -33,6 +36,15 @@ export const ReceiveDocApi = {
   // 新增收文
   createReceiveDoc: async (data: ReceiveDoc) => {
     return await request.post({ url: `/bpm/receive-doc/create`, data })
+  },
+  // 提交收文
+  submitReceiveDoc: async (data: ReceiveDoc) => {
+    return await request.post({ url: `/bpm/receive-doc/create-flow`, data })
+  },
+
+  //保存收文
+  saveReceiveDoc: async (data: ReceiveDoc) => {
+    return await request.post({ url: `/bpm/receive-doc/save`, data })
   },
 
   // 修改收文
@@ -53,5 +65,19 @@ export const ReceiveDocApi = {
   // 导出收文 Excel
   exportReceiveDoc: async (params) => {
     return await request.download({ url: `/bpm/receive-doc/export-excel`, params })
+  },
+
+  // 获取收文编号
+  getReceiveDocSign: async (data: ReceiveDocSign) => {
+    return await request.post({ url: `/bpm/receive-doc/get-number`, data })
+  },
+
+  // ==================== 子表（收文扩展） ====================
+
+  // 获得收文扩展
+  getReceiveDocXmGuid: async (receiveDocId) => {
+    return await request.get({
+      url: `/bpm/receive-doc/receive-doc-attach/list-by-receive-doc-id?receiveDocId=` + receiveDocId
+    })
   }
 }

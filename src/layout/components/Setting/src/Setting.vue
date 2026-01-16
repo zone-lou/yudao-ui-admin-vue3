@@ -77,7 +77,7 @@ const setMenuTheme = (color: string) => {
       ? 'var(--el-color-primary)'
       : hexToRGB(unref(primaryColor), 0.1),
     // 左侧菜单字体颜色
-    leftMenuTextColor: isDarkColor ? '#bfcbd9' : '#333',
+    leftMenuTextColor: isDarkColor ? '#fff' : '#333',
     // 左侧菜单选中字体颜色
     leftMenuTextActiveColor: isDarkColor ? '#fff' : 'var(--el-color-primary)',
     // logo字体颜色
@@ -88,23 +88,23 @@ const setMenuTheme = (color: string) => {
   appStore.setTheme(theme)
   appStore.setCssVarTheme()
 }
-if (layout.value === 'top' && !appStore.getIsDark) {
-  headerTheme.value = '#fff'
-  setHeaderTheme('#fff')
-}
+// if (layout.value === 'top' && !appStore.getIsDark) {
+//   headerTheme.value = '#fff'
+//   setHeaderTheme('#fff')
+// }
 
 // 监听layout变化，重置一些主题色
-watch(
-  () => layout.value,
-  (n) => {
-    if (n === 'top' && !appStore.getIsDark) {
-      headerTheme.value = '#fff'
-      setHeaderTheme('#fff')
-    } else {
-      setMenuTheme(unref(menuTheme))
-    }
-  }
-)
+// watch(
+//   () => layout.value,
+//   (n) => {
+//     if (n === 'top' && !appStore.getIsDark) {
+//       headerTheme.value = '#fff'
+//       setHeaderTheme('#fff')
+//     } else {
+//       setMenuTheme(unref(menuTheme))
+//     }
+//   }
+// )
 
 // 拷贝
 const copyConfig = async () => {
@@ -229,7 +229,7 @@ const clear = () => {
         :schema="[
           '#409eff',
           '#009688',
-          '#536dfe',
+          '#0056ff',
           '#ff5c93',
           '#ee4f12',
           '#0096c7',
@@ -246,7 +246,7 @@ const clear = () => {
         :schema="[
           '#fff',
           '#151515',
-          '#5172dc',
+          '#0056ff',
           '#e74c3c',
           '#24292e',
           '#394664',
@@ -296,7 +296,9 @@ const clear = () => {
 $prefix-cls: #{$namespace}-setting;
 
 .#{$prefix-cls} {
+  z-index: 1200;
   border-radius: 6px 0 0 6px;
-  z-index: 1200;/*修正没有z-index会被表格层覆盖,值不要超过4000*/
+
+  /* 修正没有z-index会被表格层覆盖,值不要超过4000 */
 }
 </style>

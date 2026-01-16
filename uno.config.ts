@@ -19,7 +19,7 @@ ${selector} {
 }
 /* you can have multiple rules */
 ${selector}:hover {
-  background-color: var(--top-header-hover-color);
+  background-color: #0056ff;
 }
 .dark ${selector}:hover {
   background-color: var(--el-bg-color-overlay);

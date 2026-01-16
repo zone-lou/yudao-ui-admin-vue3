@@ -108,55 +108,71 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column align="center" label="流程" prop="processInstance.name" width="180" />
-      <el-table-column label="摘要" prop="processInstance.summary" width="180">
+      <!-- 1. 标签 (超时标识) -->
+      <el-table-column label="标签" width="100" align="center">
         <template #default="scope">
-          <div
-            class="flex flex-col"
-            v-if="scope.row.processInstance.summary && scope.row.processInstance.summary.length > 0"
-          >
-            <div v-for="(item, index) in scope.row.processInstance.summary" :key="index">
-              <el-text type="info"> {{ item.key }} : {{ item.value }} </el-text>
-            </div>
-          </div>
+          <el-tag :type="getTimeoutStatus(scope.row).type">
+            {{ getTimeoutStatus(scope.row).label }}
+          </el-tag>
         </template>
       </el-table-column>
+
+      <!-- 2. 紧急程度 -->
+      <el-table-column label="紧急程度" align="center" width="100">
+        <template #default="scope">
+          <dict-tag
+            v-if="scope.row.urgencyDegree"
+            :type="DICT_TYPE.BPM_EMERGENCY_DEGREE"
+            :value="scope.row.urgencyDegree"
+          />
+          <el-tag v-else type="info">普通</el-tag>
+        </template>
+      </el-table-column>
+
+      <!-- 3. 办件名称 (绑定 processInstance.name) -->
       <el-table-column
         align="center"
-        label="发起人"
-        prop="processInstance.startUser.nickname"
-        width="100"
+        label="办件名称"
+        prop="processInstance.name"
+        min-width="180"
       />
+
+      <!-- 4. 办件编号 (已移除) -->
+
+      <!-- 5. 当前环节 (任务名称) -->
+      <el-table-column align="center" label="当前环节" prop="name" width="150" />
+
+      <!-- 6. 办件类型 (绑定 taskName) -->
+      <el-table-column align="center" label="办件类型" prop="taskName" width="180" />
+
+      <!-- 7. 开始日期 (流程发起时间) -->
       <el-table-column
         :formatter="dateFormatter"
         align="center"
-        label="截止时间"
+        label="开始日期"
+        prop="processInstance.createTime"
+        width="180"
+      />
+
+      <!-- 8. 办结时限 (流程截止时间 - 暂无字段，使用占位或 hidden) -->
+      <!-- <el-table-column label="办结时限" width="180" align="center" /> -->
+
+      <!-- 9. 环节时限 (任务截止时间) -->
+      <el-table-column
+        :formatter="dateFormatter"
+        align="center"
+        label="环节时限"
         prop="dueDate"
         width="180"
       />
 
-      <el-table-column
-        :formatter="dateFormatter"
-        align="center"
-        label="发起时间"
-        prop="processInstance.createTime"
-        width="180"
-      />
-      <el-table-column align="center" label="当前任务" prop="name" width="180" />
-      <el-table-column
-        :formatter="dateFormatter"
-        align="center"
-        label="任务时间"
-        prop="createTime"
-        width="180"
-      />
-      <el-table-column
-        align="center"
-        label="流程编号"
-        prop="processInstanceId"
-        :show-overflow-tooltip="true"
-      />
-      <el-table-column align="center" label="任务编号" prop="id" :show-overflow-tooltip="true" />
+      <!-- 10. 状态 -->
+      <el-table-column label="状态" align="center" width="100">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.BPM_TASK_STATUS" :value="scope.row.status" />
+        </template>
+      </el-table-column>
+
       <el-table-column align="center" label="操作" fixed="right" width="80">
         <template #default="scope">
           <el-button link type="primary" @click="handleAudit(scope.row)">办理</el-button>
@@ -178,10 +194,29 @@ import { dateFormatter } from '@/utils/formatTime'
 import * as TaskApi from '@/api/bpm/task'
 import { CategoryApi, CategoryVO } from '@/api/bpm/category'
 import * as DefinitionApi from '@/api/bpm/definition'
+import dayjs from 'dayjs'
+import { DICT_TYPE } from '@/utils/dict'
 
 defineOptions({ name: 'BpmTodoTask' })
 
 const { push } = useRouter() // 路由
+
+/** 获取超时状态 */
+const getTimeoutStatus = (row: any) => {
+  if (!row.dueDate) {
+    return { label: '待办', type: 'primary' }
+  }
+  const now = dayjs()
+  const due = dayjs(row.dueDate)
+
+  if (due.isBefore(now)) {
+    return { label: '超时', type: 'danger' }
+  } else if (due.diff(now, 'day', true) <= 3) {
+    return { label: '临期', type: 'warning' }
+  } else {
+    return { label: '待办', type: 'primary' }
+  }
+}
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
