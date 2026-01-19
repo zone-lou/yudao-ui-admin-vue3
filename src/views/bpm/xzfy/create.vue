@@ -10,7 +10,32 @@
           v-loading="formLoading"
         >
           <h3 class="section-title">基本信息</h3>
-
+          <el-row>
+            <el-col :span="12">
+              <el-form-item label="来文号" prop="swWh">
+                <el-input v-model="formData.swWh" placeholder="请输入来文号" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="来文机关" prop="swJg">
+                <el-select
+                  v-model="formData.swJg"
+                  placeholder="请输入或选择来文机关"
+                  filterable
+                  allow-create
+                  default-first-option
+                  style="width: 100%"
+                >
+                  <el-option
+                    v-for="dict in getDictOptions(DICT_TYPE.BPM_AGENCY_NAME)"
+                    :key="dict.value"
+                    :label="dict.label"
+                    :value="dict.value"
+                  />
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
           <el-row>
             <el-col :span="12">
               <el-form-item label="申请人" prop="sqr">
@@ -19,7 +44,21 @@
             </el-col>
             <el-col :span="12">
               <el-form-item label="被申请人" prop="bsqr">
-                <el-input v-model="formData.bsqr" placeholder="请输入被申请人" />
+                <el-select
+                  v-model="formData.bsqr"
+                  placeholder="请输入或选择被申请人"
+                  filterable
+                  allow-create
+                  default-first-option
+                  style="width: 100%"
+                >
+                  <el-option
+                    v-for="dict in getDictOptions(DICT_TYPE.BPM_AGENCY_NAME)"
+                    :key="dict.value"
+                    :label="dict.label"
+                    :value="dict.value"
+                  />
+                </el-select>
               </el-form-item>
             </el-col>
           </el-row>
@@ -39,19 +78,6 @@
 
           <el-row>
             <el-col :span="12">
-              <el-form-item label="来文号" prop="swWh">
-                <el-input v-model="formData.swWh" placeholder="请输入来文号" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="来文机关" prop="swJg">
-                <el-input v-model="formData.swJg" placeholder="请输入来文机关" />
-              </el-form-item>
-            </el-col>
-          </el-row>
-
-          <el-row>
-            <el-col :span="12">
               <el-form-item label="来文日期" prop="swRq">
                 <el-date-picker
                   v-model="formData.swRq"
@@ -62,7 +88,7 @@
                 />
               </el-form-item>
             </el-col>
-            <el-col :span="12">
+            <!-- <el-col :span="12">
               <el-form-item label="办理时限" prop="zhubandate">
                 <el-date-picker
                   v-model="formData.zhubandate"
@@ -72,10 +98,10 @@
                   style="width: 100%"
                 />
               </el-form-item>
-            </el-col>
+            </el-col> -->
           </el-row>
 
-          <el-form-item label="类别一" prop="lb1">
+          <el-form-item label="案件分类" prop="lb1">
             <el-radio-group v-model="formData.lb1">
               <el-radio
                 v-for="dict in getDictOptions(DICT_TYPE.BPM_XZFY_CLASS1)"
@@ -87,7 +113,7 @@
             </el-radio-group>
           </el-form-item>
 
-          <el-form-item label="类别二" prop="lb2">
+          <el-form-item label="涉及事项" prop="lb2">
             <el-radio-group v-model="formData.lb2">
               <el-radio
                 v-for="dict in getDictOptions(DICT_TYPE.BPM_XZFY_CLASS2)"
@@ -99,7 +125,7 @@
             </el-radio-group>
           </el-form-item>
 
-          <el-form-item label="类别三" prop="lb3">
+          <el-form-item label="案件类型" prop="lb3">
             <el-radio-group v-model="formData.lb3">
               <el-radio
                 v-for="dict in getDictOptions(DICT_TYPE.BPM_XZFY_CLASS3)"
@@ -443,7 +469,7 @@ const formData = ref({
   swWh: undefined,
   swJg: undefined,
   swRq: undefined,
-  zhubandate: undefined,
+  // zhubandate: undefined,
   lb1: undefined,
   lb2: undefined,
   lb3: undefined,
@@ -480,8 +506,14 @@ const docList = ref([{ docName: '', docDate: '', docContent: '' }])
 
 const formRules = reactive({
   sqr: [{ required: true, message: '申请人不能为空', trigger: 'blur' }],
+  bsqr: [{ required: true, message: '被申请人不能为空', trigger: 'change' }],
+  tdZl: [{ required: true, message: '土地坐落不能为空', trigger: 'blur' }],
   swWh: [{ required: true, message: '来文号不能为空', trigger: 'blur' }],
-  lb1: [{ required: true, message: '类别一不能为空', trigger: 'change' }],
+  swJg: [{ required: true, message: '来文机关不能为空', trigger: 'change' }],
+  swRq: [{ required: true, message: '来文日期不能为空', trigger: 'change' }],
+  lb1: [{ required: true, message: '案件分类不能为空', trigger: 'change' }],
+  lb2: [{ required: true, message: '涉及事项不能为空', trigger: 'change' }],
+  lb3: [{ required: true, message: '案件类型不能为空', trigger: 'change' }],
   nextNode: [{ required: true, message: '下一审批节点不能为空', trigger: 'change' }],
   tempNextUserSelectAssignees: [{ required: true, message: '审批人不能为空', trigger: 'change' }]
 })
