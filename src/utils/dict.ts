@@ -161,17 +161,20 @@ export enum DICT_TYPE {
   BPM_EMERGENCY_DEGREE = 'emergency_degree',
   BPM_AGENCY_NAME = 'agency_name',
   BPM_PRINT_CLASS = 'print_class',
-  BPM_XZFY_CLASS1 = 'xzfy_class1',
-  BPM_XZFY_CLASS2 = 'xzfy_class2',
-  BPM_XZFY_CLASS3 = 'xzfy_class3',
-  BPM_XZSS_CLASS1 = 'xzss_class1',
-  BPM_XZSS_CLASS2 = 'xzss_class2',
-  BPM_XZSS_CLASS3 = 'xzss_class3',
-  BPM_XZSS_CLASS4 = 'xzss_class4',
-  BPM_XZSS_CLASS5 = 'xzss_class5',
+  BPM_XZFY_CLASS1 = 'xzfy_class1', // 行政复议-案件分类
+  BPM_XZFY_CLASS2 = 'xzfy_class2', // 行政复议-涉及事项
+  BPM_XZFY_CLASS3 = 'xzfy_class3', // 行政复议-案件类型
+  BPM_XZSS_CLASS1 = 'xzss_class1', // 行政诉讼-案件分类
+  BPM_XZSS_CLASS2 = 'xzss_class2', // 行政诉讼-案件类别
+  BPM_XZSS_CLASS3 = 'xzss_class3', // 行政诉讼-涉及事项
+  BPM_XZSS_CLASS4 = 'xzss_class4', // 行政诉讼-案件类型
+  BPM_XZSS_CLASS5 = 'xzss_class5', // 行政诉讼-诉讼类别
   BPM_DEGREE_OF_SECRECY = 'degree_of_secrecy',
   BPM_SENDDOC_SIGN = 'senddoc_sign',
-
+  BPM_INCOMING_AUTHORITY = 'incoming_authority', //来文机关
+  BPM_INCOMING_AUTHORITY_XZSS = 'incoming_authority_xzss', //来文机关(行政诉讼)
+  BPM_APPLIED_RESPONDENT = 'applied_respondent', //被申请人
+  BPM_ADMINISTRATIVE_LITIGATION_STAGE = 'administrative_litigation_stage', //行政诉讼阶段
   // ========== PAY 模块 ==========
   PAY_CHANNEL_CODE = 'pay_channel_code', // 支付渠道编码类型
   PAY_ORDER_STATUS = 'pay_order_status', // 商户支付订单状态

@@ -27,7 +27,7 @@
                   style="width: 100%"
                 >
                   <el-option
-                    v-for="dict in getDictOptions(DICT_TYPE.BPM_AGENCY_NAME)"
+                    v-for="dict in getDictOptions(DICT_TYPE.BPM_INCOMING_AUTHORITY)"
                     :key="dict.value"
                     :label="dict.label"
                     :value="dict.value"
@@ -53,7 +53,7 @@
                   style="width: 100%"
                 >
                   <el-option
-                    v-for="dict in getDictOptions(DICT_TYPE.BPM_AGENCY_NAME)"
+                    v-for="dict in getDictOptions(DICT_TYPE.BPM_APPLIED_RESPONDENT)"
                     :key="dict.value"
                     :label="dict.label"
                     :value="dict.value"
@@ -333,7 +333,7 @@
             <el-input v-model="formData.xzfyKz.bz" type="textarea" placeholder="请输入备注" />
           </el-form-item>
 
-          <h4 style="margin: 15px 0 10px 10px; font-weight: bold; color: #606266">相关文书列表</h4>
+          <h3 class="section-title">相关文书列表</h3>
 
           <div style="margin-bottom: 10px; text-align: right">
             <el-button type="primary" plain size="small" @click="addDocRow">
@@ -463,11 +463,11 @@ const multipleFlag = ref(false)
 const formData = ref({
   id: undefined,
   sqr: undefined,
-  bsqr: undefined,
+  bsqr: '1',
   dsr: undefined,
   tdZl: undefined,
   swWh: undefined,
-  swJg: undefined,
+  swJg: '1',
   swRq: undefined,
   // zhubandate: undefined,
   lb1: undefined,
