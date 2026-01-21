@@ -400,6 +400,10 @@ const formFieldOptions4Title = computed(() => {
     label: '发起人',
     value: ProcessVariableEnum.START_USER_ID
   })
+  cloneFormField.unshift({
+    label: '自定义标题',
+    value: ProcessVariableEnum.PROCESS_CUSTOM_NAME
+  })
   return cloneFormField
 })
 const formFieldOptions4Summary = computed(() => {

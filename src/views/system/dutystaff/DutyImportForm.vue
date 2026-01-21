@@ -18,10 +18,10 @@
       <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
       <template #tip>
         <div class="el-upload__tip text-center">
-          <!--          <div class="el-upload__tip">-->
-          <!--            <el-checkbox v-model="updateSupport" />-->
-          <!--            是否更新已经存在的数据-->
-          <!--          </div>-->
+          <div class="el-upload__tip">
+            <el-checkbox v-model="updateSupport" />
+            是否更新已经存在的数据
+          </div>
           <span>仅允许导入 xls、xlsx 格式文件。</span>
           <el-link
             :underline="false"
@@ -59,7 +59,6 @@ const uploadHeaders = ref() // 上传 Header 头
 const fileList = ref([]) // 文件列表
 const updateSupport = ref(0) // 是否更新已经存在的用户数据
 
-
 /** 打开弹窗 */
 const open = () => {
   dialogVisible.value = true
@@ -86,32 +85,32 @@ const submitForm = async () => {
 
 /** 文件上传成功 */
 const emits = defineEmits(['success'])
-const submitFormSuccess = (response: any) => {
-  if (response.code !== 0) {
-    message.error(response.msg)
-    resetForm()
-    return
-  }
-  // 拼接提示语
-  const data = response.data
-  let text = '上传成功数量：' + data.createDutyNames.length + ';'
-  for (let username of data.createDutyNames) {
-    text += '< ' + username + ' >'
-  }
-  // text += '更新成功数量：' + data.updateUsernames.length + ';'
-  // for (const username of data.updateUsernames) {
-  //   text += '< ' + username + ' >'
-  // }
-  text += '插入失败数量：' + Object.keys(data.failureDutyNames).length + ';'
-  for (const username in data.failureDutyNames) {
-    text += '< ' + username + ': ' + data.failureDutyNames[username] + ' >'
-  }
-  message.alert(text)
-  formLoading.value = false
-  dialogVisible.value = false
-  // 发送操作成功的事件
-  emits('success')
-}
+// const submitFormSuccess = (response: any) => {
+//   if (response.code !== 0) {
+//     message.error(response.msg)
+//     resetForm()
+//     return
+//   }
+//   // 拼接提示语
+//   const data = response.data
+//   let text = '上传成功数量：' + data.createDutyNames.length + ';'
+//   for (let username of data.createDutyNames) {
+//     text += '< ' + username + ' >'
+//   }
+//   // text += '更新成功数量：' + data.updateUsernames.length + ';'
+//   // for (const username of data.updateUsernames) {
+//   //   text += '< ' + username + ' >'
+//   // }
+//   text += '插入失败数量：' + Object.keys(data.failureDutyNames).length + ';'
+//   for (const username in data.failureDutyNames) {
+//     text += '< ' + username + ': ' + data.failureDutyNames[username] + ' >'
+//   }
+//   message.alert(text)
+//   formLoading.value = false
+//   dialogVisible.value = false
+//   // 发送操作成功的事件
+//   emits('success')
+// }
 
 /** 上传错误提示 */
 const submitFormError = (): void => {
@@ -138,5 +137,84 @@ const importTemplate = async () => {
   download.excel(res, '值班导入模版.xls')
 }
 
+const submitFormSuccess = (response: any) => {
+  if (response.code !== 0) {
+    message.error(response.msg)
+    resetForm()
+    return
+  }
 
+  const data = response.data
+  const createCount = data.createDutyNames.length
+  const updateCount = data.updateDutyNames.length // 获取更新数量
+  const failureCount = Object.keys(data.failureDutyNames).length
+
+  // 构建 HTML 字符串
+  let htmlContent = '<div style="text-align: left; max-height: 400px; overflow-y: auto;">'
+
+  // 1. 新增成功部分 (绿色)
+  if (createCount > 0) {
+    htmlContent += `
+      <div>
+        <span style="font-weight: bold; font-size: 16px;">✅ 新增成功：<span style="color: #67C23A;">${createCount}</span> 条</span>
+        <div style="font-size: 12px; color: #909399; margin-top: 5px; line-height: 1.5;">
+          ${data.createDutyNames.join(', ')}
+        </div>
+      </div>
+    `
+  }
+
+  // 2. 更新成功部分 (蓝色) - 新增的代码段
+  if (updateCount > 0) {
+    // 如果上面有内容，加分隔线
+    if (createCount > 0) {
+      htmlContent += '<el-divider style="margin: 10px 0;"></el-divider>'
+    }
+
+    htmlContent += `
+      <div>
+        <span style="font-weight: bold; font-size: 16px;">🔄 更新成功：<span style="color: #409EFF;">${updateCount}</span> 条</span>
+        <div style="font-size: 12px; color: #909399; margin-top: 5px; line-height: 1.5;">
+          ${data.updateDutyNames.join(', ')}
+        </div>
+      </div>
+    `
+  }
+
+  // 3. 失败部分 (红色)
+  if (failureCount > 0) {
+    // 如果上面有“新增”或者“更新”，都加分隔线
+    if (createCount > 0 || updateCount > 0) {
+      htmlContent += '<el-divider style="margin: 10px 0;"></el-divider>'
+    }
+
+    htmlContent += `
+      <div>
+        <span style="font-weight: bold; font-size: 16px;">❌ 导入失败：<span style="color: #F56C6C;">${failureCount}</span> 条</span>
+        <ul style="font-size: 12px; color: #F56C6C; margin-top: 5px; padding-left: 20px; line-height: 1.5;">
+    `
+    for (const key in data.failureDutyNames) {
+      htmlContent += `<li><strong>${key}</strong>: ${data.failureDutyNames[key]}</li>`
+    }
+    htmlContent += `</ul></div>`
+  }
+
+  // 4. 兜底显示
+  if (createCount === 0 && updateCount === 0 && failureCount === 0) {
+    htmlContent += '<div>无数据变动</div>'
+  }
+
+  htmlContent += '</div>'
+
+  // 弹出提示框
+  ElMessageBox.alert(htmlContent, '导入结果', {
+    dangerouslyUseHTMLString: true,
+    confirmButtonText: '知道了',
+    customStyle: { maxWidth: '600px' }
+  })
+
+  formLoading.value = false
+  dialogVisible.value = false
+  emits('success')
+}
 </script>

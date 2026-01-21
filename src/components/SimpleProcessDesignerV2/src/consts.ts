@@ -710,7 +710,12 @@ export enum ProcessVariableEnum {
   /**
    * 流程定义名称
    */
-  PROCESS_DEFINITION_NAME = 'PROCESS_DEFINITION_NAME'
+  PROCESS_DEFINITION_NAME = 'PROCESS_DEFINITION_NAME',
+
+  /**
+   * 自定义标题
+   */
+  PROCESS_CUSTOM_NAME = 'PROCESS_CUSTOM_NAME',
 }
 
 /**
