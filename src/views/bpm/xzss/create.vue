@@ -118,6 +118,14 @@
 
           <el-row>
             <el-col :span="12">
+              <el-form-item label="后一审案号" prop="hysAh">
+                <el-input v-model="formData.hysAh" placeholder="自动获取后一审案号" disabled />
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row>
+            <el-col :span="12">
               <el-form-item label="办理时限" prop="zhubandate">
                 <el-date-picker
                   v-model="formData.zhubandate"
@@ -140,6 +148,18 @@
               </el-form-item>
             </el-col>
           </el-row>
+
+          <el-form-item label="诉讼阶段" prop="ssLx">
+            <el-radio-group v-model="formData.ssLx">
+              <el-radio
+                v-for="dict in getDictOptions(DICT_TYPE.BPM_ADMINISTRATIVE_LITIGATION_STAGE)"
+                :key="dict.value"
+                :label="dict.value"
+              >
+                {{ dict.label }}
+              </el-radio>
+            </el-radio-group>
+          </el-form-item>
 
           <el-form-item label="案件类别" prop="lb1">
             <el-radio-group v-model="formData.lb1">
@@ -539,6 +559,7 @@ const formData = ref({
   zsbsqr: undefined,
   fyAh: undefined,
   ssAh: undefined,
+  hysAh: undefined, // 后一审案号
   issupervise: 0,
   mailTip: 0,
 
