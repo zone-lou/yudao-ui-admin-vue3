@@ -159,7 +159,9 @@ const handleFileSuccess: UploadProps['onSuccess'] = (res: any, uploadFile: Uploa
   } else {
     // 旧接口：res.data 是字符串URL
     url = res.data
-    name = url.substring(url.lastIndexOf('/') + 1)
+    const decodedUrl = decodeURIComponent(url)
+    const urlWithoutQuery = decodedUrl.split('?')[0]
+    name = urlWithoutQuery.substring(urlWithoutQuery.lastIndexOf('/') + 1)
   }
 
   // 构建我们自己的文件对象，完整保留 response 以便父组件获取 ID
