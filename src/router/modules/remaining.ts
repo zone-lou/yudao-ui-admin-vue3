@@ -205,6 +205,18 @@ const remainingRouter: AppRouteRecordRaw[] = [
     }
   },
   {
+    path: '/sso-redirect',
+    component: () => import('@/views/Login/SsoRedirect.vue'), // 确保文件路径正确
+    name: 'SsoRedirect', // 不在侧边栏显示
+    meta: { noCache: true,hidden:true,title:"单点登录跳转" }
+  },
+  {
+    path: '/sso-error',
+    component: () => import('@/views/Login/SsoError.vue'),
+    name: 'SsoError',
+    meta: { noCache: true, title: '登录异常', hidden: true }
+  },
+  {
     path: '/403',
     component: () => import('@/views/Error/403.vue'),
     name: 'NoAccess',

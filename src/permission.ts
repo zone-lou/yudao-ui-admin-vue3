@@ -53,7 +53,9 @@ const whiteList = [
   '/auth-redirect',
   '/bind',
   '/register',
-  '/oauthLogin/gitee'
+  '/oauthLogin/gitee',
+  '/sso-redirect',
+  '/sso-error' // 添加这一行
 ]
 
 // 路由加载前

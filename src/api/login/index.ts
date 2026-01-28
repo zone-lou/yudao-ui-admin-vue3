@@ -89,3 +89,8 @@ export const reqCheck = (data: any) => {
 export const smsResetPassword = (data: any) => {
   return request.post({ url: '/system/auth/reset-password', data })
 }
+
+
+export const ssoExchangeApi = (ticket: string) => {
+  return request.post({ url: '/system/auth/sso-exchange', params: { ticket } })
+}
