@@ -5,6 +5,7 @@ import { Backtop } from '@/components/Backtop'
 import { Setting } from '@/layout/components/Setting'
 import { useRenderLayout } from './components/useRenderLayout'
 import { useDesign } from '@/hooks/web/useDesign'
+import { useRoute } from 'vue-router'
 
 const { getPrefixCls } = useDesign()
 
@@ -49,6 +50,7 @@ const renderLayout = () => {
 export default defineComponent({
   name: 'Layout',
   setup() {
+    const route = useRoute()
     return () => (
       <section class={[prefixCls, `${prefixCls}__${layout.value}`, 'w-[100%] h-[100%] relative']}>
         {mobile.value && !collapse.value ? (
@@ -62,7 +64,7 @@ export default defineComponent({
 
         <Backtop></Backtop>
 
-        <Setting></Setting>
+        {unref(route).path === '/user/profile' ? <Setting></Setting> : undefined}
       </section>
     )
   }

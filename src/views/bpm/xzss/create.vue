@@ -106,20 +106,20 @@
           <el-row>
             <el-col :span="12">
               <el-form-item label="复议案号" prop="fyAh">
-                <el-input v-model="formData.fyAh" placeholder="请输入复议案号" />
+                <el-input v-model="formData.fyAh" placeholder="请输入复议案号">
+                  <template #append>
+                    <el-button @click="openFySelect">选择</el-button>
+                  </template>
+                </el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
               <el-form-item label="上一审案号" prop="ssAh">
-                <el-input v-model="formData.ssAh" placeholder="请输入上一审案号" />
-              </el-form-item>
-            </el-col>
-          </el-row>
-
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="后一审案号" prop="hysAh">
-                <el-input v-model="formData.hysAh" placeholder="自动获取后一审案号" disabled />
+                <el-input v-model="formData.ssAh" placeholder="请输入上一审案号">
+                  <template #append>
+                    <el-button @click="openSsSelect">选择</el-button>
+                  </template>
+                </el-input>
               </el-form-item>
             </el-col>
           </el-row>
@@ -497,6 +497,44 @@
       </ContentWrap>
     </el-col>
   </el-row>
+
+  <!-- 复议案件选择弹窗 -->
+  <el-dialog v-model="fySelectVisible" title="选择复议案件" width="70%" append-to-body>
+    <el-table v-loading="listLoading" :data="xzfyList" border>
+      <el-table-column label="诉讼文号" prop="swWh" />
+      <el-table-column label="来文机关" prop="swJg" />
+      <el-table-column label="收文日期" align="center">
+        <template #default="scope">
+          {{ formatDate(scope.row.swRq) }}
+        </template>
+      </el-table-column>
+      <el-table-column label="原告" prop="sqr" />
+      <el-table-column label="操作" width="100" align="center">
+        <template #default="scope">
+          <el-button type="primary" link @click="selectFy(scope.row)">选择</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+  </el-dialog>
+
+  <!-- 上一审案件选择弹窗 -->
+  <el-dialog v-model="ssSelectVisible" title="选择上一审案件" width="70%" append-to-body>
+    <el-table v-loading="listLoading" :data="historyXzssList" border>
+      <el-table-column label="诉讼文号" prop="swWh" />
+      <el-table-column label="来文机关" prop="swJg" />
+      <el-table-column label="收文日期" align="center">
+        <template #default="scope">
+          {{ formatDate(scope.row.swRq) }}
+        </template>
+      </el-table-column>
+      <el-table-column label="原告" prop="sqr" />
+      <el-table-column label="操作" width="100" align="center">
+        <template #default="scope">
+          <el-button type="primary" link @click="selectSs(scope.row)">选择</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+  </el-dialog>
 </template>
 
 <script setup lang="ts">
@@ -510,12 +548,20 @@ import { XzssApi, Xzss } from '@/api/bpm/xzss'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import { useUserStore } from '@/store/modules/user'
 
+import { XzfyApi } from '@/api/bpm/xzfy'
+import { dateUtil } from '@/utils/dateUtil'
+
 defineOptions({ name: 'BpmXzssCreate' })
 
 const message = useMessage()
 const { delView } = useTagsViewStore()
 const { push, currentRoute } = useRouter()
 const userStore = useUserStore()
+
+const formatDate = (val: any) => {
+  if (!val) return ''
+  return dateUtil(val).format('YYYY-MM-DD')
+}
 
 const formLoading = ref(false)
 const formRef = ref()
@@ -550,6 +596,7 @@ const formData = ref({
   lb4: undefined,
   lb5: undefined,
   ssNr: undefined, // 复议请求
+  ssnr: undefined, // 诉讼内容
   cbr: undefined,
   cbRq: undefined,
   sfyjgRq: undefined,
@@ -558,8 +605,9 @@ const formData = ref({
   zssqr: undefined,
   zsbsqr: undefined,
   fyAh: undefined,
+  fyGuid: undefined, // 复议关联ID
   ssAh: undefined,
-  hysAh: undefined, // 后一审案号
+  ssGuid: undefined, // 上一审关联ID
   issupervise: 0,
   mailTip: 0,
 
@@ -614,6 +662,59 @@ const addDocRow = () => {
 
 const deleteDocRow = (index: number) => {
   docList.value.splice(index, 1)
+}
+
+// === 复议案号、上一审案号 选择逻辑 ===
+const fySelectVisible = ref(false)
+const ssSelectVisible = ref(false)
+const xzfyList = ref<any[]>([])
+const historyXzssList = ref<any[]>([])
+const listLoading = ref(false)
+
+const openFySelect = async () => {
+  fySelectVisible.value = true
+  listLoading.value = true
+  try {
+    // 调用 getXzfyPageUnlinked 获取未关联行政诉讼的行政复议
+    // @ts-ignore
+    const res = await XzfyApi.getXzfyPageUnlinked({ pageNo: 1, pageSize: 10 })
+    if (res && res.list) {
+      xzfyList.value = res.list
+    }
+  } catch (e) {
+    console.error(e)
+  } finally {
+    listLoading.value = false
+  }
+}
+
+const openSsSelect = async () => {
+  ssSelectVisible.value = true
+  listLoading.value = true
+  try {
+    // 调用 getXzssPage 获取行政诉讼列表
+    // @ts-ignore
+    const res = await XzssApi.getXzssPage({ pageNo: 1, pageSize: 10 })
+    if (res && res.list) {
+      historyXzssList.value = res.list
+    }
+  } catch (e) {
+    console.error(e)
+  } finally {
+    listLoading.value = false
+  }
+}
+
+const selectFy = (row: any) => {
+  formData.value.fyAh = row.swWh // 备注：复议列表的 swWh 对应 复议案号
+  formData.value.fyGuid = row.xmGuid // 关联ID
+  fySelectVisible.value = false
+}
+
+const selectSs = (row: any) => {
+  formData.value.ssAh = row.swWh // 备注：上一审列表的 swWh 对应 案号
+  formData.value.ssGuid = row.xmGuid // 关联ID
+  ssSelectVisible.value = false
 }
 
 // === 下一步节点与选人逻辑 ===

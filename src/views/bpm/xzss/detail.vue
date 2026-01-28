@@ -19,6 +19,15 @@
       <el-descriptions-item label="来文机关" label-align="center" align="center">
         {{ detailData.swJg }}
       </el-descriptions-item>
+      <el-descriptions-item label="复议案号" label-align="center" align="center">
+        {{ detailData.fyAh }}
+      </el-descriptions-item>
+      <el-descriptions-item label="上一审案号" label-align="center" align="center">
+        {{ detailData.ssAh }}
+      </el-descriptions-item>
+      <el-descriptions-item label="后一审案号" label-align="center" align="center" :span="2">
+        {{ detailData.hysAh }}
+      </el-descriptions-item>
       <el-descriptions-item label="收文日期" label-align="center" align="center">
         {{ formatDate(detailData.swRq) }}
       </el-descriptions-item>
