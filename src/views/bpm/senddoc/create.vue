@@ -28,7 +28,7 @@
                   style="width: 100%"
                 >
                   <el-option
-                    v-for="dict in getDictOptions(DICT_TYPE.BPM_SENDDOC_SIGN)"
+                    v-for="dict in getStrDictOptions(DICT_TYPE.BPM_SENDDOC_SIGN)"
                     :key="dict.value"
                     :label="dict.label"
                     :value="dict.value"
@@ -70,7 +70,7 @@
                   style="width: 100%"
                 >
                   <el-option
-                    v-for="dict in getDictOptions(DICT_TYPE.BPM_EMERGENCY_DEGREE)"
+                    v-for="dict in getStrDictOptions(DICT_TYPE.BPM_EMERGENCY_DEGREE)"
                     :key="dict.value"
                     :label="dict.label"
                     :value="dict.value"
@@ -90,7 +90,7 @@
                 >
                   <el-option label="无" value="" />
                   <el-option
-                    v-for="dict in getDictOptions(DICT_TYPE.BPM_DEGREE_OF_SECRECY)"
+                    v-for="dict in getStrDictOptions(DICT_TYPE.BPM_DEGREE_OF_SECRECY)"
                     :key="dict.value"
                     :label="dict.label"
                     :value="dict.value"
@@ -308,14 +308,16 @@ import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { CandidateStrategy, NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { ApprovalNodeInfo } from '@/api/bpm/processInstance'
 import { SendDocApi, SendDoc } from '@/api/bpm/senddoc'
-import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import { useUserStore } from '@/store/modules/user'
+import { useRoute } from 'vue-router'
 
 defineOptions({ name: 'BpmSendDocCreate' })
 
 const message = useMessage()
 const { delView } = useTagsViewStore()
 const { push, currentRoute } = useRouter()
+const route = useRoute()
 const userStore = useUserStore()
 
 const formLoading = ref(false)
@@ -440,8 +442,13 @@ const submitForm = async () => {
       data.nextNodeAssignees[taskKey] = Array.isArray(assignees) ? assignees : [assignees]
     }
 
-    await SendDocApi.createSendDoc(data)
-    message.success('发文申请发起成功')
+    if (!data.id) {
+      await SendDocApi.createSendDoc(data)
+      message.success('发文申请发起成功')
+    } else {
+      await SendDocApi.updateSendDoc(data)
+      message.success('发文更新成功')
+    }
 
     delView(unref(currentRoute))
     await push({ name: 'BpmProcessInstanceMy' })
@@ -492,6 +499,17 @@ onMounted(async () => {
 
   await getNextApprovalNodes()
   await getApprovalDetail()
+
+  const queryId = route.query.id
+  if (queryId) {
+    formLoading.value = true
+    try {
+      const detail = await SendDocApi.getSendDoc(Number(queryId))
+      Object.assign(formData.value, detail)
+    } finally {
+      formLoading.value = false
+    }
+  }
 })
 
 watch(

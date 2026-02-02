@@ -37,7 +37,7 @@
               <el-form-item label="来文字号" prop="sendDocNumber">
                 <el-select v-model="formData.sendDocNumber" placeholder="请输入来文字号">
                   <el-option
-                    v-for="dict in getIntDictOptions(DICT_TYPE.BPM_DOC_NUM_TYPE)"
+                    v-for="dict in getStrDictOptions(DICT_TYPE.BPM_DOC_NUM_TYPE)"
                     :key="dict.value"
                     :label="formatSendDocNumberLabel(dict.label)"
                     :value="dict.value"
@@ -49,7 +49,7 @@
               <el-form-item label="单位类别" prop="docClass">
                 <el-select v-model="formData.docClass" placeholder="请选择单位类别">
                   <el-option
-                    v-for="dict in getIntDictOptions(DICT_TYPE.BPM_RECEICE_CLASS)"
+                    v-for="dict in getStrDictOptions(DICT_TYPE.BPM_RECEICE_CLASS)"
                     :key="dict.value"
                     :label="dict.label"
                     :value="dict.value"
@@ -76,7 +76,7 @@
               <el-form-item label="紧急程度" prop="urgencyDegree">
                 <el-select v-model="formData.urgencyDegree" placeholder="请选择紧急程度">
                   <el-option
-                    v-for="dict in getIntDictOptions(DICT_TYPE.BPM_EMERGENCY_DEGREE)"
+                    v-for="dict in getStrDictOptions(DICT_TYPE.BPM_EMERGENCY_DEGREE)"
                     :key="dict.value"
                     :label="dict.label"
                     :value="dict.value"
@@ -91,7 +91,7 @@
               <el-form-item label="来文单位" prop="sendDept">
                 <el-select v-model="formData.sendDept" placeholder="请选择来文单位" multiple>
                   <el-option
-                    v-for="dict in getIntDictOptions(DICT_TYPE.BPM_RECEICE_DOC_UNIT)"
+                    v-for="dict in getStrDictOptions(DICT_TYPE.BPM_RECEICE_DOC_UNIT)"
                     :key="dict.value"
                     :label="dict.label"
                     :value="dict.value"
@@ -215,7 +215,7 @@
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as DefinitionApi from '@/api/bpm/definition'
 import ProcessInstanceTimeline from '@/views/bpm/processInstance/detail/ProcessInstanceTimeline.vue'

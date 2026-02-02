@@ -34,8 +34,8 @@
       </template>
       <template #file="row">
         <div class="flex items-center">
-          <span>{{ row.file.name }}</span>
-          <div class="ml-10px">
+          <span :title="row.file.name">{{ row.file.name }}</span>
+          <div class="ml-10px flex-shrink-0">
             <el-link
               :href="row.file.url"
               :underline="false"
@@ -46,7 +46,7 @@
               下载
             </el-link>
           </div>
-          <div class="ml-10px">
+          <div class="ml-10px flex-shrink-0">
             <el-button link type="danger" @click="handleRemove(row.file)"> 删除</el-button>
           </div>
         </div>
@@ -56,8 +56,8 @@
 
   <div v-if="disabled" class="upload-file">
     <div v-for="(file, index) in fileList" :key="index" class="flex items-center file-list-item">
-      <span>{{ file.name }}</span>
-      <div class="ml-10px">
+      <span :title="file.name">{{ file.name }}</span>
+      <div class="ml-10px flex-shrink-0">
         <el-link :href="file.url" :underline="false" download target="_blank" type="primary">
           下载
         </el-link>

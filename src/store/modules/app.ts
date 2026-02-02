@@ -68,7 +68,7 @@ export const useAppStore = defineStore('app', {
       greyMode: false, // 是否开始灰色模式，用于特殊悼念日
       fixedMenu: wsCache.get('fixedMenu') || false, // 是否固定菜单
 
-      layout: wsCache.get(CACHE_KEY.LAYOUT) || 'top', // layout布局
+      layout: wsCache.get(CACHE_KEY.LAYOUT) || 'topSubMenu', // layout布局
       isDark: wsCache.get(CACHE_KEY.IS_DARK) || false, // 是否是暗黑模式
       currentSize: wsCache.get('default') || 'default', // 组件尺寸
       theme: wsCache.get(CACHE_KEY.THEME) || {
@@ -77,17 +77,18 @@ export const useAppStore = defineStore('app', {
         // 左侧菜单边框颜色
         leftMenuBorderColor: 'inherit',
         // 左侧菜单背景颜色
-        leftMenuBgColor: '#transparent',
+        leftMenuBgColor: '#fff',
         // 左侧菜单浅色背景颜色
-        leftMenuBgLightColor: '#6081eb',
+        leftMenuBgLightColor: '#f5f7fa',
         // 左侧菜单选中背景颜色
-        leftMenuBgActiveColor: 'var(--el-color-primary)',
+        // 左侧菜单选中背景颜色
+        leftMenuBgActiveColor: 'rgba(0, 86, 255, 0.1)',
         // 左侧菜单收起选中背景颜色
         leftMenuCollapseBgActiveColor: 'var(--el-color-primary)',
         // 左侧菜单字体颜色
-        leftMenuTextColor: '#fff',
+        leftMenuTextColor: '#333',
         // 左侧菜单选中字体颜色
-        leftMenuTextActiveColor: '#fff',
+        leftMenuTextActiveColor: '#0056ff',
         // logo字体颜色
         logoTitleTextColor: '#fff',
         // logo边框颜色
@@ -277,11 +278,17 @@ export const useAppStore = defineStore('app', {
       }
       this.layout = layout
       wsCache.set(CACHE_KEY.LAYOUT, this.layout)
+      if (layout === 'topSubMenu') {
+        this.setIsDark(false)
+      }
     },
     setTitle(title: string) {
       this.title = title
     },
     setIsDark(isDark: boolean) {
+      if (this.layout === 'topSubMenu' && isDark) {
+        return
+      }
       this.isDark = isDark
       if (this.isDark) {
         document.documentElement.classList.add('dark')

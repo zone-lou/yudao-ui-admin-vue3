@@ -193,7 +193,10 @@
         <el-input v-model="formData.attachFilePath" placeholder="请输入附件路径" />
       </el-form-item>
       <el-form-item label="判断正文草稿，审批搞，套红正文是否存在" prop="filetag">
-        <el-input v-model="formData.filetag" placeholder="请输入判断正文草稿，审批搞，套红正文是否存在" />
+        <el-input
+          v-model="formData.filetag"
+          placeholder="请输入判断正文草稿，审批搞，套红正文是否存在"
+        />
       </el-form-item>
       <el-form-item label="拟稿单位" prop="draftDept">
         <el-input v-model="formData.draftDept" placeholder="请输入拟稿单位" />
@@ -285,14 +288,10 @@
       <el-form-item label="分发" prop="fenfaren">
         <el-input v-model="formData.fenfaren" placeholder="请输入分发" />
       </el-form-item>
-      <el-form-item label="文件类型 1党务 2政务" prop="docType">
-        <el-select v-model="formData.docType" placeholder="请选择文件类型 1党务 2政务">
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.$dictType.toUpperCase())"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
+      <el-form-item label="文件类型" prop="docType">
+        <el-select v-model="formData.docType" placeholder="请选择文件类型">
+          <el-option label="党务" :value="1" />
+          <el-option label="政务" :value="2" />
         </el-select>
       </el-form-item>
       <el-form-item label="发文审批内容" prop="sendDocNotion">
@@ -314,7 +313,10 @@
         <el-input v-model="formData.forceexchangepdf" placeholder="请输入是否强制交换pdf正文" />
       </el-form-item>
       <el-form-item label="是否上传了word套红正文" prop="isuploadwordformal">
-        <el-input v-model="formData.isuploadwordformal" placeholder="请输入是否上传了word套红正文" />
+        <el-input
+          v-model="formData.isuploadwordformal"
+          placeholder="请输入是否上传了word套红正文"
+        />
       </el-form-item>
       <el-form-item label="打字员" prop="typist">
         <el-input v-model="formData.typist" placeholder="请输入打字员" />
@@ -355,15 +357,11 @@
       <el-form-item label="发文单位" prop="sendUnitid">
         <el-input v-model="formData.sendUnitid" placeholder="请输入发文单位" />
       </el-form-item>
-      <el-form-item label="发送状态 0为拟发 1为已发 2为退回" prop="sendStatus">
+      <el-form-item label="发送状态" prop="sendStatus">
         <el-radio-group v-model="formData.sendStatus">
-          <el-radio
-            v-for="dict in getIntDictOptions(DICT_TYPE.$dictType.toUpperCase())"
-            :key="dict.value"
-            :label="dict.value"
-          >
-            {{ dict.label }}
-          </el-radio>
+          <el-radio :label="0">拟发</el-radio>
+          <el-radio :label="1">已发</el-radio>
+          <el-radio :label="2">退回</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="受理文号" prop="acceptNumber">
@@ -394,13 +392,19 @@
         />
       </el-form-item>
       <el-form-item label="是否属于规范性文件,是1，否2" prop="isNormativeDocument">
-        <el-input v-model="formData.isNormativeDocument" placeholder="请输入是否属于规范性文件,是1，否2" />
+        <el-input
+          v-model="formData.isNormativeDocument"
+          placeholder="请输入是否属于规范性文件,是1，否2"
+        />
       </el-form-item>
       <el-form-item label="是否重要" prop="ifimportant">
         <el-input v-model="formData.ifimportant" placeholder="请输入是否重要" />
       </el-form-item>
       <el-form-item label="办公室秘书落实意见" prop="secretaryimplementidea">
-        <el-input v-model="formData.secretaryimplementidea" placeholder="请输入办公室秘书落实意见" />
+        <el-input
+          v-model="formData.secretaryimplementidea"
+          placeholder="请输入办公室秘书落实意见"
+        />
       </el-form-item>
       <el-form-item label="办公室秘书" prop="secretaryimplementideaPerson">
         <el-input v-model="formData.secretaryimplementideaPerson" placeholder="请输入办公室秘书" />
@@ -417,17 +421,13 @@
         <el-input v-model="formData.miniknow" placeholder="请输入最小知悉范围" />
       </el-form-item>
       <el-form-item label="省厅便函选择类型结果" prop="selecttype">
-        <el-select v-model="formData.selecttype" placeholder="请选择省厅便函选择类型结果">
-          <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.$dictType.toUpperCase())"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
+        <el-input v-model="formData.selecttype" placeholder="请输入省厅便函选择类型结果" />
       </el-form-item>
       <el-form-item label="是否已归档,1已归档，否则未归档" prop="ifpigeonhold">
-        <el-input v-model="formData.ifpigeonhold" placeholder="请输入是否已归档,1已归档，否则未归档" />
+        <el-input
+          v-model="formData.ifpigeonhold"
+          placeholder="请输入是否已归档,1已归档，否则未归档"
+        />
       </el-form-item>
       <el-form-item label="归档号" prop="pigeonholeNum">
         <el-input v-model="formData.pigeonholeNum" placeholder="请输入归档号" />
@@ -574,8 +574,7 @@ const formData = ref({
   pigeonholeResult: undefined,
   processInstanceId: undefined
 })
-const formRules = reactive({
-})
+const formRules = reactive({})
 const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */

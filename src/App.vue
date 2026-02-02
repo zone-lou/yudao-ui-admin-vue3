@@ -18,7 +18,7 @@ const { wsCache } = useCache()
 const setDefaultTheme = () => {
   let isDarkTheme = wsCache.get(CACHE_KEY.IS_DARK)
   if (isDarkTheme === null) {
-    isDarkTheme = isDark()
+    isDarkTheme = false
   }
   appStore.setIsDark(isDarkTheme)
 }

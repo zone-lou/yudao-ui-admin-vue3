@@ -144,7 +144,7 @@ $prefix-cls: #{$namespace}-menu;
     // 设置选中时子标题的颜色
     .is-active {
       & > .#{$elNamespace}-sub-menu__title {
-        color: var(--left-menu-text-active-color) !important;
+        // color: var(--left-menu-text-active-color) !important;
       }
     }
 
@@ -152,8 +152,8 @@ $prefix-cls: #{$namespace}-menu;
     .#{$elNamespace}-sub-menu__title,
     .#{$elNamespace}-menu-item {
       &:hover {
-        color: var(--left-menu-text-active-color) !important;
-        background-color: #f0f0f0 !important;
+        color: var(--left-menu-text-color) !important;
+        background-color: var(--left-menu-bg-light-color) !important;
       }
     }
 
@@ -173,8 +173,7 @@ $prefix-cls: #{$namespace}-menu;
 
     // 设置子菜单的背景颜色
     .#{$elNamespace}-menu {
-      .#{$elNamespace}-sub-menu__title,
-      .#{$elNamespace}-menu-item:not(.is-active) {
+      .#{$elNamespace}-sub-menu__title {
         background-color: var(--left-menu-bg-light-color) !important;
       }
     }
@@ -305,7 +304,7 @@ $prefix-cls: #{$namespace}-menu-popper;
   .el-sub-menu__title,
   .el-menu-item {
     &:hover {
-      color: var(--left-menu-text-active-color) !important;
+      color: var(--left-menu-text-color) !important;
       // background-color: var(--left-menu-bg-color) !important;
     }
   }

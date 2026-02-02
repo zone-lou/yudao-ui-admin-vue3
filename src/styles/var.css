@@ -9,13 +9,14 @@
 
   --left-menu-bg-light-color: #0f2438;
 
-  --left-menu-bg-active-color: var(--el-color-primary);
+  /* --left-menu-bg-active-color: var(--el-color-primary); */
+  --left-menu-bg-active-color: rgba(0, 86, 255, 0.1);
   /* --left-menu-bg-active-color: #0056ff !important; */
   /* --el-color-primary: #0056ff !important; */
 
   --left-menu-text-color: #fff;
 
-  --left-menu-text-active-color: #fff;
+  --left-menu-text-active-color: #0056ff;
 
   --left-menu-collapse-bg-active-color: var(--el-color-primary);
   /* left menu end */
