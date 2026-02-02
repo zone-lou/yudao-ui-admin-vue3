@@ -8,7 +8,7 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="流程内码ID" prop="actinstId">
+      <!-- <el-form-item label="流程内码ID" prop="actinstId">
         <el-input
           v-model="queryParams.actinstId"
           placeholder="请输入流程内码ID"
@@ -16,8 +16,8 @@
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
-      </el-form-item>
-      <el-form-item label="人员编号" prop="userId">
+      </el-form-item> -->
+      <!-- <el-form-item label="人员编号" prop="userId">
         <el-input
           v-model="queryParams.userId"
           placeholder="请输入人员编号"
@@ -25,7 +25,7 @@
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="人员姓名" prop="userName">
         <el-input
           v-model="queryParams.userName"
@@ -81,7 +81,7 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="请假天数" prop="days">
+      <!-- <el-form-item label="请假天数" prop="days">
         <el-input
           v-model="queryParams.days"
           placeholder="请输入请假天数"
@@ -89,7 +89,7 @@
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="年份" prop="year">
         <el-input
           v-model="queryParams.year"
@@ -99,7 +99,7 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="创建时间" prop="createTime">
+      <!-- <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
           v-model="queryParams.createTime"
           value-format="YYYY-MM-DD HH:mm:ss"
@@ -109,7 +109,7 @@
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
           class="!w-220px"
         />
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -154,8 +154,8 @@
       @selection-change="handleRowCheckboxChange"
     >
       <el-table-column type="selection" width="55" />
-      <el-table-column label="主键" align="center" prop="id" />
-      <el-table-column label="人员编号" align="center" prop="userId" />
+      <!-- <el-table-column label="主键" align="center" prop="id" /> -->
+      <!-- <el-table-column label="人员编号" align="center" prop="userId" /> -->
       <el-table-column label="人员姓名" align="center" prop="userName" />
       <el-table-column
         label="登记时间"
@@ -193,6 +193,7 @@
       />
       <el-table-column label="操作" align="center" min-width="120px">
         <template #default="scope">
+          <el-button link type="primary" @click="handleDetail(scope.row)"> 详情 </el-button>
           <el-button
             link
             type="primary"
@@ -232,12 +233,14 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { TimeExplainApi, TimeExplain } from '@/api/bpm/timeexplain'
 import TimeExplainForm from './TimeExplainForm.vue'
+import { useRouter } from 'vue-router'
 
 /** 外出请假补假 列表 */
 defineOptions({ name: 'TimeExplain' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
+const router = useRouter()
 
 const loading = ref(true) // 列表的加载中
 const list = ref<TimeExplain[]>([]) // 列表的数据
@@ -319,6 +322,14 @@ const handleDeleteBatch = async () => {
 const checkedIds = ref<number[]>([])
 const handleRowCheckboxChange = (records: TimeExplain[]) => {
   checkedIds.value = records.map((item) => item.id!)
+}
+
+/** 详情跳转 */
+const handleDetail = (row: any) => {
+  router.push({
+    name: 'BpmProcessInstanceDetail',
+    query: { id: row.processInstanceId }
+  })
 }
 
 /** 导出按钮操作 */

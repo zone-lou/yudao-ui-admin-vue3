@@ -161,14 +161,9 @@
       <el-table-column label="申请用户" align="center" prop="nickName" />
       <el-table-column label="操作" align="center" min-width="120px">
         <template #default="scope">
+          <el-button link type="primary" @click="handleDetail(scope.row)"> 详情 </el-button>
           <el-button
-            type="primary"
-            @click="openForm('update', scope.row.id)"
-            v-hasPermi="['bpm:leave:update']"
-          >
-            详细
-          </el-button>
-          <el-button
+            link
             type="primary"
             @click="openForm('update', scope.row.id)"
             v-hasPermi="['bpm:leave:update']"
@@ -176,6 +171,7 @@
             编辑
           </el-button>
           <el-button
+            link
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['bpm:leave:delete']"
@@ -205,12 +201,14 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { leaveApi, leave } from '@/api/bpm/leave'
 import leaveForm from './leaveForm.vue'
+import { useRouter } from 'vue-router'
 
 /** 假期申请审批 列表 */
-defineOptions({ name: 'leave' })
+defineOptions({ name: 'Leave' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
+const router = useRouter()
 
 const loading = ref(true) // 列表的加载中
 const list = ref<leave[]>([]) // 列表的数据
@@ -302,6 +300,14 @@ const handleExport = async () => {
   } finally {
     exportLoading.value = false
   }
+}
+
+/** 详情跳转 */
+const handleDetail = (row: any) => {
+  router.push({
+    name: 'BpmProcessInstanceDetail',
+    query: { id: row.processInstanceId }
+  })
 }
 
 /** 激活时 **/

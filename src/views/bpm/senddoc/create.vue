@@ -31,7 +31,7 @@
                     v-for="dict in getStrDictOptions(DICT_TYPE.BPM_SENDDOC_SIGN)"
                     :key="dict.value"
                     :label="dict.label"
-                    :value="dict.value"
+                    :value="dict.label"
                   />
                 </el-select>
               </el-form-item>
@@ -244,43 +244,53 @@
             </el-radio-group>
           </el-form-item>
 
-          <h3 class="section-title" style="margin-top: 20px">流程处理</h3>
+          <template v-if="!formData.processInstanceId">
+            <h3 class="section-title" style="margin-top: 20px">流程处理</h3>
 
-          <el-form-item label="下一审批节点" prop="nextNode" required>
-            <el-select
-              v-model="formData.nextNode"
-              placeholder="请选择下一节点"
-              @change="nodeChange"
-              value-key="taskDefKey"
-              :empty-values="[null, undefined]"
-            >
-              <el-option
-                v-for="dict in nextNodeOptions"
-                :key="dict.taskDefKey"
-                :label="dict.taskName"
-                :value="dict"
-              />
-            </el-select>
-          </el-form-item>
+            <el-form-item label="下一审批节点" prop="nextNode" required>
+              <el-select
+                v-model="formData.nextNode"
+                placeholder="请选择下一节点"
+                @change="nodeChange"
+                value-key="taskDefKey"
+                :empty-values="[null, undefined]"
+              >
+                <el-option
+                  v-for="dict in nextNodeOptions"
+                  :key="dict.taskDefKey"
+                  :label="dict.taskName"
+                  :value="dict"
+                />
+              </el-select>
+            </el-form-item>
 
-          <el-form-item label="审批人" prop="tempNextUserSelectAssignees" required>
-            <el-select
-              v-model="formData.tempNextUserSelectAssignees"
-              placeholder="请选择审批人"
-              :multiple="multipleFlag"
-            >
-              <el-option
-                v-for="dict in selectUserOptions"
-                :key="dict.id"
-                :label="dict.nickname"
-                :value="dict.id"
-              />
-            </el-select>
-          </el-form-item>
+            <el-form-item label="审批人" prop="tempNextUserSelectAssignees" required>
+              <el-select
+                v-model="formData.tempNextUserSelectAssignees"
+                placeholder="请选择审批人"
+                :multiple="multipleFlag"
+              >
+                <el-option
+                  v-for="dict in selectUserOptions"
+                  :key="dict.id"
+                  :label="dict.nickname"
+                  :value="dict.id"
+                />
+              </el-select>
+            </el-form-item>
+          </template>
 
           <el-form-item style="margin-top: 30px">
-            <el-button :disabled="formLoading" type="primary" @click="submitForm">
+            <el-button
+              v-if="!formData.processInstanceId"
+              :disabled="formLoading"
+              type="primary"
+              @click="submitForm"
+            >
               提交申请
+            </el-button>
+            <el-button v-else :disabled="formLoading" type="primary" @click="submitForm">
+              保存修改
             </el-button>
           </el-form-item>
         </el-form>
@@ -338,7 +348,7 @@ const multipleFlag = ref(false)
 const formData = ref({
   id: undefined,
   subject: undefined, // 主题/标题
-  sendDocNumber: undefined, // 发文号
+  sendDocNumber: undefined, // 发文字号
   sendTime: undefined, // 发文日期
   docType: undefined, // 文件类型
   urgencyDegree: undefined, // 紧急程度
@@ -372,13 +382,21 @@ const formData = ref({
   tempNextUserSelectAssignees: undefined
 })
 
-const formRules = reactive({
+const formRules = computed(() => ({
   subject: [{ required: true, message: '公文标题不能为空', trigger: 'blur' }],
   docType: [{ required: true, message: '文件类型不能为空', trigger: 'change' }],
-  sendDocNumber: [{ required: true, message: '发文号不能为空', trigger: 'change' }],
-  nextNode: [{ required: true, message: '下一审批节点不能为空', trigger: 'change' }],
-  tempNextUserSelectAssignees: [{ required: true, message: '审批人不能为空', trigger: 'change' }]
-})
+  sendDocNumber: [{ required: true, message: '发文字号不能为空', trigger: 'change' }],
+  nextNode: [
+    {
+      required: !formData.value.processInstanceId,
+      message: '下一审批节点不能为空',
+      trigger: 'change'
+    }
+  ],
+  tempNextUserSelectAssignees: [
+    { required: !formData.value.processInstanceId, message: '审批人不能为空', trigger: 'change' }
+  ]
+}))
 
 // === 下一步节点与选人逻辑 ===
 const nodeChange = async (val: any) => {
@@ -506,6 +524,15 @@ onMounted(async () => {
     try {
       const detail = await SendDocApi.getSendDoc(Number(queryId))
       Object.assign(formData.value, detail)
+
+      // 修复：如果 sendDocNumber 是数字（历史旧数据），自动转换为字典标签
+      if (formData.value.sendDocNumber && /^\d+$/.test(String(formData.value.sendDocNumber))) {
+        const dicts = getStrDictOptions(DICT_TYPE.BPM_SENDDOC_SIGN)
+        const dict = dicts.find((d) => String(d.value) === String(formData.value.sendDocNumber))
+        if (dict) {
+          formData.value.sendDocNumber = dict.label
+        }
+      }
     } finally {
       formLoading.value = false
     }

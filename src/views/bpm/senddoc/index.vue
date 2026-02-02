@@ -8,10 +8,10 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="发文号" prop="sendDocNumber">
+      <el-form-item label="发文字号" prop="sendDocNumber">
         <el-input
           v-model="queryParams.sendDocNumber"
-          placeholder="请输入发文号"
+          placeholder="请输入发文字号"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
@@ -120,10 +120,10 @@
       @selection-change="handleRowCheckboxChange"
     >
       <el-table-column type="selection" width="55" />
-      <el-table-column label="发文号" align="center" prop="sendDocNumber" min-width="180">
+      <el-table-column label="发文字号" align="center" prop="sendDocNumber" min-width="180">
         <template #default="scope">
           <div class="flex items-center justify-center">
-            <span>{{ scope.row.sendDocNumber }}</span>
+            <span>{{ formatSendDocNumber(scope.row.sendDocNumber) }}</span>
             <el-tag
               v-if="!scope.row.processInstanceId"
               type="warning"
@@ -318,6 +318,20 @@ const handleExport = async () => {
   } finally {
     exportLoading.value = false
   }
+}
+
+const formatSendDocNumber = (val: any) => {
+  if (val === undefined || val === null || val === '') return val
+  const strVal = String(val)
+  // 如果是数字（历史字典键值），进行匹配转换
+  if (/^\d+$/.test(strVal)) {
+    const dicts = getStrDictOptions(DICT_TYPE.BPM_SENDDOC_SIGN)
+    const dict = dicts.find((d) => String(d.value) === strVal)
+    if (dict) {
+      return dict.label
+    }
+  }
+  return val
 }
 
 /** 初始化 **/

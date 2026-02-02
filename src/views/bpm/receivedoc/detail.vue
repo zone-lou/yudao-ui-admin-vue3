@@ -129,11 +129,12 @@ const getInfo = async () => {
 }
 
 const formatSendDocNumber = (val: any) => {
-  if (!val) return val
+  if (val === undefined || val === null || val === '') return val
+  const strVal = String(val)
   // 如果是数字（字典键值），则进行转换
-  if (/^\d+$/.test(val.toString())) {
+  if (/^\d+$/.test(strVal)) {
     const dicts = getStrDictOptions(DICT_TYPE.BPM_DOC_NUM_TYPE)
-    const dict = dicts.find((d) => d.value === val.toString())
+    const dict = dicts.find((d) => String(d.value) === strVal)
     if (dict) {
       const year = new Date().getFullYear()
       return `${dict.label}[${year}]号`

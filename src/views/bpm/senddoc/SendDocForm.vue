@@ -28,8 +28,8 @@
       <el-form-item label="抄送机关" prop="deliverSendDept">
         <el-input v-model="formData.deliverSendDept" placeholder="请输入抄送机关" />
       </el-form-item>
-      <el-form-item label="发文号" prop="sendDocNumber">
-        <el-input v-model="formData.sendDocNumber" placeholder="请输入发文号" />
+      <el-form-item label="发文字号" prop="sendDocNumber">
+        <el-input v-model="formData.sendDocNumber" placeholder="请输入发文字号" />
       </el-form-item>
       <el-form-item label="发文日期" prop="sendTime">
         <el-date-picker

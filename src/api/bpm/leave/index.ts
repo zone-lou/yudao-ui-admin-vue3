@@ -1,19 +1,20 @@
 import request from '@/config/axios'
-import type { Dayjs } from 'dayjs';
+import type { Dayjs } from 'dayjs'
 
 /** 假期申请审批信息 */
 export interface leave {
-          id: number; // 假期申请审批内码
-          applyDate: string | Dayjs; // 申请时间
-          qxjStartDate: string | Dayjs; // 开始时间(请假时间段中最小的时间)
-          qxjEndDate: string | Dayjs; // 结束时间(请假时间段中最大的时间)
-          qxjType: number; // 请（休）假种类
-          sjReason: string; // 事假理由
-          totalTs: number; // 共计天数
-          spzt: number; // 审批状态
-          userid: number; // 申请用户
-          filepath: string; // 文件地址
-  }
+  id: number // 假期申请审批内码
+  applyDate: string | Dayjs // 申请时间
+  qxjStartDate: string | Dayjs // 开始时间(请假时间段中最小的时间)
+  qxjEndDate: string | Dayjs // 结束时间(请假时间段中最大的时间)
+  qxjType: number // 请（休）假种类
+  sjReason: string // 事假理由
+  totalTs: number // 共计天数
+  spzt: number // 审批状态
+  userid: number // 申请用户
+  filepath: string // 文件地址
+  processInstanceId: string // 流程实例的编号
+}
 export interface LeaveSummaryVO {
   year?: number
   month?: number

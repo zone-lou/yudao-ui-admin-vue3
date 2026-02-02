@@ -4,8 +4,8 @@
       <el-descriptions-item label="公文标题" :span="2">
         {{ detailData.subject }}
       </el-descriptions-item>
-      <el-descriptions-item label="发文号">
-        {{ detailData.sendDocNumber }}
+      <el-descriptions-item label="发文字号">
+        {{ formatSendDocNumber(detailData.sendDocNumber) }}
       </el-descriptions-item>
       <el-descriptions-item label="发文日期">
         {{ formatDate(detailData.sendTime) }}
@@ -109,7 +109,7 @@
 import { dateUtil } from '@/utils/dateUtil'
 import { SendDocApi } from '@/api/bpm/senddoc'
 import { propTypes } from '@/utils/propTypes'
-import { DICT_TYPE } from '@/utils/dict'
+import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
 
 defineOptions({ name: 'BpmSendDocDetail' })
 
@@ -173,6 +173,20 @@ const handleDownload = (file: any) => {
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
+}
+
+const formatSendDocNumber = (val: any) => {
+  if (val === undefined || val === null || val === '') return val
+  const strVal = String(val)
+  // 如果是数字（历史字典键值），进行匹配转换
+  if (/^\d+$/.test(strVal)) {
+    const dicts = getStrDictOptions(DICT_TYPE.BPM_SENDDOC_SIGN)
+    const dict = dicts.find((d) => String(d.value) === strVal)
+    if (dict) {
+      return dict.label
+    }
+  }
+  return val
 }
 
 /** 格式化日期 */

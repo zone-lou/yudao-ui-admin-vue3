@@ -11,6 +11,7 @@ export interface TimeExplain {
   status: number // 审核状态（0审批中 1审核完毕 2删除）
   days: number // 请假天数
   filepath: string // 文件路径
+  processInstanceId: string // 流程实例的编号
 }
 
 // 外出请假补假 API
