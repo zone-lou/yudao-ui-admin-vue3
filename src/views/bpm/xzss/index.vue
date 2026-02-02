@@ -239,9 +239,13 @@
           </el-tabs>
         </template>
       </el-table-column>
-      <el-table-column label="主键" align="center" prop="id" />
-      <el-table-column label="来文号" align="center" prop="swWh" />
-      <el-table-column label="来文机关" align="center" prop="swJg" />
+      <!-- <el-table-column label="主键" align="center" prop="id" /> -->
+      <el-table-column label="来文号" align="center" prop="swWh" width="130px" />
+      <el-table-column label="来文机关" align="center" prop="swJg" width="150px">
+        <template #default="scope">
+          {{ formatDictOrStr(scope.row.swJg, DICT_TYPE.BPM_INCOMING_AUTHORITY_XZSS) }}
+        </template>
+      </el-table-column>
       <el-table-column
         label="收文日期"
         align="center"
@@ -249,16 +253,40 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="原告" align="center" prop="sqr" />
-      <el-table-column label="被告" align="center" prop="bsqr" />
-      <el-table-column label="第三人" align="center" prop="dsr" />
-      <el-table-column label="土地坐落" align="center" prop="tdZl" />
-      <el-table-column label="诉讼类型" align="center" prop="ssLx" />
-      <el-table-column label="类别一" align="center" prop="lb1" />
-      <el-table-column label="类别二" align="center" prop="lb2" />
-      <el-table-column label="类别三" align="center" prop="lb3" />
-      <el-table-column label="类别四" align="center" prop="lb4" />
-      <el-table-column label="类别五" align="center" prop="lb5" />
+      <el-table-column label="原告" align="center" prop="sqr" width="100px" />
+      <el-table-column label="被告" align="center" prop="bsqr" width="100px" />
+      <el-table-column label="第三人" align="center" prop="dsr" width="100px" />
+      <el-table-column label="土地坐落" align="center" prop="tdZl" width="100px" />
+      <el-table-column label="诉讼类型" align="center" prop="ssLx" width="100px">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.BPM_ADMINISTRATIVE_LITIGATION_STAGE" :value="scope.row.ssLx" />
+        </template>
+      </el-table-column>
+      <el-table-column label="案件类别" align="center" prop="lb1" width="100px">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.BPM_XZSS_CLASS1" :value="scope.row.lb1" />
+        </template>
+      </el-table-column>
+      <el-table-column label="案件分类" align="center" prop="lb2" width="100px">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.BPM_XZSS_CLASS2" :value="scope.row.lb2" />
+        </template>
+      </el-table-column>
+      <el-table-column label="涉及事项" align="center" prop="lb3" width="100px">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.BPM_XZSS_CLASS3" :value="scope.row.lb3" />
+        </template>
+      </el-table-column>
+      <el-table-column label="案件类型" align="center" prop="lb4" width="100px">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.BPM_XZSS_CLASS4" :value="scope.row.lb4" />
+        </template>
+      </el-table-column>
+      <el-table-column label="诉讼类别" align="center" prop="lb5" width="100px">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.BPM_XZSS_CLASS5" :value="scope.row.lb5" />
+        </template>
+      </el-table-column>
       <el-table-column label="复议请求" align="center" prop="ssNr" />
       <el-table-column label="承办人" align="center" prop="cbr" />
       <el-table-column
@@ -279,7 +307,11 @@
       <el-table-column label="被上诉人" align="center" prop="bssr" />
       <el-table-column label="再审申请人" align="center" prop="zssqr" />
       <el-table-column label="再审被申请人" align="center" prop="zsbsqr" />
-      <el-table-column label="监督监管" align="center" prop="issupervise" />
+      <el-table-column label="监督监管" align="center" prop="issupervise">
+        <template #default="scope">
+          {{ formatBoolean(scope.row.issupervise) }}
+        </template>
+      </el-table-column>
       <el-table-column
         label="办理时限"
         align="center"
@@ -288,7 +320,11 @@
         width="180px"
       />
       <el-table-column label="诉讼内容" align="center" prop="ssnr" />
-      <el-table-column label="是否已寄件提醒" align="center" prop="mailTip" />
+      <el-table-column label="是否已寄件提醒" align="center" prop="mailTip">
+        <template #default="scope">
+          {{ formatBoolean(scope.row.mailTip) }}
+        </template>
+      </el-table-column>
       <el-table-column label="流程实例的编号" align="center" prop="processInstanceId" />
       <el-table-column
         label="创建时间"
@@ -332,6 +368,7 @@
 </template>
 
 <script setup lang="ts">
+import { getIntDictOptions, getStrDictOptions, getDictOptions, DICT_TYPE } from '@/utils/dict'
 import { isEmpty } from '@/utils/is'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
@@ -449,6 +486,25 @@ const handleExport = async () => {
   } finally {
     exportLoading.value = false
   }
+}
+
+const formatDictOrStr = (val: any, dictType: string) => {
+  if (val === undefined || val === null || val === '') return val
+  const strVal = String(val)
+  // 尝试在字典中查找
+  const dicts = getDictOptions(dictType)
+  const dict = dicts.find((d) => String(d.value) === strVal)
+  if (dict) {
+    return dict.label
+  }
+  // 如果字典没找到，说明可能是手动输入的文本，或者本身就是文本
+  return val
+}
+
+const formatBoolean = (val: any) => {
+  if (val === 1) return '是'
+  if (val === 0) return '否'
+  return val
 }
 
 /** 初始化 **/

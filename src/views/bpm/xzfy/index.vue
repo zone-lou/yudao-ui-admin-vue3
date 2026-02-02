@@ -128,9 +128,13 @@
           </el-tabs>
         </template>
       </el-table-column>
-      <el-table-column label="主键" align="center" prop="id" />
-      <el-table-column label="来文号" align="center" prop="swWh" />
-      <el-table-column label="来文机关" align="center" prop="swJg" />
+      <!-- <el-table-column label="主键" align="center" prop="id" /> -->
+      <el-table-column label="来文号" align="center" prop="swWh" width="130px" />
+      <el-table-column label="来文机关" align="center" prop="swJg" width="150px">
+        <template #default="scope">
+          {{ formatDictOrStr(scope.row.swJg, DICT_TYPE.BPM_INCOMING_AUTHORITY) }}
+        </template>
+      </el-table-column>
       <el-table-column
         label="来文日期"
         align="center"
@@ -142,9 +146,21 @@
       <el-table-column label="被申请人" align="center" prop="bsqr" />
       <el-table-column label="第三人" align="center" prop="dsr" />
       <el-table-column label="土地坐落" align="center" prop="tdZl" />
-      <el-table-column label="类别一" align="center" prop="lb1" />
-      <el-table-column label="类别二" align="center" prop="lb2" />
-      <el-table-column label="类别三" align="center" prop="lb3" />
+      <el-table-column label="案件分类" align="center" prop="lb1" width="100px">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.BPM_XZFY_CLASS1" :value="scope.row.lb1" />
+        </template>
+      </el-table-column>
+      <el-table-column label="涉及事项" align="center" prop="lb2" width="100px">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.BPM_XZFY_CLASS2" :value="scope.row.lb2" />
+        </template>
+      </el-table-column>
+      <el-table-column label="案件类型" align="center" prop="lb3" width="100px">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.BPM_XZFY_CLASS3" :value="scope.row.lb3" />
+        </template>
+      </el-table-column>
       <el-table-column label="承办人" align="center" prop="cbr" />
       <el-table-column
         label="承办日期"
@@ -161,7 +177,11 @@
         width="180px"
       />
       <el-table-column label="行政区（街道、村）" align="center" prop="xzq" />
-      <el-table-column label="监督监管" align="center" prop="issupervise" />
+      <el-table-column label="监督监管" align="center" prop="issupervise">
+        <template #default="scope">
+          {{ formatBoolean(scope.row.issupervise) }}
+        </template>
+      </el-table-column>
       <el-table-column
         label="办理时限"
         align="center"
@@ -169,7 +189,11 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="是否已寄件提醒" align="center" prop="mailTip" />
+      <el-table-column label="是否已寄件提醒" align="center" prop="mailTip">
+        <template #default="scope">
+          {{ formatBoolean(scope.row.mailTip) }}
+        </template>
+      </el-table-column>
       <el-table-column label="流程实例的编号" align="center" prop="processInstanceId" />
       <el-table-column label="操作" align="center" min-width="120px">
         <template #default="scope">
@@ -206,6 +230,7 @@
 </template>
 
 <script setup lang="ts">
+import { getIntDictOptions, getStrDictOptions, getDictOptions, DICT_TYPE } from '@/utils/dict'
 import { isEmpty } from '@/utils/is'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
@@ -310,6 +335,25 @@ const handleExport = async () => {
   } finally {
     exportLoading.value = false
   }
+}
+
+const formatDictOrStr = (val: any, dictType: string) => {
+  if (val === undefined || val === null || val === '') return val
+  const strVal = String(val)
+  // 尝试在字典中查找
+  const dicts = getDictOptions(dictType)
+  const dict = dicts.find((d) => String(d.value) === strVal)
+  if (dict) {
+    return dict.label
+  }
+  // 如果字典没找到，说明可能是手动输入的文本，或者本身就是文本
+  return val
+}
+
+const formatBoolean = (val: any) => {
+  if (val === 1) return '是'
+  if (val === 0) return '否'
+  return val
 }
 
 /** 初始化 **/
