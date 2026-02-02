@@ -40,7 +40,7 @@
                     v-for="dict in getStrDictOptions(DICT_TYPE.BPM_DOC_NUM_TYPE)"
                     :key="dict.value"
                     :label="formatSendDocNumberLabel(dict.label)"
-                    :value="dict.value"
+                    :value="formatSendDocNumberLabel(dict.label)"
                   />
                 </el-select>
               </el-form-item>
@@ -190,10 +190,23 @@
           </el-form-item>
 
           <el-form-item>
-            <el-button :disabled="formLoading" type="primary" @click="handleSubmit">
+            <el-button
+              v-if="!formData.processInstanceId"
+              :disabled="formLoading"
+              type="primary"
+              @click="handleSubmit"
+            >
               发起流程
             </el-button>
-            <el-button :disabled="formLoading" type="success" @click="handleSave">
+            <el-button v-else :disabled="formLoading" type="primary" @click="handleSave">
+              保存修改
+            </el-button>
+            <el-button
+              v-if="!formData.processInstanceId"
+              :disabled="formLoading"
+              type="success"
+              @click="handleSave"
+            >
               保存草稿
             </el-button>
           </el-form-item>
@@ -339,7 +352,11 @@ const handleSave = async () => {
   formLoading.value = true
   try {
     const data = buildRequestData()
-    await ReceiveDocApi.saveReceiveDoc(data)
+    if (data.id) {
+      await ReceiveDocApi.updateReceiveDoc(data)
+    } else {
+      await ReceiveDocApi.saveReceiveDoc(data)
+    }
     message.success('保存成功')
     delView(unref(currentRoute))
     await push('/bpm/OAdoc/receive-doc')
@@ -495,6 +512,15 @@ onMounted(async () => {
     try {
       const detail = await ReceiveDocApi.getReceiveDoc(queryId)
       Object.assign(formData.value, detail)
+
+      // 修复：如果 sendDocNumber 是数字（历史旧数据或之前的错误），自动转换为格式化字符串
+      if (formData.value.sendDocNumber && /^\d+$/.test(formData.value.sendDocNumber)) {
+        const dicts = getStrDictOptions(DICT_TYPE.BPM_DOC_NUM_TYPE)
+        const dict = dicts.find((d) => d.value === formData.value.sendDocNumber)
+        if (dict) {
+          formData.value.sendDocNumber = formatSendDocNumberLabel(dict.label)
+        }
+      }
 
       if (typeof formData.value.sendDept === 'string' && formData.value.sendDept) {
         formData.value.sendDept = formData.value.sendDept.split(',')

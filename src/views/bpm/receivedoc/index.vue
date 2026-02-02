@@ -159,7 +159,11 @@
           <dict-tag :type="DICT_TYPE.BPM_AGENCY_NAME" :value="scope.row.sendDept" />
         </template>
       </el-table-column>
-      <el-table-column label="来文字号" align="center" prop="sendDocNumber" />
+      <el-table-column label="来文字号" align="center" prop="sendDocNumber">
+        <template #default="scope">
+          {{ formatSendDocNumber(scope.row.sendDocNumber) }}
+        </template>
+      </el-table-column>
       <el-table-column
         label="收文日期"
         align="center"
@@ -343,6 +347,25 @@ const handleExport = async () => {
     exportLoading.value = false
   }
 }
+
+const formatSendDocNumber = (val: string) => {
+  if (!val) return val
+  // 如果是数字（字典键值），则进行转换
+  if (/^\d+$/.test(val)) {
+    const dicts = getStrDictOptions(DICT_TYPE.BPM_DOC_NUM_TYPE)
+    const dict = dicts.find((d) => d.value === val)
+    if (dict) {
+      const year = new Date().getFullYear()
+      return `${dict.label}[${year}]号`
+    }
+  }
+  return val
+}
+
+/** 激活时 **/
+onActivated(() => {
+  getList()
+})
 
 /** 初始化 **/
 onMounted(() => {

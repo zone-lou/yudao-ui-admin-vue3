@@ -45,24 +45,24 @@
           />
         </el-select>
       </el-form-item>
-<!--      <el-form-item label="事假理由" prop="sjReason">-->
-<!--        <el-input-->
-<!--          v-model="queryParams.sjReason"-->
-<!--          placeholder="请输入事假理由"-->
-<!--          clearable-->
-<!--          @keyup.enter="handleQuery"-->
-<!--          class="!w-240px"-->
-<!--        />-->
-<!--      </el-form-item>-->
-<!--      <el-form-item label="共计天数" prop="totalTs">-->
-<!--        <el-input-->
-<!--          v-model="queryParams.totalTs"-->
-<!--          placeholder="请输入共计天数"-->
-<!--          clearable-->
-<!--          @keyup.enter="handleQuery"-->
-<!--          class="!w-240px"-->
-<!--        />-->
-<!--      </el-form-item>-->
+      <!--      <el-form-item label="事假理由" prop="sjReason">-->
+      <!--        <el-input-->
+      <!--          v-model="queryParams.sjReason"-->
+      <!--          placeholder="请输入事假理由"-->
+      <!--          clearable-->
+      <!--          @keyup.enter="handleQuery"-->
+      <!--          class="!w-240px"-->
+      <!--        />-->
+      <!--      </el-form-item>-->
+      <!--      <el-form-item label="共计天数" prop="totalTs">-->
+      <!--        <el-input-->
+      <!--          v-model="queryParams.totalTs"-->
+      <!--          placeholder="请输入共计天数"-->
+      <!--          clearable-->
+      <!--          @keyup.enter="handleQuery"-->
+      <!--          class="!w-240px"-->
+      <!--        />-->
+      <!--      </el-form-item>-->
       <el-form-item label="审批状态" prop="spzt">
         <el-input
           v-model="queryParams.spzt"
@@ -102,11 +102,11 @@
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
         <el-button
-            type="danger"
-            plain
-            :disabled="isEmpty(checkedIds)"
-            @click="handleDeleteBatch"
-            v-hasPermi="['bpm:leave:delete']"
+          type="danger"
+          plain
+          :disabled="isEmpty(checkedIds)"
+          @click="handleDeleteBatch"
+          v-hasPermi="['bpm:leave:delete']"
         >
           <Icon icon="ep:delete" class="mr-5px" /> 批量删除
         </el-button>
@@ -117,14 +117,14 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table
-        row-key="id"
-        v-loading="loading"
-        :data="list"
-        :stripe="true"
-        :show-overflow-tooltip="true"
-        @selection-change="handleRowCheckboxChange"
+      row-key="id"
+      v-loading="loading"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
+      @selection-change="handleRowCheckboxChange"
     >
-    <el-table-column type="selection" width="55" />
+      <el-table-column type="selection" width="55" />
       <el-table-column
         label="申请时间"
         align="center"
@@ -268,16 +268,16 @@ const handleDeleteBatch = async () => {
   try {
     // 删除的二次确认
     await message.delConfirm()
-    await leaveApi.deleteleaveList(checkedIds.value);
-    checkedIds.value = [];
+    await leaveApi.deleteleaveList(checkedIds.value)
+    checkedIds.value = []
     message.success(t('common.delSuccess'))
-    await getList();
+    await getList()
   } catch {}
 }
 
 const checkedIds = ref<number[]>([])
 const handleRowCheckboxChange = (records: leave[]) => {
-  checkedIds.value = records.map((item) => item.id!);
+  checkedIds.value = records.map((item) => item.id!)
 }
 
 /** 导出按钮操作 */
@@ -294,6 +294,11 @@ const handleExport = async () => {
     exportLoading.value = false
   }
 }
+
+/** 激活时 **/
+onActivated(() => {
+  getList()
+})
 
 /** 初始化 **/
 onMounted(() => {

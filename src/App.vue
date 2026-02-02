@@ -17,6 +17,9 @@ const { wsCache } = useCache()
 // 根据浏览器当前主题设置系统主题色
 const setDefaultTheme = () => {
   let isDarkTheme = wsCache.get(CACHE_KEY.IS_DARK)
+  if (appStore.getLayout === 'topSubMenu') {
+    isDarkTheme = false
+  }
   if (isDarkTheme === null) {
     isDarkTheme = false
   }

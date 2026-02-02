@@ -17,23 +17,13 @@ const layout = computed(() => appStore.getLayout)
   <div :class="prefixCls" class="flex flex-wrap space-x-14px">
     <div
       :class="[
-        `${prefixCls}__classic`,
+        `${prefixCls}__top-sub-menu`,
         'relative w-56px h-48px cursor-pointer bg-gray-300',
         {
-          'is-acitve': layout === 'classic'
+          'is-acitve': layout === 'topSubMenu'
         }
       ]"
-      @click="appStore.setLayout('classic')"
-    ></div>
-    <div
-      :class="[
-        `${prefixCls}__top-left`,
-        'relative w-56px h-48px cursor-pointer bg-gray-300',
-        {
-          'is-acitve': layout === 'topLeft'
-        }
-      ]"
-      @click="appStore.setLayout('topLeft')"
+      @click="appStore.setLayout('topSubMenu')"
     ></div>
     <div
       :class="[
@@ -44,28 +34,6 @@ const layout = computed(() => appStore.getLayout)
         }
       ]"
       @click="appStore.setLayout('top')"
-    ></div>
-    <div
-      :class="[
-        `${prefixCls}__cut-menu`,
-        'relative w-56px h-48px cursor-pointer bg-gray-300',
-        {
-          'is-acitve': layout === 'cutMenu'
-        }
-      ]"
-      @click="appStore.setLayout('cutMenu')"
-    >
-      <div class="absolute left-[10%] top-0 h-full w-[33%] bg-gray-200"></div>
-    </div>
-    <div
-      :class="[
-        `${prefixCls}__top-sub-menu`,
-        'relative w-56px h-48px cursor-pointer bg-gray-300',
-        {
-          'is-acitve': layout === 'topSubMenu'
-        }
-      ]"
-      @click="appStore.setLayout('topSubMenu')"
     ></div>
   </div>
 </template>

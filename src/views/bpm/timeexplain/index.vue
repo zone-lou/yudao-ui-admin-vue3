@@ -131,11 +131,11 @@
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
         <el-button
-            type="danger"
-            plain
-            :disabled="isEmpty(checkedIds)"
-            @click="handleDeleteBatch"
-            v-hasPermi="['bpm:time-explain:delete']"
+          type="danger"
+          plain
+          :disabled="isEmpty(checkedIds)"
+          @click="handleDeleteBatch"
+          v-hasPermi="['bpm:time-explain:delete']"
         >
           <Icon icon="ep:delete" class="mr-5px" /> 批量删除
         </el-button>
@@ -146,14 +146,14 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table
-        row-key="id"
-        v-loading="loading"
-        :data="list"
-        :stripe="true"
-        :show-overflow-tooltip="true"
-        @selection-change="handleRowCheckboxChange"
+      row-key="id"
+      v-loading="loading"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
+      @selection-change="handleRowCheckboxChange"
     >
-    <el-table-column type="selection" width="55" />
+      <el-table-column type="selection" width="55" />
       <el-table-column label="主键" align="center" prop="id" />
       <el-table-column label="人员编号" align="center" prop="userId" />
       <el-table-column label="人员姓名" align="center" prop="userName" />
@@ -309,16 +309,16 @@ const handleDeleteBatch = async () => {
   try {
     // 删除的二次确认
     await message.delConfirm()
-    await TimeExplainApi.deleteTimeExplainList(checkedIds.value);
-    checkedIds.value = [];
+    await TimeExplainApi.deleteTimeExplainList(checkedIds.value)
+    checkedIds.value = []
     message.success(t('common.delSuccess'))
-    await getList();
+    await getList()
   } catch {}
 }
 
 const checkedIds = ref<number[]>([])
 const handleRowCheckboxChange = (records: TimeExplain[]) => {
-  checkedIds.value = records.map((item) => item.id!);
+  checkedIds.value = records.map((item) => item.id!)
 }
 
 /** 导出按钮操作 */
@@ -335,6 +335,11 @@ const handleExport = async () => {
     exportLoading.value = false
   }
 }
+
+/** 激活时 **/
+onActivated(() => {
+  getList()
+})
 
 /** 初始化 **/
 onMounted(() => {

@@ -28,6 +28,7 @@ const themeChange = (val: boolean) => {
 
 <template>
   <ElSwitch
+    v-if="appStore.getLayout !== 'topSubMenu'"
     v-model="isDark"
     :active-color="blackColor"
     :active-icon="Sun"

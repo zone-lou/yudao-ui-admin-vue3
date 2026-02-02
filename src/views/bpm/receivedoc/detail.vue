@@ -10,7 +10,7 @@
       </el-descriptions-item>
 
       <el-descriptions-item label="来文字号" label-align="center" align="center">
-        <dict-tag :type="DICT_TYPE.BPM_DOC_NUM_TYPE" :value="detailData.sendDocNumber" />
+        {{ formatSendDocNumber(detailData.sendDocNumber) }}
       </el-descriptions-item>
 
       <el-descriptions-item label="单位类别" label-align="center" align="center">
@@ -72,7 +72,7 @@
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE } from '@/utils/dict'
+import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
 import { dateUtil } from '@/utils/dateUtil'
 import { ReceiveDocApi, ReceiveDoc } from '@/api/bpm/receivedoc'
 import { propTypes } from '@/utils/propTypes'
@@ -129,6 +129,20 @@ const getInfo = async () => {
   } finally {
     detailLoading.value = false
   }
+}
+
+const formatSendDocNumber = (val: any) => {
+  if (!val) return val
+  // 如果是数字（字典键值），则进行转换
+  if (/^\d+$/.test(val.toString())) {
+    const dicts = getStrDictOptions(DICT_TYPE.BPM_DOC_NUM_TYPE)
+    const dict = dicts.find((d) => d.value === val.toString())
+    if (dict) {
+      const year = new Date().getFullYear()
+      return `${dict.label}[${year}]号`
+    }
+  }
+  return val
 }
 
 /** 格式化日期 */

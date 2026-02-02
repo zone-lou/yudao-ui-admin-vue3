@@ -69,7 +69,10 @@ export const useAppStore = defineStore('app', {
       fixedMenu: wsCache.get('fixedMenu') || false, // 是否固定菜单
 
       layout: wsCache.get(CACHE_KEY.LAYOUT) || 'topSubMenu', // layout布局
-      isDark: wsCache.get(CACHE_KEY.IS_DARK) || false, // 是否是暗黑模式
+      isDark:
+        wsCache.get(CACHE_KEY.LAYOUT) === 'topSubMenu'
+          ? false
+          : wsCache.get(CACHE_KEY.IS_DARK) || false, // 是否是暗黑模式
       currentSize: wsCache.get('default') || 'default', // 组件尺寸
       theme: wsCache.get(CACHE_KEY.THEME) || {
         // 主题色
