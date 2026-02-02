@@ -66,15 +66,15 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="审核状态（0审批中 1审核完毕 2删除）" prop="status">
+      <el-form-item label="审核状态" prop="status">
         <el-select
           v-model="queryParams.status"
-          placeholder="请选择审核状态（0审批中 1审核完毕 2删除）"
+          placeholder="请选择审核状态"
           clearable
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_USER_SEX)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_TASK_STATUS)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -178,9 +178,9 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="审核状态（0审批中 1审核完毕 2删除）" align="center" prop="status">
+      <el-table-column label="审核状态" align="center" prop="status">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.SYSTEM_USER_SEX" :value="scope.row.status" />
+          <dict-tag :type="DICT_TYPE.BPM_TASK_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column label="请假天数" align="center" prop="days" />

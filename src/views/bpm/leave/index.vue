@@ -38,7 +38,7 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.LEAVE_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_LEAVE_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -148,17 +148,27 @@
       />
       <el-table-column label="请（休）假种类" align="center" prop="qxjType">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.LEAVE_TYPE" :value="scope.row.qxjType" />
+          <dict-tag :type="DICT_TYPE.BPM_LEAVE_TYPE" :value="scope.row.qxjType" />
         </template>
       </el-table-column>
       <el-table-column label="事假理由" align="center" prop="sjReason" />
       <el-table-column label="共计天数" align="center" prop="totalTs" />
-      <el-table-column label="审批状态" align="center" prop="spzt" />
-      <el-table-column label="申请用户" align="center" prop="userid" />
+      <el-table-column label="审批状态" align="center" prop="spzt">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.BPM_TASK_STATUS" :value="scope.row.spzt" />
+        </template>
+      </el-table-column>
+      <el-table-column label="申请用户" align="center" prop="nickName" />
       <el-table-column label="操作" align="center" min-width="120px">
         <template #default="scope">
           <el-button
-            link
+            type="primary"
+            @click="openForm('update', scope.row.id)"
+            v-hasPermi="['bpm:leave:update']"
+          >
+            详细
+          </el-button>
+          <el-button
             type="primary"
             @click="openForm('update', scope.row.id)"
             v-hasPermi="['bpm:leave:update']"
@@ -166,7 +176,6 @@
             编辑
           </el-button>
           <el-button
-            link
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['bpm:leave:delete']"

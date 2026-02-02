@@ -26,10 +26,7 @@
       </el-descriptions-item>
 
       <el-descriptions-item label="来文单位" label-align="center" align="center" :span="2">
-        <dict-tag
-          :type="DICT_TYPE.BPM_RECEICE_DOC_UNIT"
-          :value="formatCommaData(detailData.sendDept)"
-        />
+        <dict-tag :type="DICT_TYPE.BPM_AGENCY_NAME" :value="formatCommaData(detailData.sendDept)" />
       </el-descriptions-item>
 
       <el-descriptions-item label="主办办结时间" label-align="center" align="center">

@@ -34,10 +34,10 @@
       <el-form-item label="原因说明" prop="reason">
         <el-input v-model="formData.reason" placeholder="请输入原因说明" />
       </el-form-item>
-      <el-form-item label="审核状态（0审批中 1审核完毕 2删除）" prop="status">
-        <el-select v-model="formData.status" placeholder="请选择审核状态（0审批中 1审核完毕 2删除）">
+      <el-form-item label="审核状态" prop="status">
+        <el-select v-model="formData.status" placeholder="请选择审核状态">
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_USER_SEX)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_TASK_STATUS)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -81,8 +81,7 @@ const formData = ref({
   days: undefined,
   filepath: undefined
 })
-const formRules = reactive({
-})
+const formRules = reactive({})
 const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */

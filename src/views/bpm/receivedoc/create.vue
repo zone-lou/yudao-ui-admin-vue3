@@ -91,7 +91,7 @@
               <el-form-item label="来文单位" prop="sendDept">
                 <el-select v-model="formData.sendDept" placeholder="请选择来文单位" multiple>
                   <el-option
-                    v-for="dict in getStrDictOptions(DICT_TYPE.BPM_RECEICE_DOC_UNIT)"
+                    v-for="dict in getStrDictOptions(DICT_TYPE.BPM_AGENCY_NAME)"
                     :key="dict.value"
                     :label="dict.label"
                     :value="dict.value"
