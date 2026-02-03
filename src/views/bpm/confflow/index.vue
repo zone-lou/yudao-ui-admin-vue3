@@ -35,10 +35,10 @@
           class="!w-240px"
         />
       </el-form-item> -->
-      <el-form-item label="申请人部门" prop="deptName">
+      <el-form-item label="申请部门" prop="deptName">
         <el-input
           v-model="queryParams.deptName"
-          placeholder="请输入申请人部门"
+          placeholder="请输入申请部门"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
@@ -128,10 +128,15 @@
       @selection-change="handleRowCheckboxChange"
     >
       <el-table-column type="selection" width="55" />
-      <el-table-column label="申请人ID" align="center" prop="userId" />
-      <el-table-column label="申请人" align="center" prop="userName" />
-      <el-table-column label="申请人部门ID" align="center" prop="deptId" />
-      <el-table-column label="申请人部门" align="center" prop="deptName" />
+      <!--      <el-table-column label="申请人" align="center" prop="userName" />-->
+      <!--      <el-table-column label="申请人部门" align="center" prop="deptName" />-->
+
+      <el-table-column label="会议名称" align="center" prop="title" />
+      <el-table-column label="提议内容" align="center" prop="content" />
+      <el-table-column label="备注" align="center" prop="remark" />
+      <el-table-column label="会议地点" align="center" prop="venue" />
+      <el-table-column label="我局参会科室" align="center" prop="offerUnit" />
+      <el-table-column label="我局参会人员" align="center" prop="offerPerson" />
       <el-table-column
         label="申请日期"
         align="center"
@@ -146,19 +151,13 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="会议名称" align="center" prop="title" />
-      <el-table-column label="提议内容" align="center" prop="content" />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="会议地点" align="center" prop="venue" />
-      <el-table-column label="我局参会科室" align="center" prop="offerUnit" />
-      <el-table-column label="我局参会人员" align="center" prop="offerPerson" />
-      <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
-        :formatter="dateFormatter"
-        width="180px"
-      />
+      <!--      <el-table-column-->
+      <!--        label="创建时间"-->
+      <!--        align="center"-->
+      <!--        prop="createTime"-->
+      <!--        :formatter="dateFormatter"-->
+      <!--        width="180px"-->
+      <!--      />-->
       <el-table-column label="操作" align="center" min-width="120px">
         <template #default="scope">
           <el-button

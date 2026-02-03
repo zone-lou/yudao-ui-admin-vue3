@@ -11,6 +11,8 @@ interface UserVO {
   avatar: string
   nickname: string
   deptId: number
+  deptName: string
+  mobile: string
 }
 
 interface UserInfoVO {
@@ -30,7 +32,9 @@ export const useUserStore = defineStore('admin-user', {
       id: 0,
       avatar: '',
       nickname: '',
-      deptId: 0
+      deptId: 0,
+      mobile:'',
+      deptName:'',
     }
   }),
   getters: {

@@ -247,6 +247,17 @@ const remainingRouter: AppRouteRecordRaw[] = [
     }
   },
   {
+    path: '/meeting/monthly-sheet',
+    component: () => import('@/views/system/meeting//MonthlySheet.vue'),
+    name: 'MeetingMonthlySheet',
+    meta: {
+      title: '月度查询导出',
+      hidden: true, // 不在侧边栏显示
+      activeMenu: '/system/meeting/', // 激活父级菜单的高亮
+      // canTo: true, // 如果有鉴权拦截，可能需要配置
+    }
+  },
+  {
     path: '/bpm',
     component: Layout,
     name: 'bpm',
