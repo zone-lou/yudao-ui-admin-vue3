@@ -134,3 +134,7 @@ export const getProcessInstanceBpmnModelView = async (id: string) => {
 export const getProcessInstancePrintData = async (id: string) => {
   return await request.get({ url: '/bpm/process-instance/get-print-data?processInstanceId=' + id })
 }
+// 获得统一流程实例分页 (办件查询)
+export const getUnifiedProcessInstancePage = (params: any) => {
+  return request.get({ url: '/bpm/process-instance/unified-page', params })
+}
