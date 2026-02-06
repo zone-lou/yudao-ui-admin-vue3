@@ -10,6 +10,16 @@ export interface Staff {
           staffName: string; // 人员姓名
           smsCount: number; // 提醒次数
   }
+export interface DutyStaffRespVO {
+  id: number
+  dutyDate: string
+  staffType: string
+  userId: number
+  staffName: string
+  smsCount: number
+  deptName: string
+}
+
 
 // 值班 API
 export const StaffApi = {
@@ -51,6 +61,10 @@ export const StaffApi = {
   // 下载值班导入模板
   importDutyTemplate:()=>{
     return request.download({ url: '/system/duty/staff/get-import-template' })
+  },
+
+  getDutyStaffList: async (params: any)=>{
+    return await request.get({ url: `/system/duty/staff/list`, params })
   }
 
 }

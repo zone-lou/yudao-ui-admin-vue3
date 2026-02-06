@@ -79,3 +79,13 @@ export const updateUserStatus = (id: number, status: number) => {
 export const getSimpleUserList = (): Promise<UserVO[]> => {
   return request.get({ url: '/system/user/simple-list' })
 }
+
+
+export const getUserDeptIds = async (userId: number) => {
+  return await request.get({ url: '/system/user-dept/get-dept-ids', params: { userId } })
+}
+
+// 赋予用户关联部门
+export const assignUserDept = async (data: any) => {
+  return await request.put({ url: '/system/user-dept/assign-dept', data })
+}

@@ -185,6 +185,11 @@
                       >
                         <Icon icon="ep:circle-check" />分配角色
                       </el-dropdown-item>
+                      <el-dropdown-item
+                        command="handleDept"
+                      >
+                        <Icon icon="ep:circle-check" />关联部门
+                      </el-dropdown-item>
                     </el-dropdown-menu>
                   </template>
                 </el-dropdown>
@@ -208,6 +213,8 @@
   <UserImportForm ref="importFormRef" @success="getList" />
   <!-- 分配角色 -->
   <UserAssignRoleForm ref="assignRoleFormRef" @success="getList" />
+
+  <UserAssignDeptForm ref="assignDeptFormRef" />
 </template>
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
@@ -220,7 +227,7 @@ import UserForm from './UserForm.vue'
 import UserImportForm from './UserImportForm.vue'
 import UserAssignRoleForm from './UserAssignRoleForm.vue'
 import DeptTree from './DeptTree.vue'
-
+import UserAssignDeptForm from './UserAssignDeptForm.vue'
 defineOptions({ name: 'SystemUser' })
 
 const message = useMessage() // 消息弹窗
@@ -332,6 +339,9 @@ const handleCommand = (command: string, row: UserApi.UserVO) => {
     case 'handleRole':
       handleRole(row)
       break
+    case 'handleDept':
+      handleDept(row)
+      break
     default:
       break
   }
@@ -388,6 +398,10 @@ const handleResetPwd = async (row: UserApi.UserVO) => {
 const assignRoleFormRef = ref()
 const handleRole = (row: UserApi.UserVO) => {
   assignRoleFormRef.value.open(row)
+}
+const assignDeptFormRef = ref()
+const handleDept = (row: UserApi.UserVO) => {
+  assignDeptFormRef.value.open(row)
 }
 
 /** 初始化 */

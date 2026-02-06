@@ -45,6 +45,11 @@ export enum TaskStatusEnum {
   APPROVING = 7
 }
 
+export enum TraceTypeEnum {
+  PREV = 1, // 查前置 (来源)
+  NEXT = 2 // 查后置 (去向)
+}
+
 export const getTaskTodoPage = async (params: any) => {
   return await request.get({ url: '/bpm/task/todo-page', params })
 }
@@ -119,4 +124,17 @@ export const myTodoTask = async (processInstanceId: string) => {
 // 获取减签任务列表
 export const getChildrenTaskList = async (id: string) => {
   return await request.get({ url: '/bpm/task/list-by-parent-task-id?parentTaskId=' + id })
+}
+
+
+export const getTaskTrace = async (taskId: string, type: number, processInstanceId:string) => {
+  return await request.get({
+    // 注意：这里的路径要拼上你 Controller 类上的 @RequestMapping
+    // 假设是 /bpm/task，如果不确定，请去后端 Controller 顶部看一眼
+    url: '/bpm/task/trace/' + taskId,
+    params: {
+      type: type,
+      processInstanceId: processInstanceId
+    }
+  })
 }
