@@ -340,6 +340,9 @@ export function useNodeForm(nodeType: NodeType) {
     ) {
       showText = `手动选择`
     }
+    if (configForm.value?.candidateStrategy === CandidateStrategy.LEADER_DEPT) {
+      showText = `分管领导`
+    }
     // 流程表达式
     if (configForm.value?.candidateStrategy === CandidateStrategy.EXPRESSION) {
       showText = `流程表达式：${configForm.value.expression}`

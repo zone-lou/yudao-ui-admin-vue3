@@ -203,8 +203,11 @@ export enum CandidateStrategy {
   /**
    * 流程表达式
    */
-  EXPRESSION = 60
-
+  EXPRESSION = 60,
+  /**
+   * 分管领导
+   */
+  LEADER_DEPT = 56
 }
 
 // 多人审批方式类型枚举 （ 用于审批节点 ）
@@ -560,7 +563,8 @@ export const CANDIDATE_STRATEGY: DictDataVO[] = [
   { label: '表单内用户字段', value: CandidateStrategy.FORM_USER },
   { label: '表单内部门负责人', value: CandidateStrategy.FORM_DEPT_LEADER },
   { label: '手动选择', value: CandidateStrategy.MANUAL_SELECTED },
-  { label: '流程表达式', value: CandidateStrategy.EXPRESSION }
+  { label: '流程表达式', value: CandidateStrategy.EXPRESSION },
+  { label: '分管领导', value: CandidateStrategy.LEADER_DEPT}
 ]
 // 审批节点 的审批类型
 export const APPROVE_TYPE: DictDataVO[] = [

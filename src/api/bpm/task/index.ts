@@ -50,6 +50,12 @@ export enum TraceTypeEnum {
   NEXT = 2 // 查后置 (去向)
 }
 
+export interface TaskCountVO {
+  todoCount: number
+  doneCount: number
+  totalCount: number
+}
+
 export const getTaskTodoPage = async (params: any) => {
   return await request.get({ url: '/bpm/task/todo-page', params })
 }
@@ -137,4 +143,8 @@ export const getTaskTrace = async (taskId: string, type: number, processInstance
       processInstanceId: processInstanceId
     }
   })
+}
+
+export const getTaskCount = () => {
+  return request.get<TaskCountVO>({ url: '/bpm/task/get-count' })
 }

@@ -97,7 +97,18 @@
               </el-form-item>
             </el-col>
           </el-row>
-
+          <el-row>
+            <el-col :span="12">
+              <el-form-item label="出发地" prop="startPlace">
+                <el-input v-model="formData.startPlace" placeholder="请输入出发地" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="目的地" prop="endPlace">
+                <el-input v-model="formData.endPlace" placeholder="请输入目的地" />
+              </el-form-item>
+            </el-col>
+          </el-row>
           <el-form-item label="原因说明" prop="reason">
             <el-input
               v-model="formData.reason"
@@ -168,14 +179,18 @@ const formData = ref({
   filepath: undefined,
   status: 0,
   startPeriod: 1,
-  endPeriod: 2
+  endPeriod: 2,
+  startPlace: '义乌', // 默认义乌
+  endPlace: undefined // 目的地
 })
 
 const formRules = reactive({
   checkBegin: [{ required: true, message: '开始时间不能为空', trigger: 'blur' }],
   checkEnd: [{ required: true, message: '结束时间不能为空', trigger: 'blur' }],
   reason: [{ required: true, message: '原因说明不能为空', trigger: 'blur' }],
-  checkDate: [{ required: true, message: '登记时间不能为空', trigger: 'blur' }]
+  checkDate: [{ required: true, message: '登记时间不能为空', trigger: 'blur' }],
+  startPlace: [{ required: true, message: '出发地不能为空', trigger: 'blur' }],
+  endPlace: [{ required: true, message: '目的地不能为空', trigger: 'blur' }]
 })
 const formRef = ref()
 
