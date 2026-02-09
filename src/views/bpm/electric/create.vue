@@ -382,7 +382,7 @@ const getApprovalDetail = async () => {
 }
 
 const getNextApprovalNodes = async () => {
-  const data = await ProcessInstanceApi.getNextSelectNode({
+  const data = await ProcessInstanceApi.getNextSelectNodes({
     processDefinitionId: processDefinitionId.value,
     // TODO 小北：可以支持 processDefinitionKey 查询
     activityId: NodeId.START_USER_NODE_ID // 解决 GET 无法传递对象的问题，后端 String 再转 JSON

@@ -1,80 +1,153 @@
 <template>
-  <el-descriptions :column="2" border style="margin-right: 20px" size="large">
-    <el-descriptions-item label="申请人" label-align="center" align="center" width="150px">
-      {{ nickname }}
-    </el-descriptions-item>
-    <el-descriptions-item label="所在科室" label-align="center" align="center" width="150px">
-      {{ detailData.deptName }}
-    </el-descriptions-item>
-    <el-descriptions-item label="请假类型" label-align="center" align="center" width="150px">
-      <dict-tag :type="DICT_TYPE.BPM_LEAVE_TYPE" :value="detailData.qxjType" />
-    </el-descriptions-item>
-    <el-descriptions-item label="申请日期" label-align="center" align="center" width="150px">
-      {{ formatDate(detailData.applyDate) }}
-    </el-descriptions-item>
-    <el-descriptions-item label="请假开始从" label-align="center" align="center" width="150px">
-      {{ formatDate(detailData.qxjStartDate) }}
-    </el-descriptions-item>
-    <el-descriptions-item label="时段" label-align="center" align="center" width="150px">
-      {{ getPeriod(detailData.qxjStartDate) }}
-    </el-descriptions-item>
+  <div class="oa-container">
+    <div class="doc-title">义乌市自然资源和规划局请假审批单</div>
 
-    <el-descriptions-item label="请假结束至" label-align="center" align="center" width="150px">
-      {{ formatDate(detailData.qxjEndDate) }}
-    </el-descriptions-item>
+    <table class="oa-table">
+      <colgroup>
+        <col width="130px" />
+        <col width="35%" />
+        <col width="130px" />
+        <col />
+      </colgroup>
+      <tr>
+        <td class="label-cell">申请人</td>
+        <td class="input-cell">{{ startUser }}</td>
+        <td class="label-cell">所在科室</td>
+        <td class="input-cell">{{ deptName }}</td>
+      </tr>
 
-    <el-descriptions-item label="时段" label-align="center" align="center" width="150px">
-      {{ getPeriod(detailData.qxjEndDate) }}
-    </el-descriptions-item>
-    <el-descriptions-item label="请假天数" label-align="center" align="center" width="150px">
-      {{ detailData.totalTs }}
-    </el-descriptions-item>
-    <el-descriptions-item
-      label="请假事由"
-      label-align="center"
-      align="center"
-      width="150px"
-      :span="2"
-    >
-      {{ detailData.sjReason }}
-    </el-descriptions-item>
-  </el-descriptions>
+      <tr>
+        <td class="label-cell">请假类型</td>
+        <td class="input-cell">{{ leaveType }}</td>
+        <td class="label-cell">申请日期</td>
+        <td class="input-cell">{{ applyDate }}</td>
+      </tr>
 
-  <!--独立的文件列表区域 -->
-  <div v-if="fileList.length > 0" class="file-section">
-    <h3 class="file-section-title">
-      <el-icon name="Document" />
-      附件列表
-    </h3>
+      <tr>
+        <td class="label-cell">请假开始 从</td>
+        <td class="input-cell">{{ startTime }}</td>
+        <td class="label-cell">时段</td>
+        <td class="input-cell">{{ startSession }}</td>
+      </tr>
 
-    <el-table :data="fileList" border style="width: 100%">
-      <el-table-column prop="name" label="文件名称" width="700" show-overflow-tooltip>
-        <template #default="{ row }">
-          <el-link type="primary" @click="previewFile(row.path)" :underline="false">
-            {{ row.name }}
-          </el-link>
-        </template>
-      </el-table-column>
-      <el-table-column prop="size" label="文件大小" width="120">
-        <template #default="{ row }">
-          {{ formatFileSize(row.size) }}
-        </template>
-      </el-table-column>
-      <el-table-column prop="type" label="文件类型" width="120">
-        <template #default="{ row }">
-          <el-tag :type="getFileTagType(row.type)">
-            {{ row.type }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" width="100">
-        <template #default="{ row }">
-          <el-link type="primary" @click="downloadFile(row.path)" :underline="false">
-            下载
-          </el-link>
-        </template>
-      </el-table-column>
-    </el-table>
+      <tr>
+        <td class="label-cell">请假结束 至</td>
+        <td class="input-cell">{{ endTime }}</td>
+        <td class="label-cell">时段</td>
+        <td class="input-cell">{{ endSession }}</td>
+      </tr>
+
+      <tr>
+        <td class="label-cell">附件列表</td>
+        <td class="input-cell">
+          <div v-if="fileList.length > 0">
+            <div v-for="(file, index) in fileList" :key="index" style="margin-bottom: 2px">
+              <el-link type="primary" @click="previewFile(file)" :underline="false">
+                {{ file.name }}
+              </el-link>
+            </div>
+          </div>
+          <span v-else>无</span>
+        </td>
+        <td class="label-cell">请假天数</td>
+        <td class="input-cell">{{ leaveDays }} 天</td>
+      </tr>
+
+      <tr>
+        <td class="label-cell">请假事由</td>
+        <td
+          colspan="3"
+          class="input-cell h-reason"
+          style="padding: 10px; text-align: left; vertical-align: top"
+        >
+          {{ reason }}
+        </td>
+      </tr>
+
+      <tr>
+        <td class="label-cell" rowspan="2">科室(单位)负责人意见</td>
+        <td
+          colspan="3"
+          class="input-cell h-large"
+          style="padding: 10px; text-align: left; vertical-align: top"
+        >
+          {{ deptHeadContent }}
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3" class="signature-row">
+          <span class="sig-item"
+            >办理人：<span class="sig-line">{{ deptHeadHandler }}</span></span
+          >
+          <span class="sig-item"
+            >日期：<span class="sig-line">{{ deptHeadDate }}</span></span
+          >
+        </td>
+      </tr>
+
+      <tr>
+        <td class="label-cell" rowspan="2">办公室意见</td>
+        <td
+          colspan="3"
+          class="input-cell h-large"
+          style="padding: 10px; text-align: left; vertical-align: top"
+        >
+          {{ officeContent }}
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3" class="signature-row">
+          <span class="sig-item"
+            >办理人：<span class="sig-line">{{ officeHandler }}</span></span
+          >
+          <span class="sig-item"
+            >日期：<span class="sig-line">{{ officeDate }}</span></span
+          >
+        </td>
+      </tr>
+
+      <tr>
+        <td class="label-cell" rowspan="2">局分管领导意见</td>
+        <td
+          colspan="3"
+          class="input-cell h-large"
+          style="padding: 10px; text-align: left; vertical-align: top"
+        >
+          {{ deputyLeaderContent }}
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3" class="signature-row">
+          <span class="sig-item"
+            >办理人：<span class="sig-line">{{ deputyLeaderHandler }}</span></span
+          >
+          <span class="sig-item"
+            >日期：<span class="sig-line">{{ deputyLeaderDate }}</span></span
+          >
+        </td>
+      </tr>
+
+      <tr>
+        <td class="label-cell" rowspan="2">局主要领导意见</td>
+        <td
+          colspan="3"
+          class="input-cell h-large"
+          style="padding: 10px; text-align: left; vertical-align: top"
+        >
+          {{ mainLeaderContent }}
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3" class="signature-row">
+          <span class="sig-item"
+            >办理人：<span class="sig-line">{{ mainLeaderHandler }}</span></span
+          >
+          <span class="sig-item"
+            >日期：<span class="sig-line">{{ mainLeaderDate }}</span></span
+          >
+        </td>
+      </tr>
+    </table>
   </div>
 
   <!-- 文件预览对话框 -->
@@ -84,6 +157,7 @@
     width="80%"
     top="5vh"
     destroy-on-close
+    append-to-body
   >
     <div class="preview-container">
       <iframe
@@ -93,31 +167,68 @@
         frameborder="0"
       ></iframe>
       <div v-else class="preview-loading">
-        <el-icon name="Loading" class="is-loading" />
+        <el-icon class="is-loading"><Loading /></el-icon>
         <span>正在加载文件预览...</span>
       </div>
     </div>
   </el-dialog>
 </template>
+
 <script setup lang="ts">
-import { DICT_TYPE } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { dateUtil } from '@/utils/dateUtil'
 import { formatDate } from '@/utils/formatTime'
 import { propTypes } from '@/utils/propTypes'
 import * as LeaveApi from '@/api/bpm/leave'
 import { useUserStore } from '@/store/modules/user'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 
 defineOptions({ name: 'LeaveDetail' })
 const userStore = useUserStore()
-const nickname = computed(() => userStore.user.nickname)
 const deptName = ref('')
+
+// Template data fields
+const startUser = computed(() => detailData.value.nickname || userStore.user.nickname)
+const leaveType = computed(() => {
+  if (!detailData.value.qxjType) return ''
+  const dict = getIntDictOptions(DICT_TYPE.BPM_LEAVE_TYPE).find(
+    (d) => d.value === detailData.value.qxjType
+  )
+  return dict ? dict.label : detailData.value.qxjType
+})
+const applyDate = computed(() => formatDate(detailData.value.applyDate))
+const startTime = computed(() => formatDate(detailData.value.qxjStartDate))
+const startSession = computed(() => getPeriod(detailData.value.qxjStartDate))
+const endTime = computed(() => formatDate(detailData.value.qxjEndDate))
+const endSession = computed(() => getPeriod(detailData.value.qxjEndDate))
+const leaveDays = computed(() => detailData.value.totalTs)
+const reason = computed(() => detailData.value.sjReason)
+const fileNames = computed(() => fileList.value.map((f) => f.name).join('、'))
+
+// Historical Opinions
+const deptHeadContent = ref('')
+const deptHeadHandler = ref('')
+const deptHeadDate = ref('')
+
+const officeContent = ref('')
+const officeHandler = ref('')
+const officeDate = ref('')
+
+const deputyLeaderContent = ref('')
+const deputyLeaderHandler = ref('')
+const deputyLeaderDate = ref('')
+
+const mainLeaderContent = ref('')
+const mainLeaderHandler = ref('')
+const mainLeaderDate = ref('')
 
 const { query } = useRoute() // 查询参数
 
 const props = defineProps({
-  id: propTypes.number.def(undefined)
+  id: propTypes.number.def(undefined),
+  activityNodes: propTypes.array.def([])
 })
 
 const detailLoading = ref(false) // 表单的加载中
@@ -312,10 +423,55 @@ const getInfo = async () => {
   try {
     detailData.value = await LeaveApi.leaveApi.getleave(props.id || queryId)
     console.log(detailData)
+    processActivityNodes()
   } finally {
     detailLoading.value = false
   }
 }
+
+/** 分类处理审批节点意见 */
+const processActivityNodes = () => {
+  if (!props.activityNodes || props.activityNodes.length === 0) return
+
+  props.activityNodes.forEach((node: any) => {
+    if (node.tasks && node.tasks.length > 0) {
+      node.tasks.forEach((task: any) => {
+        if (task.reason) {
+          const name = node.name || ''
+          const info = {
+            comment: task.reason,
+            assigneeUser: task.assigneeUser,
+            endTime: node.endTime || task.endTime
+          }
+          const setOpinion = (contentRef, handlerRef, dateRef) => {
+            contentRef.value = info.comment
+            handlerRef.value = info.assigneeUser?.nickname
+            dateRef.value = formatDate(info.endTime)
+          }
+
+          if (name.includes('科室负责人') || name.includes('单位负责人')) {
+            setOpinion(deptHeadContent, deptHeadHandler, deptHeadDate)
+          } else if (name.includes('办公室')) {
+            setOpinion(officeContent, officeHandler, officeDate)
+          } else if (name.includes('分管领导')) {
+            setOpinion(deputyLeaderContent, deputyLeaderHandler, deputyLeaderDate)
+          } else if (name.includes('主要领导')) {
+            setOpinion(mainLeaderContent, mainLeaderHandler, mainLeaderDate)
+          }
+        }
+      })
+    }
+  })
+}
+
+// 监听 activityNodes 变化
+watch(
+  () => props.activityNodes,
+  () => {
+    processActivityNodes()
+  },
+  { immediate: true }
+)
 defineExpose({ open: getInfo }) // 提供 open 方法，用于打开弹窗
 
 // 新增：根据时间戳判断上午/下午
@@ -337,7 +493,7 @@ onMounted(() => {
   deptName.value = res
 })
 </script>
-<style scoped lang="scss">
+<style scoped>
 @keyframes rotating {
   from {
     transform: rotate(0deg);
@@ -348,56 +504,118 @@ onMounted(() => {
   }
 }
 
-.file-section {
-  padding: 15px;
-  margin-top: 20px;
-  border-radius: 4px;
+.oa-container {
+  width: 100%;
+  max-width: 900px;
+  padding: 20px;
+  margin: 0 auto;
+  font-family: SimSun, 'Songti SC', serif;
+  background-color: #fff;
+}
 
-  .file-section-title {
-    display: flex;
-    margin-bottom: 15px;
-    font-size: 16px;
-    font-weight: bold;
-    color: white;
-    align-items: center;
-  }
+.doc-title {
+  margin-bottom: 25px;
+  font-size: 26px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: #b1351e;
+  text-align: center;
+}
+
+.oa-table {
+  width: 100%;
+  font-size: 14px;
+  border: 1px solid #8cb4e0;
+  border-collapse: collapse;
+}
+
+.oa-table td {
+  padding: 6px 10px;
+  line-height: 1.4;
+  color: #333;
+  vertical-align: middle;
+  border: 1px solid #8cb4e0;
+}
+
+.label-cell {
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  white-space: nowrap;
+  background-color: #dbe9f8;
+}
+
+.input-cell {
+  min-height: 24px;
+  background-color: #fff;
+}
+
+.h-large {
+  height: 100px;
+}
+
+.h-reason {
+  height: 120px;
+}
+
+.signature-row {
+  padding: 5px 20px;
+  color: #555;
+  text-align: right;
+  background-color: #fff;
+}
+
+.sig-item {
+  display: inline-block;
+  margin-left: 30px;
+}
+
+.sig-line {
+  display: inline-block;
+  min-width: 80px;
+  padding-left: 5px;
+  text-align: left;
+
+  /* 下面这行改为 none，去除下划线 */
+  border-bottom: none;
 }
 
 .preview-container {
+  display: flex;
   height: 600px;
   overflow: hidden;
   border: 1px solid #ebeef5;
   border-radius: 4px;
-
-  .preview-iframe {
-    width: 100%;
-    height: 100%;
-  }
-
-  .preview-loading {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    color: #606266;
-
-    .el-icon {
-      margin-bottom: 10px;
-      font-size: 24px;
-      animation: rotating 2s linear infinite;
-    }
-  }
+  flex-direction: column;
 }
-// 添加PDF预览的特殊样式
-:deep(.preview-iframe) {
-  // 确保PDF能正确显示
-  &::after {
-    position: absolute;
-    inset: 0;
-    display: block;
-    background: var(--el-bg-color) no-repeat center/contain;
-    content: '';
-  }
+
+.preview-iframe {
+  width: 100%;
+  height: 100%;
+  flex: 1;
+}
+
+.preview-loading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: #606266;
+}
+
+.preview-loading .el-icon {
+  margin-bottom: 10px;
+  font-size: 24px;
+  animation: rotating 2s linear infinite;
+}
+
+/* PDF preview fix */
+:deep(.preview-iframe)::after {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: var(--el-bg-color) no-repeat center/contain;
+  content: '';
 }
 </style>

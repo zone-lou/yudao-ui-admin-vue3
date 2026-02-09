@@ -1,28 +1,49 @@
 <template>
-  <ContentWrap :bodyStyle="{ padding: '10px 20px 0' }" class="position-relative">
+  <ContentWrap :bodyStyle="{ padding: '10px 20px 0' }" class="position-relative !mb-0px">
     <div class="processInstance-wrap-main">
       <el-scrollbar>
         <img
-          class="position-absolute right-20px"
-          width="150"
+          class="position-absolute right-20px z-3"
+          width="120"
           :src="auditIconsMap[processInstance.status]"
           alt=""
         />
-        <div class="flex">
-          <div class="text-#878c93 h-15px">编号：{{ id }}</div>
-          <Icon icon="ep:printer" class="ml-15px cursor-pointer" @click="handlePrint" />
-        </div>
-        <el-divider class="!my-8px" />
-        <div class="flex items-center gap-5 mb-10px h-40px">
+        <div class="flex items-center items-center">
+          <div class="text-26px font-bold mb-5px mr-10px">{{ processInstance.name }}</div>
+          <div class="flex items-center gap-5 mr-10px text-13px h-35px">
+            <div
+              class="bg-gray-100 h-35px rounded-3xl flex items-center p-8px gap-2 dark:color-gray-600"
+            >
+              <el-avatar
+                :size="28"
+                v-if="processInstance?.startUser?.avatar"
+                :src="processInstance?.startUser?.avatar"
+              />
+              <el-avatar :size="28" v-else-if="processInstance?.startUser?.nickname">
+                {{ processInstance?.startUser?.nickname.substring(0, 1) }}
+              </el-avatar>
+              {{ processInstance?.startUser?.nickname }}
+            </div>
+            <div class="text-#878c93"> {{ formatDate(processInstance.startTime) }} 提交 </div>
+          </div>
+          <!-- <div class="text-#878c93 h-15px">编号：{{ id }}</div> -->
+          <dict-tag
+            v-if="processInstance.status"
+            :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS"
+            :value="processInstance.status" />
+          <Icon icon="ep:printer" class="ml-15px cursor-pointer" @click="handlePrint"
+        /></div>
+        <!-- <el-divider class="!my-8px" /> -->
+        <!-- <div class="flex items-center gap-5 mb-10px h-40px">
           <div class="text-26px font-bold mb-5px">{{ processInstance.name }}</div>
           <dict-tag
             v-if="processInstance.status"
             :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS"
             :value="processInstance.status"
           />
-        </div>
+        </div> -->
 
-        <div class="flex items-center gap-5 mb-10px text-13px h-35px">
+        <!-- <div class="flex items-center gap-5 mb-10px text-13px h-35px">
           <div
             class="bg-gray-100 h-35px rounded-3xl flex items-center p-8px gap-2 dark:color-gray-600"
           >
@@ -37,7 +58,7 @@
             {{ processInstance?.startUser?.nickname }}
           </div>
           <div class="text-#878c93"> {{ formatDate(processInstance.startTime) }} 提交 </div>
-        </div>
+        </div> -->
 
         <el-tabs v-model="activeTab">
           <!-- 表单信息 -->
@@ -45,7 +66,7 @@
             <div class="form-scroll-area">
               <el-scrollbar>
                 <el-row>
-                  <el-col :span="17" class="!flex !flex-col formCol">
+                  <el-col :span="isFullWidth ? 24 : 17" class="!flex !flex-col formCol">
                     <!-- 表单信息 -->
                     <div
                       v-loading="processInstanceLoading"
@@ -62,11 +83,17 @@
                       </el-col>
                       <!-- 情况二：业务表单 -->
                       <div v-if="processDefinition?.formType === BpmModelFormType.CUSTOM">
-                        <BusinessFormComponent :id="processInstance.businessKey" />
+                        <BusinessFormComponent
+                          :id="processInstance.businessKey"
+                          :taskId="taskId"
+                          :currentNode="currentNode"
+                          :activityNodes="activityNodes"
+                          ref="businessFormComponentRef"
+                        />
                       </div>
                     </div>
                   </el-col>
-                  <el-col :span="7">
+                  <el-col :span="7" v-if="!isFullWidth">
                     <!-- 审批记录时间线 -->
                     <ProcessInstanceTimeline :activity-nodes="activityNodes" />
                   </el-col>
@@ -124,6 +151,7 @@
             :normal-form="detailForm"
             :normal-form-api="fApi"
             :writable-fields="writableFields"
+            :get-business-form-reason="getBusinessFormReason"
             @success="refresh"
           />
         </div>
@@ -166,6 +194,7 @@ const message = useMessage() // 消息弹窗
 const processInstanceLoading = ref(false) // 流程实例的加载中
 const processInstance = ref<any>({}) // 流程实例
 const processDefinition = ref<any>({}) // 流程定义
+const isFullWidth = ref(false) // 是否全宽显示（隐藏右侧流程条）
 const processModelView = ref<any>({}) // 流程模型视图
 const operationButtonRef = ref() // 操作按钮组件 ref
 const auditIconsMap = {
@@ -195,6 +224,7 @@ const getDetail = () => {
 
 /** 加载流程实例 */
 const BusinessFormComponent = ref<any>(null) // 异步组件
+const businessFormComponentRef = ref<any>(null) // 业务表单组件实例
 /** 获取审批详情 */
 const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])
 
@@ -203,7 +233,7 @@ const nextNodes = ref<ProcessInstanceApi.NextNode[]>([])
 const currentNode = ref<ProcessInstanceApi.ApprovalNodeInfo>() // 审批节点信息
 
 const getNextApprovalNodes = async () => {
-  const data = await ProcessInstanceApi.getNextSelectNode({
+  const data = await ProcessInstanceApi.getNextSelectNodes({
     processInstanceId: props.id,
     // TODO 小北：可以支持 processDefinitionKey 查询
     activityId: props.activityId,
@@ -233,6 +263,10 @@ const getApprovalDetail = async () => {
     }
     processInstance.value = data.processInstance
     processDefinition.value = data.processDefinition
+
+    // Check if it's ReceiveDoc to trigger full width mode
+    const path = processDefinition.value.formCustomViewPath || ''
+    isFullWidth.value = path.includes('bpm/receivedoc/detail')
 
     // 设置表单信息
     if (processDefinition.value.formType === BpmModelFormType.NORMAL) {
@@ -323,6 +357,8 @@ const setFieldPermission = (field: string, permission: string) => {
 
 /** 操作成功后刷新 */
 const refresh = () => {
+  // 通知业务表单提交成功
+  businessFormComponentRef.value?.processInstanceSuccess?.()
   // 重新获取详情
   getDetail()
 }
@@ -336,12 +372,38 @@ const handlePrint = async () => {
 /** 当前的 Tab */
 const activeTab = ref('form')
 
+/** 获取业务表单的审批意见 */
+const getBusinessFormReason = computed(() => {
+  if (businessFormComponentRef.value?.getOpinion) {
+    return async () => businessFormComponentRef.value.getOpinion()
+  }
+  return undefined
+})
+
 /** 初始化 */
 const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 onMounted(async () => {
   getDetail()
   // 获得用户列表
   userOptions.value = await UserApi.getSimpleUserList()
+
+  // 临时覆写全局内容内边距 (hack)
+  const style = document.createElement('style')
+  style.id = 'temp-padding-override'
+  style.innerHTML = `
+    :root {
+      --app-content-padding: 5px !important;
+
+    }
+  `
+  document.head.appendChild(style)
+})
+
+onUnmounted(() => {
+  const style = document.getElementById('temp-padding-override')
+  if (style) {
+    style.remove()
+  }
 })
 </script>
 
@@ -349,25 +411,25 @@ onMounted(async () => {
 $wrap-padding-height: 20px;
 $wrap-margin-height: 15px;
 $button-height: 51px;
-$process-header-height: 194px;
+$process-header-height: 73px;
 
 .processInstance-wrap-main {
   height: calc(
-    100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 35px
+    100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) + 25px
   );
   max-height: calc(
-    100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 35px
+    100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) + 25px
   );
   overflow: auto;
 
   .form-scroll-area {
     display: flex;
     height: calc(
-      100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 35px -
+      100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 10px -
         $process-header-height - 40px
     );
     max-height: calc(
-      100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 35px -
+      100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 10px -
         $process-header-height - 40px
     );
     overflow: auto;

@@ -26,13 +26,13 @@
         {{ formatDate(detailData.zhubandate) }}
       </el-descriptions-item>
 
-      <el-descriptions-item label="类别一" label-align="center" align="center">
+      <el-descriptions-item label="案件分类" label-align="center" align="center">
         <dict-tag :type="DICT_TYPE.BPM_XZFY_CLASS1" :value="detailData.lb1" />
       </el-descriptions-item>
-      <el-descriptions-item label="类别二" label-align="center" align="center">
+      <el-descriptions-item label="涉及事项" label-align="center" align="center">
         <dict-tag :type="DICT_TYPE.BPM_XZFY_CLASS2" :value="detailData.lb2" />
       </el-descriptions-item>
-      <el-descriptions-item label="类别三" label-align="center" align="center">
+      <el-descriptions-item label="案件类型" label-align="center" align="center">
         <dict-tag :type="DICT_TYPE.BPM_XZFY_CLASS3" :value="detailData.lb3" />
       </el-descriptions-item>
 

@@ -2,137 +2,29 @@
   <div
     class="h-50px bottom-10 text-14px flex items-center color-#32373c dark:color-#fff font-bold btn-container"
   >
-    <!-- 【通过】按钮 -->
-    <el-popover
-      :visible="popOverVisible.approve"
-      placement="top-end"
-      :width="420"
-      trigger="click"
-      v-if="runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.APPROVE)"
+    <!-- 【保存草稿】按钮 -->
+    <el-button
+      v-if="runningTask && isHandleTaskStatus() && getBusinessFormReason"
+      plain
+      type="warning"
+      class="mr-10px"
+      @click="handleSaveDraft"
     >
-      <template #reference>
-        <el-button plain type="success" @click="openPopover('approve')">
-          <Icon icon="ep:select" />&nbsp; {{ getButtonDisplayName(OperationButtonType.APPROVE) }}
-        </el-button>
-      </template>
-      <!-- 审批表单 -->
-      <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
-        <el-form
-          label-position="top"
-          class="mb-auto"
-          ref="approveFormRef"
-          :model="approveReasonForm"
-          :rules="approveReasonRule"
-          label-width="100px"
-        >
-          <el-card v-if="runningTask?.formId > 0" class="mb-15px !-mt-10px">
-            <template #header>
-              <span class="el-icon-picture-outline"> 填写表单【{{ runningTask?.formName }}】 </span>
-            </template>
-            <form-create
-              v-model="approveForm.value"
-              v-model:api="approveFormFApi"
-              :option="approveForm.option"
-              :rule="approveForm.rule"
-            />
-          </el-card>
-          <el-form-item :label="`${nodeTypeName}意见`" prop="reason" required>
-            <el-input
-              v-model="approveReasonForm.reason"
-              :placeholder="`请输入${nodeTypeName}意见`"
-              type="textarea"
-              :rows="4"
-            />
-          </el-form-item>
-          <el-form-item
-            label="下一节点"
-            v-if="currentNode.candidateStrategy === CandidateStrategy.MANUAL_SELECTED"
-            required
-          >
-            <el-select
-              v-model="selectNode"
-              placeholder="请选择下一节点"
-              @change="nodeChange"
-              value-key="conditionExpression"
-              :empty-values="[null, undefined]"
-            >
-              <el-option
-                v-for="dict in nextNodes"
-                :key="dict.conditionExpression"
-                :label="dict.taskName"
-                :value="dict"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item
-            label="下一节点审批人"
-            v-if="
-              currentNode.candidateStrategy === CandidateStrategy.MANUAL_SELECTED &&
-              selectNode?.taskDefKey !== 'end'
-            "
-            required
-          >
-            <el-select
-              v-model="tempNextUserSelectAssignees"
-              placeholder="请选择审批人"
-              :multiple="multipleFlag"
-            >
-              <el-option
-                v-for="dict in selectUserOptions"
-                :key="dict.id"
-                :label="dict.nickname"
-                :value="dict.id"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item
-            label="下一个节点的审批人"
-            prop="nextAssignees"
-            v-if="
-              nextAssigneesActivityNode.length > 0 &&
-              currentNode.candidateStrategy !== CandidateStrategy.MANUAL_SELECTED
-            "
-          >
-            <div class="ml-10px -mt-15px -mb-35px">
-              <ProcessInstanceTimeline
-                ref="nextAssigneesTimelineRef"
-                :activity-nodes="nextAssigneesActivityNode"
-                :show-status-icon="false"
-                :enable-approve-user-select="true"
-                @select-user-confirm="selectNextAssigneesConfirm"
-              />
-            </div>
-          </el-form-item>
-          <el-form-item
-            v-if="runningTask.signEnable"
-            label="签名"
-            prop="signPicUrl"
-            ref="approveSignFormRef"
-          >
-            <el-button @click="signRef.open()">点击签名</el-button>
-            <el-image
-              class="w-90px h-40px ml-5px"
-              v-if="approveReasonForm.signPicUrl"
-              :src="approveReasonForm.signPicUrl"
-              :preview-src-list="[approveReasonForm.signPicUrl]"
-            />
-          </el-form-item>
-          <el-form-item>
-            <el-button
-              :disabled="formLoading"
-              type="success"
-              @click="handleAudit(true, approveFormRef)"
-            >
-              {{ getButtonDisplayName(OperationButtonType.APPROVE) }}
-            </el-button>
-            <el-button @click="closePopover('approve', approveFormRef)"> 取消 </el-button>
-          </el-form-item>
-        </el-form>
-      </div>
-    </el-popover>
+      <Icon icon="ep:document-copy" />&nbsp; 保存草稿
+    </el-button>
+
+    <!-- 【通过】按钮 -->
+    <el-button
+      v-if="runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.APPROVE)"
+      plain
+      type="success"
+      @click="openApproveDialog"
+    >
+      <Icon icon="ep:select" />&nbsp; {{ getButtonDisplayName(OperationButtonType.APPROVE) }}
+    </el-button>
 
     <!-- 【拒绝】按钮 -->
-    <el-popover
+    <!-- <el-popover
       :visible="popOverVisible.reject"
       placement="top-end"
       :width="420"
@@ -144,7 +36,7 @@
           <Icon icon="ep:close" />&nbsp; {{ getButtonDisplayName(OperationButtonType.REJECT) }}
         </el-button>
       </template>
-      <!-- 审批表单 -->
+      //审批表单
       <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
         <el-form
           label-position="top"
@@ -174,10 +66,10 @@
           </el-form-item>
         </el-form>
       </div>
-    </el-popover>
+    </el-popover> -->
 
     <!-- 【抄送】按钮 -->
-    <el-popover
+    <!-- <el-popover
       :visible="popOverVisible.copy"
       placement="top-start"
       :width="420"
@@ -232,10 +124,10 @@
           </el-form-item>
         </el-form>
       </div>
-    </el-popover>
+    </el-popover> -->
 
     <!-- 【转办】按钮 -->
-    <el-popover
+    <!-- <el-popover
       :visible="popOverVisible.transfer"
       placement="top-start"
       :width="420"
@@ -284,10 +176,10 @@
           </el-form-item>
         </el-form>
       </div>
-    </el-popover>
+    </el-popover> -->
 
     <!-- 【委派】按钮 -->
-    <el-popover
+    <!-- <el-popover
       :visible="popOverVisible.delegate"
       placement="top-start"
       :width="420"
@@ -336,7 +228,7 @@
           </el-form-item>
         </el-form>
       </div>
-    </el-popover>
+    </el-popover> -->
 
     <!-- 【加签】按钮 当前任务审批人为A，向前加签选了一个C，则需要C先审批，然后再是A审批，向后加签B，A审批完，需要B再审批完，才算完成这个任务节点 -->
     <el-popover
@@ -553,6 +445,94 @@
     </div>
   </div>
 
+  <!-- 审批通过弹窗 -->
+  <el-dialog
+    v-model="approveDialogVisible"
+    title="审批通过"
+    width="900px"
+    append-to-body
+    destroy-on-close
+  >
+    <el-form
+      ref="approveFormRef"
+      :model="approveReasonForm"
+      :rules="approveReasonRule"
+      label-width="90px"
+    >
+      <el-form-item prop="reason" label="审批意见" v-if="!getBusinessFormReason">
+        <el-input
+          v-model="approveReasonForm.reason"
+          type="textarea"
+          placeholder="请输入审批意见"
+          :rows="3"
+        />
+      </el-form-item>
+
+      <div v-if="approvalNodes.length > 0" class="mb-10px">
+        <div class="font-bold mb-5px">选择下一需处理节点及审批人</div>
+        <div class="flex flex-row overflow-x-auto gap-4 pb-2 select-none">
+          <div
+            v-for="node in approvalNodes"
+            :key="node.taskDefKey"
+            class="border border-gray-200 rounded-lg p-3 bg-gray-50/50 dark:bg-gray-800/50 flex-none w-[280px] h-[500px] flex flex-col shadow-sm hover:shadow-md transition-shadow"
+          >
+            <div
+              class="flex items-center justify-between mb-3 pb-2 border-b border-gray-200 dark:border-gray-700 flex-none"
+            >
+              <el-checkbox
+                v-model="node.checked"
+                :label="node.name || node.taskName"
+                size="large"
+                class="!font-bold !text-gray-800 dark:!text-gray-200"
+              >
+                {{ node.name || node.taskName }}
+              </el-checkbox>
+            </div>
+            <div class="pl-2 flex-1 overflow-y-auto custom-scrollbar">
+              <div
+                v-if="!node.candidateUsers || node.candidateUsers.length === 0"
+                class="text-gray-400 text-sm h-full flex items-center justify-center text-center px-4"
+              >
+                无需选择审批人<br />(自动分配或无需审批)
+              </div>
+              <el-tree
+                class="!bg-transparent"
+                v-else
+                :ref="(el) => setTreeRef(el, node.taskDefKey)"
+                :data="node.candidateUsers"
+                :props="{ label: 'name', children: 'children' }"
+                show-checkbox
+                node-key="id"
+                default-expand-all
+                :check-strictly="false"
+                @check="(_, { checkedKeys }) => handleTreeCheck(node, checkedKeys)"
+              >
+                <template #default="{ data }">
+                  <span
+                    :class="{
+                      'font-bold text-gray-700 dark:text-gray-200':
+                        data.children && data.children.length > 0,
+                      'text-blue-600 dark:text-blue-400':
+                        !data.children || data.children.length === 0
+                    }"
+                  >
+                    {{ data.name }}
+                  </span>
+                </template>
+              </el-tree>
+            </div>
+          </div>
+        </div>
+      </div>
+    </el-form>
+    <template #footer>
+      <el-button @click="approveDialogVisible = false">取消</el-button>
+      <el-button type="success" @click="handleApproveConfirm" :loading="formLoading"
+        >确认</el-button
+      >
+    </template>
+  </el-dialog>
+
   <!-- 签名弹窗 -->
   <SignDialog ref="signRef" @success="handleSignFinish" />
 </template>
@@ -591,6 +571,7 @@ const props = defineProps<{
   writableFields: string[] // 流程表单可以编辑的字段
   currentNode: any
   nextNodes: any
+  getBusinessFormReason?: () => Promise<string | undefined>
 }>()
 
 const formLoading = ref(false) // 表单加载中
@@ -761,6 +742,13 @@ const openPopover = async (type: string) => {
       return
     }
     initNextAssigneesFormField()
+    // 获取意见
+    if (props.getBusinessFormReason) {
+      const opinion = await props.getBusinessFormReason()
+      if (opinion) {
+        approveReasonForm.reason = opinion
+      }
+    }
   }
   if (type === 'return') {
     // 获取退回节点
@@ -790,164 +778,222 @@ const closePopover = (type: string, formRef: FormInstance | undefined) => {
   }
 }
 
-/** 流程通过时，根据表单变量查询新的流程节点，判断下一个节点类型是否为自选审批人 */
-const initNextAssigneesFormField = async () => {
-  console.log(runningTask.value, 'dsdsldsdsf')
-  // 获取修改的流程变量, 暂时只支持流程表单
-  const variables = getUpdatedProcessInstanceVariables()
-  const data = await ProcessInstanceApi.getNextApprovalNodes({
-    processInstanceId: props.processInstance.id,
-    taskId: runningTask.value.id,
-    processVariablesStr: JSON.stringify(variables)
-  })
-  if (data && data.length > 0) {
-    const customApproveUsersData: Record<string, any[]> = {} // 用于收集需要设置到 Timeline 组件的自定义审批人数据
-    data.forEach((node: any) => {
-      if (
-        // 情况一：当前节点没有审批人，并且是发起人自选
-        (isEmpty(node.tasks) &&
-          isEmpty(node.candidateUsers) &&
-          CandidateStrategy.START_USER_SELECT === node.candidateStrategy) ||
-        // 情况二：当前节点是审批人自选
-        CandidateStrategy.APPROVE_USER_SELECT === node.candidateStrategy
-      ) {
-        nextAssigneesActivityNode.value.push(node)
-      }
+// 新增 Dialog 可见性控制
+const approveDialogVisible = ref(false)
+const approvalNodes = ref<any[]>([])
 
-      // 如果节点有 candidateUsers，设置到 customApproveUsers 中
-      if (node.candidateUsers && node.candidateUsers.length > 0) {
-        customApproveUsersData[node.id] = node.candidateUsers
-      }
-    })
+/** 打开审批弹窗 */
+const openApproveDialog = async () => {
+  // 校验流程表单
+  const valid = await validateNormalForm()
+  if (!valid) {
+    message.warning('表单校验不通过，请先完善表单!!')
+    return
+  }
 
-    // 将 candidateUsers 设置到 Timeline 组件中
-    await nextTick() // 等待下一个 tick，确保 Timeline 组件已经渲染
-    if (nextAssigneesTimelineRef.value && Object.keys(customApproveUsersData).length > 0) {
-      nextAssigneesTimelineRef.value.batchSetCustomApproveUsers(customApproveUsersData)
+  // 获取意见
+  if (props.getBusinessFormReason) {
+    const opinion = await props.getBusinessFormReason()
+    if (opinion) {
+      approveReasonForm.reason = opinion // 自动填充
     }
   }
+
+  // 加载可选节点
+  await loadApprovalNodes()
+  approveDialogVisible.value = true
 }
 
-/** 选择下一个节点的审批人 */
-const selectNextAssigneesConfirm = (id: string, userList: any[]) => {
-  approveReasonForm.nextAssignees[id] = userList?.map((item: any) => item.id)
-}
-/** 审批通过时，校验每个自选审批人的节点是否都已配置了审批人 */
-const validateNextAssignees = () => {
-  if (Object.keys(nextAssigneesActivityNode.value).length === 0) {
-    return true
-  }
-  // 如果需要自选审批人，则校验每个节点是否都已配置审批人
-  for (const item of nextAssigneesActivityNode.value) {
-    if (isEmpty(approveReasonForm.nextAssignees[item.id])) {
-      message.warning('下一个节点的审批人不能为空!')
-      return false
-    }
-  }
-  return true
-}
-
-/** 处理审批通过和不通过的操作 */
-const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => {
+/** 加载可选节点数据 */
+const loadApprovalNodes = async () => {
   formLoading.value = true
   try {
-    // 校验表单
-    if (!formRef) return
-    await formRef.validate()
-    // 校验流程表单必填字段
-    const valid = await validateNormalForm()
-    if (!valid) {
-      message.warning('表单校验不通过，请先完善表单!!')
+    const variables = getUpdatedProcessInstanceVariables()
+    const data = await ProcessInstanceApi.getNextSelectNodes({
+      processInstanceId: props.processInstance.id,
+      taskId: runningTask.value.id,
+      processVariablesStr: JSON.stringify(variables)
+    })
+    console.log('NextSelectNodes:', data)
+
+    if (data && data.length > 0) {
+      for (const node of data) {
+        node.checked = false
+        node.selectedUsers = []
+
+        // 如果没有预设候选人，尝试通过规则获取
+        if (!node.candidateUsers || node.candidateUsers.length === 0) {
+          if (node.extensionProperties && node.extensionProperties.choose_rule) {
+            const users = await ProcessInstanceApi.getSelectUserOptions({
+              chooseRule: node.extensionProperties.choose_rule,
+              ruleValue: node.extensionProperties.rule_value
+            })
+            node.candidateUsers = buildDeptTree(users)
+          }
+        } else {
+          // 如果已有候选人(可能是扁平结构也可能是树结构)
+          // 根据数据示例， API 直接返回了树结构，但 children 里的用户只有 nickname 没有 name
+          // 我们需要遍历树，把 nickname 赋值给 name
+          const traverse = (nodes: any[]) => {
+            nodes.forEach((n) => {
+              if (!n.name && n.nickname) {
+                n.name = n.nickname
+              }
+              if (n.children && n.children.length > 0) {
+                traverse(n.children)
+              }
+            })
+          }
+          traverse(node.candidateUsers)
+        }
+      }
+    }
+    approvalNodes.value = data || []
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 构建部门树 */
+const buildDeptTree = (users: any[]) => {
+  const deptMap = new Map()
+  const result: any[] = []
+
+  users.forEach((user) => {
+    // 确保有 name 用于显示
+    user.name = user.nickname || user.name
+
+    // 如果没有部门信息，直接作为顶层用户节点（虽少见但防范）
+    if (!user.deptId) {
+      result.push(user)
       return
     }
 
-    if (pass) {
-      // 如果是“手动选择”节点策略
-      if (props.currentNode.candidateStrategy === CandidateStrategy.MANUAL_SELECTED) {
-        // 1. 校验下一节点
-        if (!selectNode.value) {
-          message.warning('请选择下一节点!')
-          return // 阻止提交
-        }
-
-        // 2. 校验审批人（非结束节点）
-        if (selectNode.value.taskDefKey !== 'end') {
-          if (
-            !tempNextUserSelectAssignees.value ||
-            (Array.isArray(tempNextUserSelectAssignees.value) &&
-              tempNextUserSelectAssignees.value.length === 0)
-          ) {
-            message.warning('下一节点审批人不能为空!')
-            return // 阻止提交
-          }
-        }
+    if (!deptMap.has(user.deptId)) {
+      const deptNode = {
+        id: `dept-${user.deptId}`, // 避免ID冲突
+        name: user.deptName || '未知部门',
+        children: [],
+        isDept: true
       }
-      const nextAssigneesValid = validateNextAssignees()
-      if (!nextAssigneesValid) return
-      const variables = getUpdatedProcessInstanceVariables()
-      // 审批通过数据
-      const data = {
-        id: runningTask.value.id,
-        reason: approveReasonForm.reason,
-        variables, // 审批通过, 把修改的字段值赋于流程实例变量
-        nextAssignees: approveReasonForm.nextAssignees // 下个自选节点选择的审批人信息
-      } as any
-      // 签名
-      if (runningTask.value.signEnable) {
-        data.signPicUrl = approveReasonForm.signPicUrl
-      }
-
-      // 多表单处理，并且有额外的 approveForm 表单，需要校验 + 拼接到 data 表单里提交
-      // TODO 芋艿 任务有多表单这里要如何处理，会和可编辑的字段冲突
-      const formCreateApi = approveFormFApi.value
-      if (Object.keys(formCreateApi)?.length > 0) {
-        await formCreateApi.validate()
-        // @ts-ignore
-        data.variables = approveForm.value.value
-      }
-      if (props.currentNode.candidateStrategy === CandidateStrategy.MANUAL_SELECTED) {
-        if (selectNode.value.conditionExpression) {
-          data.nextNode = selectNode.value.conditionExpression.value
-          data.variables[selectNode.value.conditionExpression.key] =
-            selectNode.value.conditionExpression.value
-        }
-        data.nextNodeAssignees = {}
-        console.log(selectNode.value, '选定的节点')
-        if (selectNode.value.extensionProperties) {
-          if (selectNode.value.extensionProperties.multiple_flag === '1') {
-            data.nextNodeAssignees[selectNode.value.taskDefKey] = tempNextUserSelectAssignees.value
-          } else {
-            data.nextNodeAssignees[selectNode.value.taskDefKey] = [
-              tempNextUserSelectAssignees.value
-            ]
-          }
-        }
-      }
-      console.log(data)
-      await TaskApi.approveTask(data)
-      popOverVisible.value.approve = false
-      nextAssigneesActivityNode.value = []
-      // 清理 Timeline 组件中的自定义审批人数据
-      if (nextAssigneesTimelineRef.value) {
-        nextAssigneesTimelineRef.value.batchSetCustomApproveUsers({})
-      }
-      message.success('审批通过成功')
-    } else {
-      // 审批不通过数据
-      const data = {
-        id: runningTask.value.id,
-        reason: rejectReasonForm.reason
-      }
-      await TaskApi.rejectTask(data)
-      popOverVisible.value.reject = false
-      message.success('审批不通过成功')
+      deptMap.set(user.deptId, deptNode)
+      result.push(deptNode)
     }
-    // 重置表单
-    formRef.resetFields()
-    // 加载最新数据
+    // 添加用户到部门
+    deptMap.get(user.deptId).children.push({
+      ...user,
+      name: user.nickname || user.name, // Ensure name is set for the child node
+      id: user.id, // 用户ID
+      isUser: true
+    })
+  })
+  return result
+}
+
+/** 树节点选中回调 */
+const handleTreeCheck = (node: any, checkedKeys: any[]) => {
+  // 如果选中了人，自动勾选节点
+  if (checkedKeys.length > 0) {
+    node.checked = true
+  }
+}
+
+/** 提交审批 */
+const handleApproveConfirm = async () => {
+  // 校验
+  // 必须选中至少一个节点
+  const selectedNodes = approvalNodes.value.filter((n) => n.checked)
+  if (approvalNodes.value.length > 0 && selectedNodes.length === 0) {
+    message.warning('请至少选择一个流程节点')
+    return
+  }
+
+  // 校验节点下的人员
+  // 遍历 selectedNodes
+  const nextNodeAssignees: Record<string, number[]> = {}
+  const variables: Record<string, any> = {}
+
+  for (const node of selectedNodes) {
+    // 获取该节点下选中的用户
+    // 我们需要 ref 引用
+    const treeRef = userTreeRefs.value[node.taskDefKey]
+    if (!treeRef) continue
+
+    const checkedNodes = treeRef.getCheckedNodes(true, false) // leafOnly = true
+    // 过滤出用户(假设有 nickname 字段的是用户)
+    const userIds = checkedNodes.filter((n: any) => n.id && n.nickname).map((n: any) => n.id)
+
+    if (userIds.length === 0) {
+      message.warning(`节点【${node.taskName}】请至少选择一名审批人`)
+      return
+    }
+    nextNodeAssignees[node.taskDefKey] = userIds
+
+    // 设置变量
+    if (node.conditionExpression) {
+      variables[node.conditionExpression.key] = node.conditionExpression.value
+    }
+  }
+
+  // 构造提交数据
+  const data = {
+    id: runningTask.value.id,
+    reason: approveReasonForm.reason,
+    variables: { ...getUpdatedProcessInstanceVariables(), ...variables }, // 合并变量
+    nextNodeAssignees: nextNodeAssignees
+  } as any
+  // 签名
+  if (runningTask.value.signEnable) {
+    data.signPicUrl = approveReasonForm.signPicUrl
+  }
+
+  // 多表单校验
+  const formCreateApi = approveFormFApi.value
+  if (Object.keys(formCreateApi)?.length > 0) {
+    await formCreateApi.validate()
+    // @ts-ignore
+    data.variables = { ...data.variables, ...approveForm.value.value }
+  }
+
+  formLoading.value = true
+  try {
+    await TaskApi.approveTask(data)
+    message.success('审批通过成功')
+    approveDialogVisible.value = false
     reload()
   } finally {
     formLoading.value = false
+  }
+}
+
+// 拒绝操作保持原有逻辑，或者直接复用 handleAudit (pass=false)
+const handleReject = async (formRef: FormInstance | undefined) => {
+  // ... 原有逻辑
+  const data = {
+    id: runningTask.value.id,
+    reason: rejectReasonForm.reason
+  }
+  await TaskApi.rejectTask(data)
+  popOverVisible.value.reject = false
+  message.success('审批不通过成功')
+  formRef?.resetFields()
+  reload()
+}
+
+/** 处理审批通过和不通过的操作 */
+// 保留此函数名以兼容模板调用 (Reject 还在用)
+const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => {
+  if (!pass) {
+    await handleReject(formRef)
+  } else {
+    // 旧逻辑已废弃，直接报错或空处理
+    console.error('Should not call handleAudit(true) anymore')
+  }
+}
+const userTreeRefs = ref<Record<string, any>>({})
+const setTreeRef = (el: any, key: string) => {
+  if (el) {
+    userTreeRefs.value[key] = el
   }
 }
 
@@ -1101,6 +1147,22 @@ const handleReCreate = async () => {
     name: 'BpmProcessInstanceCreate',
     query: { processInstanceId: props.processInstance?.id }
   })
+}
+
+/** 处理保存草稿 */
+const handleSaveDraft = async () => {
+  if (props.getBusinessFormReason) {
+    const opinion = await props.getBusinessFormReason()
+    if (opinion) {
+      await TaskApi.addComment({
+        id: runningTask.value.id,
+        reason: opinion
+      })
+      message.success('保存草稿成功')
+    } else {
+      message.warning('意见不能为空')
+    }
+  }
 }
 
 /** 获取减签人员标签 */

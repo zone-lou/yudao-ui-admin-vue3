@@ -132,7 +132,6 @@ export const getChildrenTaskList = async (id: string) => {
   return await request.get({ url: '/bpm/task/list-by-parent-task-id?parentTaskId=' + id })
 }
 
-
 export const getTaskTrace = async (taskId: string, type: number, processInstanceId:string) => {
   return await request.get({
     // 注意：这里的路径要拼上你 Controller 类上的 @RequestMapping
@@ -147,4 +146,7 @@ export const getTaskTrace = async (taskId: string, type: number, processInstance
 
 export const getTaskCount = () => {
   return request.get<TaskCountVO>({ url: '/bpm/task/get-count' })
+
+export const addComment = async (data: any) => {
+  return await request.post({ url: '/bpm/task/add-comment', data })
 }

@@ -57,7 +57,7 @@ export type NextNode = {
   conditionExpression: string
   extensionProperties: any
   taskDefKey: string
-  taskName:string
+  taskName: string
 }
 
 export const getProcessInstanceMyPage = async (params: any) => {
@@ -107,7 +107,7 @@ export const getNextApprovalNodes = async (params: any) => {
 }
 
 // 获取下一个可以选择的流程节点
-export const getNextSelectNode = async (params: any) => {
+export const getNextSelectNodes = async (params: any) => {
   return await request.get({ url: '/bpm/process-instance/get-next-select-nodes', params })
 }
 

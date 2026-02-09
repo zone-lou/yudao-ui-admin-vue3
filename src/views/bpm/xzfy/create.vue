@@ -542,7 +542,7 @@ const getSelectUsers = async (item: any) => {
 const getNextApprovalNodes = async () => {
   if (!processDefinitionId.value) return
 
-  const data = await ProcessInstanceApi.getNextSelectNode({
+  const data = await ProcessInstanceApi.getNextSelectNodes({
     processDefinitionId: processDefinitionId.value,
     activityId: NodeId.START_USER_NODE_ID
   })
