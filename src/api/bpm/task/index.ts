@@ -146,7 +146,24 @@ export const getTaskTrace = async (taskId: string, type: number, processInstance
 
 export const getTaskCount = () => {
   return request.get<TaskCountVO>({ url: '/bpm/task/get-count' })
+}
 
 export const addComment = async (data: any) => {
   return await request.post({ url: '/bpm/task/add-comment', data })
+}
+
+export const batchApproveTaskIfEnd = async (data: any) => {
+  return await request.put({ url: '/bpm/task/batch-approve-end', data })
+}
+
+// 【新增】管理员强制结束流程（强制归档）
+// 注意：根据后端 Controller，参数是 Query Param，且方法是 DELETE
+export const finishProcessInstanceByAdmin = async (processInstanceId: string, reason: string) => {
+  return await request.delete({
+    url: '/bpm/task/finish-by-admin',
+    params: {
+      processInstanceId,
+      reason
+    }
+  })
 }

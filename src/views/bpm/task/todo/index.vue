@@ -10,9 +10,9 @@
   <ContentWrap>
     <div class="flex justify-between items-start">
       <div class="flex gap-2">
-        <el-button type="success" plain @click="handleDone">
-          <Icon icon="ep:check" class="mr-5px" /> 办结
-        </el-button>
+<!--        <el-button type="success" plain @click="handleDone">-->
+<!--          <Icon icon="ep:check" class="mr-5px" /> 办结-->
+<!--        </el-button>-->
         <el-button type="primary" @click="handleBatchDone">
           <Icon icon="ep:finished" class="mr-5px" /> 批量办结
         </el-button>
@@ -66,7 +66,7 @@
                 <Icon icon="ep:plus" class="mr-5px" />高级筛选
               </el-button>
             </template>
-            <el-form-item label="发起时间"  prop="createTime">
+            <el-form-item label="发起时间" prop="createTime">
               <el-date-picker
                 v-model="queryParams.createTime"
                 value-format="YYYY-MM-DD HH:mm:ss"
@@ -76,7 +76,6 @@
                 :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
                 class="!w-full"
               />
-
             </el-form-item>
 
             <el-form-item label="办件名称" prop="processInstanceName">
@@ -143,7 +142,8 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list">
+    <el-table v-loading="loading" :data="list" @selection-change="handleSelectionChange">
+      <el-table-column type="selection" width="55" />
       <!-- 1. 标签 (超时标识) -->
       <el-table-column label="chaosh" width="100" align="center">
         <template #header>
@@ -251,11 +251,51 @@ import * as DefinitionApi from '@/api/bpm/definition'
 import dayjs from 'dayjs'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import { Clock } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 defineOptions({ name: 'BpmTodoTask' })
+const selectionList = ref<any[]>([])
 
 const { push } = useRouter() // 路由
 
+const handleSelectionChange = (val: any[]) => {
+  selectionList.value = val
+}
+
+const handleBatchDone = async () => {
+  if (selectionList.value.length === 0) {
+    ElMessage.warning('请选择要办结的任务')
+    return
+  }
+
+  // 提取 ID 列表
+  const ids = selectionList.value.map((item) => item.id)
+
+  try {
+    // 弹出输入原因框
+    const { value } = await ElMessageBox.prompt('请输入批量办结的原因', '批量办结', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      inputPattern: /\S/, // 非空校验
+      inputErrorMessage: '原因不能为空',
+      inputValue: '批量办结' // 默认值
+    })
+
+    // 调用接口
+    await TaskApi.batchApproveTaskIfEnd({
+      ids: ids,
+      reason: value
+    })
+
+    ElMessage.success('批量办结成功')
+    // 刷新列表
+    await getList()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error(error)
+    }
+  }
+}
 /** 获取超时状态 */
 const getTimeoutStatus = (row: any) => {
   // 如果没有截止日期，视为普通待办
@@ -355,12 +395,6 @@ const isProcessOverdue = (row: any) => {
 const handleDone = () => {
   // TODO: 实现办结逻辑
   console.log('点击了办结')
-}
-
-/** 批量办结按钮操作 */
-const handleBatchDone = () => {
-  // TODO: 实现批量办结逻辑
-  console.log('点击了批量办结')
 }
 
 /** 查询任务列表 */

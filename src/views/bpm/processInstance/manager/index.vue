@@ -150,6 +150,15 @@
           >
             取消
           </el-button>
+          <el-button
+            link
+            type="danger"
+            v-if="scope.row.status === 1"
+            v-hasPermi="['bpm:task:complate']"
+            @click="handleForceSuccess(scope.row)"
+          >
+            强制归档
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -169,6 +178,7 @@ import { ElMessageBox } from 'element-plus'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { CategoryApi } from '@/api/bpm/category'
 import * as UserApi from '@/api/system/user'
+import * as TaskApi from '@/api/bpm/task'
 import { cancelProcessInstanceByAdmin } from '@/api/bpm/processInstance'
 
 // 它和【我的流程】的差异是，该菜单可以看全部的流程实例
@@ -204,6 +214,29 @@ const getList = async () => {
     total.value = data.total
   } finally {
     loading.value = false
+  }
+}
+
+const handleForceSuccess = async (row: any) => {
+  try {
+    const { value } = await ElMessageBox.prompt('请输入强制归档(通过)的原因', '系统提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      inputPattern: /\S/,
+      inputErrorMessage: '原因不能为空',
+      type: 'warning'
+    })
+
+    // 调用接口
+    await TaskApi.finishProcessInstanceByAdmin(row.id, value)
+
+    message.success('强制归档成功')
+    // 刷新列表
+    await getList()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error(error)
+    }
   }
 }
 
