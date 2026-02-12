@@ -165,6 +165,11 @@ const detailLoading = ref(false)
 const detailData = ref<Partial<Confflow>>({})
 const userStore = useUserStore()
 
+/** 格式化日期 */
+const formatDate = (val: any) => {
+  if (!val) return ''
+  return dateUtil(val).format('YYYY-MM-DD')
+}
 // Template data fields
 const title = computed(() => detailData.value.title)
 const userName = computed(() => detailData.value.userName)
@@ -292,12 +297,6 @@ const processFileList = (pathStr: string | undefined) => {
       return { name, url, ext }
     })
     .filter(Boolean)
-}
-
-/** 格式化日期 */
-const formatDate = (val: any) => {
-  if (!val) return ''
-  return dateUtil(val).format('YYYY-MM-DD')
 }
 
 /** 处理预览 */

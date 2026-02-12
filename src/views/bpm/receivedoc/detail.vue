@@ -582,18 +582,18 @@ onMounted(() => {
   getInfo()
 })
 
-onBeforeUnmount(async () => {
-  if (currentOpinion.value && props.taskId && !isSubmitted.value) {
-    try {
-      await addComment({
-        id: props.taskId,
-        reason: currentOpinion.value
-      })
-    } catch (e) {
-      console.error('Auto save draft failed', e)
-    }
-  }
-})
+// onBeforeUnmount(async () => {
+//   if (currentOpinion.value && props.taskId && !isSubmitted.value) {
+//     try {
+//       await addComment({
+//         id: props.taskId,
+//         reason: currentOpinion.value
+//       })
+//     } catch (e) {
+//       console.error('Auto save draft failed', e)
+//     }
+//   }
+// })
 </script>
 
 <style scoped>

@@ -136,7 +136,6 @@
           <el-button
             link
             type="primary"
-            v-hasPermi="['bpm:process-instance:cancel']"
             @click="handleDetail(scope.row)"
           >
             详情
@@ -145,7 +144,6 @@
             link
             type="primary"
             v-if="scope.row.status === 1"
-            v-hasPermi="['bpm:process-instance:query']"
             @click="handleCancel(scope.row)"
           >
             取消
@@ -154,7 +152,6 @@
             link
             type="danger"
             v-if="scope.row.status === 1"
-            v-hasPermi="['bpm:task:complate']"
             @click="handleForceSuccess(scope.row)"
           >
             强制归档
