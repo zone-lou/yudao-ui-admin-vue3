@@ -1,107 +1,250 @@
 <template>
-  <div v-loading="detailLoading">
-    <el-descriptions title="基础信息" :column="2" border size="large" class="mb-20px">
-      <el-descriptions-item label="公文标题" :span="2">
-        {{ detailData.subject }}
-      </el-descriptions-item>
-      <el-descriptions-item label="发文字号">
-        {{ formatSendDocNumber(detailData.sendDocNumber) }}
-      </el-descriptions-item>
-      <el-descriptions-item label="发文日期">
-        {{ formatDate(detailData.sendTime) }}
-      </el-descriptions-item>
-      <el-descriptions-item label="文件类型">
-        {{ formatDocType(detailData.docType) }}
-      </el-descriptions-item>
-      <el-descriptions-item label="紧急程度">
-        <dict-tag :type="DICT_TYPE.BPM_EMERGENCY_DEGREE" :value="detailData.urgencyDegree" />
-      </el-descriptions-item>
-      <el-descriptions-item label="机密程度">
-        {{ detailData.secretDegree }}
-      </el-descriptions-item>
-      <el-descriptions-item label="公文性质">
-        {{ detailData.docProperty }}
-      </el-descriptions-item>
-      <el-descriptions-item label="拟稿人">
-        {{ detailData.draftPerson }}
-      </el-descriptions-item>
-      <el-descriptions-item label="拟稿时间">
-        {{ formatDate(detailData.draftDate) }}
-      </el-descriptions-item>
-      <el-descriptions-item label="联系电话">
-        {{ detailData.contactPhone }}
-      </el-descriptions-item>
-      <el-descriptions-item label="发文单位">
-        {{ detailData.sendDept }}
-      </el-descriptions-item>
-    </el-descriptions>
+  <div id="printDivTag" v-loading="detailLoading">
+    <div class="oa-container">
+      <div class="doc-title">义乌市自然资源和规划局发文拟稿单</div>
 
-    <el-descriptions title="机关单位" :column="1" border size="large" class="mb-20px">
-      <el-descriptions-item label="主送机关">
-        {{ detailData.primarySendDept }}
-      </el-descriptions-item>
-      <el-descriptions-item label="抄送机关">
-        {{ detailData.copySendDept }}
-      </el-descriptions-item>
-      <el-descriptions-item label="抄报机关">
-        {{ detailData.reportSendDept }}
-      </el-descriptions-item>
-      <el-descriptions-item label="联合发文单位">
-        {{ detailData.uniondepts }}
-      </el-descriptions-item>
-    </el-descriptions>
+      <table class="oa-table">
+        <tr>
+          <td class="label-cell">标 题</td>
+          <td colspan="3" class="data-text" style="font-weight: bold; font-size: 16px">
+            {{ detailData.subject }}
+          </td>
+        </tr>
 
-    <el-descriptions title="内容与附件" :column="1" border size="large" class="mb-20px">
-      <el-descriptions-item label="发文草稿内容">
-        {{ detailData.sendDocDraft }}
-      </el-descriptions-item>
-      <el-descriptions-item label="附件">
-        <div v-if="fileList.length > 0">
-          <el-table :data="fileList" border style="width: 100%" size="small">
-            <el-table-column label="文件名" prop="name" show-overflow-tooltip />
-            <el-table-column label="操作" width="100" align="center">
-              <template #default="scope">
-                <el-button link type="primary" @click="handleDownload(scope.row)">下载</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-        </div>
-        <span v-else>无</span>
-      </el-descriptions-item>
-      <el-descriptions-item label="备注">
-        {{ detailData.remark }}
-      </el-descriptions-item>
-    </el-descriptions>
+        <tr>
+          <td class="label-cell">发文字号</td>
+          <td class="data-text">
+            {{ formatSendDocNumber(detailData.sendDocNumber) }}
+          </td>
+          <td class="label-cell" style="width: 100px">秘密等级</td>
+          <td class="data-text" style="width: 25%">
+            {{ detailData.secretDegree }}
+          </td>
+        </tr>
 
-    <el-descriptions title="审批与办理" :column="2" border size="large" class="mb-20px">
-      <el-descriptions-item label="签发人">
-        {{ detailData.issuedName }}
-      </el-descriptions-item>
-      <el-descriptions-item label="校对人">
-        {{ detailData.proofreader }}
-      </el-descriptions-item>
-      <el-descriptions-item label="签印份数">
-        {{ detailData.signPrintCount }}
-      </el-descriptions-item>
-      <el-descriptions-item label="保管期限">
-        {{ detailData.keepTerm }}
-      </el-descriptions-item>
-      <el-descriptions-item label="是否规范性文件">
-        {{
-          detailData.isNormativeDocument === 1
-            ? '是'
-            : detailData.isNormativeDocument === 2
-              ? '否'
-              : ''
-        }}
-      </el-descriptions-item>
-      <el-descriptions-item label="是否重要">
-        {{ formatBoolean(detailData.ifimportant) }}
-      </el-descriptions-item>
-      <el-descriptions-item label="发送状态">
-        {{ formatSendStatus(detailData.sendStatus) }}
-      </el-descriptions-item>
-    </el-descriptions>
+        <tr>
+          <td class="label-cell">紧急程度</td>
+          <td colspan="3" class="data-text">
+            <dict-tag :type="DICT_TYPE.BPM_EMERGENCY_DEGREE" :value="detailData.urgencyDegree" />
+          </td>
+        </tr>
+
+        <tr>
+          <td class="label-cell">拟 稿</td>
+          <td
+            colspan="3"
+            class="data-text"
+            style="height: 150px; position: relative; padding-bottom: 30px"
+          >
+            <div class="mb-2">
+              <span class="font-bold">【发文内容】：</span>
+              <div style="white-space: pre-wrap">{{ detailData.sendDocDraft }}</div>
+            </div>
+
+            <div
+              class="flex justify-between items-center"
+              style="
+                position: absolute;
+                bottom: 5px;
+                left: 8px;
+                right: 8px;
+                font-size: 12px;
+                color: #333;
+              "
+            >
+              <span
+                >办理人：<span class="data-text">{{ detailData.draftPerson }}</span></span
+              >
+              <span
+                >所属部门：<span class="data-text">{{ detailData.sendDept }}</span></span
+              >
+              <span
+                >办理日期：<span class="data-text">{{
+                  formatDate(detailData.draftDate)
+                }}</span></span
+              >
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <td class="label-cell" style="border-top: 1px solid #d71920">附 件</td>
+          <td colspan="3" class="data-text" style="border-top: 1px solid #d71920">
+            <div v-if="fileList.length > 0">
+              <div
+                v-for="(file, index) in fileList"
+                :key="index"
+                class="flex items-center gap-2 mb-1"
+              >
+                <span>{{ file.name }}</span>
+                <el-button link type="primary" size="small" @click="handleDownload(file)"
+                  >下载</el-button
+                >
+              </div>
+            </div>
+            <div v-else class="text-gray-400">无</div>
+          </td>
+        </tr>
+
+        <tr v-if="hasNode('主办') || checkList.length > 0">
+          <td class="label-cell">主办单位审核</td>
+          <td colspan="3" class="data-text p-0">
+            <div v-if="isEditable('主办')" class="p-2">
+              <el-input
+                v-model="currentOpinion"
+                type="textarea"
+                :rows="2"
+                placeholder="请输入主办单位审核意见"
+              />
+            </div>
+            <div v-for="(info, index) in checkList" :key="index" class="approval-item">
+              <div class="flex justify-between items-center w-full">
+                <div class="flex-1">{{ info.comment }}</div>
+                <div class="text-right whitespace-nowrap ml-4">
+                  <span class="mr-2">{{ info.assigneeUser?.nickname }}</span>
+                  <span>{{ formatDate(info.endTime) }}</span>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr v-if="hasNode('法制') || legalList.length > 0">
+          <td class="label-cell">法制机构审核</td>
+          <td colspan="3" class="data-text p-0">
+            <div v-if="isEditable('法制')" class="p-2">
+              <el-input
+                v-model="currentOpinion"
+                type="textarea"
+                :rows="2"
+                placeholder="请输入法制机构审核意见"
+              />
+            </div>
+            <div v-for="(info, index) in legalList" :key="index" class="approval-item">
+              <div class="flex justify-between items-center w-full">
+                <div class="flex-1">{{ info.comment }}</div>
+                <div class="text-right whitespace-nowrap ml-4">
+                  <span class="mr-2">{{ info.assigneeUser?.nickname }}</span>
+                  <span>{{ formatDate(info.endTime) }}</span>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr v-if="hasNode('办公室') || formatList.length > 0">
+          <td class="label-cell">办公室意见</td>
+          <td colspan="3" class="data-text p-0">
+            <div v-if="isEditable('办公室')" class="p-2">
+              <el-input
+                v-model="currentOpinion"
+                type="textarea"
+                :rows="2"
+                placeholder="请输入办公室意见"
+              />
+            </div>
+            <div v-for="(info, index) in formatList" :key="index" class="approval-item">
+              <div class="flex justify-between items-center w-full">
+                <div class="flex-1">{{ info.comment }}</div>
+                <div class="text-right whitespace-nowrap ml-4">
+                  <span class="mr-2">{{ info.assigneeUser?.nickname }}</span>
+                  <span>{{ formatDate(info.endTime) }}</span>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr v-if="hasNode('分管') || leaderReviewList.length > 0">
+          <td class="label-cell">分管领导审阅</td>
+          <td colspan="3" class="data-text p-0">
+            <div v-if="isEditable('分管')" class="p-2">
+              <el-input
+                v-model="currentOpinion"
+                type="textarea"
+                :rows="2"
+                placeholder="请输入审阅意见"
+              />
+            </div>
+            <div v-for="(info, index) in leaderReviewList" :key="index" class="approval-item">
+              <div class="flex justify-between items-center w-full">
+                <div class="flex-1">{{ info.comment }}</div>
+                <div class="text-right whitespace-nowrap ml-4">
+                  <span class="mr-2">{{ info.assigneeUser?.nickname }}</span>
+                  <span>{{ formatDate(info.endTime) }}</span>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <td class="label-cell">局长签发</td>
+          <td
+            colspan="3"
+            class="data-text"
+            style="height: 120px; position: relative; padding-bottom: 30px"
+          >
+            <div class="w-full h-full">
+              <div v-if="isEditable('局长') || isEditable('签发')">
+                <el-input
+                  v-model="currentOpinion"
+                  type="textarea"
+                  :rows="3"
+                  placeholder="请输入签发意见"
+                  class="no-border-input"
+                />
+              </div>
+              <div v-else>
+                <div
+                  v-for="(info, index) in ensureMinRows(signerList, 1)"
+                  :key="index"
+                  class="mb-1"
+                >
+                  {{ info.comment }}
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="flex items-center justify-end"
+              style="position: absolute; bottom: 5px; right: 8px"
+            >
+              <span style="margin-right: 5px">签发人：</span>
+              <span
+                class="data-text"
+                style="
+                  display: inline-block;
+                  min-width: 60px;
+                  border-bottom: 1px solid #333;
+                  text-align: center;
+                "
+              >
+                {{
+                  signerList.length > 0
+                    ? signerList[signerList.length - 1].assigneeUser?.nickname
+                    : detailData.issuedName
+                }}
+              </span>
+              <span style="margin-left: 15px">日期：</span>
+              <span
+                class="data-text"
+                style="
+                  display: inline-block;
+                  min-width: 80px;
+                  border-bottom: 1px solid #333;
+                  text-align: center;
+                "
+              >
+                {{
+                  signerList.length > 0 ? formatDate(signerList[signerList.length - 1].endTime) : ''
+                }}
+              </span>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
   </div>
 </template>
 
@@ -110,36 +253,121 @@ import { dateUtil } from '@/utils/dateUtil'
 import { SendDocApi } from '@/api/bpm/senddoc'
 import { propTypes } from '@/utils/propTypes'
 import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
+import { useUserStore } from '@/store/modules/user'
 
 defineOptions({ name: 'BpmSendDocDetail' })
 
 const props = defineProps({
-  id: propTypes.number.def(undefined)
+  id: propTypes.number.def(undefined),
+  taskId: propTypes.string.def(undefined),
+  currentNode: propTypes.object.def({}),
+  activityNodes: propTypes.array.def([])
 })
 
 const { query } = useRoute()
+const userStore = useUserStore()
 const detailLoading = ref(false)
 const detailData = ref<any>({})
 const fileList = ref<any[]>([])
+const currentOpinion = ref('')
 
-/** 获取详情数据 */
+// 审批意见列表（变量名保持不变，但业务含义已更新）
+const checkList = ref<any[]>([]) // 对应：主办单位审核
+const legalList = ref<any[]>([]) // 对应：法制机构审核
+const formatList = ref<any[]>([]) // 对应：办公室意见
+const leaderReviewList = ref<any[]>([]) // 对应：分管领导审阅
+const signerList = ref<any[]>([]) // 对应：局长签发
+
+// 这里为了显示所有行，暂时返回 true，您也可以根据 checkList.length > 0 控制
+const hasNode = (keyword: string) => true
+
+const isEditable = (keyword: string) => {
+  if (!props.taskId) return false
+  const nodeName = props.currentNode?.name || ''
+  return nodeName.indexOf(keyword) !== -1
+}
+
+const getOpinion = () => currentOpinion.value
+
+const ensureMinRows = (list: any[], minRows: number) => {
+  const res = [...list]
+  if (res.length < minRows) {
+    // 仅用于占位
+  }
+  return res
+}
+
+/** 核心修改：匹配流程节点名称到对应的显示区域 */
+const processActivityNodes = () => {
+  if (!props.activityNodes || props.activityNodes.length === 0) return
+
+  checkList.value = []
+  legalList.value = []
+  formatList.value = []
+  leaderReviewList.value = []
+  signerList.value = []
+
+  const userId = userStore.getUser.id
+
+  props.activityNodes.forEach((node: any) => {
+    if (node.tasks && node.tasks.length > 0) {
+      node.tasks.forEach((task: any) => {
+        // 处理中的任务，回显草稿
+        if (task.status === 1) {
+          if (task.assigneeUser?.id === userId && task.reason) {
+            currentOpinion.value = task.reason
+          }
+          return
+        }
+
+        // 已办结的任务，进行归档展示
+        if (task.reason) {
+          const name = node.name || ''
+          const info = {
+            name: name,
+            comment: task.reason,
+            assigneeUser: task.assigneeUser,
+            endTime: node.endTime || task.endTime
+          }
+
+          // 1. 主办单位审核 (兼容 '核稿' 旧数据)
+          if (name.includes('主办') || name.includes('核稿')) {
+            checkList.value.push(info)
+          }
+          // 2. 法制机构审核 (兼容 '合法' 或 '法制')
+          else if (name.includes('法制') || name.includes('合法')) {
+            legalList.value.push(info)
+          }
+          // 3. 办公室意见 (兼容 '办公室' 或 '格式')
+          else if (name.includes('办公室') || name.includes('格式') || name.includes('文字')) {
+            formatList.value.push(info)
+          }
+          // 4. 分管领导审阅
+          else if (name.includes('分管') || name.includes('审阅')) {
+            leaderReviewList.value.push(info)
+          }
+          // 5. 局长签发 (兼容 '局长' 或 '签发')
+          else if (name.includes('局长') || name.includes('签发')) {
+            signerList.value.push(info)
+          }
+        }
+      })
+    }
+  })
+}
+
 const getInfo = async (id?: number) => {
   const rawId = id || props.id || query.id
-  if (!rawId || rawId === 'null' || rawId === 'undefined') {
-    return
-  }
-
+  if (!rawId) return
   const queryId = Number(rawId)
-  if (isNaN(queryId)) {
-    console.error('Invalid ID:', rawId)
-    return
-  }
+  if (isNaN(queryId)) return
 
   detailLoading.value = true
   try {
     const res = await SendDocApi.getSendDoc(queryId)
     detailData.value = res || {}
     processFileList(res.attachFilePath)
+    processActivityNodes()
   } catch (error) {
     console.error('获取详情失败', error)
   } finally {
@@ -147,12 +375,25 @@ const getInfo = async (id?: number) => {
   }
 }
 
-/** 附件处理 */
+watch(
+  () => props.activityNodes,
+  () => processActivityNodes(),
+  { immediate: true }
+)
+
 const processFileList = (pathStr: string | undefined) => {
   if (!pathStr) {
     fileList.value = []
     return
   }
+  try {
+    const parsed = JSON.parse(pathStr)
+    if (Array.isArray(parsed)) {
+      fileList.value = parsed
+      return
+    }
+  } catch (e) {}
+
   const paths = Array.isArray(pathStr) ? pathStr : pathStr.split(',')
   fileList.value = paths
     .map((url) => {
@@ -164,7 +405,6 @@ const processFileList = (pathStr: string | undefined) => {
     .filter(Boolean)
 }
 
-/** 下载文件 */
 const handleDownload = (file: any) => {
   const link = document.createElement('a')
   link.style.display = 'none'
@@ -176,50 +416,22 @@ const handleDownload = (file: any) => {
 }
 
 const formatSendDocNumber = (val: any) => {
-  if (val === undefined || val === null || val === '') return val
+  if (!val) return val
   const strVal = String(val)
-  // 如果是数字（历史字典键值），进行匹配转换
   if (/^\d+$/.test(strVal)) {
     const dicts = getStrDictOptions(DICT_TYPE.BPM_SENDDOC_SIGN)
     const dict = dicts.find((d) => String(d.value) === strVal)
-    if (dict) {
-      return dict.label
-    }
+    if (dict) return dict.label + '〔2025〕号'
   }
   return val
 }
 
-/** 格式化日期 */
 const formatDate = (val: any) => {
   if (!val) return ''
   return dateUtil(val).format('YYYY-MM-DD')
 }
 
-/** 格式化布尔值 (0否, 1是) */
-const formatBoolean = (val: any) => {
-  if (val === 1) return '是'
-  if (val === 0) return '否'
-  return ''
-}
-
-/** 格式化文件类型 */
-const formatDocType = (val: any) => {
-  if (val === 1) return '党务'
-  if (val === 2) return '政务'
-  return val
-}
-
-/** 格式化发送状态 */
-const formatSendStatus = (val: any) => {
-  const map: Record<number, string> = {
-    0: '拟发',
-    1: '已发',
-    2: '退回'
-  }
-  return map[val] || val
-}
-
-defineExpose({ open: getInfo })
+defineExpose({ open: getInfo, getOpinion })
 
 onMounted(() => {
   getInfo()
@@ -227,9 +439,65 @@ onMounted(() => {
 </script>
 
 <style scoped>
-:deep(.el-descriptions__label) {
+/* 保持原有样式不变 */
+#printDivTag .oa-container {
+  width: 100%;
+  padding: 10px 20px;
+  background-color: #fff;
+  font-family: SimSun, 'Songti SC', STSong, serif;
+}
+
+#printDivTag .doc-title {
+  font-size: 24px;
   font-weight: bold;
-  color: #606266;
-  background-color: #f5f7fa;
+  text-align: center;
+  color: #d71920;
+  margin-bottom: 15px;
+  letter-spacing: 2px;
+}
+
+#printDivTag .oa-table {
+  width: 100%;
+  border: 2px solid #d71920;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+#printDivTag .oa-table td {
+  border: 1px solid #d71920;
+  padding: 6px 8px;
+  font-size: 14px;
+  color: #000;
+  vertical-align: middle;
+}
+
+#printDivTag .label-cell {
+  width: 120px;
+  font-weight: bold;
+  text-align: center;
+  color: #d71920;
+  background-color: #fffbfc;
+}
+
+#printDivTag .data-text {
+  font-family: SimHei, sans-serif;
+  color: #000;
+}
+
+.approval-item {
+  border-bottom: 1px dashed #e8e8e8;
+  padding: 4px 0;
+}
+.approval-item:last-child {
+  border-bottom: none;
+}
+
+:deep(.el-textarea__inner) {
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  resize: none;
+  font-family: SimHei, sans-serif;
+  background-color: transparent;
 }
 </style>

@@ -26,11 +26,10 @@
         <el-button
           type="success"
           plain
-          icon="Download"
           :loading="exportLoading"
           @click="goToExportPage"
         >
-          导出本月记录
+          <Icon icon="ep:download" />导出
         </el-button>
       </div>
     </div>
@@ -197,7 +196,7 @@ const handleExport = async () => {
 const goToExportPage = () => {
   // 跳转到月度查询页面
   // 注意：你需要确保在【菜单管理】中配置了这个路由，或者直接用 path
-  router.push({ path: 'system/meeting/MonthlySheet' })
+  router.push({ path: '/system/MonthlySheet' })
 }
 
 const getDayBookings = (list: any[], dateStr: string) => {

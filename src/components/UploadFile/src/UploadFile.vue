@@ -24,14 +24,7 @@
         <Icon icon="ep:upload-filled" />
         选取文件
       </el-button>
-      <template v-if="isShowTip" #tip>
-        <div>
-          大小不超过 <b style="color: #f56c6c">{{ fileSize }}MB</b>
-        </div>
-        <div>
-          格式为 <b style="color: #f56c6c">{{ fileType.join('/') }}</b> 的文件
-        </div>
-      </template>
+
       <template #file="row">
         <div class="flex items-center">
           <span :title="row.file.name">{{ row.file.name }}</span>
@@ -86,12 +79,9 @@ const emit = defineEmits(['update:modelValue'])
 
 const props = defineProps({
   modelValue: propTypes.oneOfType<string | string[]>([String, Array<String>]).isRequired,
-  fileType: propTypes.array.def(['doc', 'xls', 'ppt', 'txt', 'pdf']),
-  fileSize: propTypes.number.def(5),
-  limit: propTypes.number.def(5),
+  limit: propTypes.number.def(5), // 仅保留了文件数量限制，按需调整
   autoUpload: propTypes.bool.def(true),
   drag: propTypes.bool.def(false),
-  isShowTip: propTypes.bool.def(true),
   disabled: propTypes.bool.def(false),
   directory: propTypes.string.def(undefined),
   uploadApi: propTypes.func.def(undefined)
@@ -113,75 +103,81 @@ const httpRequest = async (options: UploadRequestOptions) => {
 }
 
 const beforeUpload: UploadProps['beforeUpload'] = (file: UploadRawFile) => {
+  // 仅保留数量限制校验
   if (fileList.value.length >= props.limit) {
     message.error(`上传文件数量不能超过${props.limit}个!`)
     return false
   }
-  let fileExtension = ''
-  if (file.name.lastIndexOf('.') > -1) {
-    fileExtension = file.name.slice(file.name.lastIndexOf('.') + 1)
-  }
-  const isImg = props.fileType.some((type: string) => {
-    if (file.type.indexOf(type) > -1) return true
-    return !!(fileExtension && fileExtension.indexOf(type) > -1)
-  })
-  const isLimit = file.size / 1024 / 1024 < props.fileSize
-  if (!isImg) {
-    message.error(`文件格式不正确, 请上传${props.fileType.join('/')}格式!`)
-    return false
-  }
-  if (!isLimit) {
-    message.error(`上传文件大小不能超过${props.fileSize}MB!`)
-    return false
-  }
+
+  // 删除了 fileType 和 fileSize 的判断逻辑
+
   message.success('正在上传文件，请稍候...')
   uploadNumber.value++
   return true
 }
 
-// 【关键修改】接收 uploadFile 参数，使用 uid 移除临时文件
+// 接收 uploadFile 参数，使用 uid 移除临时文件
 const handleFileSuccess: UploadProps['onSuccess'] = (res: any, uploadFile: UploadFile): void => {
-  message.success('上传成功')
-
-  // 移除 element-plus 自动添加到列表中的那个文件（因为它没有我们需要的数据结构）
-  const index = fileList.value.findIndex((item) => item.uid === uploadFile.uid)
-  if (index > -1) {
-    fileList.value.splice(index, 1)
-  }
-
-  // 兼容处理：
+  // 兼容处理：解析名称和远程URL
   let name = ''
   let url = ''
-  // 新接口：res.data 是对象
   if (typeof res.data === 'object' && res.data !== null) {
     name = res.data.name
     url = res.data.url
   } else {
-    // 旧接口：res.data 是字符串URL
     url = res.data
     const decodedUrl = decodeURIComponent(url)
     const urlWithoutQuery = decodedUrl.split('?')[0]
     name = urlWithoutQuery.substring(urlWithoutQuery.lastIndexOf('/') + 1)
   }
 
-  // 构建我们自己的文件对象，完整保留 response 以便父组件获取 ID
-  uploadList.value.push({ name: name, url: url, response: res })
+  // 1. 核心改变：不删除原文件，而是通过 uid 找到它，直接覆盖信息以保持原有占位和顺序
+  const targetFile = fileList.value.find((item) => item.uid === uploadFile.uid)
+  if (targetFile) {
+    targetFile.name = name
+    targetFile.url = url
+    targetFile.response = res
+    targetFile.status = 'success'
+  }
 
-  if (uploadList.value.length == uploadNumber.value) {
-    fileList.value.push(...uploadList.value)
+  // 2. 利用 uploadList 当作已完成文件的计数器
+  uploadList.value.push({} as UploadUserFile)
+
+  // 3. 当全部选中的文件都处理完时，统一触发更新
+  if (uploadList.value.length === uploadNumber.value) {
+    message.success('文件上传成功')
     uploadList.value = []
     uploadNumber.value = 0
     emitUpdateModelValue()
   }
 }
-
 const handleExceed: UploadProps['onExceed'] = (): void => {
   message.error(`上传文件数量不能超过${props.limit}个!`)
 }
 
-const excelUploadError: UploadProps['onError'] = (): void => {
-  message.error('导入数据失败，请您重新上传！')
+const excelUploadError: UploadProps['onError'] = (err: any, uploadFile: UploadFile): void => {
+  message.error(`${uploadFile.name} 上传失败，请稍后重试！`)
+
+  // 1. 从 fileList 中移除这个上传失败的占位文件
+  const index = fileList.value.findIndex((item) => item.uid === uploadFile.uid)
+  if (index > -1) {
+    fileList.value.splice(index, 1)
+  }
+
+  // 2. 将预计需要等待的上传总数减 1
   uploadNumber.value = Math.max(0, uploadNumber.value - 1)
+
+  // 3. 检查剩余的成功文件是否已经全部处理完毕
+  // 如果 选了3个文件，1个失败，2个成功。失败时把总数从3减到2，如果此时成功的2个已经处理完了，就触发完成逻辑
+  if (uploadNumber.value > 0 && uploadList.value.length === uploadNumber.value) {
+    message.success('其他文件上传处理完成')
+    uploadList.value = []
+    uploadNumber.value = 0
+    emitUpdateModelValue()
+  } else if (uploadNumber.value === 0) {
+    // 如果全部都失败了，清空状态
+    uploadList.value = []
+  }
 }
 
 const handleRemove = (file: UploadFile) => {
@@ -231,7 +227,13 @@ watch(
 )
 
 const emitUpdateModelValue = () => {
-  let result: string | string[] = fileList.value.map((file) => file.url!)
+  // 过滤掉尚未上传成功（没有真实远程url）的文件
+  const successFiles = fileList.value.filter(
+    (file) => file.status === 'success' && file.url && !file.url.startsWith('blob:')
+  )
+
+  let result: string | string[] = successFiles.map((file) => file.url!)
+
   if (props.limit === 1 || isString(props.modelValue)) {
     result = result.join(',')
   }

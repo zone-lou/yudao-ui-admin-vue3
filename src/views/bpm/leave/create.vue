@@ -153,14 +153,14 @@
 </template>
 
 <script setup lang="ts">
-import { useTagsViewStore } from '@/store/modules/tagsView' // 关键引用
+import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as DefinitionApi from '@/api/bpm/definition'
 import ProcessInstanceTimeline from '@/views/bpm/processInstance/detail/ProcessInstanceTimeline.vue'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { CandidateStrategy, NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { ApprovalNodeInfo } from '@/api/bpm/processInstance'
-import { leaveApi, leave } from '@/api/bpm/leave' // 确保引用了请假API
-import { HolidayApi } from '@/api/system/holiday' // 节假日API
+import { leaveApi, leave } from '@/api/bpm/leave'
+import { HolidayApi } from '@/api/system/holiday'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import dayjs from 'dayjs'
 import { useUserStore } from '@/store/modules/user'
@@ -173,8 +173,8 @@ const nickname = computed(() => userStore.user.nickname)
 const deptName = ref('')
 
 const message = useMessage()
-const { delView } = useTagsViewStore() // 获取关闭视图方法
-const { push, currentRoute } = useRouter() // 获取路由方法
+const { delView } = useTagsViewStore()
+const { push, currentRoute } = useRouter()
 
 const formLoading = ref(false)
 
@@ -188,7 +188,7 @@ const formData = ref({
   sjReason: undefined,
   totalTs: 0,
   filepath: undefined,
-  spzt: undefined, // 审批状态
+  spzt: undefined,
   userid: undefined,
   startPeriod: 1,
   endPeriod: 2
@@ -204,7 +204,7 @@ const formRules = reactive({
 const formRef = ref()
 
 // 流程配置
-const processDefineKey = 'oa_leave' // 请假流程 Key (需确认)
+const processDefineKey = 'oa_leave'
 const startUserSelectTasks = ref([])
 const startUserSelectAssignees = ref({})
 const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])
@@ -213,10 +213,53 @@ const processDefinitionId = ref('')
 const AM = 1
 const PM = 2
 
-// 节假日缓存
+const duration = ref(0)
+
+// ---------------- 权限与条件计算 ----------------
+const getRoleLevel = (roleStr: string): number => {
+  if (roleStr.startsWith('grade_')) {
+    const parts = roleStr.split('_')
+    return parseInt(parts[1]) || 0
+  }
+  return 1
+}
+
+const maxPermissionRole = computed(() => {
+  const gradeRoles = userStore.roles.filter((r) => r.startsWith('grade_'))
+  if (gradeRoles.length === 0) return 'grade_3'
+  return gradeRoles.reduce((prev, curr) => {
+    return getRoleLevel(curr) > getRoleLevel(prev) ? curr : prev
+  })
+})
+
+const days_condition4 = computed(() => {
+  console.log(duration.value, '当前计算时长(用于条件判断)')
+  if (maxPermissionRole.value === 'grade_3' && duration.value <= 1) {
+    return '4_6'
+  } else {
+    return '4_3'
+  }
+})
+
+const days_condition3 = computed(() => {
+  if (
+    (maxPermissionRole.value === 'grade_3' && duration.value > 1 && duration.value < 30) ||
+    (maxPermissionRole.value === 'grade_7' && duration.value <= 7)
+  ) {
+    return '3_6'
+  }
+  if (
+    maxPermissionRole.value === 'grade_11' ||
+    (maxPermissionRole.value === 'grade_7' && duration.value > 7) ||
+    (maxPermissionRole.value === 'grade_3' && duration.value > 30)
+  ) {
+    return '3_5'
+  } else return ''
+})
+
+// ---------------- 节假日与时长计算 ----------------
 const holidayCache = ref<Record<string, { workDay: string; restDay: string }>>({})
 
-// 获取节假日数据
 const getHolidayData = async (year: string) => {
   if (holidayCache.value[year]) return holidayCache.value[year]
   try {
@@ -231,7 +274,6 @@ const getHolidayData = async (year: string) => {
   return null
 }
 
-// 核心计算逻辑
 const calculateDuration = async () => {
   formData.value.totalTs = 0
   if (!formData.value.qxjStartDate || !formData.value.qxjEndDate || !formData.value.qxjType) return
@@ -244,41 +286,28 @@ const calculateDuration = async () => {
     message.error('结束日期不能早于开始日期')
     return
   }
-
   if (end.isSame(start) && formData.value.startPeriod === PM && formData.value.endPeriod === AM) {
     message.error('结束时段不能早于开始时段')
     return
   }
 
-  // 1. 获取请假类型配置（是否包含节假日）
   const dictOptions = getIntDictOptions(DICT_TYPE.BPM_LEAVE_TYPE)
   const currentDict = dictOptions.find((i) => i.value === formData.value.qxjType)
-  // 备注包含 "包含节假日" 则为日历日模式，否则为工作日模式
   // @ts-ignore
   const isCalendarDayMode = currentDict?.remark?.includes('包含节假日')
 
-  // 2. 如果需要排除节假日，确保有节假日数据
   let holidayInfo: any = null
   if (!isCalendarDayMode) {
     const res = await getHolidayData(year)
-    // 兼容 API 返回数组的情况
     if (Array.isArray(res) && res.length > 0) {
       holidayInfo = res[0]
     } else {
       holidayInfo = res
     }
-    console.log('请假计算 - 年份:', year, '节假日数据(处理后):', holidayInfo)
-
-    // 如果跨年... (省略逻辑，暂不改动)
-
-    // 如果跨年，可能需要获取下一年的？这里暂只取开始时间的年份，通常请假不会跨太久，或者后端API支持。
-    // 严谨做法：Check if end year != start year, fetch both.
     const endYear = end.format('YYYY')
     if (endYear !== year) {
-      // 简单处理：合并数据或分别查询。为简单起见，如果年份不同，再查一次
       const endHolidayInfo = await getHolidayData(endYear)
       if (endHolidayInfo) {
-        // 合并 workDay 和 restDay 字符串
         if (!holidayInfo) holidayInfo = endHolidayInfo
         else {
           holidayInfo = {
@@ -290,48 +319,25 @@ const calculateDuration = async () => {
     }
   }
 
-  // 判断某天是否为工作日
   const isWorkDay = (date: dayjs.Dayjs) => {
     const dateStr = date.format('YYYY-MM-DD')
+    if (isCalendarDayMode) return true
 
-    // 模式1：日历日模式（包含节假日） -> 每一天都算工作日（即都要计入请假）
-    if (isCalendarDayMode) {
-      console.log(dateStr, '日历日模式-计入')
-      return true
-    }
-
-    // 模式2：工作日模式（排除节假日）
-    // 优先：API返回的精准设定
     const isForceWork = holidayInfo?.workDay?.includes && holidayInfo.workDay.includes(dateStr)
     const isForceRest = holidayInfo?.restDay?.includes && holidayInfo.restDay.includes(dateStr)
 
-    if (isForceWork) {
-      console.log(dateStr, '调休工作日-计入')
-      return true
-    }
-    if (isForceRest) {
-      console.log(dateStr, '法定节假日-排除')
-      return false
-    }
-
-    // 兜底：周六周日为休息
+    if (isForceWork) return true
+    if (isForceRest) return false
     const day = date.day()
-    if (day === 0 || day === 6) {
-      console.log(dateStr, '周末-排除')
-      return false
-    }
-
-    console.log(dateStr, '普通工作日-计入')
+    if (day === 0 || day === 6) return false
     return true
   }
 
   let totalDays = 0
   let currentDate = start.clone()
-
   while (currentDate.isBefore(end) || currentDate.isSame(end)) {
     if (isWorkDay(currentDate)) {
       if (currentDate.isSame(start) && currentDate.isSame(end)) {
-        // 同一天
         if (formData.value.startPeriod === AM && formData.value.endPeriod === AM) totalDays += 0.5
         else if (formData.value.startPeriod === PM && formData.value.endPeriod === PM)
           totalDays += 0.5
@@ -346,14 +352,45 @@ const calculateDuration = async () => {
     }
     currentDate = currentDate.add(1, 'day')
   }
-
+  console.log(totalDays,'dasfdds')
+  duration.value = totalDays
   formData.value.totalTs = totalDays
+}
+
+// ---------------- 审批流核心逻辑 ----------------
+const getApprovalDetail = async () => {
+  // 如果没有流程ID，无法获取详情
+  if (!processDefinitionId.value) return
+
+  try {
+    const data = await ProcessInstanceApi.getApprovalDetail({
+      processDefinitionId: processDefinitionId.value,
+      activityId: NodeId.START_USER_NODE_ID,
+      processVariablesStr: JSON.stringify({
+        role_condition: maxPermissionRole.value,
+        days_condition4: days_condition4.value, // 使用计算属性
+        days_condition3: days_condition3.value // 使用计算属性
+      })
+    })
+    if (!data) return
+    activityNodes.value = data.activityNodes
+    // 更新需要发起人自选的节点
+    startUserSelectTasks.value = data.activityNodes?.filter(
+      (node: ApprovalNodeInfo) => CandidateStrategy.START_USER_SELECT === node.candidateStrategy
+    )
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const selectUserConfirm = (id: string, userList: any[]) => {
+  startUserSelectAssignees.value[id] = userList?.map((item: any) => item.id)
 }
 
 const submitForm = async () => {
   if (!formRef) return
   await formRef.value.validate()
-  calculateDuration()
+  await calculateDuration() // 提交前再次确认时长
 
   if (startUserSelectTasks.value?.length > 0) {
     for (const userTask of startUserSelectTasks.value) {
@@ -369,11 +406,9 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = { ...formData.value } as unknown as leave
-    // 处理附件
     if (Array.isArray(data.filepath)) {
       data.filepath = data.filepath.join(',')
     }
-    // 选人
     if (startUserSelectTasks.value?.length > 0) {
       // @ts-ignore
       data.startUserSelectAssignees = startUserSelectAssignees.value
@@ -381,8 +416,6 @@ const submitForm = async () => {
 
     await leaveApi.createleave(data)
     message.success('请假申请发起成功')
-
-    // 【关键修改】关闭当前 Tab 并跳转回“我的请求”列表
     delView(unref(currentRoute))
     await push({ name: 'BpmProcessInstanceMy' })
   } finally {
@@ -390,43 +423,61 @@ const submitForm = async () => {
   }
 }
 
-const getApprovalDetail = async () => {
-  try {
-    const data = await ProcessInstanceApi.getApprovalDetail({
-      processDefinitionId: processDefinitionId.value,
-      activityId: NodeId.START_USER_NODE_ID,
-      processVariablesStr: JSON.stringify({})
-    })
-    if (!data) return
-    activityNodes.value = data.activityNodes
-    startUserSelectTasks.value = data.activityNodes?.filter(
-      (node: ApprovalNodeInfo) => CandidateStrategy.START_USER_SELECT === node.candidateStrategy
-    )
-  } catch (e) {
-    console.error(e)
+// ---------------- 监听器 (核心修改点) ----------------
+
+// 1. 精准监听条件变化，触发审批流预览更新
+// 替代了原来的 watch(formData, ...)
+watch(
+  () => [days_condition3.value, days_condition4.value],
+  async ([new3, new4], [old3, old4]) => {
+    // 只有当流程定义已经加载完成，才去获取详情
+    if (processDefinitionId.value) {
+      console.log('条件变化，刷新审批预览', { new3, new4 })
+      // 条件改变，重置选人状态，因为节点可能变了
+      startUserSelectAssignees.value = {}
+      await getApprovalDetail()
+    }
   }
-}
+)
 
-const selectUserConfirm = (id: string, userList: any[]) => {
-  startUserSelectAssignees.value[id] = userList?.map((item: any) => item.id)
-}
+// 2. 监听日期和时段变化，计算时长 (时长变化会自动更新 days_condition, 进而触发上面的 watch)
+watch(
+  () => [
+    formData.value.qxjStartDate,
+    formData.value.qxjEndDate,
+    formData.value.startPeriod,
+    formData.value.endPeriod,
+    formData.value.qxjType // 类型变化也会影响时长计算（是否包含节假日）
+  ],
+  () => {
+    calculateDuration()
+  }
+)
 
+// ---------------- 生命周期 (核心修改点) ----------------
 onMounted(async () => {
+  // 1. 初始化页面数据
   formData.value.applyDate = Date.now()
-  const res = await getUserProfile()
-  if (res.dept) deptName.value = res.dept.name
-  else if (res.users && res.users.dept) deptName.value = res.users.dept.name
+  const userRes = await getUserProfile()
+  if (userRes.dept) deptName.value = userRes.dept.name
+  else if (userRes.users && userRes.users.dept) deptName.value = userRes.users.dept.name
 
+  // 2. 【关键】优先获取流程定义，拿到 processDefinitionId
   const processDefinitionDetail = await DefinitionApi.getProcessDefinition(
     undefined,
     processDefineKey
   )
+
   if (!processDefinitionDetail) {
     message.error('请假流程未配置，请检查 Key: ' + processDefineKey)
     return
   }
+
+  // 3. 赋值流程ID
   processDefinitionId.value = processDefinitionDetail.id
   startUserSelectTasks.value = processDefinitionDetail.startUserSelectTasks
+
+  // 4. 【关键】流程ID就绪后，再请求审批节点详情
   await getApprovalDetail()
 })
 </script>

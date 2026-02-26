@@ -21,11 +21,10 @@
       <el-button
         type="success"
         plain
-        icon="Download"
         @click="handleExport"
         :loading="exportLoading"
       >
-        导出 Excel
+        <Icon icon="ep:download" />导出 Excel
       </el-button>
     </div>
 
@@ -92,7 +91,7 @@ import dayjs from 'dayjs'
 import * as BookingApi from '@/api/system/meeting' // 确保路径正确
 import download from '@/utils/download' // 引入下载工具
 import { ElMessage } from 'element-plus'
-
+defineOptions({ name: 'MonthlySheet' })
 const loading = ref(false)
 const exportLoading = ref(false)
 const queryDate = ref(new Date()) // 默认当前月
