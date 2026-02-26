@@ -14,8 +14,7 @@
               <el-form-item label="收文编号" prop="receiveDocNumber">
                 <el-input
                   v-model="formData.receiveDocNumber"
-                  placeholder="选择单位类别自动生成"
-                  disabled
+                  placeholder="请输入收文编号，或选择单位类别自动生成"
                 />
               </el-form-item>
             </el-col>
@@ -35,14 +34,13 @@
           <el-row>
             <el-col :span="12">
               <el-form-item label="来文字号" prop="sendDocNumber">
-                <el-select v-model="formData.sendDocNumber" placeholder="请输入来文字号">
-                  <el-option
-                    v-for="dict in getStrDictOptions(DICT_TYPE.BPM_DOC_NUM_TYPE)"
-                    :key="dict.value"
-                    :label="formatSendDocNumberLabel(dict.label)"
-                    :value="formatSendDocNumberLabel(dict.label)"
-                  />
-                </el-select>
+                <el-autocomplete
+                  v-model="formData.sendDocNumber"
+                  :fetch-suggestions="queryDocNumberSuggestions"
+                  placeholder="请输入或选择来文字号"
+                  clearable
+                  style="width: 100%"
+                />
               </el-form-item>
             </el-col>
             <el-col :span="12">
@@ -62,12 +60,19 @@
           <el-row>
             <el-col :span="12">
               <el-form-item label="文件类别" prop="docSecondClass">
-                <el-select v-model="formData.docSecondClass" placeholder="请选择文件类别">
+                <el-select
+                  v-model="formData.docSecondClass"
+                  placeholder="请选择或手动输入文件类别"
+                  filterable
+                  allow-create
+                  default-first-option
+                  clearable
+                >
                   <el-option
                     v-for="dict in getIntDictOptions(DICT_TYPE.BPM_DOC_CLASS)"
                     :key="dict.value"
                     :label="dict.label"
-                    :value="dict.value"
+                    :value="dict.label"
                   />
                 </el-select>
               </el-form-item>
@@ -89,12 +94,20 @@
           <el-row>
             <el-col :span="12">
               <el-form-item label="来文单位" prop="sendDept">
-                <el-select v-model="formData.sendDept" placeholder="请选择来文单位" multiple>
+                <el-select
+                  v-model="formData.sendDept"
+                  placeholder="请选择或手动输入来文单位"
+                  multiple
+                  filterable
+                  allow-create
+                  default-first-option
+                  clearable
+                >
                   <el-option
                     v-for="dict in getStrDictOptions(DICT_TYPE.BPM_AGENCY_NAME)"
                     :key="dict.value"
                     :label="dict.label"
-                    :value="dict.value"
+                    :value="dict.label"
                   />
                 </el-select>
               </el-form-item>
@@ -313,11 +326,16 @@ const buildRequestData = () => {
   if (Array.isArray(data.sendDept)) {
     data.sendDept = data.sendDept.join(',')
   }
+
   const rawFileList = uploadFileRef.value?.fileList || []
+
   data.fileList = rawFileList
+    // 过滤掉还在上传中、或者上传失败的临时文件占位，只保留成功的或已存在的回显文件
+    .filter((item: any) => item.status === 'success' || item.id)
     .map((item: any, index: number) => {
       let fileId = undefined
       let fileName = item.name
+
       if (item.response?.data) {
         const fileResponse = item.response.data
         fileId =
@@ -330,20 +348,29 @@ const buildRequestData = () => {
       } else {
         console.warn('文件ID解析失败:', item.name)
       }
+
       return {
         receiveDocId: data.id,
         attachFileId: fileId,
         attachFileName: fileName,
-        attachOrder: index,
+        attachOrder: index, // 这里的 index 就是用户界面上看到的正确顺序
         showType: 0
       }
     })
-    .filter((item) => item.attachFileId)
+    .filter((item: any) => item.attachFileId) // 二次保险，确保 ID 存在
+
   return data
 }
-
 /** 保存操作 */
 const handleSave = async () => {
+  const rawFileList = uploadFileRef.value?.fileList || []
+  const isUploading = rawFileList.some(
+    (file: any) => file.status === 'ready' || file.status === 'uploading'
+  )
+  if (isUploading) {
+    message.warning('还有文件正在上传中，请稍后提交')
+    return
+  }
   try {
     await formRef.value.validateField(['subject', 'receiveDocNumber'])
   } catch (e) {
@@ -365,8 +392,32 @@ const handleSave = async () => {
   }
 }
 
+const queryDocNumberSuggestions = (queryString: string, cb: any) => {
+  // 1. 获取并格式化字典中的参考模板
+  const dictOptions = getStrDictOptions(DICT_TYPE.BPM_DOC_NUM_TYPE) || []
+  const suggestions = dictOptions.map((dict) => ({
+    value: formatSendDocNumberLabel(dict.label) // el-autocomplete 需要对象中包含 value 属性
+  }))
+
+  // 2. 如果用户已经输入了内容，根据输入内容过滤建议；如果没输入，直接展示所有模板供参考
+  const results = queryString
+    ? suggestions.filter((item) => item.value.includes(queryString))
+    : suggestions
+
+  // 3. 返回给组件显示
+  cb(results)
+}
+
 /** 提交操作 */
 const handleSubmit = async () => {
+  const rawFileList = uploadFileRef.value?.fileList || []
+  const isUploading = rawFileList.some(
+    (file: any) => file.status === 'ready' || file.status === 'uploading'
+  )
+  if (isUploading) {
+    message.warning('还有文件正在上传中，请稍后提交')
+    return
+  }
   if (!formRef) return
   const valid = await formRef.value.validate()
   if (!valid) return
@@ -603,6 +654,24 @@ watch(
     const oldYear = oldVal ? dateUtil(oldVal).format('YYYY') : ''
     if (newYear !== oldYear) {
       generateReceiveDocNumber()
+    }
+  }
+)
+
+watch(
+  () => formData.value.attachFilePath,
+  (newVal) => {
+    // 当存在上传文件，且当前的“文件标题”为空时才自动填充（避免覆盖用户手动输入的值）
+    if (newVal && !formData.value.subject && uploadFileRef.value?.fileList?.length > 0) {
+      const firstFileName = uploadFileRef.value.fileList[0].name
+
+      if (firstFileName) {
+        // 提取文件名并去掉后缀 (例如: "会议记录.pdf" -> "会议记录")
+        const lastDotIndex = firstFileName.lastIndexOf('.')
+        const title = lastDotIndex > -1 ? firstFileName.substring(0, lastDotIndex) : firstFileName
+
+        formData.value.subject = title
+      }
     }
   }
 )

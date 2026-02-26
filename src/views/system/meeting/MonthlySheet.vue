@@ -21,11 +21,10 @@
       <el-button
         type="success"
         plain
-        icon="Download"
         @click="handleExport"
         :loading="exportLoading"
       >
-        导出 Excel
+        <Icon icon="ep:download" />导出 Excel
       </el-button>
     </div>
 
