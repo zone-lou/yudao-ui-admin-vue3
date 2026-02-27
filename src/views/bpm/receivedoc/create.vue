@@ -452,10 +452,10 @@ const handleSubmit = async () => {
           formData.value.tempNextUserSelectAssignees
         ]
       }
-      data.processVariablesStr = JSON.stringify({
-        [formData.value.nextNode.conditionExpression.key]:
-          formData.value.nextNode.conditionExpression.value
-      })
+      const condition = formData.value.nextNode?.conditionExpression
+      data.processVariablesStr = condition?.key
+        ? JSON.stringify({ [condition.key]: condition.value })
+        : '{}'
     }
 
     console.log(data, '提交请求数据')
@@ -487,14 +487,16 @@ const getApprovalDetail = async () => {
   // 如果是修改流程中表单，不需要重新计算下一节点
   if (formData.value.processInstanceId) return
 
+  const condition = formData.value.nextNode?.conditionExpression
+  const processVariablesStr = condition?.key
+    ? JSON.stringify({ [condition.key]: condition.value })
+    : '{}'
+
   try {
     const data = await ProcessInstanceApi.getApprovalDetail({
       processDefinitionId: processDefinitionId.value,
       activityId: NodeId.START_USER_NODE_ID,
-      processVariablesStr: JSON.stringify({
-        [formData.value.nextNode.conditionExpression.key]:
-          formData.value.nextNode.conditionExpression.value
-      })
+      processVariablesStr
     })
 
     if (!data) {
