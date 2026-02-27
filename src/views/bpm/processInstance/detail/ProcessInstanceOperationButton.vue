@@ -13,222 +13,15 @@
       <Icon icon="ep:document-copy" />&nbsp; 保存草稿
     </el-button>
 
-    <!-- 【通过】按钮 -->
+    <!-- 【发送】按钮 -->
     <el-button
       v-if="runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.APPROVE)"
       plain
       type="success"
       @click="openApproveDialog"
     >
-      <Icon icon="ep:select" />&nbsp; {{ getButtonDisplayName(OperationButtonType.APPROVE) }}
+      <Icon icon="ep:select" />&nbsp; 发送
     </el-button>
-
-    <!-- 【拒绝】按钮 -->
-    <!-- <el-popover
-      :visible="popOverVisible.reject"
-      placement="top-end"
-      :width="420"
-      trigger="click"
-      v-if="runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.REJECT)"
-    >
-      <template #reference>
-        <el-button class="mr-20px" plain type="danger" @click="openPopover('reject')">
-          <Icon icon="ep:close" />&nbsp; {{ getButtonDisplayName(OperationButtonType.REJECT) }}
-        </el-button>
-      </template>
-      //审批表单
-      <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
-        <el-form
-          label-position="top"
-          class="mb-auto"
-          ref="rejectFormRef"
-          :model="rejectReasonForm"
-          :rules="rejectReasonRule"
-          label-width="100px"
-        >
-          <el-form-item label="审批意见" prop="reason">
-            <el-input
-              v-model="rejectReasonForm.reason"
-              placeholder="请输入审批意见"
-              type="textarea"
-              :rows="4"
-            />
-          </el-form-item>
-          <el-form-item>
-            <el-button
-              :disabled="formLoading"
-              type="danger"
-              @click="handleAudit(false, rejectFormRef)"
-            >
-              {{ getButtonDisplayName(OperationButtonType.REJECT) }}
-            </el-button>
-            <el-button @click="closePopover('reject', rejectFormRef)"> 取消 </el-button>
-          </el-form-item>
-        </el-form>
-      </div>
-    </el-popover> -->
-
-    <!-- 【抄送】按钮 -->
-    <!-- <el-popover
-      :visible="popOverVisible.copy"
-      placement="top-start"
-      :width="420"
-      trigger="click"
-      v-if="runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.COPY)"
-    >
-      <template #reference>
-        <div @click="openPopover('copy')" class="hover-bg-gray-100 rounded-xl p-6px">
-          <Icon :size="14" icon="svg-icon:send" />&nbsp;
-          {{ getButtonDisplayName(OperationButtonType.COPY) }}
-        </div>
-      </template>
-      <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
-        <el-form
-          label-position="top"
-          class="mb-auto"
-          ref="copyFormRef"
-          :model="copyForm"
-          :rules="copyFormRule"
-          label-width="100px"
-        >
-          <el-form-item label="抄送人" prop="copyUserIds">
-            <el-select
-              v-model="copyForm.copyUserIds"
-              clearable
-              style="width: 100%"
-              multiple
-              placeholder="请选择抄送人"
-            >
-              <el-option
-                v-for="item in userOptions"
-                :key="item.id"
-                :label="item.nickname"
-                :value="item.id"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="抄送意见" prop="copyReason">
-            <el-input
-              v-model="copyForm.copyReason"
-              clearable
-              placeholder="请输入抄送意见"
-              type="textarea"
-              :rows="3"
-            />
-          </el-form-item>
-          <el-form-item>
-            <el-button :disabled="formLoading" type="primary" @click="handleCopy">
-              {{ getButtonDisplayName(OperationButtonType.COPY) }}
-            </el-button>
-            <el-button @click="closePopover('copy', copyFormRef)"> 取消 </el-button>
-          </el-form-item>
-        </el-form>
-      </div>
-    </el-popover> -->
-
-    <!-- 【转办】按钮 -->
-    <!-- <el-popover
-      :visible="popOverVisible.transfer"
-      placement="top-start"
-      :width="420"
-      trigger="click"
-      v-if="runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.TRANSFER)"
-    >
-      <template #reference>
-        <div @click="openPopover('transfer')" class="hover-bg-gray-100 rounded-xl p-6px">
-          <Icon :size="14" icon="fa:share-square-o" />&nbsp;
-          {{ getButtonDisplayName(OperationButtonType.TRANSFER) }}
-        </div>
-      </template>
-      <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
-        <el-form
-          label-position="top"
-          class="mb-auto"
-          ref="transferFormRef"
-          :model="transferForm"
-          :rules="transferFormRule"
-          label-width="100px"
-        >
-          <el-form-item label="新审批人" prop="assigneeUserId">
-            <el-select v-model="transferForm.assigneeUserId" clearable style="width: 100%">
-              <el-option
-                v-for="item in userOptions"
-                :key="item.id"
-                :label="item.nickname"
-                :value="item.id"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="审批意见" prop="reason">
-            <el-input
-              v-model="transferForm.reason"
-              clearable
-              placeholder="请输入审批意见"
-              type="textarea"
-              :rows="3"
-            />
-          </el-form-item>
-          <el-form-item>
-            <el-button :disabled="formLoading" type="primary" @click="handleTransfer()">
-              {{ getButtonDisplayName(OperationButtonType.TRANSFER) }}
-            </el-button>
-            <el-button @click="closePopover('transfer', transferFormRef)"> 取消 </el-button>
-          </el-form-item>
-        </el-form>
-      </div>
-    </el-popover> -->
-
-    <!-- 【委派】按钮 -->
-    <!-- <el-popover
-      :visible="popOverVisible.delegate"
-      placement="top-start"
-      :width="420"
-      trigger="click"
-      v-if="runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.DELEGATE)"
-    >
-      <template #reference>
-        <div @click="openPopover('delegate')" class="hover-bg-gray-100 rounded-xl p-6px">
-          <Icon :size="14" icon="ep:position" />&nbsp;
-          {{ getButtonDisplayName(OperationButtonType.DELEGATE) }}
-        </div>
-      </template>
-      <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
-        <el-form
-          label-position="top"
-          class="mb-auto"
-          ref="delegateFormRef"
-          :model="delegateForm"
-          :rules="delegateFormRule"
-          label-width="100px"
-        >
-          <el-form-item label="接收人" prop="delegateUserId">
-            <el-select v-model="delegateForm.delegateUserId" clearable style="width: 100%">
-              <el-option
-                v-for="item in userOptions"
-                :key="item.id"
-                :label="item.nickname"
-                :value="item.id"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="审批意见" prop="reason">
-            <el-input
-              v-model="delegateForm.reason"
-              clearable
-              placeholder="请输入审批意见"
-              type="textarea"
-              :rows="3"
-            />
-          </el-form-item>
-          <el-form-item>
-            <el-button :disabled="formLoading" type="primary" @click="handleDelegate()">
-              {{ getButtonDisplayName(OperationButtonType.DELEGATE) }}
-            </el-button>
-            <el-button @click="closePopover('delegate', delegateFormRef)"> 取消 </el-button>
-          </el-form-item>
-        </el-form>
-      </div>
-    </el-popover> -->
 
     <!-- 【加签】按钮 当前任务审批人为A，向前加签选了一个C，则需要C先审批，然后再是A审批，向后加签B，A审批完，需要B再审批完，才算完成这个任务节点 -->
     <el-popover
@@ -445,10 +238,10 @@
     </div>
   </div>
 
-  <!-- 审批通过弹窗 -->
+  <!-- 发送弹窗 -->
   <el-dialog
     v-model="approveDialogVisible"
-    title="审批通过"
+    title="发送"
     width="900px"
     append-to-body
     destroy-on-close
@@ -469,60 +262,65 @@
       </el-form-item>
 
       <div v-if="approvalNodes.length > 0" class="mb-10px">
-        <div class="font-bold mb-5px">选择下一需处理节点及审批人</div>
-        <div class="flex flex-row overflow-x-auto gap-4 pb-2 select-none">
-          <div
+        <el-tabs v-model="activeTab" class="w-full">
+          <el-tab-pane
             v-for="node in approvalNodes"
             :key="node.taskDefKey"
-            class="border border-gray-200 rounded-lg p-3 bg-gray-50/50 dark:bg-gray-800/50 flex-none w-[280px] h-[500px] flex flex-col shadow-sm hover:shadow-md transition-shadow"
+            :label="node.name || node.taskName"
+            :name="node.taskDefKey"
           >
+            <!-- 节点人员树区域 -->
             <div
-              class="flex items-center justify-between mb-3 pb-2 border-b border-gray-200 dark:border-gray-700 flex-none"
+              class="border border-gray-200 rounded-lg p-3 bg-gray-50/50 dark:bg-gray-800/50 flex flex-col shadow-sm hover:shadow-md transition-shadow h-[400px]"
             >
-              <el-checkbox
-                v-model="node.checked"
-                :label="node.name || node.taskName"
-                size="large"
-                class="!font-bold !text-gray-800 dark:!text-gray-200"
-              >
-                {{ node.name || node.taskName }}
-              </el-checkbox>
-            </div>
-            <div class="pl-2 flex-1 overflow-y-auto custom-scrollbar">
               <div
-                v-if="!node.candidateUsers || node.candidateUsers.length === 0"
-                class="text-gray-400 text-sm h-full flex items-center justify-center text-center px-4"
+                class="flex items-center justify-between mb-3 pb-2 border-b border-gray-200 dark:border-gray-700 flex-none"
               >
-                无需选择审批人<br />(自动分配或无需审批)
+                <el-checkbox
+                  v-model="node.checked"
+                  :label="node.name || node.taskName"
+                  size="large"
+                  class="!font-bold !text-gray-800 dark:!text-gray-200"
+                >
+                  {{ node.name || node.taskName }}
+                </el-checkbox>
               </div>
-              <el-tree
-                class="!bg-transparent"
-                v-else
-                :ref="(el) => setTreeRef(el, node.taskDefKey)"
-                :data="node.candidateUsers"
-                :props="{ label: 'name', children: 'children' }"
-                show-checkbox
-                node-key="id"
-                default-expand-all
-                :check-strictly="false"
-                @check="(_, { checkedKeys }) => handleTreeCheck(node, checkedKeys)"
-              >
-                <template #default="{ data }">
-                  <span
-                    :class="{
-                      'font-bold text-gray-700 dark:text-gray-200':
-                        data.children && data.children.length > 0,
-                      'text-blue-600 dark:text-blue-400':
-                        !data.children || data.children.length === 0
-                    }"
-                  >
-                    {{ data.name }}
-                  </span>
-                </template>
-              </el-tree>
+              <div class="pl-2 flex-1 overflow-y-auto custom-scrollbar">
+                <div
+                  v-if="!node.candidateUsers || node.candidateUsers.length === 0"
+                  class="text-gray-400 text-sm h-full flex items-center justify-center text-center px-4"
+                >
+                  无需选择审批人<br />(自动分配或无需审批)
+                </div>
+                <el-tree
+                  class="!bg-transparent"
+                  v-else
+                  :ref="(el) => setTreeRef(el, node.taskDefKey)"
+                  :data="node.candidateUsers"
+                  :props="{ label: 'name', children: 'children' }"
+                  show-checkbox
+                  node-key="id"
+                  default-expand-all
+                  :check-strictly="false"
+                  @check="(data, { checkedKeys }) => handleTreeCheck(node, data, checkedKeys)"
+                >
+                  <template #default="{ data }">
+                    <span
+                      :class="{
+                        'font-bold text-gray-700 dark:text-gray-200':
+                          data.children && data.children.length > 0,
+                        'text-blue-600 dark:text-blue-400':
+                          !data.children || data.children.length === 0
+                      }"
+                    >
+                      {{ data.name }}
+                    </span>
+                  </template>
+                </el-tree>
+              </div>
             </div>
-          </div>
-        </div>
+          </el-tab-pane>
+        </el-tabs>
       </div>
     </el-form>
     <template #footer>
@@ -539,20 +337,16 @@
 <script lang="ts" setup>
 import { useUserStoreWithOut } from '@/store/modules/user'
 import { setConfAndFields2 } from '@/utils/formCreate'
-import * as TaskApi from '@/api/bpm/task'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
-import * as UserApi from '@/api/system/user'
+import * as TaskApi from '@/api/bpm/task'
 import {
-  NodeType,
-  OPERATION_BUTTON_NAME,
   OperationButtonType,
-  CandidateStrategy
+  OPERATION_BUTTON_NAME,
+  NodeType
 } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { BpmModelFormType, BpmProcessInstanceStatus } from '@/utils/constants'
 import type { FormInstance, FormRules } from 'element-plus'
 import SignDialog from './SignDialog.vue'
-import ProcessInstanceTimeline from '../detail/ProcessInstanceTimeline.vue'
-import { isEmpty } from '@/utils/is'
 
 defineOptions({ name: 'ProcessInstanceBtnContainer' })
 
@@ -565,7 +359,7 @@ const emit = defineEmits(['success']) // 定义 success 事件，用于操作成
 const props = defineProps<{
   processInstance: any // 流程实例信息
   processDefinition: any // 流程定义信息
-  userOptions: UserApi.UserVO[]
+  userOptions: any[]
   normalForm: any // 流程表单 formCreate
   normalFormApi: any // 流程表单 formCreate Api
   writableFields: string[] // 流程表单可以编辑的字段
@@ -587,24 +381,14 @@ const popOverVisible = ref({
   deleteSign: false
 }) // 气泡卡是否展示
 const returnList = ref([] as any) // 退回节点
-
-// ========== 审批信息 ==========
 const runningTask = ref<any>() // 运行中的任务
+const nodeTypeName = ref('审批') // 节点类型名称
 const approveForm = ref<any>({}) // 审批通过时，额外的补充信息
 const approveFormFApi = ref<any>({}) // approveForms 的 fAPi
-const nodeTypeName = ref('审批') // 节点类型名称
 
-// 审批通过意见表单
+const nextAssigneesTimelineRef = ref() // 下一个节点审批人时间线组件的引用
 const reasonRequire = ref()
 const approveFormRef = ref<FormInstance>()
-const signRef = ref()
-const approveSignFormRef = ref()
-const selectNode = ref()
-const tempNextUserSelectAssignees = ref()
-const selectUserOptions = ref([])
-const multipleFlag = ref(false)
-const nextAssigneesActivityNode = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([]) // 下一个审批节点信息
-const nextAssigneesTimelineRef = ref() // 下一个节点审批人时间线组件的引用
 const approveReasonForm = reactive({
   reason: '',
   signPicUrl: '',
@@ -618,63 +402,6 @@ const approveReasonRule = computed(() => {
     signPicUrl: [{ required: true, message: '签名不能为空', trigger: 'change' }],
     nextAssignees: [{ required: true, message: '审批人不能为空', trigger: 'blur' }]
   }
-})
-const nodeChange = async (val) => {
-  if (val.taskDefKey !== 'end') {
-    await getSelectUsers(val.extensionProperties)
-  }
-}
-
-const getSelectUsers = async (item) => {
-  const data = await ProcessInstanceApi.getSelectUserOptions({
-    // TODO 小北：可以支持 processDefinitionKey 查询
-    chooseRule: item.choose_rule,
-    ruleValue: item.rule_value
-  })
-  multipleFlag.value = item.multiple_flag === '1'
-  selectUserOptions.value = data
-}
-// 拒绝表单
-const rejectFormRef = ref<FormInstance>()
-const rejectReasonForm = reactive({
-  reason: ''
-})
-const rejectReasonRule = computed(() => {
-  return {
-    reason: [{ required: reasonRequire.value, message: '审批意见不能为空', trigger: 'blur' }]
-  }
-})
-
-// 抄送表单
-const copyFormRef = ref<FormInstance>()
-const copyForm = reactive({
-  copyUserIds: [],
-  copyReason: ''
-})
-const copyFormRule = reactive<FormRules<typeof copyForm>>({
-  copyUserIds: [{ required: true, message: '抄送人不能为空', trigger: 'change' }]
-})
-
-// 转办表单
-const transferFormRef = ref<FormInstance>()
-const transferForm = reactive({
-  assigneeUserId: undefined,
-  reason: ''
-})
-const transferFormRule = reactive<FormRules<typeof transferForm>>({
-  assigneeUserId: [{ required: true, message: '新审批人不能为空', trigger: 'change' }],
-  reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }]
-})
-
-// 委派表单
-const delegateFormRef = ref<FormInstance>()
-const delegateForm = reactive({
-  delegateUserId: undefined,
-  reason: ''
-})
-const delegateFormRule = reactive<FormRules<typeof delegateForm>>({
-  delegateUserId: [{ required: true, message: '接收人不能为空', trigger: 'change' }],
-  reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }]
 })
 
 // 加签表单
@@ -734,22 +461,22 @@ watch(
 /** 弹出气泡卡 */
 const openPopover = async (type: string) => {
   if (popOverVisible.value[type] === true) return
-  if (type === 'approve') {
-    // 校验流程表单
-    const valid = await validateNormalForm()
-    if (!valid) {
-      message.warning('表单校验不通过，请先完善表单!!')
-      return
-    }
-    initNextAssigneesFormField()
-    // 获取意见
-    if (props.getBusinessFormReason) {
-      const opinion = await props.getBusinessFormReason()
-      if (opinion) {
-        approveReasonForm.reason = opinion
-      }
-    }
-  }
+  // if (type === 'approve') {
+  //   // 校验流程表单
+  //   const valid = await validateNormalForm()
+  //   if (!valid) {
+  //     message.warning('表单校验不通过，请先完善表单!!')
+  //     return
+  //   }
+  //   // initNextAssigneesFormField()  // 未定义函数，先注释或者删除
+  //   // 获取意见
+  //   if (props.getBusinessFormReason) {
+  //     const opinion = await props.getBusinessFormReason()
+  //     if (opinion) {
+  //       approveReasonForm.reason = opinion
+  //     }
+  //   }
+  // }
   if (type === 'return') {
     // 获取退回节点
     returnList.value = await TaskApi.getTaskListByReturn(runningTask.value.id)
@@ -771,7 +498,6 @@ const closePopover = (type: string, formRef: FormInstance | undefined) => {
     formRef.resetFields()
   }
   popOverVisible.value[type] = false
-  nextAssigneesActivityNode.value = []
   // 清理 Timeline 组件中的自定义审批人数据
   if (nextAssigneesTimelineRef.value) {
     nextAssigneesTimelineRef.value.batchSetCustomApproveUsers({})
@@ -779,6 +505,7 @@ const closePopover = (type: string, formRef: FormInstance | undefined) => {
 }
 
 // 新增 Dialog 可见性控制
+const activeTab = ref('')
 const approveDialogVisible = ref(false)
 const approvalNodes = ref<any[]>([])
 
@@ -816,7 +543,17 @@ const loadApprovalNodes = async () => {
     })
     console.log('NextSelectNodes:', data)
 
+    // 分类逻辑已在 categorizedNodes computed 属性中处理
+
     if (data && data.length > 0) {
+      // 需求：主办科室节点置顶
+      data.sort((a: any, b: any) => {
+        const aName = a.taskName || a.name || ''
+        const bName = b.taskName || b.name || ''
+        if (aName.includes('主办') && !bName.includes('主办')) return -1
+        if (!aName.includes('主办') && bName.includes('主办')) return 1
+        return 0
+      })
       for (const node of data) {
         node.checked = false
         node.selectedUsers = []
@@ -849,6 +586,9 @@ const loadApprovalNodes = async () => {
       }
     }
     approvalNodes.value = data || []
+    if (approvalNodes.value.length > 0) {
+      activeTab.value = approvalNodes.value[0].taskDefKey
+    }
   } finally {
     formLoading.value = false
   }
@@ -891,7 +631,18 @@ const buildDeptTree = (users: any[]) => {
 }
 
 /** 树节点选中回调 */
-const handleTreeCheck = (node: any, checkedKeys: any[]) => {
+const handleTreeCheck = (node: any, data: any, checkedKeys: any[]) => {
+  // 单选逻辑处理：如果 multiple_flag 为 0 且当前勾选数超过 1
+  if (node.extensionProperties?.multiple_flag === '0') {
+    const treeRef = userTreeRefs.value[node.taskDefKey]
+    if (treeRef) {
+      // 强制只选中当前点击的节点（如果是人则选人，如果是部门则根据 el-tree 配置决定）
+      treeRef.setCheckedKeys([data.id])
+      node.checked = true
+      return
+    }
+  }
+
   // 如果选中了人，自动勾选节点
   if (checkedKeys.length > 0) {
     node.checked = true
@@ -912,6 +663,7 @@ const handleApproveConfirm = async () => {
   // 遍历 selectedNodes
   const nextNodeAssignees: Record<string, number[]> = {}
   const variables: Record<string, any> = {}
+  const addsignUserIds: number[] = []
 
   for (const node of selectedNodes) {
     // 获取该节点下选中的用户
@@ -927,7 +679,13 @@ const handleApproveConfirm = async () => {
       message.warning(`节点【${node.taskName}】请至少选择一名审批人`)
       return
     }
-    nextNodeAssignees[node.taskDefKey] = userIds
+
+    // 需求：如果包含 _internal_loop，则将人员放入 addsignUserIds 而非 nextNodeAssignees
+    if (node.taskDefKey.includes('_internal_loop')) {
+      addsignUserIds.push(...userIds)
+    } else {
+      nextNodeAssignees[node.taskDefKey] = userIds
+    }
 
     // 设置变量
     if (node.conditionExpression) {
@@ -940,7 +698,8 @@ const handleApproveConfirm = async () => {
     id: runningTask.value.id,
     reason: approveReasonForm.reason,
     variables: { ...getUpdatedProcessInstanceVariables(), ...variables }, // 合并变量
-    nextNodeAssignees: nextNodeAssignees
+    nextNodeAssignees: nextNodeAssignees,
+    addsignUserIds: addsignUserIds.length > 0 ? addsignUserIds : undefined
   } as any
   // 签名
   if (runningTask.value.signEnable) {
@@ -958,7 +717,7 @@ const handleApproveConfirm = async () => {
   formLoading.value = true
   try {
     await TaskApi.approveTask(data)
-    message.success('审批通过成功')
+    message.success('发送成功')
     approveDialogVisible.value = false
     reload()
   } finally {
@@ -966,105 +725,10 @@ const handleApproveConfirm = async () => {
   }
 }
 
-// 拒绝操作保持原有逻辑，或者直接复用 handleAudit (pass=false)
-const handleReject = async (formRef: FormInstance | undefined) => {
-  // ... 原有逻辑
-  const data = {
-    id: runningTask.value.id,
-    reason: rejectReasonForm.reason
-  }
-  await TaskApi.rejectTask(data)
-  popOverVisible.value.reject = false
-  message.success('审批不通过成功')
-  formRef?.resetFields()
-  reload()
-}
-
-/** 处理审批通过和不通过的操作 */
-// 保留此函数名以兼容模板调用 (Reject 还在用)
-const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => {
-  if (!pass) {
-    await handleReject(formRef)
-  } else {
-    // 旧逻辑已废弃，直接报错或空处理
-    console.error('Should not call handleAudit(true) anymore')
-  }
-}
 const userTreeRefs = ref<Record<string, any>>({})
 const setTreeRef = (el: any, key: string) => {
   if (el) {
     userTreeRefs.value[key] = el
-  }
-}
-
-/** 处理抄送 */
-const handleCopy = async () => {
-  formLoading.value = true
-  try {
-    // 1. 校验表单
-    if (!copyFormRef.value) return
-    await copyFormRef.value.validate()
-    // 2. 提交抄送
-    const data = {
-      id: runningTask.value.id,
-      reason: copyForm.copyReason,
-      copyUserIds: copyForm.copyUserIds
-    }
-    await TaskApi.copyTask(data)
-    copyFormRef.value.resetFields()
-    popOverVisible.value.copy = false
-    message.success('操作成功')
-  } finally {
-    formLoading.value = false
-  }
-}
-
-/** 处理转交 */
-const handleTransfer = async () => {
-  formLoading.value = true
-  try {
-    // 1.1 校验表单
-    if (!transferFormRef.value) return
-    await transferFormRef.value.validate()
-    // 1.2 提交转交
-    const data = {
-      id: runningTask.value.id,
-      reason: transferForm.reason,
-      assigneeUserId: transferForm.assigneeUserId
-    }
-    await TaskApi.transferTask(data)
-    transferFormRef.value.resetFields()
-    popOverVisible.value.transfer = false
-    message.success('操作成功')
-    // 2. 加载最新数据
-    reload()
-  } finally {
-    formLoading.value = false
-  }
-}
-
-/** 处理委派 */
-const handleDelegate = async () => {
-  formLoading.value = true
-  try {
-    // 1.1 校验表单
-    if (!delegateFormRef.value) return
-    await delegateFormRef.value.validate()
-    // 1.2 处理委派
-    const data = {
-      id: runningTask.value.id,
-      reason: delegateForm.reason,
-      delegateUserId: delegateForm.delegateUserId
-    }
-
-    await TaskApi.delegateTask(data)
-    popOverVisible.value.delegate = false
-    delegateFormRef.value.resetFields()
-    message.success('操作成功')
-    // 2. 加载最新数据
-    reload()
-  } finally {
-    formLoading.value = false
   }
 }
 
@@ -1073,8 +737,8 @@ const handlerAddSign = async (type: string) => {
   formLoading.value = true
   try {
     // 1.1 校验表单
-    if (!addSignFormRef.value) return
-    await addSignFormRef.value.validate()
+    if (!addSignFormRef.value) return // Corrected ref name from approveSignFormRef to addSignFormRef
+    await addSignFormRef.value.validate() // Corrected ref name from approveSignFormRef to addSignFormRef
     // 1.2 提交加签
     const data = {
       id: runningTask.value.id,
@@ -1185,7 +849,7 @@ const handlerDeleteSign = async () => {
     }
     await TaskApi.signDeleteTask(data)
     message.success('减签成功')
-    deleteSignFormRef.value.resetFields()
+    deleteSignFormRef.value?.resetFields()
     popOverVisible.value.deleteSign = false
     // 2 加载最新数据
     reload()
@@ -1281,7 +945,7 @@ const getUpdatedProcessInstanceVariables = () => {
 /** 处理签名完成 */
 const handleSignFinish = (url: string) => {
   approveReasonForm.signPicUrl = url
-  approveSignFormRef.value.validate('change')
+  approveFormRef.value?.validateField('signPicUrl')
 }
 
 defineExpose({ loadTodoTask })

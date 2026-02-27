@@ -184,7 +184,12 @@
             >
               <div>
                 <span class="font-bold" v-if="info.name">【{{ info.name }}】</span>
-                <span v-if="info.assigneeUser">{{ info.assigneeUser?.nickname }}: </span>
+                <span
+                  v-if="(info.name || '').includes('主办')"
+                  style="margin-right: 4px; font-weight: bold; color: red"
+                  >*</span
+                >
+                <span v-if="info.assigneeUser">{{ info.assigneeUser?.nickname }}:</span>
                 {{ info.comment }}
                 <span class="text-xs text-gray-400 ml-2" v-if="info.endTime">{{
                   formatDate(info.endTime)
@@ -313,6 +318,11 @@
           :key="'reader-' + index"
         >
           <td class="center-text data-text" style="height: 35px">
+            <span
+              v-if="(info.name || '').includes('主办')"
+              style="margin-right: 4px; font-weight: bold; color: red"
+              >*</span
+            >
             {{ info.assigneeUser?.nickname || info.name || '' }}
           </td>
           <td colspan="2" class="data-text" style="padding: 4px 8px; text-align: left">

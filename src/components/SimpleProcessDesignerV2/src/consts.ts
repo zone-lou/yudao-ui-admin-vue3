@@ -564,7 +564,7 @@ export const CANDIDATE_STRATEGY: DictDataVO[] = [
   { label: '表单内部门负责人', value: CandidateStrategy.FORM_DEPT_LEADER },
   { label: '手动选择', value: CandidateStrategy.MANUAL_SELECTED },
   { label: '流程表达式', value: CandidateStrategy.EXPRESSION },
-  { label: '分管领导', value: CandidateStrategy.LEADER_DEPT}
+  { label: '分管领导', value: CandidateStrategy.LEADER_DEPT }
 ]
 // 审批节点 的审批类型
 export const APPROVE_TYPE: DictDataVO[] = [
@@ -643,7 +643,7 @@ export const COMPARISON_OPERATORS: DictDataVO = [
 ]
 // 审批操作按钮名称
 export const OPERATION_BUTTON_NAME = new Map<number, string>()
-OPERATION_BUTTON_NAME.set(OperationButtonType.APPROVE, '通过')
+OPERATION_BUTTON_NAME.set(OperationButtonType.APPROVE, '发送')
 OPERATION_BUTTON_NAME.set(OperationButtonType.REJECT, '拒绝')
 OPERATION_BUTTON_NAME.set(OperationButtonType.TRANSFER, '转办')
 OPERATION_BUTTON_NAME.set(OperationButtonType.DELEGATE, '委派')
@@ -653,7 +653,7 @@ OPERATION_BUTTON_NAME.set(OperationButtonType.COPY, '抄送')
 
 // 默认的按钮权限设置
 export const DEFAULT_BUTTON_SETTING: ButtonSetting[] = [
-  { id: OperationButtonType.APPROVE, displayName: '通过', enable: true },
+  { id: OperationButtonType.APPROVE, displayName: '发送', enable: true },
   { id: OperationButtonType.REJECT, displayName: '拒绝', enable: true },
   { id: OperationButtonType.TRANSFER, displayName: '转办', enable: true },
   { id: OperationButtonType.DELEGATE, displayName: '委派', enable: true },
@@ -719,7 +719,7 @@ export enum ProcessVariableEnum {
   /**
    * 自定义标题
    */
-  PROCESS_CUSTOM_NAME = 'PROCESS_CUSTOM_NAME',
+  PROCESS_CUSTOM_NAME = 'PROCESS_CUSTOM_NAME'
 }
 
 /**

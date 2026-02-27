@@ -68,7 +68,7 @@ import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { leaveApi, leave } from '@/api/bpm/leave'
 
 /** 假期申请审批 表单 */
-defineOptions({ name: 'leaveForm' })
+defineOptions({ name: 'LeaveForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
