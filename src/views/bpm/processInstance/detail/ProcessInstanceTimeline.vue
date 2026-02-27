@@ -29,11 +29,6 @@
         <!-- 第一行：节点名称、时间 -->
         <div class="flex w-full">
           <div class="font-bold">
-            <span
-              v-if="(activity.name || '').includes('主办')"
-              style="margin-right: 4px; font-weight: bold; color: red"
-              >*</span
-            >
             {{ activity.name }}
             <span v-if="activity.status === TaskStatusEnum.SKIP">【跳过】</span>
           </div>
@@ -109,11 +104,6 @@
                   <el-avatar class="!m-5px" :size="28" v-else>
                     {{ task.assigneeUser?.nickname.substring(0, 1) }}
                   </el-avatar>
-                  <span
-                    v-if="(activity.name || '').includes('主办')"
-                    style="margin-right: 4px; font-weight: bold; color: red"
-                    >*</span
-                  >
                   {{ task.assigneeUser?.nickname }}
                 </template>
                 <template v-else-if="task.ownerUser?.avatar || task.ownerUser?.nickname">
@@ -126,11 +116,6 @@
                   <el-avatar class="!m-5px" :size="28" v-else>
                     {{ task.ownerUser?.nickname.substring(0, 1) }}
                   </el-avatar>
-                  <span
-                    v-if="(activity.name || '').includes('主办')"
-                    style="margin-right: 4px; font-weight: bold; color: red"
-                    >*</span
-                  >
                   {{ task.ownerUser?.nickname }}
                 </template>
                 <!-- 信息：任务 ICON -->

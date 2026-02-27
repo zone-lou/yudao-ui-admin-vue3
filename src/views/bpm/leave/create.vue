@@ -352,7 +352,7 @@ const calculateDuration = async () => {
     }
     currentDate = currentDate.add(1, 'day')
   }
-  console.log(totalDays,'dasfdds')
+  console.log(totalDays, 'dasfdds')
   duration.value = totalDays
   formData.value.totalTs = totalDays
 }

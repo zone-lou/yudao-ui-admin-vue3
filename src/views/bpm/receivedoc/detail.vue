@@ -285,6 +285,7 @@
             isEditable('阅办') ||
             isEditable('科室') ||
             isEditable('办公室转发') ||
+            isEditable('办公室确认') ||
             isEditable('主办') ||
             isEditable('协办')
           "
@@ -310,6 +311,7 @@
             isEditable('阅办') ||
               isEditable('科室') ||
               isEditable('办公室转发') ||
+              isEditable('办公室确认') ||
               isEditable('主办') ||
               isEditable('协办')
               ? 0
@@ -505,6 +507,7 @@ const processActivityNodes = () => {
             name.includes('阅办') ||
             name.includes('科室') ||
             name.includes('办公室转发') ||
+            name.includes('办公室确认') ||
             name.includes('主办') ||
             name.includes('协办')
           ) {

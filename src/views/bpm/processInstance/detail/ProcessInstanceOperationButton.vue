@@ -13,14 +13,15 @@
       <Icon icon="ep:document-copy" />&nbsp; 保存草稿
     </el-button>
 
-    <!-- 【发送】按钮 -->
+    <!-- 【发送/办结】按钮 -->
     <el-button
       v-if="runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.APPROVE)"
       plain
       type="success"
-      @click="openApproveDialog"
+      @click="isOnlyEndNode ? handleDirectFinish() : openApproveDialog()"
     >
-      <Icon icon="ep:select" />&nbsp; 发送
+      <Icon icon="ep:select" />&nbsp;
+      {{ isOnlyEndNode ? '办结' : getButtonDisplayName(OperationButtonType.APPROVE) }}
     </el-button>
 
     <!-- 【加签】按钮 当前任务审批人为A，向前加签选了一个C，则需要C先审批，然后再是A审批，向后加签B，A审批完，需要B再审批完，才算完成这个任务节点 -->
@@ -509,6 +510,77 @@ const activeTab = ref('')
 const approveDialogVisible = ref(false)
 const approvalNodes = ref<any[]>([])
 
+/** 判断是否只有结束节点 */
+const isOnlyEndNode = computed(() => {
+  if (props.nextNodes && props.nextNodes.length === 1) {
+    const node = props.nextNodes[0] || {}
+    const nameStr = (node.name || node.taskName || '').toLowerCase()
+    return node.type === 1 || node.taskDefKey?.includes('EndEvent') || nameStr.includes('结束')
+  }
+  return false
+})
+
+/** 一键直接办结节点（跳过弹窗选择） */
+const handleDirectFinish = async () => {
+  // 1. 校验流程表单
+  const valid = await validateNormalForm()
+  if (!valid) {
+    message.warning('表单校验不通过，请先完善表单!!')
+    return
+  }
+
+  // 若开启了在线签名要求，为了复用原有交互，回退到打开详实发送弹窗由其管理（如确有此需求可在这里唤起签版）
+  if (runningTask.value?.signEnable && !approveReasonForm.signPicUrl) {
+    return openApproveDialog()
+  }
+
+  try {
+    await message.confirm('是否办结？', '流程办结提示')
+  } catch {
+    return
+  }
+
+  // 2. 获取业务表单意见
+  let reason = approveReasonForm.reason
+  if (props.getBusinessFormReason) {
+    const opinion = await props.getBusinessFormReason()
+    if (opinion) {
+      reason = opinion
+    }
+  }
+
+  // 3. 构建请求级多表单变量
+  let variables = getUpdatedProcessInstanceVariables()
+  const formCreateApi = approveFormFApi.value
+  if (Object.keys(formCreateApi)?.length > 0) {
+    await formCreateApi.validate()
+    // @ts-ignore
+    variables = { ...variables, ...approveForm.value.value }
+  }
+
+  // 4. 发起直接办结请求
+  const data = {
+    id: runningTask.value.id,
+    reason: reason || '同意',
+    variables: variables,
+    nextNodeAssignees: {} // 结束节点时无下一处理人
+  } as any
+
+  if (runningTask.value?.signEnable) {
+    data.signPicUrl = approveReasonForm.signPicUrl
+  }
+
+  formLoading.value = true
+  try {
+    await TaskApi.approveTask(data)
+    message.success('办结操作成功')
+    approveDialogVisible.value = false
+    reload()
+  } finally {
+    formLoading.value = false
+  }
+}
+
 /** 打开审批弹窗 */
 const openApproveDialog = async () => {
   // 校验流程表单
@@ -555,6 +627,10 @@ const loadApprovalNodes = async () => {
         return 0
       })
       for (const node of data) {
+        // 需求：如果是内循环节点，过滤掉本人
+        if (node.taskDefKey.includes('_internal_loop') && node.candidateUsers) {
+          node.candidateUsers = filterTreeMySelf(node.candidateUsers, userId)
+        }
         node.checked = false
         node.selectedUsers = []
 
@@ -662,17 +738,16 @@ const handleApproveConfirm = async () => {
   // 校验节点下的人员
   // 遍历 selectedNodes
   const nextNodeAssignees: Record<string, number[]> = {}
+  const addSignUserIds: number[] = []
   const variables: Record<string, any> = {}
-  const addsignUserIds: number[] = []
 
   for (const node of selectedNodes) {
     // 获取该节点下选中的用户
-    // 我们需要 ref 引用
     const treeRef = userTreeRefs.value[node.taskDefKey]
     if (!treeRef) continue
 
     const checkedNodes = treeRef.getCheckedNodes(true, false) // leafOnly = true
-    // 过滤出用户(假设有 nickname 字段的是用户)
+    // 过滤出用户
     const userIds = checkedNodes.filter((n: any) => n.id && n.nickname).map((n: any) => n.id)
 
     if (userIds.length === 0) {
@@ -680,9 +755,9 @@ const handleApproveConfirm = async () => {
       return
     }
 
-    // 需求：如果包含 _internal_loop，则将人员放入 addsignUserIds 而非 nextNodeAssignees
+    // 需求：如果节点包含 _internal_loop，人员放入 addSignUserIds
     if (node.taskDefKey.includes('_internal_loop')) {
-      addsignUserIds.push(...userIds)
+      addSignUserIds.push(...userIds)
     } else {
       nextNodeAssignees[node.taskDefKey] = userIds
     }
@@ -698,8 +773,8 @@ const handleApproveConfirm = async () => {
     id: runningTask.value.id,
     reason: approveReasonForm.reason,
     variables: { ...getUpdatedProcessInstanceVariables(), ...variables }, // 合并变量
-    nextNodeAssignees: nextNodeAssignees,
-    addsignUserIds: addsignUserIds.length > 0 ? addsignUserIds : undefined
+    nextNodeAssignees,
+    addSignUserIds: addSignUserIds.length > 0 ? addSignUserIds : undefined
   } as any
   // 签名
   if (runningTask.value.signEnable) {
@@ -949,6 +1024,38 @@ const handleSignFinish = (url: string) => {
 }
 
 defineExpose({ loadTodoTask })
+/** 过滤掉树中的本人 */
+const filterTreeMySelf = (treeData: any[], currentUserId: number) => {
+  if (!treeData || treeData.length === 0) return []
+
+  const result: any[] = []
+  treeData.forEach((node) => {
+    // 如果是用户节点（假设没有 children 字段且 ID 匹配，或者通过 nickname 判定）
+    if (
+      (!node.children || node.children.length === 0) &&
+      node.id === currentUserId &&
+      (node.nickname || node.name)
+    ) {
+      return
+    }
+
+    // 如果有子节点（部门），递归处理
+    if (node.children && node.children.length > 0) {
+      const filteredChildren = filterTreeMySelf(node.children, currentUserId)
+      // 如果部门下还有人或子部门，保留该部门
+      if (filteredChildren.length > 0) {
+        result.push({
+          ...node,
+          children: filteredChildren
+        })
+      }
+    } else {
+      // 叶子节点且不匹配，保留
+      result.push(node)
+    }
+  })
+  return result
+}
 </script>
 
 <style lang="scss" scoped>

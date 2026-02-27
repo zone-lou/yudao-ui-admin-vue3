@@ -163,7 +163,8 @@ defineOptions({ name: 'BpmConfflowCreate' })
 const userStore = useUserStore()
 const message = useMessage() // 消息弹窗
 const { delView } = useTagsViewStore() // 视图操作
-const { push, currentRoute } = useRouter() // 路由
+const { push } = useRouter() // 路由
+const route = useRoute()
 
 const formLoading = ref(false)
 const multipleFlag = ref(false)
@@ -274,8 +275,8 @@ const submitForm = async () => {
     message.success('发起成功')
 
     // 关闭当前 Tab 并跳转
-    delView(unref(currentRoute))
-    await push({ name: 'BpmProcessInstanceMy' }) // 假设跳转到“我的流程”
+    delView(route)
+    await push('/bpm/OAdoc/conference-report') // 跳转到会议报告单列表
   } finally {
     formLoading.value = false
   }

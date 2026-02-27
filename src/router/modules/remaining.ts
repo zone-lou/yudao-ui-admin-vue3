@@ -208,7 +208,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
     path: '/sso-redirect',
     component: () => import('@/views/Login/SsoRedirect.vue'), // 确保文件路径正确
     name: 'SsoRedirect', // 不在侧边栏显示
-    meta: { noCache: true,hidden:true,title:"单点登录跳转" }
+    meta: { noCache: true, hidden: true, title: '单点登录跳转' }
   },
   {
     path: '/sso-error',
@@ -253,7 +253,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
     meta: {
       title: '月度查询导出',
       hidden: true, // 不在侧边栏显示
-      activeMenu: '/system/meeting/', // 激活父级菜单的高亮
+      activeMenu: '/system/meeting/' // 激活父级菜单的高亮
       // canTo: true, // 如果有鉴权拦截，可能需要配置
     }
   },
@@ -298,7 +298,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
           hidden: true,
           canTo: true,
           title: '流程详情',
-          activeMenu: '/bpm/task/my'
+          activeMenu: '/bpm/done'
         },
         props: (route) => ({
           id: route.query.id,
