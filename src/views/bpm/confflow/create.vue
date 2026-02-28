@@ -284,7 +284,7 @@ const submitForm = async () => {
 
     // 关闭当前 Tab 并跳转
     delView(route)
-    await push('/bpm/OAdoc/confflow') // 跳转到会议报告单列表
+    await push('/bpm/unified') // 跳转到统一办件列表
   } finally {
     formLoading.value = false
   }

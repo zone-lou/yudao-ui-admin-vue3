@@ -475,7 +475,7 @@ const handleSubmit = async () => {
 
     message.success('提交成功')
     delView(route)
-    await push('/bpm/OAdoc/receive-doc')
+    await push('/bpm/unified')
   } finally {
     formLoading.value = false
   }
