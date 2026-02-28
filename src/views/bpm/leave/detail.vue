@@ -38,8 +38,13 @@
       </tr>
 
       <tr>
+        <td class="label-cell">请假天数</td>
+        <td class="input-cell" colspan="3">{{ leaveDays }} 天</td>
+      </tr>
+
+      <tr class="print-hide-row">
         <td class="label-cell">附件列表</td>
-        <td class="input-cell">
+        <td class="input-cell" colspan="3">
           <div v-if="fileList.length > 0">
             <div v-for="(file, index) in fileList" :key="index" style="margin-bottom: 2px">
               <el-link type="primary" @click="previewFile(file)" :underline="false">
@@ -49,8 +54,6 @@
           </div>
           <span v-else>无</span>
         </td>
-        <td class="label-cell">请假天数</td>
-        <td class="input-cell">{{ leaveDays }} 天</td>
       </tr>
 
       <tr>
@@ -487,9 +490,9 @@ onMounted(() => {
   getInfo()
 
   // 获取部门名称
-  const res = userStore.user.dept
-    ? userStore.user.dept.name
-    : userStore.user.depts?.map((d: any) => d.name).join('、') || ''
+  const res = (userStore.user as any).dept
+    ? (userStore.user as any).dept.name
+    : (userStore.user as any).depts?.map((d: any) => d.name).join('、') || ''
   deptName.value = res
 })
 </script>
@@ -501,6 +504,12 @@ onMounted(() => {
 
   to {
     transform: rotate(360deg);
+  }
+}
+
+@media print {
+  .print-hide-row {
+    display: none !important;
   }
 }
 

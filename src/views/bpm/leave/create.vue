@@ -174,7 +174,8 @@ const deptName = ref('')
 
 const message = useMessage()
 const { delView } = useTagsViewStore()
-const { push, currentRoute } = useRouter()
+const { push } = useRouter()
+const route = useRoute()
 
 const formLoading = ref(false)
 
@@ -416,8 +417,9 @@ const submitForm = async () => {
 
     await leaveApi.createleave(data)
     message.success('请假申请发起成功')
-    delView(unref(currentRoute))
-    await push({ name: 'BpmProcessInstanceMy' })
+    const currentRouteObj = unref(route)
+    await push({ path: '/bpm/unified' })
+    delView(currentRouteObj)
   } finally {
     formLoading.value = false
   }

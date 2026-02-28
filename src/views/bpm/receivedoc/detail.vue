@@ -41,7 +41,7 @@
         </tr>
 
         <!-- 附件列表行 (始终显示，无附件显示暂无) -->
-        <tr>
+        <tr class="print-hide-row">
           <td class="label-cell">收文附件</td>
           <td colspan="3" class="data-text">
             <div v-if="fileList.length > 0">
@@ -610,7 +610,13 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* --- 放入字典中的样式 (Style in Dictionary) --- */
+@media print {
+  .print-hide-row {
+    display: none !important;
+  }
+}
+
+/* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .oa-container {
   width: 100%;
   padding: 10px 20px;
@@ -619,6 +625,7 @@ onMounted(() => {
   background-color: #fff;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .doc-title {
   margin-bottom: 15px;
   font-size: 22px;
@@ -628,6 +635,7 @@ onMounted(() => {
   text-align: center;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .meta-info {
   display: flex;
   justify-content: space-between;
@@ -637,11 +645,12 @@ onMounted(() => {
   align-items: center;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .meta-input {
   display: inline-block;
   min-width: 80px;
   padding: 0 5px;
-  font-family: SimHei, sans-serif;
+  font-family: SimSun, 'Songti SC', STSong, serif;
   font-size: 12px !important;
   color: #000;
   text-align: left;
@@ -649,14 +658,16 @@ onMounted(() => {
   border-bottom: none !important;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .data-text {
-  font-family: SimHei, sans-serif;
+  font-family: SimSun, 'Songti SC', STSong, serif;
   font-size: 12px !important;
   color: #000;
   word-break: break-all;
   border-bottom: none !important;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .oa-table {
   width: 100%;
   border: 2px solid #d71920;
@@ -664,6 +675,7 @@ onMounted(() => {
   table-layout: fixed;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .oa-table td {
   padding: 4px 6px;
   font-size: 13.5px;
@@ -673,6 +685,7 @@ onMounted(() => {
   border: 1px solid #d71920;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .label-cell {
   width: 110px;
   font-weight: bold;
@@ -682,6 +695,7 @@ onMounted(() => {
   background-color: #fffbfc;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .compact-row {
   display: flex;
   width: 100%;
@@ -691,12 +705,14 @@ onMounted(() => {
   flex-wrap: wrap;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .check-item {
   display: flex;
   align-items: center;
   white-space: nowrap;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .checkbox-mock {
   position: relative;
   top: -1px;
@@ -713,6 +729,7 @@ onMounted(() => {
   justify-content: center;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .date-text {
   display: inline-block;
   min-width: 60px;
@@ -722,23 +739,28 @@ onMounted(() => {
   border-bottom: none !important;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .h-80 {
   height: 80px;
   vertical-align: top;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .h-40 {
   height: 40px;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .h-35 {
   height: 35px;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .center-text {
   text-align: center;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .signature-row {
   height: 30px;
   padding-top: 2px;
@@ -746,4 +768,6 @@ onMounted(() => {
   color: #333;
   vertical-align: bottom;
 }
+
+/* --- 放入字典中的样式 (Style in Dictionary) --- */
 </style>

@@ -353,14 +353,14 @@ onMounted(() => {
   font-size: 28px;
   font-weight: bold;
   letter-spacing: 2px;
-  color: #8c2a2a;
+  color: #d71920;
   text-align: center;
 }
 
 /* 表格通用样式 */
 .oa-table {
   width: 100%;
-  border: 1px solid #a65e5e;
+  border: 1px solid #d71920;
   border-collapse: collapse;
   table-layout: fixed;
 }
@@ -372,16 +372,16 @@ onMounted(() => {
   color: #000;
   word-wrap: break-word;
   vertical-align: middle;
-  border: 1px solid #a65e5e;
+  border: 1px solid #d71920;
 }
 
 /* 左侧 Label 样式 */
 .label-cell {
   width: 140px;
   font-weight: bold;
-  color: #8c2a2a;
+  color: #d71920;
   text-align: center;
-  background-color: #fdf5f5;
+  background-color: #fffbfc;
 }
 
 /* 高度辅助类 */
@@ -443,8 +443,8 @@ onMounted(() => {
   padding: 5px;
   vertical-align: middle;
   border: none; /* 重置 */
-  border-right: 1px solid #a65e5e !important;
-  border-bottom: 1px solid #a65e5e !important;
+  border-right: 1px solid #d71920 !important;
+  border-bottom: 1px solid #d71920 !important;
 }
 
 /* 移除最后一行和最后一列的多余边框 */

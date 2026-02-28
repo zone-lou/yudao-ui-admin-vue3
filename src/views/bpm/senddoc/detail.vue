@@ -6,7 +6,7 @@
       <table class="oa-table">
         <tr>
           <td class="label-cell">标 题</td>
-          <td colspan="3" class="data-text" style="font-weight: bold; font-size: 16px">
+          <td colspan="3" class="data-text" style="font-size: 16px; font-weight: bold">
             {{ detailData.subject }}
           </td>
         </tr>
@@ -34,7 +34,7 @@
           <td
             colspan="3"
             class="data-text"
-            style="height: 150px; position: relative; padding-bottom: 30px"
+            style="position: relative; height: 150px; padding-bottom: 30px"
           >
             <div class="mb-2">
               <span class="font-bold">【发文内容】：</span>
@@ -45,9 +45,9 @@
               class="flex justify-between items-center"
               style="
                 position: absolute;
+                right: 8px;
                 bottom: 5px;
                 left: 8px;
-                right: 8px;
                 font-size: 12px;
                 color: #333;
               "
@@ -67,7 +67,7 @@
           </td>
         </tr>
 
-        <tr>
+        <tr class="print-hide-row">
           <td class="label-cell" style="border-top: 1px solid #d71920">附 件</td>
           <td colspan="3" class="data-text" style="border-top: 1px solid #d71920">
             <div v-if="fileList.length > 0">
@@ -183,7 +183,7 @@
           <td
             colspan="3"
             class="data-text"
-            style="height: 120px; position: relative; padding-bottom: 30px"
+            style="position: relative; height: 120px; padding-bottom: 30px"
           >
             <div class="w-full h-full">
               <div v-if="isEditable('局长') || isEditable('签发')">
@@ -208,7 +208,7 @@
 
             <div
               class="flex items-center justify-end"
-              style="position: absolute; bottom: 5px; right: 8px"
+              style="position: absolute; right: 8px; bottom: 5px"
             >
               <span style="margin-right: 5px">签发人：</span>
               <span
@@ -216,8 +216,8 @@
                 style="
                   display: inline-block;
                   min-width: 60px;
-                  border-bottom: 1px solid #333;
                   text-align: center;
+                  border-bottom: 1px solid #333;
                 "
               >
                 {{
@@ -232,8 +232,8 @@
                 style="
                   display: inline-block;
                   min-width: 80px;
-                  border-bottom: 1px solid #333;
                   text-align: center;
+                  border-bottom: 1px solid #333;
                 "
               >
                 {{
@@ -439,23 +439,30 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 保持原有样式不变 */
+@media print {
+  .print-hide-row {
+    display: none !important;
+  }
+}
+
+/* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .oa-container {
   width: 100%;
   padding: 10px 20px;
-  background-color: #fff;
   font-family: SimSun, 'Songti SC', STSong, serif;
+  background-color: #fff;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .doc-title {
   font-size: 24px;
   font-weight: bold;
-  text-align: center;
-  color: #d71920;
-  margin-bottom: 15px;
   letter-spacing: 2px;
+  color: #d71920;
+  text-align: center;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .oa-table {
   width: 100%;
   border: 2px solid #d71920;
@@ -463,41 +470,47 @@ onMounted(() => {
   table-layout: fixed;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .oa-table td {
-  border: 1px solid #d71920;
   padding: 6px 8px;
   font-size: 14px;
   color: #000;
   vertical-align: middle;
+  border: 1px solid #d71920;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .label-cell {
   width: 120px;
   font-weight: bold;
-  text-align: center;
   color: #d71920;
+  text-align: center;
   background-color: #fffbfc;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .data-text {
-  font-family: SimHei, sans-serif;
+  font-family: SimSun, 'Songti SC', STSong, serif;
   color: #000;
 }
 
 .approval-item {
-  border-bottom: 1px dashed #e8e8e8;
   padding: 4px 0;
+  border-bottom: 1px dashed #e8e8e8;
 }
+
 .approval-item:last-child {
   border-bottom: none;
 }
 
 :deep(.el-textarea__inner) {
+  padding: 0;
+  font-family: SimSun, 'Songti SC', STSong, serif;
+  background-color: transparent;
   border: none;
   box-shadow: none;
-  padding: 0;
   resize: none;
-  font-family: SimHei, sans-serif;
-  background-color: transparent;
 }
+
+/* 保持原有样式不变 */
 </style>

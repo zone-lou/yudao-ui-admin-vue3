@@ -443,10 +443,16 @@ const printObj = ref({
     border: none !important;
   }
 
+  /* stylelint-disable-next-line selector-id-pattern */
   #printDivTag .oa-container {
     width: 100% !important;
     padding: 0 !important;
     box-shadow: none !important;
   }
+}
+
+/* 确保不光是打印，就连普通预览弹窗里也不显示含该类的行 */
+.print-dialog-scroll .print-hide-row {
+  display: none !important;
 }
 </style>

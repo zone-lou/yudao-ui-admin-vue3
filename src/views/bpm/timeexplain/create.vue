@@ -155,6 +155,7 @@ import { TimeExplain, TimeExplainApi } from '@/api/bpm/timeexplain'
 import dayjs from 'dayjs'
 import { useUserStore } from '@/store/modules/user'
 import { getUserProfile } from '@/api/system/user/profile'
+import { useRoute } from 'vue-router'
 
 defineOptions({ name: 'BpmTimeExplainCreate' })
 
@@ -164,7 +165,8 @@ const deptName = ref('')
 
 const message = useMessage()
 const { delView } = useTagsViewStore() // 获取关闭视图方法
-const { push, currentRoute } = useRouter() // 获取路由方法
+const { push } = useRouter() // 获取路由方法
+const route = useRoute()
 
 const formLoading = ref(false)
 
@@ -279,8 +281,9 @@ const submitForm = async () => {
     message.success('公出申请发起成功')
 
     // 【关键修改】关闭当前 Tab 并跳转回“我的请求”列表
-    delView(unref(currentRoute))
-    await push({ name: 'BpmProcessInstanceMy' })
+    const currentRouteObj = unref(route)
+    await push({ path: '/bpm/unified' })
+    delView(currentRouteObj)
   } finally {
     formLoading.value = false
   }

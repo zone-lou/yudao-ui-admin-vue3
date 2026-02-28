@@ -35,3 +35,10 @@
     border-left-color: var(--el-color-primary);
   }
 }
+// 解决侧边栏菜单展开时，由 .el-menu-item * 默认竖向底端对齐导致角标及其内部元素高度污染的问题
+.el-menu-item .el-badge,
+.el-menu-item .el-badge *,
+.el-sub-menu__title .el-badge,
+.el-sub-menu__title .el-badge * {
+  vertical-align: baseline !important;
+}

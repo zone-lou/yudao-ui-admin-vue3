@@ -38,8 +38,13 @@
       </tr>
 
       <tr>
+        <td class="label-cell">外出天数</td>
+        <td class="input-cell" colspan="3">{{ leaveDays }} 天</td>
+      </tr>
+
+      <tr class="print-hide-row">
         <td class="label-cell">附件列表</td>
-        <td class="input-cell">
+        <td class="input-cell" colspan="3">
           <div v-if="fileList.length > 0">
             <div v-for="(file, index) in fileList" :key="index" style="margin-bottom: 2px">
               <el-link type="primary" @click="handlePreview(file)" :underline="false">
@@ -49,8 +54,6 @@
           </div>
           <span v-else>无</span>
         </td>
-        <td class="label-cell">外出天数</td>
-        <td class="input-cell">{{ leaveDays }} 天</td>
       </tr>
 
       <tr>
@@ -422,5 +425,11 @@ onMounted(() => {
   padding-left: 5px;
   text-align: left;
   border-bottom: none;
+}
+
+@media print {
+  .print-hide-row {
+    display: none !important;
+  }
 }
 </style>

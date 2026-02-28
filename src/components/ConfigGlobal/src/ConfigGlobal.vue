@@ -33,10 +33,13 @@ watch(
       !appStore.getMobile ? appStore.setMobile(true) : undefined
       setCssVar('--left-menu-min-width', '0')
       appStore.setCollapse(true)
-      appStore.getLayout !== 'classic' ? appStore.setLayout('classic') : undefined
+      // 用户定制：取消自动断点下自动切换到左侧栏的预设，保证能够一直存在自定义的顶部导航等布局。
+      // appStore.getLayout !== 'classic' ? appStore.setLayout('classic') : undefined
     } else {
       appStore.getMobile ? appStore.setMobile(false) : undefined
       setCssVar('--left-menu-min-width', '64px')
+      // 窗口放大到非移动端断点时，自动展开（取消折叠）侧边栏菜单
+      appStore.getCollapse ? appStore.setCollapse(false) : undefined
     }
   },
   {

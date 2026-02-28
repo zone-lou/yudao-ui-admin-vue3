@@ -275,10 +275,10 @@ export const useAppStore = defineStore('app', {
       this.pageLoading = pageLoading
     },
     setLayout(layout: LayoutType) {
-      if (this.mobile && layout !== 'classic') {
-        ElMessage.warning('移动端模式下不支持切换其他布局')
-        return
-      }
+      // if (this.mobile && layout !== 'classic') {
+      //   ElMessage.warning('移动端模式下不支持切换其他布局')
+      //   return
+      // }
       this.layout = layout
       wsCache.set(CACHE_KEY.LAYOUT, this.layout)
       if (layout === 'topSubMenu') {
