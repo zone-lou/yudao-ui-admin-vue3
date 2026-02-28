@@ -10,23 +10,9 @@
           v-loading="formLoading"
         >
           <el-row>
-            <el-col :span="24">
+            <el-col :span="12">
               <el-form-item label="会议名称" prop="title">
                 <el-input v-model="formData.title" placeholder="请输入会议名称" />
-              </el-form-item>
-            </el-col>
-          </el-row>
-
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="申请日期" prop="applyDate">
-                <el-date-picker
-                  v-model="formData.applyDate"
-                  type="date"
-                  value-format="x"
-                  placeholder="选择申请日期"
-                  style="width: 100%"
-                />
               </el-form-item>
             </el-col>
             <el-col :span="12">
@@ -40,6 +26,20 @@
                 />
               </el-form-item>
             </el-col>
+          </el-row>
+
+          <el-row>
+            <!-- <el-col :span="12">
+              <el-form-item label="申请日期" prop="applyDate">
+                <el-date-picker
+                  v-model="formData.applyDate"
+                  type="date"
+                  value-format="x"
+                  placeholder="选择申请日期"
+                  style="width: 100%"
+                />
+              </el-form-item>
+            </el-col> -->
           </el-row>
 
           <el-row>
@@ -68,31 +68,39 @@
             </el-col>
           </el-row>
 
-          <el-form-item label="参会人员会议情况及建议" prop="situation">
+          <el-form-item label="会议主要内容及我局承办事项" prop="situation">
+            <el-input
+              v-model="formData.remark"
+              type="textarea"
+              :autosize="{ minRows: 2, maxRows: 4 }"
+              placeholder="会议主要内容及我局承办事项"
+            />
+          </el-form-item>
+          <el-form-item label="参会人员会议表态情况及建议意见" prop="situation">
             <el-input
               v-model="formData.situation"
               type="textarea"
               :autosize="{ minRows: 2, maxRows: 4 }"
-              placeholder="请输入参会人员会议情况及建议"
+              placeholder="参会人员会议表态情况及建议意见"
             />
           </el-form-item>
 
-          <el-form-item label="提议内容" prop="content">
+          <!-- <el-form-item label="提议内容" prop="content">
             <Editor v-model="formData.content" height="150px" />
-          </el-form-item>
+          </el-form-item> -->
 
           <el-form-item label="附件" prop="attachFilePath">
             <UploadFile v-model="formData.attachFilePath" />
           </el-form-item>
 
-          <el-form-item label="备注" prop="remark">
+          <!-- <el-form-item label="备注" prop="remark">
             <el-input
               v-model="formData.remark"
               placeholder="请输入备注"
               type="textarea"
               :autosize="{ minRows: 2, maxRows: 4 }"
             />
-          </el-form-item>
+          </el-form-item> -->
 
           <el-form-item label="下一审批节点" prop="nextNode" required>
             <el-select
@@ -276,7 +284,7 @@ const submitForm = async () => {
 
     // 关闭当前 Tab 并跳转
     delView(route)
-    await push('/bpm/OAdoc/conference-report') // 跳转到会议报告单列表
+    await push('/bpm/OAdoc/confflow') // 跳转到会议报告单列表
   } finally {
     formLoading.value = false
   }
