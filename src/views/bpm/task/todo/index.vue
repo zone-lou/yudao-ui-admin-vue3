@@ -10,9 +10,9 @@
   <ContentWrap>
     <div class="flex justify-between items-start">
       <div class="flex gap-2">
-<!--        <el-button type="success" plain @click="handleDone">-->
-<!--          <Icon icon="ep:check" class="mr-5px" /> 办结-->
-<!--        </el-button>-->
+        <!--        <el-button type="success" plain @click="handleDone">-->
+        <!--          <Icon icon="ep:check" class="mr-5px" /> 办结-->
+        <!--        </el-button>-->
         <el-button type="primary" @click="handleBatchDone">
           <Icon icon="ep:finished" class="mr-5px" /> 批量办结
         </el-button>
@@ -145,7 +145,7 @@
     <el-table v-loading="loading" :data="list" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" />
       <!-- 1. 标签 (超时标识) -->
-      <el-table-column label="chaosh" width="100" align="center">
+      <el-table-column label="chaosh" width="40" align="center">
         <template #header>
           <el-icon><Clock /></el-icon>
         </template>
@@ -180,12 +180,12 @@
       <el-table-column align="center" label="办件名称" prop="processInstance.name" width="250" />
 
       <!-- 4. 办件编号 (已移除) -->
-      <el-table-column align="center" label="办件编号" prop="processInstanceId" width="250" />
+      <!-- <el-table-column align="center" label="办件编号" prop="processInstanceId" width="250" /> -->
       <!-- 5. 当前环节 (任务名称) -->
       <el-table-column align="center" label="当前环节" prop="name" width="150" />
 
       <!-- 6. 办件类型 (绑定 taskName) -->
-      <el-table-column align="center" label="办件类型" prop="taskName" width="180" />
+      <el-table-column align="center" label="办件类型" prop="taskName" width="120" />
 
       <!-- 7. 开始日期 (流程发起时间) -->
       <el-table-column
@@ -217,11 +217,11 @@
         <template #default="scope">
           <span>待办</span>
 
-          <span v-if="isTaskOverdue(scope.row)" style="color: #f56c6c; font-weight: bold">
+          <span v-if="isTaskOverdue(scope.row)" style="font-weight: bold; color: #f56c6c">
             ，已超期
           </span>
 
-          <span v-if="isProcessOverdue(scope.row)" style="color: #f56c6c; font-weight: bold">
+          <span v-if="isProcessOverdue(scope.row)" style="font-weight: bold; color: #f56c6c">
             ，办件已超期
           </span>
         </template>

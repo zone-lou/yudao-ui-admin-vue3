@@ -140,7 +140,7 @@
     </el-col>
 
     <el-col :span="8">
-      <ContentWrap title="审批流程" :bodyStyle="{ padding: '0 20px 0' }">
+      <ContentWrap title="审批流程预览" :bodyStyle="{ padding: '0 20px 0' }">
         <ProcessInstanceTimeline
           ref="timelineRef"
           :activity-nodes="activityNodes"
@@ -417,9 +417,12 @@ const submitForm = async () => {
 
     await leaveApi.createleave(data)
     message.success('请假申请发起成功')
-    const currentRouteObj = unref(route)
-    await push({ path: '/bpm/unified' })
-    delView(currentRouteObj)
+
+    // 【关键修改】加入宏任务延迟，彻底避免页面过快重定向致使自身 tab 仍在 keep-alive 存活列队中
+    setTimeout(() => {
+      delView(route)
+      push('/bpm/unified')
+    }, 200)
   } finally {
     formLoading.value = false
   }

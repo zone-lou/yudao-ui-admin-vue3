@@ -161,7 +161,7 @@
 
       <el-table-column align="center" label="办件名称" prop="processInstance.name" width="250" />
 
-      <el-table-column align="center" label="办件编号" prop="processInstanceId" width="250" />
+      <!-- <el-table-column align="center" label="办件编号" prop="processInstanceId" width="250" /> -->
 
       <el-table-column align="center" label="环节名称" prop="name" width="150" />
 

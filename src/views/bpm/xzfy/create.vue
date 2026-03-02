@@ -415,7 +415,7 @@
     </el-col>
 
     <el-col :span="8">
-      <ContentWrap title="审批流程" :bodyStyle="{ padding: '0 20px 0' }">
+      <ContentWrap title="审批流程预览" :bodyStyle="{ padding: '0 20px 0' }">
         <ProcessInstanceTimeline
           ref="timelineRef"
           :activity-nodes="activityNodes"

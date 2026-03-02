@@ -88,9 +88,7 @@
 
         <el-col :span="24" class="text-right">
           <el-button type="primary" @click="handleQuery"><Icon icon="ep:search" />查询</el-button>
-          <el-button  @click="resetQuery"
-            ><Icon icon="ep:refresh" />重置</el-button
-          >
+          <el-button @click="resetQuery"><Icon icon="ep:refresh" />重置</el-button>
         </el-col>
       </el-row>
     </el-form>
@@ -122,13 +120,13 @@
 
       <el-table-column label="办件类型" align="center" prop="category" width="120" />
 
-      <el-table-column
+      <!-- <el-table-column
         label="办件编号"
         align="center"
         prop="id"
         min-width="200"
         show-overflow-tooltip
-      />
+      /> -->
 
       <el-table-column
         label="来文单位"
@@ -171,7 +169,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="状态" width="80" align="center">
+      <el-table-column label="状态" width="50" align="center">
         <template #header>
           <el-icon><Clock /></el-icon>
         </template>
@@ -235,7 +233,7 @@
 
 <script setup lang="ts">
 // ... script 部分代码保持不变，不需要修改 ...
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, onActivated } from 'vue'
 import { useRouter } from 'vue-router'
 import dayjs from 'dayjs'
 import { getUnifiedProcessInstancePage } from '@/api/bpm/processInstance'
@@ -323,24 +321,32 @@ onMounted(async () => {
   await getList()
   processDefinitionList.value = await DefinitionApi.getSimpleProcessDefinitionList()
 })
+
+onActivated(async () => {
+  await getList()
+})
 </script>
 
 <style scoped>
 .app-container {
-  background-color: #f5f7fa;
   padding: 10px;
+  background-color: #f5f7fa;
 }
+
 .w-full {
   width: 100%;
 }
+
 .link-type {
   color: #337ab7;
-  cursor: pointer;
   text-decoration: underline;
+  cursor: pointer;
 }
+
 .link-type:hover {
   color: #20a0ff;
 }
+
 .text-right {
   text-align: right;
 }

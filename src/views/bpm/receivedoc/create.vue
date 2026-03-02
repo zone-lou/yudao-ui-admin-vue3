@@ -228,7 +228,7 @@
     </el-col>
 
     <el-col :span="8">
-      <ContentWrap title="审批流程" :bodyStyle="{ padding: '0 20px 0' }">
+      <ContentWrap title="审批流程预览" :bodyStyle="{ padding: '0 20px 0' }">
         <ProcessInstanceTimeline
           ref="timelineRef"
           :activity-nodes="activityNodes"
@@ -385,8 +385,10 @@ const handleSave = async () => {
       await ReceiveDocApi.saveReceiveDoc(data)
     }
     message.success('保存成功')
-    delView(unref(currentRoute))
-    await push('/bpm/OAdoc/receive-doc')
+    setTimeout(() => {
+      delView(unref(currentRoute))
+      push('/bpm/OAdoc/receive-doc')
+    }, 200)
   } finally {
     formLoading.value = false
   }
@@ -469,13 +471,13 @@ const handleSubmit = async () => {
         await ReceiveDocApi.updateReceiveDoc(data)
       } else {
         // 3. 无流程实例ID -> 草稿提交 -> 走 submit 接口
-        await ReceiveDocApi.submitReceiveDoc(data)
       }
     }
-
     message.success('提交成功')
-    delView(route)
-    await push('/bpm/unified')
+    setTimeout(() => {
+      delView(route)
+      push('/bpm/unified')
+    }, 200)
   } finally {
     formLoading.value = false
   }

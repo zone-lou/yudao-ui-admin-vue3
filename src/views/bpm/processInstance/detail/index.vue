@@ -171,6 +171,8 @@ import { registerComponent } from '@/utils/routerHelper'
 import type { ApiAttrs } from '@form-create/element-ui/types/config'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import * as UserApi from '@/api/system/user'
+import { useRouter } from 'vue-router'
+import { useTagsViewStore } from '@/store/modules/tagsView'
 import ProcessInstanceBpmnViewer from './ProcessInstanceBpmnViewer.vue'
 import ProcessInstanceSimpleViewer from './ProcessInstanceSimpleViewer.vue'
 import ProcessInstanceTaskList from './ProcessInstanceTaskList.vue'
@@ -190,6 +192,9 @@ const props = defineProps<{
   taskId?: string // 任务编号
   activityId?: string //流程活动编号，用于抄送查看
 }>()
+
+const router = useRouter()
+const { delView } = useTagsViewStore()
 const message = useMessage() // 消息弹窗
 const processInstanceLoading = ref(false) // 流程实例的加载中
 const processInstance = ref<any>({}) // 流程实例
@@ -355,12 +360,15 @@ const setFieldPermission = (field: string, permission: string) => {
   }
 }
 
-/** 操作成功后刷新 */
+/** 操作成功后跳转待办办件 */
 const refresh = () => {
   // 通知业务表单提交成功
   businessFormComponentRef.value?.processInstanceSuccess?.()
-  // 重新获取详情
-  getDetail()
+
+  setTimeout(() => {
+    delView(router.currentRoute.value)
+    router.push({ path: '/bpm/todo' })
+  }, 200)
 }
 
 /** 处理打印 */

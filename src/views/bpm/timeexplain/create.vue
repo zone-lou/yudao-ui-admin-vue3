@@ -132,7 +132,7 @@
     </el-col>
 
     <el-col :span="8">
-      <ContentWrap title="审批流程" :bodyStyle="{ padding: '0 20px 0' }">
+      <ContentWrap title="审批流程预览" :bodyStyle="{ padding: '0 20px 0' }">
         <ProcessInstanceTimeline
           ref="timelineRef"
           :activity-nodes="activityNodes"
@@ -280,10 +280,11 @@ const submitForm = async () => {
     await TimeExplainApi.createTimeExplain(data)
     message.success('公出申请发起成功')
 
-    // 【关键修改】关闭当前 Tab 并跳转回“我的请求”列表
-    const currentRouteObj = unref(route)
-    await push({ path: '/bpm/unified' })
-    delView(currentRouteObj)
+    // 【关键修改】加入宏任务延迟，避免异步重绘冲突致使标签未关闭
+    setTimeout(() => {
+      delView(route)
+      push('/bpm/unified')
+    }, 200)
   } finally {
     formLoading.value = false
   }

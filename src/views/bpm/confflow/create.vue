@@ -1,7 +1,7 @@
 <template>
   <el-row :gutter="20">
     <el-col :span="16">
-      <ContentWrap title="申请信息">
+      <ContentWrap title="会议报告单申请信息">
         <el-form
           ref="formRef"
           :model="formData"
@@ -143,7 +143,7 @@
     </el-col>
 
     <el-col :span="8">
-      <ContentWrap title="审批流程" :bodyStyle="{ padding: '0 20px 0' }">
+      <ContentWrap title="审批流程预览" :bodyStyle="{ padding: '0 20px 0' }">
         <ProcessInstanceTimeline
           ref="timelineRef"
           :activity-nodes="activityNodes"
@@ -282,9 +282,11 @@ const submitForm = async () => {
     await ConfflowApi.createConfflow(data)
     message.success('发起成功')
 
-    // 关闭当前 Tab 并跳转
-    delView(route)
-    await push('/bpm/unified') // 跳转到统一办件列表
+    // 延迟关闭当前 Tab 并跳转，以避免页面组件未解构完全
+    setTimeout(() => {
+      delView(route)
+      push('/bpm/unified') // 跳转到统一办件列表
+    }, 200)
   } finally {
     formLoading.value = false
   }

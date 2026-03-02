@@ -189,11 +189,41 @@ import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 
 defineOptions({ name: 'LeaveDetail' })
+
 const userStore = useUserStore()
-const deptName = ref('')
+const deptName = computed(() => {
+  if (detailData.value.deptName) return detailData.value.deptName
+  if (props.activityNodes && props.activityNodes.length > 0) {
+    for (const node of props.activityNodes as any[]) {
+      if (node.tasks && node.tasks.length > 0) {
+        for (const task of node.tasks) {
+          if (task.assigneeUser && task.assigneeUser.deptName) {
+            return task.assigneeUser.deptName
+          }
+        }
+      }
+    }
+  }
+  return ''
+})
 
 // Template data fields
-const startUser = computed(() => detailData.value.nickname || userStore.user.nickname)
+const startUser = computed(() => {
+  if (detailData.value.nickname) return detailData.value.nickname
+  if (detailData.value.nickName) return detailData.value.nickName
+  if (props.activityNodes && props.activityNodes.length > 0) {
+    for (const node of props.activityNodes as any[]) {
+      if (node.tasks && node.tasks.length > 0) {
+        for (const task of node.tasks) {
+          if (task.assigneeUser && task.assigneeUser.nickname) {
+            return task.assigneeUser.nickname
+          }
+        }
+      }
+    }
+  }
+  return ''
+})
 const leaveType = computed(() => {
   if (!detailData.value.qxjType) return ''
   const dict = getIntDictOptions(DICT_TYPE.BPM_LEAVE_TYPE).find(
@@ -475,7 +505,7 @@ watch(
   },
   { immediate: true }
 )
-defineExpose({ open: getInfo }) // 提供 open 方法，用于打开弹窗
+defineExpose({ open: getInfo })
 
 // 新增：根据时间戳判断上午/下午
 const getPeriod = (val: any) => {
@@ -488,12 +518,6 @@ const getPeriod = (val: any) => {
 /** 初始化 **/
 onMounted(() => {
   getInfo()
-
-  // 获取部门名称
-  const res = (userStore.user as any).dept
-    ? (userStore.user as any).dept.name
-    : (userStore.user as any).depts?.map((d: any) => d.name).join('、') || ''
-  deptName.value = res
 })
 </script>
 <style scoped>

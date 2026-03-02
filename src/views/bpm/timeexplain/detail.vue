@@ -171,15 +171,45 @@ const props = defineProps({
 
 const { query } = useRoute()
 const userStore = useUserStore()
-const nickname = computed(() => userStore.user.nickname)
-const deptName = ref(userStore.user.dept?.name || '')
+
+const deptName = computed(() => {
+  if (detailData.value.deptName) return detailData.value.deptName
+  if (props.activityNodes && props.activityNodes.length > 0) {
+    for (const node of props.activityNodes as any[]) {
+      if (node.tasks && node.tasks.length > 0) {
+        for (const task of node.tasks) {
+          if (task.assigneeUser && task.assigneeUser.deptName) {
+            return task.assigneeUser.deptName
+          }
+        }
+      }
+    }
+  }
+  return ''
+})
 
 const detailLoading = ref(false)
 const detailData = ref<any>({})
 const fileList = ref<any[]>([])
 
 // Template data fields
-const startUser = computed(() => detailData.value.nickname || userStore.user.nickname)
+const startUser = computed(() => {
+  if (detailData.value.userName) return detailData.value.userName
+  if (detailData.value.nickname) return detailData.value.nickname
+  if (detailData.value.nickName) return detailData.value.nickName
+  if (props.activityNodes && props.activityNodes.length > 0) {
+    for (const node of props.activityNodes as any[]) {
+      if (node.tasks && node.tasks.length > 0) {
+        for (const task of node.tasks) {
+          if (task.assigneeUser && task.assigneeUser.nickname) {
+            return task.assigneeUser.nickname
+          }
+        }
+      }
+    }
+  }
+  return ''
+})
 const leaveType = computed(() => '因公外出')
 const applyDate = computed(() => formatDate(detailData.value.checkDate))
 const startTime = computed(() => formatDate(detailData.value.checkBegin))
