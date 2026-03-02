@@ -288,13 +288,30 @@ const submitForm = async () => {
     formLoading.value = false
   }
 }
+const getRoleLevel = (roleStr: string): number => {
+  if (roleStr.startsWith('grade_')) {
+    const parts = roleStr.split('_')
+    return parseInt(parts[1]) || 0
+  }
+  return 1
+}
+
+const maxPermissionRole = computed(() => {
+  const gradeRoles = userStore.roles.filter((r) => r.startsWith('grade_'))
+  if (gradeRoles.length === 0) return 'grade_3'
+  return gradeRoles.reduce((prev, curr) => {
+    return getRoleLevel(curr) > getRoleLevel(prev) ? curr : prev
+  })
+})
 
 const getApprovalDetail = async () => {
   try {
     const data = await ProcessInstanceApi.getApprovalDetail({
       processDefinitionId: processDefinitionId.value,
       activityId: NodeId.START_USER_NODE_ID,
-      processVariablesStr: JSON.stringify({})
+      processVariablesStr: JSON.stringify({
+        role_condition: maxPermissionRole.value
+      })
     })
     if (!data) return
     activityNodes.value = data.activityNodes
