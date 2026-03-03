@@ -59,11 +59,42 @@
         </td>
       </tr>
 
-      <tr>
+      <!-- 科室负责人审核 -->
+      <tr v-if="isEditable('科室负责人')">
+        <td class="label-cell" rowspan="2">科室负责人审核</td>
+        <td colspan="3" class="h-medium data-text" style="padding: 10px">
+          <el-input
+            v-model="currentOpinion"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入您的意见"
+            class="w-full h-full"
+          />
+        </td>
+      </tr>
+      <tr v-else-if="deptHeadContent || deptHeadHandler">
         <td class="label-cell" rowspan="2">科室负责人审核</td>
         <td colspan="3" style="height: 50px; padding: 10px">{{ deptHeadContent }}</td>
       </tr>
-      <tr>
+      <tr v-else>
+        <!-- 如果没有科室负责人节点意见且当前不可编辑，保持空行 -->
+        <td class="label-cell" rowspan="2">科室负责人审核</td>
+        <td colspan="3" style="height: 50px; padding: 10px"></td>
+      </tr>
+
+      <tr v-if="isEditable('科室负责人')">
+        <td colspan="3" class="footer-row">
+          <div class="footer-content" style="justify-content: flex-start; padding-left: 20px">
+            <span
+              >办理人员：<span class="sign-input">{{ userStore.getUser.nickname }}</span></span
+            >
+            <span
+              >办理日期：<span class="sign-input">{{ formatDate(new Date()) }}</span></span
+            >
+          </div>
+        </td>
+      </tr>
+      <tr v-else>
         <td colspan="3" class="footer-row">
           <div class="footer-content" style="justify-content: flex-start; padding-left: 20px">
             <span
@@ -85,6 +116,22 @@
               <td class="sub-header" style="width: 20%">办理人员</td>
               <td class="sub-header" style="width: 20%">办理日期</td>
             </tr>
+            <tr v-if="isEditable('分管领导') || isEditable('局领导')">
+              <td class="sub-content" style="padding: 4px 8px">
+                <el-input
+                  v-model="currentOpinion"
+                  type="textarea"
+                  :rows="2"
+                  placeholder="请输入您的意见"
+                />
+              </td>
+              <td class="sub-content" style="text-align: center; vertical-align: middle">
+                {{ userStore.getUser.nickname }}
+              </td>
+              <td class="sub-content" style="text-align: center; vertical-align: middle">
+                {{ formatDate(new Date()) }}
+              </td>
+            </tr>
             <tr v-for="(item, index) in deputyLeaderList" :key="index">
               <td class="sub-content">{{ item.comment }}</td>
               <td class="sub-content" style="text-align: center">{{
@@ -92,15 +139,56 @@
               }}</td>
               <td class="sub-content" style="text-align: center">{{ formatDate(item.endTime) }}</td>
             </tr>
+            <!-- 当既不可编辑，也没有数据时，兜底显示一行空行 -->
+            <tr
+              v-if="
+                deputyLeaderList.length === 0 && !(isEditable('分管领导') || isEditable('局领导'))
+              "
+            >
+              <td class="sub-content"></td>
+              <td class="sub-content"></td>
+              <td class="sub-content"></td>
+            </tr>
           </table>
         </td>
       </tr>
 
-      <tr>
+      <!-- 局长阅签 -->
+      <tr v-if="isEditable('局长') || isEditable('主要领导')">
+        <td class="label-cell" rowspan="2">局长阅签</td>
+        <td colspan="3" class="h-medium data-text" style="padding: 10px">
+          <el-input
+            v-model="currentOpinion"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入局长批示"
+            class="w-full h-full"
+          />
+        </td>
+      </tr>
+      <tr v-else-if="directorContent || directorHandler">
         <td class="label-cell" rowspan="2">局长阅签</td>
         <td colspan="3" style="height: 50px; padding: 10px">{{ directorContent }}</td>
       </tr>
-      <tr>
+      <tr v-else>
+        <!-- 局长未审批时占位空行 -->
+        <td class="label-cell" rowspan="2">局长阅签</td>
+        <td colspan="3" style="height: 50px; padding: 10px"></td>
+      </tr>
+
+      <tr v-if="isEditable('局长') || isEditable('主要领导')">
+        <td colspan="3" class="footer-row">
+          <div class="footer-content" style="justify-content: center">
+            <span
+              >办理人员：<span class="sign-input">{{ userStore.getUser.nickname }}</span></span
+            >
+            <span style="margin-left: 50px"
+              >日期：<span class="sign-input">{{ formatDate(new Date()) }}</span></span
+            >
+          </div>
+        </td>
+      </tr>
+      <tr v-else>
         <td colspan="3" class="footer-row">
           <div class="footer-content" style="justify-content: center">
             <span
@@ -157,13 +245,16 @@ defineOptions({ name: 'BpmConfflowDetail' })
 
 const props = defineProps({
   id: propTypes.number.def(undefined),
-  activityNodes: propTypes.array.def([])
+  activityNodes: propTypes.array.def([]),
+  taskId: propTypes.string.def(undefined), // 当前任务ID
+  currentNode: propTypes.object.def({}) // 当前节点信息
 })
 
 const { query } = useRoute()
 const detailLoading = ref(false)
 const detailData = ref<Partial<Confflow>>({})
 const userStore = useUserStore()
+const currentOpinion = ref('') // 当前正在填写的审批意见
 
 /** 格式化日期 */
 const formatDate = (val: any) => {
@@ -216,16 +307,45 @@ const getInfo = async () => {
   }
 }
 
+/** 暴露给父组件的方法：获取当前填写的意见 */
+const getOpinion = () => {
+  // 识别哪些节点名是属于要在“体现在表格内的节点”
+  const inlineKeywords = ['科室负责人', '局长', '主要领导', '分管领导', '局领导']
+  const nodeName = props.currentNode?.name || ''
+  const isInlineNode = inlineKeywords.some((keyword) => nodeName.includes(keyword))
+
+  if (isInlineNode) {
+    return currentOpinion.value
+  }
+  return undefined
+}
+
+/** 判断当前节点是否可编辑 */
+const isEditable = (keyword: string) => {
+  if (!props.taskId) return false
+  const nodeName = props.currentNode?.name || ''
+  return nodeName.indexOf(keyword) !== -1
+}
+
 /** 分类处理审批节点意见 */
 const processActivityNodes = () => {
   if (!props.activityNodes || props.activityNodes.length === 0) return
 
   // 清空各列表
   deputyLeaderList.value = []
+  const userId = userStore.getUser.id
 
   props.activityNodes.forEach((node: any) => {
     if (node.tasks && node.tasks.length > 0) {
       node.tasks.forEach((task: any) => {
+        // 遇到进行中的自己节点，如果是草稿，就给 currentOpinion
+        if (task.status === 1) {
+          if (task.assigneeUser?.id === userId && task.reason) {
+            currentOpinion.value = task.reason
+          }
+          return // 处理中的任务不渲染到已完成列表里
+        }
+
         if (task.reason) {
           const name = node.name || ''
           const info = {
@@ -330,7 +450,7 @@ const handleDownload = (file: any) => {
   document.body.removeChild(link)
 }
 
-defineExpose({ open: getInfo })
+defineExpose({ open: getInfo, getOpinion })
 
 onMounted(() => {
   getInfo()
@@ -500,5 +620,12 @@ onMounted(() => {
   p {
     margin-top: 10px;
   }
+}
+
+/* 输入框无边框样式适配（同 receiveDoc） */
+:deep(.el-textarea__inner) {
+  border: none;
+  box-shadow: none;
+  resize: none;
 }
 </style>

@@ -52,7 +52,11 @@ export default defineComponent({
     const uniqueOpened = computed(() => appStore.getUniqueOpened)
 
     const activeMenu = computed(() => {
-      const { meta, path } = unref(currentRoute)
+      const { meta, path, query } = unref(currentRoute)
+      // if query activeMenu exists, use it first
+      if (query.activeMenu) {
+        return query.activeMenu as string
+      }
       // if set path, the sidebar will highlight the path you set
       if (meta.activeMenu) {
         return meta.activeMenu as string

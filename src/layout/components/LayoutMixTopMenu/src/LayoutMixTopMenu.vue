@@ -28,7 +28,10 @@ export default defineComponent({
     )
 
     const activeMenu = computed(() => {
-      const { meta, path } = unref(currentRoute)
+      const { meta, path, query } = unref(currentRoute)
+      if (query.activeMenu) {
+        return query.activeMenu as string
+      }
       if (meta.activeMenu) {
         return meta.activeMenu as string
       }
@@ -95,8 +98,8 @@ export default defineComponent({
     }
 
     const isActive = (routePath: string) => {
-      const { path, meta } = unref(currentRoute)
-      const currentActivePath = (meta.activeMenu as string) || path
+      const { path, meta, query } = unref(currentRoute)
+      const currentActivePath = (query.activeMenu as string) || (meta.activeMenu as string) || path
       const normalizedRoutePath = routePath.startsWith('/') ? routePath : `/${routePath}`
 
       // 优先判断 Store 中的 Active Path (点击时立即生效)
