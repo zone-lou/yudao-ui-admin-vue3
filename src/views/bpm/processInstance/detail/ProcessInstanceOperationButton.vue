@@ -759,6 +759,16 @@ const handleApproveConfirm = async () => {
   const variables: Record<string, any> = {}
 
   for (const node of selectedNodes) {
+    // 提前设置跳转变量：如果这个节点有流转条件，必须塞给引擎，无论它是否需要人审批
+    if (node.conditionExpression) {
+      variables[node.conditionExpression.key] = node.conditionExpression.value
+    }
+
+    // 特例：如果是结束节点 ("end")，因为该节点天生不需要选人，直接跳过选人拦截检查并放行
+    if (node.taskDefKey === 'end') {
+      continue
+    }
+
     // 获取该节点下选中的用户
     const treeRef = userTreeRefs.value[node.taskDefKey]
     if (!treeRef) continue
@@ -767,7 +777,13 @@ const handleApproveConfirm = async () => {
     // 过滤出用户
     const userIds = checkedNodes.filter((n: any) => n.id && n.nickname).map((n: any) => n.id)
 
+    // 针对常规节点：发现没有勾选任何人，进行阻断
     if (userIds.length === 0) {
+      // 容错补充：防止配置出错该节点天生没配置候选人树，如果是这种没树的节点，理论上可以放它走或者依据业务退回
+      // 既然前面提示过“无需选择审批人(自动分配或无需审批)”，我们就放行它
+      if (!node.candidateUsers || node.candidateUsers.length === 0) {
+        continue
+      }
       message.warning(`节点【${node.taskName}】请至少选择一名审批人`)
       return
     }
@@ -777,11 +793,6 @@ const handleApproveConfirm = async () => {
       addSignUserIds.push(...userIds)
     } else {
       nextNodeAssignees[node.taskDefKey] = userIds
-    }
-
-    // 设置变量
-    if (node.conditionExpression) {
-      variables[node.conditionExpression.key] = node.conditionExpression.value
     }
   }
 
