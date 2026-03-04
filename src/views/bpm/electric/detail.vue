@@ -77,6 +77,7 @@ import { dateUtil } from '@/utils/dateUtil'
 import { ReceiveDocApi, ReceiveDoc } from '@/api/bpm/receivedoc'
 import { propTypes } from '@/utils/propTypes'
 import { Base64 } from 'js-base64' // 关键：需要安装 npm install js-base64
+import * as ConfigApi from '@/api/infra/config'
 
 defineOptions({ name: 'BpmReceiveDocDetail' })
 
@@ -90,6 +91,7 @@ const detailData = ref<Partial<ReceiveDoc>>({})
 
 // --- 附件相关状态 ---
 const fileList = ref<any[]>([])
+const fileViewBaseUrl = ref('')
 // const previewVisible = ref(false) // 已移除
 // const previewUrl = ref('') // 已移除
 // const previewType = ref('image') // 已移除
@@ -101,6 +103,7 @@ const getInfo = async () => {
 
   detailLoading.value = true
   try {
+    fileViewBaseUrl.value = await ConfigApi.getConfigKey('url.fileview.address')
     const res = await ReceiveDocApi.getReceiveDoc(queryId)
     detailData.value = res
     processFileList(res.attachFilePath)
@@ -160,7 +163,7 @@ const handlePreview = (file: any) => {
   }
 
   // 1. 准备基础数据
-  const kkBaseUrl = 'http://192.168.50.239:8012'
+  const kkBaseUrl = fileViewBaseUrl.value || 'http://192.168.50.239:8012'
   let fullUrl = file.url
 
   // 【注意】如果 file.url 是相对路径 (如 /admin-api/file/...)，

@@ -2,6 +2,7 @@
   <ContentWrap :bodyStyle="{ padding: '10px 20px 0' }" class="position-relative !mb-0px">
     <div class="processInstance-wrap-main">
       <el-scrollbar>
+        <!-- 审批状态图标（盖章效果） -->
         <img
           class="position-absolute right-20px z-3"
           width="120"

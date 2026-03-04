@@ -345,6 +345,7 @@ import { dateUtil } from '@/utils/dateUtil'
 import { Base64 } from 'js-base64'
 import { propTypes } from '@/utils/propTypes'
 import { useUserStore } from '@/store/modules/user'
+import * as ConfigApi from '@/api/infra/config'
 
 defineOptions({ name: 'BpmReceiveDocDetail' })
 const userStore = useUserStore()
@@ -379,6 +380,7 @@ const detailData = ref({
 })
 const fileList = ref<any[]>([])
 const currentOpinion = ref('') // 当前正在填写的审批意见
+const fileViewBaseUrl = ref('')
 
 // 审批意见分类
 const nibanList = ref<any[]>([]) // 拟办
@@ -421,6 +423,7 @@ const getInfo = async () => {
   }
   detailLoading.value = true
   try {
+    fileViewBaseUrl.value = await ConfigApi.getConfigKey('url.fileview.address')
     const data = await ReceiveDocApi.ReceiveDocApi.getReceiveDoc(queryId)
     detailData.value = data
 
@@ -563,7 +566,7 @@ const formatCommaData = (val: any) => {
 
 const handlePreview = (file: any) => {
   if (!file || !file.url) return
-  const kkBaseUrl = 'http://192.168.50.239:8012'
+  const kkBaseUrl = fileViewBaseUrl.value || 'http://192.168.50.239:8012'
   let fullUrl = file.url
   const encodedUrl = Base64.encode(fullUrl)
   const previewUrl = `${kkBaseUrl}/onlinePreview?url=${encodeURIComponent(encodedUrl)}`

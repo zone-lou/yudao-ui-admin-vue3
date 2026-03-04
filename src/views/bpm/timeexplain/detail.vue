@@ -161,6 +161,7 @@ import { TimeExplainApi } from '@/api/bpm/timeexplain'
 import { propTypes } from '@/utils/propTypes'
 import { useUserStore } from '@/store/modules/user'
 import { Base64 } from 'js-base64'
+import * as ConfigApi from '@/api/infra/config'
 
 defineOptions({ name: 'BpmTimeExplainDetail' })
 
@@ -191,6 +192,7 @@ const deptName = computed(() => {
 const detailLoading = ref(false)
 const detailData = ref<any>({})
 const fileList = ref<any[]>([])
+const fileViewBaseUrl = ref('')
 
 // Template data fields
 const startUser = computed(() => {
@@ -260,6 +262,7 @@ const getInfo = async () => {
 
   detailLoading.value = true
   try {
+    fileViewBaseUrl.value = await ConfigApi.getConfigKey('url.fileview.address')
     const res = await TimeExplainApi.getTimeExplain(queryId)
     detailData.value = res || {}
     processFileList(res.filepath)
@@ -349,7 +352,7 @@ const handlePreview = (file: any) => {
   if (!file || !file.url) return
 
   // 1. 基础配置
-  const kkBaseUrl = 'http://192.168.50.239:8012'
+  const kkBaseUrl = fileViewBaseUrl.value || 'http://192.168.50.239:8012'
   let fullUrl = file.url
 
   if (fullUrl.startsWith('/')) {

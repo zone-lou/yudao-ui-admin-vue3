@@ -980,6 +980,10 @@ const getButtonDisplayName = (btnType: OperationButtonType) => {
   if (runningTask.value?.buttonsSetting && runningTask.value?.buttonsSetting[btnType]) {
     displayName = runningTask.value.buttonsSetting[btnType].displayName
   }
+  // 屏蔽流程实例旧配置中附带的“通过”字眼，强制转换
+  if (displayName === '通过' || displayName === '审批通过') {
+    return '发送'
+  }
   return displayName
 }
 
