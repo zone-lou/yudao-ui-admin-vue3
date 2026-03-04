@@ -24,61 +24,6 @@
       {{ isOnlyEndNode ? '办结' : getButtonDisplayName(OperationButtonType.APPROVE) }}
     </el-button>
 
-    <!-- 【加签】按钮 当前任务审批人为A，向前加签选了一个C，则需要C先审批，然后再是A审批，向后加签B，A审批完，需要B再审批完，才算完成这个任务节点 -->
-    <el-popover
-      :visible="popOverVisible.addSign"
-      placement="top-start"
-      :width="420"
-      trigger="click"
-      v-if="runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.ADD_SIGN)"
-    >
-      <template #reference>
-        <div @click="openPopover('addSign')" class="hover-bg-gray-100 rounded-xl p-6px">
-          <Icon :size="14" icon="ep:plus" />&nbsp;
-          {{ getButtonDisplayName(OperationButtonType.ADD_SIGN) }}
-        </div>
-      </template>
-      <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
-        <el-form
-          label-position="top"
-          class="mb-auto"
-          ref="addSignFormRef"
-          :model="addSignForm"
-          :rules="addSignFormRule"
-          label-width="100px"
-        >
-          <el-form-item label="加签处理人" prop="addSignUserIds">
-            <el-select v-model="addSignForm.addSignUserIds" multiple clearable style="width: 100%">
-              <el-option
-                v-for="item in userOptions"
-                :key="item.id"
-                :label="item.nickname"
-                :value="item.id"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="审批意见" prop="reason">
-            <el-input
-              v-model="addSignForm.reason"
-              clearable
-              placeholder="请输入审批意见"
-              type="textarea"
-              :rows="3"
-            />
-          </el-form-item>
-          <el-form-item>
-            <el-button :disabled="formLoading" type="primary" @click="handlerAddSign('before')">
-              向前{{ getButtonDisplayName(OperationButtonType.ADD_SIGN) }}
-            </el-button>
-            <el-button :disabled="formLoading" type="primary" @click="handlerAddSign('after')">
-              向后{{ getButtonDisplayName(OperationButtonType.ADD_SIGN) }}
-            </el-button>
-            <el-button @click="closePopover('addSign', addSignFormRef)"> 取消 </el-button>
-          </el-form-item>
-        </el-form>
-      </div>
-    </el-popover>
-
     <!-- 【减签】按钮 -->
     <el-popover
       :visible="popOverVisible.deleteSign"
@@ -404,17 +349,6 @@ const approveReasonRule = computed(() => {
     signPicUrl: [{ required: true, message: '签名不能为空', trigger: 'change' }],
     nextAssignees: [{ required: true, message: '审批人不能为空', trigger: 'blur' }]
   }
-})
-
-// 加签表单
-const addSignFormRef = ref<FormInstance>()
-const addSignForm = reactive({
-  addSignUserIds: undefined,
-  reason: ''
-})
-const addSignFormRule = reactive<FormRules<typeof addSignForm>>({
-  addSignUserIds: [{ required: true, message: '加签处理人不能为空', trigger: 'change' }],
-  reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }]
 })
 
 // 减签表单
@@ -810,31 +744,6 @@ const userTreeRefs = ref<Record<string, any>>({})
 const setTreeRef = (el: any, key: string) => {
   if (el) {
     userTreeRefs.value[key] = el
-  }
-}
-
-/** 处理加签 */
-const handlerAddSign = async (type: string) => {
-  formLoading.value = true
-  try {
-    // 1.1 校验表单
-    if (!addSignFormRef.value) return // Corrected ref name from approveSignFormRef to addSignFormRef
-    await addSignFormRef.value.validate() // Corrected ref name from approveSignFormRef to addSignFormRef
-    // 1.2 提交加签
-    const data = {
-      id: runningTask.value.id,
-      type,
-      reason: addSignForm.reason,
-      userIds: addSignForm.addSignUserIds
-    }
-    await TaskApi.signCreateTask(data)
-    message.success('操作成功')
-    addSignFormRef.value.resetFields()
-    popOverVisible.value.addSign = false
-    // 2 加载最新数据
-    reload()
-  } finally {
-    formLoading.value = false
   }
 }
 
