@@ -71,6 +71,7 @@ import type {
 } from 'element-plus'
 import { isString } from '@/utils/is'
 import { useUpload } from '@/components/UploadFile/src/useUpload'
+import Sortable from 'sortablejs' // 引入排序拖拽核心
 
 defineOptions({ name: 'UploadFile' })
 
@@ -240,6 +241,30 @@ const emitUpdateModelValue = () => {
   emit('update:modelValue', result)
 }
 
+/** 挂载拖拽混排实例化事件 */
+const initSortable = () => {
+  const el = uploadRef.value?.$el.querySelector('.el-upload-list')
+  if (!el || props.disabled) return
+
+  Sortable.create(el, {
+    ghostClass: 'sortable-ghost',
+    animation: 150,
+    onEnd: (evt: any) => {
+      // 捕获基于数组变更后的索引调换位置
+      const targetElement = fileList.value.splice(evt.oldIndex as number, 1)[0]
+      fileList.value.splice(evt.newIndex as number, 0, targetElement)
+      // 更新绑定
+      emitUpdateModelValue()
+    }
+  })
+}
+
+onMounted(() => {
+  nextTick(() => {
+    initSortable()
+  })
+})
+
 /** 暴露 fileList 给父组件，以便 create.vue 获取文件ID */
 defineExpose({ fileList })
 </script>
@@ -274,5 +299,10 @@ defineExpose({ fileList })
 .file-list-item {
   border: 1px dashed var(--el-border-color-darker);
   border-radius: 8px;
+}
+
+.sortable-ghost {
+  background: #f0f2f5;
+  opacity: 0.5;
 }
 </style>

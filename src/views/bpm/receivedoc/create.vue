@@ -60,21 +60,13 @@
           <el-row>
             <el-col :span="12">
               <el-form-item label="文件类别" prop="docSecondClass">
-                <el-select
+                <el-autocomplete
                   v-model="formData.docSecondClass"
-                  placeholder="请选择或手动输入文件类别"
-                  filterable
-                  allow-create
-                  default-first-option
+                  :fetch-suggestions="queryDocSecondClassSuggestions"
+                  placeholder="请输入或选择文件类别"
                   clearable
-                >
-                  <el-option
-                    v-for="dict in getIntDictOptions(DICT_TYPE.BPM_DOC_CLASS)"
-                    :key="dict.value"
-                    :label="dict.label"
-                    :value="dict.label"
-                  />
-                </el-select>
+                  style="width: 100%"
+                />
               </el-form-item>
             </el-col>
             <el-col :span="12">
@@ -94,22 +86,13 @@
           <el-row>
             <el-col :span="12">
               <el-form-item label="来文单位" prop="sendDept">
-                <el-select
+                <el-autocomplete
                   v-model="formData.sendDept"
-                  placeholder="请选择或手动输入来文单位"
-                  multiple
-                  filterable
-                  allow-create
-                  default-first-option
+                  :fetch-suggestions="querySendDeptSuggestions"
+                  placeholder="请输入或选择来文单位"
                   clearable
-                >
-                  <el-option
-                    v-for="dict in getStrDictOptions(DICT_TYPE.BPM_AGENCY_NAME)"
-                    :key="dict.value"
-                    :label="dict.label"
-                    :value="dict.label"
-                  />
-                </el-select>
+                  style="width: 100%"
+                />
               </el-form-item>
             </el-col>
           </el-row>
@@ -253,6 +236,7 @@ import { useUserStore } from '@/store/modules/user'
 import { getUserProfile } from '@/api/system/user/profile'
 import { dateUtil } from '@/utils/dateUtil'
 import { uploadReturnInfo } from '@/api/infra/file'
+import * as ConfigApi from '@/api/infra/config'
 
 defineOptions({ name: 'BpmReceiveDocCreate' })
 
@@ -270,10 +254,10 @@ const formData = ref({
   id: undefined,
   processInstanceId: undefined,
   docClass: undefined,
-  sendDept: [],
+  sendDept: undefined,
   sendDocNumber: undefined,
   receiveDocNumber: undefined,
-  receiveTime: undefined,
+  receiveTime: undefined as number | undefined,
   subject: undefined,
   urgencyDegree: undefined,
   remark: undefined,
@@ -306,6 +290,7 @@ const startUserSelectAssignees = ref({})
 const tempStartUserSelectAssignees = ref({})
 const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])
 const processDefinitionId = ref('')
+const defaultReceiveUserId = ref<number | string>('')
 
 const nodeChange = async (val) => {
   await getSelectUsers(val.extensionProperties)
@@ -318,6 +303,21 @@ const getSelectUsers = async (item) => {
   })
   multipleFlag.value = item.multiple_flag === '1'
   selectUserOptions.value = data
+
+  // 检查是否需要自动填充默认审批人
+  const isCurrentlyEmpty = multipleFlag.value
+    ? !formData.value.tempNextUserSelectAssignees ||
+      formData.value.tempNextUserSelectAssignees.length === 0
+    : !formData.value.tempNextUserSelectAssignees
+
+  if (isCurrentlyEmpty && defaultReceiveUserId.value) {
+    const matchedUser = data.find((u: any) => String(u.id) === String(defaultReceiveUserId.value))
+    if (matchedUser) {
+      formData.value.tempNextUserSelectAssignees = multipleFlag.value
+        ? [matchedUser.id]
+        : matchedUser.id
+    }
+  }
 }
 
 /** 构建请求数据 */
@@ -392,6 +392,28 @@ const handleSave = async () => {
   } finally {
     formLoading.value = false
   }
+}
+
+const querySendDeptSuggestions = (queryString: string, cb: any) => {
+  const dictOptions = getStrDictOptions(DICT_TYPE.BPM_AGENCY_NAME) || []
+  const suggestions = dictOptions.map((dict) => ({
+    value: dict.label
+  }))
+  const results = queryString
+    ? suggestions.filter((item) => item.value.includes(queryString))
+    : suggestions
+  cb(results)
+}
+
+const queryDocSecondClassSuggestions = (queryString: string, cb: any) => {
+  const dictOptions = getIntDictOptions(DICT_TYPE.BPM_DOC_CLASS) || []
+  const suggestions = dictOptions.map((dict) => ({
+    value: dict.label
+  }))
+  const results = queryString
+    ? suggestions.filter((item) => item.value.includes(queryString))
+    : suggestions
+  cb(results)
 }
 
 const queryDocNumberSuggestions = (queryString: string, cb: any) => {
@@ -542,6 +564,15 @@ const selectUserConfirm = (id: string, userList: any[]) => {
 
 /** 初始化 */
 onMounted(async () => {
+  try {
+    const defaultId = await ConfigApi.getConfigKey('value.receive.userId')
+    if (defaultId) {
+      defaultReceiveUserId.value = defaultId
+    }
+  } catch (e) {
+    console.error('获取默认收文审批人配置失败:', e)
+  }
+
   const processDefinitionDetail = await DefinitionApi.getProcessDefinition(
     undefined,
     processDefineKey
@@ -575,12 +606,6 @@ onMounted(async () => {
         if (dict) {
           formData.value.sendDocNumber = formatSendDocNumberLabel(dict.label)
         }
-      }
-
-      if (typeof formData.value.sendDept === 'string' && formData.value.sendDept) {
-        formData.value.sendDept = formData.value.sendDept.split(',')
-      } else if (!formData.value.sendDept) {
-        formData.value.sendDept = []
       }
 
       const attachList = await ReceiveDocApi.getReceiveDocXmGuid(queryId)

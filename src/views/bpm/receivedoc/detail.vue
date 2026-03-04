@@ -22,10 +22,7 @@
         <tr>
           <td class="label-cell">来文机关</td>
           <td class="data-text">
-            <dict-tag
-              :type="DICT_TYPE.BPM_AGENCY_NAME"
-              :value="formatCommaData(detailData.sendDept)"
-            />
+            <span>{{ detailData.sendDept }}</span>
           </td>
           <td class="label-cell" style="width: 90px">来文号</td>
           <td class="data-text" style="width: 20%">

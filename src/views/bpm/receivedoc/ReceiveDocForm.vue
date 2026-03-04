@@ -18,14 +18,12 @@
         </el-select>
       </el-form-item>
       <el-form-item label="来文单位" prop="sendDept">
-        <el-select v-model="formData.sendDept" placeholder="请选择来文单位">
-          <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.BPM_AGENCY_NAME)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
+        <el-autocomplete
+          v-model="formData.sendDept"
+          :fetch-suggestions="querySendDeptSuggestions"
+          placeholder="请输入或选择来文单位"
+          clearable
+        />
       </el-form-item>
       <el-form-item label="来文字号" prop="sendDocNumber">
         <el-input v-model="formData.sendDocNumber" placeholder="请输入来文字号" />
@@ -58,14 +56,12 @@
         <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
       </el-form-item>
       <el-form-item label="文件类别" prop="docSecondClass">
-        <el-select v-model="formData.docSecondClass" placeholder="请选择文件类别">
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_DOC_CLASS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
+        <el-autocomplete
+          v-model="formData.docSecondClass"
+          :fetch-suggestions="queryDocSecondClassSuggestions"
+          placeholder="请输入或选择文件类别"
+          clearable
+        />
       </el-form-item>
 
       <el-form-item label="附件" prop="attachFilePath">
@@ -116,7 +112,7 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formData = ref({
+const formData = ref<any>({
   id: undefined,
   docClass: undefined,
   sendDept: undefined,
@@ -241,12 +237,30 @@ const resetForm = () => {
     subject: undefined,
     urgencyDegree: undefined,
     remark: undefined,
-    docSecondClass: undefined,
+    docSecondClass: undefined as string | undefined,
     attachFilePath: undefined,
     zhubandate: undefined,
     xiebandate: undefined,
     fileList: []
   }
   formRef.value?.resetFields()
+}
+
+const querySendDeptSuggestions = (queryString: string, cb: any) => {
+  const dictOptions = getStrDictOptions(DICT_TYPE.BPM_AGENCY_NAME) || []
+  const suggestions = dictOptions.map((dict) => ({ value: dict.label }))
+  const results = queryString
+    ? suggestions.filter((item) => item.value.includes(queryString))
+    : suggestions
+  cb(results)
+}
+
+const queryDocSecondClassSuggestions = (queryString: string, cb: any) => {
+  const dictOptions = getIntDictOptions(DICT_TYPE.BPM_DOC_CLASS) || []
+  const suggestions = dictOptions.map((dict) => ({ value: dict.label }))
+  const results = queryString
+    ? suggestions.filter((item) => item.value.includes(queryString))
+    : suggestions
+  cb(results)
 }
 </script>

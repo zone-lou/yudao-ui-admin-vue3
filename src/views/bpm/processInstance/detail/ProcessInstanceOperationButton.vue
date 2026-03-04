@@ -253,7 +253,7 @@
       :rules="approveReasonRule"
       label-width="90px"
     >
-      <el-form-item prop="reason" label="审批意见" v-if="!getBusinessFormReason">
+      <el-form-item prop="reason" label="审批意见" v-if="requireDialogReasonInput">
         <el-input
           v-model="approveReasonForm.reason"
           type="textarea"
@@ -389,6 +389,7 @@ const approveFormFApi = ref<any>({}) // approveForms 的 fAPi
 
 const nextAssigneesTimelineRef = ref() // 下一个节点审批人时间线组件的引用
 const reasonRequire = ref()
+const requireDialogReasonInput = ref(false)
 const approveFormRef = ref<FormInstance>()
 const approveReasonForm = reactive({
   reason: '',
@@ -544,7 +545,7 @@ const handleDirectFinish = async () => {
   let reason = approveReasonForm.reason
   if (props.getBusinessFormReason) {
     const opinion = await props.getBusinessFormReason()
-    if (opinion) {
+    if (opinion !== undefined) {
       reason = opinion
     }
   }
@@ -591,10 +592,15 @@ const openApproveDialog = async () => {
   }
 
   // 获取意见
+  requireDialogReasonInput.value = !props.getBusinessFormReason
   if (props.getBusinessFormReason) {
     const opinion = await props.getBusinessFormReason()
-    if (opinion) {
+    if (opinion !== undefined) {
       approveReasonForm.reason = opinion // 自动填充
+      requireDialogReasonInput.value = false
+    } else {
+      approveReasonForm.reason = ''
+      requireDialogReasonInput.value = true
     }
   }
 
@@ -892,14 +898,14 @@ const handleReCreate = async () => {
 const handleSaveDraft = async () => {
   if (props.getBusinessFormReason) {
     const opinion = await props.getBusinessFormReason()
-    if (opinion) {
+    if (opinion !== undefined && opinion !== '') {
       await TaskApi.addComment({
         id: runningTask.value.id,
         reason: opinion
       })
       message.success('保存草稿成功')
     } else {
-      message.warning('意见不能为空')
+      message.warning('暂无内容或当前环节不支持草稿保存')
     }
   }
 }
