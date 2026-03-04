@@ -217,10 +217,10 @@
           >
             <!-- 节点人员树区域 -->
             <div
-              class="border border-gray-200 rounded-lg p-3 bg-gray-50/50 dark:bg-gray-800/50 flex flex-col shadow-sm hover:shadow-md transition-shadow h-[400px]"
+              class="border border-gray-200 rounded-lg bg-gray-50/50 dark:bg-gray-800/50 flex flex-col shadow-sm hover:shadow-md transition-shadow h-[400px]"
             >
               <div
-                class="flex items-center justify-between mb-3 pb-2 border-b border-gray-200 dark:border-gray-700 flex-none"
+                class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 flex-none"
               >
                 <el-checkbox
                   v-model="node.checked"
