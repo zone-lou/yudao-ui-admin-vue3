@@ -569,7 +569,7 @@ const handlePreview = (file: any) => {
   const kkBaseUrl = fileViewBaseUrl.value || 'http://192.168.50.239:8012'
   let fullUrl = file.url
   const encodedUrl = Base64.encode(fullUrl)
-  const previewUrl = `${kkBaseUrl}/onlinePreview?url=${encodeURIComponent(encodedUrl)}`
+  const previewUrl = `${kkBaseUrl}${encodeURIComponent(encodedUrl)}`
   window.open(previewUrl, '_blank')
 }
 

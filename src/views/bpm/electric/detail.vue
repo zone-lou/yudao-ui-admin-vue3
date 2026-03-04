@@ -177,8 +177,8 @@ const handlePreview = (file: any) => {
   const encodedUrl = Base64.encode(fullUrl)
 
   // 3. 拼接最终预览地址
-  // 格式: http://kk-ip:8012/onlinePreview?url=base64_string
-  const previewUrl = `${kkBaseUrl}/onlinePreview?url=${encodeURIComponent(encodedUrl)}`
+  // 格式: http://kk-ip:8012base64_string
+  const previewUrl = `${kkBaseUrl}${encodeURIComponent(encodedUrl)}`
 
   // 4. 打开新窗口预览
   window.open(previewUrl, '_blank')

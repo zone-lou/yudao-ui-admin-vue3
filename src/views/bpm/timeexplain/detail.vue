@@ -363,7 +363,7 @@ const handlePreview = (file: any) => {
   const encodedUrl = Base64.encode(fullUrl)
 
   // 3. 拼接并打开
-  const previewUrl = `${kkBaseUrl}/onlinePreview?url=${encodeURIComponent(encodedUrl)}`
+  const previewUrl = `${kkBaseUrl}${encodeURIComponent(encodedUrl)}`
   window.open(previewUrl, '_blank')
 }
 
