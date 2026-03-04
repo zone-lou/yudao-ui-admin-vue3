@@ -1,6 +1,12 @@
 <template>
   <el-card v-loading="loading" class="box-card">
-    <MyProcessViewer key="designer" :xml="view.bpmnXml" :view="view" class="process-viewer" />
+    <MyProcessViewer
+      ref="myProcessViewerRef"
+      key="designer"
+      :xml="view.bpmnXml"
+      :view="view"
+      class="process-viewer"
+    />
   </el-card>
 </template>
 <script lang="ts" setup>
@@ -18,7 +24,6 @@ const props = defineProps({
 const view = ref({
   bpmnXml: ''
 }) // BPMN 流程图数据
-
 
 /** 只有 loading 完成时，才去加载流程列表 */
 watch(
@@ -39,11 +44,21 @@ watch(
     view.value.bpmnXml = value
   }
 )
+
+const myProcessViewerRef = ref()
+
+const processReZoom = () => {
+  myProcessViewerRef.value?.processReZoom?.()
+}
+
+defineExpose({
+  processReZoom
+})
 </script>
 <style lang="scss" scoped>
 .box-card {
-  height: 100%;
   width: 100%;
+  height: 100%;
   margin-bottom: 0;
 
   :deep(.el-card__body) {
@@ -52,9 +67,9 @@ watch(
   }
 
   :deep(.process-viewer) {
+    width: 100%;
     height: 100% !important;
     min-height: 100%;
-    width: 100%;
     overflow: auto;
   }
 }

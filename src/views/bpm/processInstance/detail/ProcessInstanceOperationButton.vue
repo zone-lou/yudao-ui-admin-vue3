@@ -207,66 +207,75 @@
         />
       </el-form-item>
 
-      <div v-if="approvalNodes.length > 0" class="mb-10px">
-        <el-tabs v-model="activeTab" class="w-full">
-          <el-tab-pane
-            v-for="node in approvalNodes"
-            :key="node.taskDefKey"
-            :label="node.name || node.taskName"
-            :name="node.taskDefKey"
-          >
-            <!-- 节点人员树区域 -->
-            <div
-              class="border border-gray-200 rounded-lg p-3 bg-gray-50/50 dark:bg-gray-800/50 flex flex-col shadow-sm hover:shadow-md transition-shadow h-[400px]"
+      <div class="mb-10px min-h-[450px]" v-loading="formLoading">
+        <template v-if="approvalNodes.length > 0">
+          <el-tabs v-model="activeTab" class="w-full">
+            <el-tab-pane
+              v-for="node in approvalNodes"
+              :key="node.taskDefKey"
+              :label="node.name || node.taskName"
+              :name="node.taskDefKey"
             >
+              <!-- 节点人员树区域 -->
               <div
-                class="flex items-center justify-between mb-3 pb-2 border-b border-gray-200 dark:border-gray-700 flex-none"
+                class="border border-gray-200 rounded-lg p-3 bg-gray-50/50 dark:bg-gray-800/50 flex flex-col shadow-sm transition-shadow h-[400px]"
               >
-                <el-checkbox
-                  v-model="node.checked"
-                  :label="node.name || node.taskName"
-                  size="large"
-                  class="!font-bold !text-gray-800 dark:!text-gray-200"
-                >
-                  {{ node.name || node.taskName }}
-                </el-checkbox>
-              </div>
-              <div class="pl-2 flex-1 overflow-y-auto custom-scrollbar">
                 <div
-                  v-if="!node.candidateUsers || node.candidateUsers.length === 0"
-                  class="text-gray-400 text-sm h-full flex items-center justify-center text-center px-4"
+                  class="flex items-center justify-between mb-3 pb-2 border-b border-gray-200 dark:border-gray-700 flex-none"
                 >
-                  无需选择审批人<br />(自动分配或无需审批)
+                  <el-checkbox
+                    v-model="node.checked"
+                    :label="node.name || node.taskName"
+                    size="large"
+                    class="!font-bold !text-gray-800 dark:!text-gray-200"
+                    @change="(val) => handleNodeCheckboxChange(val, node)"
+                  >
+                    {{ node.name || node.taskName }}
+                  </el-checkbox>
                 </div>
-                <el-tree
-                  class="!bg-transparent"
-                  v-else
-                  :ref="(el) => setTreeRef(el, node.taskDefKey)"
-                  :data="node.candidateUsers"
-                  :props="{ label: 'name', children: 'children' }"
-                  show-checkbox
-                  node-key="id"
-                  default-expand-all
-                  :check-strictly="false"
-                  @check="(data, { checkedKeys }) => handleTreeCheck(node, data, checkedKeys)"
-                >
-                  <template #default="{ data }">
-                    <span
-                      :class="{
-                        'font-bold text-gray-700 dark:text-gray-200':
-                          data.children && data.children.length > 0,
-                        'text-blue-600 dark:text-blue-400':
-                          !data.children || data.children.length === 0
-                      }"
-                    >
-                      {{ data.name }}
-                    </span>
-                  </template>
-                </el-tree>
+                <div class="pl-2 flex-1 overflow-y-auto custom-scrollbar">
+                  <div
+                    v-if="!node.candidateUsers || node.candidateUsers.length === 0"
+                    class="text-gray-400 text-sm h-full flex items-center justify-center text-center px-4"
+                  >
+                    无需选择审批人<br />(自动分配或无需审批)
+                  </div>
+                  <el-tree
+                    class="!bg-transparent"
+                    v-else
+                    :ref="(el) => setTreeRef(el, node.taskDefKey)"
+                    :data="node.candidateUsers"
+                    :props="{ label: 'name', children: 'children' }"
+                    show-checkbox
+                    node-key="id"
+                    default-expand-all
+                    :check-strictly="false"
+                    @check="(data, { checkedKeys }) => handleTreeCheck(node, data, checkedKeys)"
+                  >
+                    <template #default="{ data }">
+                      <span
+                        :class="{
+                          'font-bold text-gray-700 dark:text-gray-200':
+                            data.children && data.children.length > 0,
+                          'text-blue-600 dark:text-blue-400':
+                            !data.children || data.children.length === 0
+                        }"
+                      >
+                        {{ data.name }}
+                      </span>
+                    </template>
+                  </el-tree>
+                </div>
               </div>
-            </div>
-          </el-tab-pane>
-        </el-tabs>
+            </el-tab-pane>
+          </el-tabs>
+        </template>
+        <div
+          v-else-if="!formLoading"
+          class="flex items-center justify-center h-[450px] text-gray-400"
+        >
+          暂无需要选择的审批节点
+        </div>
       </div>
     </el-form>
     <template #footer>
@@ -343,9 +352,7 @@ const approveReasonForm = reactive({
 })
 const approveReasonRule = computed(() => {
   return {
-    reason: [
-      { required: reasonRequire.value, message: nodeTypeName + '意见不能为空', trigger: 'blur' }
-    ],
+    reason: [{ required: true, message: nodeTypeName.value + '意见不能为空', trigger: 'blur' }],
     signPicUrl: [{ required: true, message: '签名不能为空', trigger: 'change' }],
     nextAssignees: [{ required: true, message: '审批人不能为空', trigger: 'blur' }]
   }
@@ -480,8 +487,17 @@ const handleDirectFinish = async () => {
   if (props.getBusinessFormReason) {
     const opinion = await props.getBusinessFormReason()
     if (opinion !== undefined) {
+      if (!opinion || opinion.trim() === '') {
+        message.warning('请先在表格内填写审批意见！')
+        return
+      }
       reason = opinion
     }
+  }
+
+  if (!reason || reason.trim() === '') {
+    message.warning('请填写审批意见！')
+    return
   }
 
   // 3. 构建请求级多表单变量
@@ -496,7 +512,7 @@ const handleDirectFinish = async () => {
   // 4. 发起直接办结请求
   const data = {
     id: runningTask.value.id,
-    reason: reason || '同意',
+    reason: reason,
     variables: variables,
     nextNodeAssignees: {} // 结束节点时无下一处理人
   } as any
@@ -530,6 +546,10 @@ const openApproveDialog = async () => {
   if (props.getBusinessFormReason) {
     const opinion = await props.getBusinessFormReason()
     if (opinion !== undefined) {
+      if (!opinion || opinion.trim() === '') {
+        message.warning('请先在表格内填写审批意见！')
+        return
+      }
       approveReasonForm.reason = opinion // 自动填充
       requireDialogReasonInput.value = false
     } else {
@@ -538,9 +558,11 @@ const openApproveDialog = async () => {
     }
   }
 
-  // 加载可选节点
-  await loadApprovalNodes()
+  // 并行或提前加载节点，减少卡顿感，弹出动作剥离到外层优先
   approveDialogVisible.value = true
+  // 使用 nextTick 让弹窗动画先行，不被卡死
+  await nextTick()
+  await loadApprovalNodes()
 }
 
 /** 加载可选节点数据 */
@@ -648,26 +670,81 @@ const buildDeptTree = (users: any[]) => {
 
 /** 树节点选中回调 */
 const handleTreeCheck = (node: any, data: any, checkedKeys: any[]) => {
-  // 单选逻辑处理：如果 multiple_flag 为 0 且当前勾选数超过 1
+  // 单选逻辑处理：如果 multiple_flag 为 0
   if (node.extensionProperties?.multiple_flag === '0') {
     const treeRef = userTreeRefs.value[node.taskDefKey]
     if (treeRef) {
-      // 强制只选中当前点击的节点（如果是人则选人，如果是部门则根据 el-tree 配置决定）
-      treeRef.setCheckedKeys([data.id])
-      node.checked = true
+      // 判断当前点击是选中还是取消选中
+      if (checkedKeys.includes(data.id)) {
+        // 如果点击的是部门（或者是带子节点的虚拟父级），在单选模式下不能直接全选子节点
+        if (data.children && data.children.length > 0) {
+          // 为了防止级联导致多人被勾，我们主动退化为：只勾选该部门下的第一个人员
+          const firstUserId = data.children[0].id
+          treeRef.setCheckedKeys([firstUserId])
+        } else {
+          // 如果点击的本来就是且只是具体人，则正常排他，强制只选中当前人
+          treeRef.setCheckedKeys([data.id])
+        }
+        node.checked = true
+      } else {
+        // 如果是取消选中，则清空勾选
+        treeRef.setCheckedKeys([])
+        node.checked = false
+      }
       return
     }
   }
 
-  // 如果选中了人，自动勾选节点
-  if (checkedKeys.length > 0) {
-    node.checked = true
+  // 当选中任何人员时，自动勾选父级节点；如果一个人都没选中，则自动取消该节点勾选
+  node.checked = checkedKeys.length > 0
+}
+
+/** 节点级别的全选/反选处理 */
+const handleNodeCheckboxChange = (val: boolean | string | number, node: any) => {
+  const treeRef = userTreeRefs.value[node.taskDefKey]
+  if (!treeRef) return
+
+  if (val) {
+    // 全选：如果有多选限制（multiple_flag === '0'），则不应当随意全选，给出提示或选第一个
+    if (node.extensionProperties?.multiple_flag === '0') {
+      message.warning('该节点为单选，无法批量全选')
+      setTimeout(() => {
+        node.checked = false
+      }, 0)
+      return
+    }
+    // 获取所有叶子节点（即实际的人员）的 ID 进行全勾选
+    const allLeafIds: any[] = []
+    const traverse = (nodes: any[]) => {
+      nodes.forEach((n) => {
+        if (!n.children || n.children.length === 0) {
+          allLeafIds.push(n.id)
+        } else {
+          traverse(n.children)
+        }
+      })
+    }
+    traverse(node.candidateUsers || [])
+    treeRef.setCheckedKeys(allLeafIds)
+  } else {
+    // 反选：清空树木里的勾选状态
+    treeRef.setCheckedKeys([])
   }
 }
 
 /** 提交审批 */
 const handleApproveConfirm = async () => {
   // 校验
+  if (!approveFormRef.value) return
+  const valid = await approveFormRef.value.validate()
+  if (!valid) return
+
+  // 防御：如果是来自内置审批栏，由于 el-form-item v-if 会导致其必填失效，故追加硬校验
+  if (!approveReasonForm.reason || approveReasonForm.reason.trim() === '') {
+    message.warning('审批意见不能为空')
+    return
+  }
+
   // 必须选中至少一个节点
   const selectedNodes = approvalNodes.value.filter((n) => n.checked)
   if (approvalNodes.value.length > 0 && selectedNodes.length === 0) {

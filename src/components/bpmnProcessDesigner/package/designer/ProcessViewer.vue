@@ -173,7 +173,13 @@ const selectTasks = ref<any[]>([]) // 选中的任务数组
 /** Zoom：恢复 */
 const processReZoom = () => {
   defaultZoom.value = 1
-  bpmnViewer.value?.get('canvas').zoom('fit-viewport', 'auto')
+  if (bpmnViewer.value) {
+    const canvas = bpmnViewer.value.get('canvas') as any
+    if (canvas && typeof canvas.resized === 'function') {
+      canvas.resized()
+    }
+    bpmnViewer.value.get('canvas').zoom('fit-viewport', 'auto')
+  }
 }
 
 /** Zoom：放大 */
@@ -367,13 +373,37 @@ watch(
 )
 
 /** mounted：初始化 */
+let observer: IntersectionObserver | null = null
 onMounted(() => {
   importXML(props.xml)
   setProcessStatus(props.view)
+
+  // 监听容器可见性以在 Tab 切换出来时强制自适应重塑画板及缩放比例
+  if (processCanvas.value) {
+    observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && defaultZoom.value === 1) {
+          // 只有原本处于默认比例的时候才在呈现出来时重新覆盖去贴合容器大小
+          processReZoom()
+        }
+      })
+    })
+    observer.observe(processCanvas.value)
+  }
 })
 
 /** unmount：销毁 */
 onBeforeUnmount(() => {
+  if (observer && processCanvas.value) {
+    observer.unobserve(processCanvas.value)
+    observer.disconnect()
+    observer = null
+  }
   clearViewer()
+})
+
+/** 暴露方法以便外部在 Tab 切换时控制重绘自适应缩放 */
+defineExpose({
+  processReZoom
 })
 </script>

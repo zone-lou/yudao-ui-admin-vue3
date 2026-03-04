@@ -513,6 +513,7 @@ const handleSubmit = async () => {
         await ReceiveDocApi.updateReceiveDoc(data)
       } else {
         // 3. 无流程实例ID -> 草稿提交 -> 走 submit 接口
+        await ReceiveDocApi.submitReceiveDoc(data)
       }
     }
     message.success('提交成功')
