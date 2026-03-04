@@ -137,7 +137,7 @@ const preparePrintData = (rawData: any) => {
               ? rawData.sendDept
               : [rawData.sendDept]
         data.sendDept = arr
-          .map((v: any) => getDictLabel(DICT_TYPE.BPM_RECEICE_DOC_UNIT, v))
+          .map((v: any) => getDictLabel(DICT_TYPE.BPM_AGENCY_NAME, v) || v)
           .filter(Boolean)
           .join('、')
       } catch (err) {
