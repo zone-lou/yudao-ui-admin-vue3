@@ -201,35 +201,6 @@
         </td>
       </tr>
     </table>
-
-    <!-- 文件预览对话框 -->
-    <el-dialog
-      v-model="previewVisible"
-      title="文件预览"
-      width="800px"
-      destroy-on-close
-      append-to-body
-    >
-      <div class="preview-container">
-        <img
-          v-if="previewType === 'image'"
-          :src="previewUrl"
-          alt="preview"
-          style="max-width: 100%"
-        />
-        <iframe
-          v-else-if="previewType === 'iframe'"
-          :src="previewUrl"
-          width="100%"
-          height="600px"
-          frameborder="0"
-        ></iframe>
-        <div v-else class="unsupported-preview">
-          <el-icon :size="40" color="#909399"><Document /></el-icon>
-          <p>该文件类型暂不支持在线预览，请下载查看。</p>
-        </div>
-      </div>
-    </el-dialog>
   </div>
 </template>
 
@@ -239,7 +210,8 @@ import { dateUtil } from '@/utils/dateUtil'
 import { useUserStore } from '@/store/modules/user'
 import { ConfflowApi, Confflow } from '@/api/bpm/confflow' // 引入API
 import { propTypes } from '@/utils/propTypes'
-import { Document } from '@element-plus/icons-vue'
+import { Base64 } from 'js-base64'
+import * as ConfigApi from '@/api/infra/config'
 
 defineOptions({ name: 'BpmConfflowDetail' })
 
@@ -287,9 +259,7 @@ const deputyLeaderList = ref<any[]>([])
 
 // --- 附件相关状态 ---
 const fileList = ref<any[]>([])
-const previewVisible = ref(false)
-const previewUrl = ref('')
-const previewType = ref('image') // image | iframe | other
+const fileViewBaseUrl = ref('')
 
 /** 获取详情数据 */
 const getInfo = async () => {
@@ -298,6 +268,7 @@ const getInfo = async () => {
 
   detailLoading.value = true
   try {
+    fileViewBaseUrl.value = await ConfigApi.getConfigKey('url.fileview.address')
     const res = await ConfflowApi.getConfflow(queryId)
     detailData.value = res || {}
     processFileList(res.attachFilePath)
@@ -421,22 +392,17 @@ const processFileList = (pathStr: string | undefined) => {
 
 /** 处理预览 */
 const handlePreview = (file: any) => {
-  const { url, ext } = file
-  const imgExts = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp']
-  const officeExts = ['pdf', 'txt']
+  if (!file || !file.url) return
 
-  if (imgExts.includes(ext)) {
-    previewType.value = 'image'
-    previewUrl.value = url
-    previewVisible.value = true
-  } else if (officeExts.includes(ext)) {
-    previewType.value = 'iframe'
-    previewUrl.value = url
-    previewVisible.value = true
-  } else {
-    previewType.value = 'other'
-    previewVisible.value = true
+  let fullUrl = file.url.trim()
+  if (fullUrl.startsWith('/')) {
+    fullUrl = window.location.origin + fullUrl
   }
+
+  const kkBaseUrl = fileViewBaseUrl.value || 'http://192.168.50.239:8012/onlinePreview?url='
+  const encodedUrl = Base64.encode(fullUrl)
+  const previewUrl = `${kkBaseUrl}${encodeURIComponent(encodedUrl)}`
+  window.open(previewUrl, '_blank')
 }
 
 /** 处理下载 */
