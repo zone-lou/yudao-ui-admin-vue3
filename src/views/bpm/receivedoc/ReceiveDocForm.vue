@@ -69,6 +69,7 @@
           v-model="formData.attachFilePath"
           ref="uploadFileRef"
           :upload-api="uploadReturnInfo"
+          @update:first-file-name="handleFirstFileNameUpdate"
         />
       </el-form-item>
 
@@ -132,6 +133,14 @@ const formRules = reactive({})
 const formRef = ref() // 表单 Ref
 // 上传组件 Ref
 const uploadFileRef = ref()
+
+// 监听并接收首位有效文件名称回填
+const handleFirstFileNameUpdate = (fileName: string, forceUpdate: boolean = false) => {
+  const data = formData.value as any
+  if (fileName && (forceUpdate || !data.subject || data.subject.toString().trim() === '')) {
+    data.subject = fileName
+  }
+}
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {

@@ -76,7 +76,12 @@ import Sortable from 'sortablejs' // 引入排序拖拽核心
 defineOptions({ name: 'UploadFile' })
 
 const message = useMessage()
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'update:first-file-name'])
+
+// 抛出首位文件名专属事件
+const emitFirstFileName = (fileName: string, forceUpdate = false) => {
+  emit('update:first-file-name', fileName, forceUpdate)
+}
 
 const props = defineProps({
   modelValue: propTypes.oneOfType<string | string[]>([String, Array<String>]).isRequired,
@@ -215,6 +220,17 @@ watch(
       newUrls.every((url, index) => url === currentUrls[index])
 
     if (isSame) {
+      if (fileList.value.length > 0) {
+        const firstFile = fileList.value[0]
+        let titleName = firstFile.name
+        const lastDotIndex = titleName.lastIndexOf('.')
+        if (lastDotIndex > 0) {
+          titleName = titleName.substring(0, lastDotIndex)
+        }
+        emitFirstFileName(titleName)
+      } else {
+        emitFirstFileName('')
+      }
       return
     }
 
@@ -223,11 +239,24 @@ watch(
       name: url.substring(url.lastIndexOf('/') + 1),
       url
     }))
+
+    // 初始化/回显完成后提取首位向外抛出（回显场景肯定是不强制覆盖的）
+    if (fileList.value.length > 0) {
+      const firstFile = fileList.value[0]
+      let titleName = firstFile.name
+      const lastDotIndex = titleName.lastIndexOf('.')
+      if (lastDotIndex > 0) {
+        titleName = titleName.substring(0, lastDotIndex)
+      }
+      emitFirstFileName(titleName, false)
+    } else {
+      emitFirstFileName('', false)
+    }
   },
   { immediate: true, deep: true }
 )
 
-const emitUpdateModelValue = () => {
+const emitUpdateModelValue = (forceUpdate = false) => {
   // 过滤掉尚未上传成功（没有真实远程url）的文件
   const successFiles = fileList.value.filter(
     (file) => file.status === 'success' && file.url && !file.url.startsWith('blob:')
@@ -239,6 +268,19 @@ const emitUpdateModelValue = () => {
     result = result.join(',')
   }
   emit('update:modelValue', result)
+
+  // 联动提取首位文件名并抛出（去除后缀），附带是否强制覆盖的标志
+  if (successFiles.length > 0) {
+    const firstFile = successFiles[0]
+    let titleName = firstFile.name
+    const lastDotIndex = titleName.lastIndexOf('.')
+    if (lastDotIndex > 0) {
+      titleName = titleName.substring(0, lastDotIndex)
+    }
+    emitFirstFileName(titleName, forceUpdate)
+  } else {
+    emitFirstFileName('', forceUpdate)
+  }
 }
 
 /** 挂载拖拽混排实例化事件 */
@@ -253,8 +295,8 @@ const initSortable = () => {
       // 捕获基于数组变更后的索引调换位置
       const targetElement = fileList.value.splice(evt.oldIndex as number, 1)[0]
       fileList.value.splice(evt.newIndex as number, 0, targetElement)
-      // 更新绑定
-      emitUpdateModelValue()
+      // 更新绑定，标记这是来自人工拖拽强制更新排列的行为
+      emitUpdateModelValue(true)
     }
   })
 }

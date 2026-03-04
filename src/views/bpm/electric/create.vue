@@ -149,7 +149,10 @@
             <el-input v-model="formData.subject" placeholder="请输入标题" />
           </el-form-item>
           <el-form-item label="收文文件" prop="filepath">
-            <UploadFile v-model="formData.attachFilePath" />
+            <UploadFile
+              v-model="formData.attachFilePath"
+              @update:first-file-name="handleFirstFileNameUpdate"
+            />
           </el-form-item>
           <el-form-item label="备注" prop="remark">
             <el-input
@@ -280,6 +283,14 @@ const processDefinitionId = ref('')
 
 const nodeChange = async (val) => {
   await getSelectUsers(val.extensionProperties)
+}
+
+// 监听并接收首位有效文件名称回填
+const handleFirstFileNameUpdate = (fileName: string, forceUpdate: boolean = false) => {
+  const data = formData.value as any
+  if (fileName && (forceUpdate || !data.subject || data.subject.toString().trim() === '')) {
+    data.subject = fileName
+  }
 }
 
 const getSelectUsers = async (item) => {

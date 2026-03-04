@@ -131,6 +131,7 @@
               v-model="formData.attachFilePath"
               ref="uploadFileRef"
               :upload-api="uploadReturnInfo"
+              @update:first-file-name="handleFirstFileNameUpdate"
             />
           </el-form-item>
 
@@ -294,6 +295,25 @@ const defaultReceiveUserId = ref<number | string>('')
 
 const nodeChange = async (val) => {
   await getSelectUsers(val.extensionProperties)
+}
+
+// 监听并接收首位有效文件名称回填
+const handleFirstFileNameUpdate = (fileName: string, forceUpdate: boolean = false) => {
+  const data = formData.value as any
+  console.log(
+    '[DEBUG] 接收到排在第一位的文件名:',
+    fileName,
+    '当前标题:',
+    data.subject,
+    '强制?',
+    forceUpdate
+  )
+
+  // 如果取到了文件名，且 (强制覆盖 或者 当前表单标题为空) 才进行覆盖填补
+  if (fileName && (forceUpdate || !data.subject || data.subject.toString().trim() === '')) {
+    data.subject = fileName
+    console.log('[DEBUG] 标题已填入:', fileName)
+  }
 }
 
 const getSelectUsers = async (item) => {
