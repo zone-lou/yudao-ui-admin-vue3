@@ -68,11 +68,9 @@ export const useAppStore = defineStore('app', {
       greyMode: false, // 是否开始灰色模式，用于特殊悼念日
       fixedMenu: wsCache.get('fixedMenu') || false, // 是否固定菜单
 
-      layout: wsCache.get(CACHE_KEY.LAYOUT) || 'topSubMenu', // layout布局
+      layout: 'top', // 全局默认改为 top 布局，去除原有的 wsCache.get(CACHE_KEY.LAYOUT) 缓存继承以免旧用户仍然加载 topSubMenu
       isDark:
-        wsCache.get(CACHE_KEY.LAYOUT) === 'topSubMenu'
-          ? false
-          : wsCache.get(CACHE_KEY.IS_DARK) || false, // 是否是暗黑模式
+        wsCache.get(CACHE_KEY.LAYOUT) === 'top' ? false : wsCache.get(CACHE_KEY.IS_DARK) || false, // 是否是暗黑模式
       currentSize: wsCache.get('default') || 'default', // 组件尺寸
       theme: wsCache.get(CACHE_KEY.THEME) || {
         // 主题色
@@ -281,7 +279,7 @@ export const useAppStore = defineStore('app', {
       // }
       this.layout = layout
       wsCache.set(CACHE_KEY.LAYOUT, this.layout)
-      if (layout === 'topSubMenu') {
+      if (layout === 'top') {
         this.setIsDark(false)
       }
     },
@@ -289,7 +287,7 @@ export const useAppStore = defineStore('app', {
       this.title = title
     },
     setIsDark(isDark: boolean) {
-      if (this.layout === 'topSubMenu' && isDark) {
+      if (this.layout === 'top' && isDark) {
         return
       }
       this.isDark = isDark
