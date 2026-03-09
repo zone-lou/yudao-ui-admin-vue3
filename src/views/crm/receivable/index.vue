@@ -9,7 +9,7 @@
       :inline="true"
       :model="queryParams"
       class="-mb-15px"
-      label-width="68px"
+      label-width="auto"
     >
       <el-form-item label="回款编号" prop="no">
         <el-input

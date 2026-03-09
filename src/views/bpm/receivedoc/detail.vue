@@ -13,324 +13,335 @@
         <span>
           紧急程度：
           <span class="meta-input">
-            <dict-tag :type="DICT_TYPE.BPM_EMERGENCY_DEGREE" :value="detailData.urgencyDegree" />
+            <dict-tag
+              v-if="detailData.urgencyDegree !== undefined"
+              :type="DICT_TYPE.BPM_EMERGENCY_DEGREE"
+              :value="detailData.urgencyDegree"
+            />
           </span>
         </span>
       </div>
 
       <table class="oa-table">
-        <tr>
-          <td class="label-cell">来文机关</td>
-          <td class="data-text">
-            <span>{{ detailData.sendDept }}</span>
-          </td>
-          <td class="label-cell" style="width: 90px">来文号</td>
-          <td class="data-text" style="width: 20%">
-            <span>{{ formatSendDocNumber(detailData.sendDocNumber) }}</span>
-          </td>
-        </tr>
+        <tbody>
+          <tr>
+            <td class="label-cell">来文机关</td>
+            <td class="data-text">
+              <span>{{ detailData.sendDept }}</span>
+            </td>
+            <td class="label-cell" style="width: 90px">来文号</td>
+            <td class="data-text" style="width: 20%">
+              <span>{{ formatSendDocNumber(detailData.sendDocNumber) }}</span>
+            </td>
+          </tr>
 
-        <tr>
-          <td class="label-cell">标 题</td>
-          <td colspan="3" class="data-text" style="font-weight: bold">
-            {{ detailData.subject }}
-          </td>
-        </tr>
+          <tr>
+            <td class="label-cell">标 题</td>
+            <td colspan="3" class="data-text" style="font-weight: bold">
+              {{ detailData.subject }}
+            </td>
+          </tr>
 
-        <!-- 附件列表行 (始终显示，无附件显示暂无) -->
-        <tr class="print-hide-row">
-          <td class="label-cell">收文附件</td>
-          <td colspan="3" class="data-text">
-            <div v-if="fileList.length > 0">
-              <div v-for="(file, index) in fileList" :key="index" style="margin-bottom: 5px">
-                <span>{{ file.name }}</span>
-                <el-button
-                  link
-                  type="primary"
-                  size="small"
-                  @click="handlePreview(file)"
-                  class="ml-2"
+          <!-- 附件列表行 (始终显示，无附件显示暂无) -->
+          <tr class="print-hide-row">
+            <td class="label-cell">收文附件</td>
+            <td colspan="3" class="data-text">
+              <div v-if="fileList.length > 0">
+                <div v-for="(file, index) in fileList" :key="index" style="margin-bottom: 5px">
+                  <span>{{ file.name }}</span>
+                  <el-button
+                    link
+                    type="primary"
+                    size="small"
+                    @click="handlePreview(file)"
+                    class="ml-2"
+                  >
+                    预览
+                  </el-button>
+                  <el-button link type="primary" size="small" @click="handleDownload(file)">
+                    下载
+                  </el-button>
+                </div>
+              </div>
+              <div v-else class="text-gray-400">无</div>
+            </td>
+          </tr>
+
+          <!-- 拟办意见 -->
+          <tr>
+            <td class="label-cell" rowspan="2">拟办意见</td>
+            <td colspan="3" class="h-80 data-text">
+              <div v-if="isEditable('拟办') || isEditable('发起')" class="w-full h-full">
+                <el-input
+                  v-model="currentOpinion"
+                  type="textarea"
+                  :rows="3"
+                  placeholder="请输入拟办意见"
+                  class="w-full h-full"
+                  style="border: none"
+                />
+              </div>
+              <div v-else>
+                <div v-for="(info, index) in ensureMinRows(nibanList, 3)" :key="index">
+                  {{ info.comment }}
+                </div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="3" class="signature-row">
+              <div class="flex items-center">
+                <span style="margin-right: 5px">办理人：</span>
+                <span class="data-text" style="display: inline-block; min-width: 60px">
+                  {{ nibanList.length > 0 ? nibanList[0].assigneeUser?.nickname : '' }}
+                </span>
+                <span style="margin-left: 15px">办理日期：</span>
+                <span class="data-text" style="display: inline-block; min-width: 80px">
+                  {{ nibanList.length > 0 ? formatDate(nibanList[0].endTime) : '' }}
+                </span>
+              </div>
+            </td>
+          </tr>
+
+          <!-- 局长批示 -->
+          <tr>
+            <td class="label-cell" rowspan="2">局长批示</td>
+            <td colspan="3" class="h-80 data-text">
+              <div v-if="isEditable('局长') || isEditable('主要领导')" class="w-full h-full">
+                <el-input
+                  v-model="currentOpinion"
+                  type="textarea"
+                  :rows="3"
+                  placeholder="请输入局长批示"
+                  class="w-full h-full"
+                />
+              </div>
+              <div v-else>
+                <div
+                  v-for="(info, index) in ensureMinRows(directorList, 3)"
+                  :key="index"
+                  class="mb-5px"
                 >
-                  预览
-                </el-button>
-                <el-button link type="primary" size="small" @click="handleDownload(file)">
-                  下载
-                </el-button>
+                  <div>{{ info.comment }}</div>
+                </div>
               </div>
-            </div>
-            <div v-else class="text-gray-400">无</div>
-          </td>
-        </tr>
-
-        <!-- 拟办意见 -->
-        <tr>
-          <td class="label-cell" rowspan="2">拟办意见</td>
-          <td colspan="3" class="h-80 data-text">
-            <div v-if="isEditable('拟办') || isEditable('发起')" class="w-full h-full">
-              <el-input
-                v-model="currentOpinion"
-                type="textarea"
-                :rows="3"
-                placeholder="请输入拟办意见"
-                class="w-full h-full"
-                style="border: none"
-              />
-            </div>
-            <div v-else>
-              <div v-for="(info, index) in ensureMinRows(nibanList, 3)" :key="index">
-                {{ info.comment }}
+            </td>
+          </tr>
+          <tr>
+            <td colspan="3" class="signature-row">
+              <div class="flex items-center">
+                <span style="margin-right: 5px">办理人：</span>
+                <span class="data-text" style="display: inline-block; min-width: 60px">
+                  {{
+                    directorList.length > 0
+                      ? directorList[directorList.length - 1].assigneeUser?.nickname
+                      : ''
+                  }}
+                </span>
+                <span style="margin-left: 15px">办理日期：</span>
+                <span class="data-text" style="display: inline-block; min-width: 80px">
+                  {{
+                    directorList.length > 0
+                      ? formatDate(directorList[directorList.length - 1].endTime)
+                      : ''
+                  }}
+                </span>
               </div>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="3" class="signature-row">
-            <div class="flex items-center">
-              <span style="margin-right: 5px">办理人：</span>
-              <span class="data-text" style="display: inline-block; min-width: 60px">
-                {{ nibanList.length > 0 ? nibanList[0].assigneeUser?.nickname : '' }}
-              </span>
-              <span style="margin-left: 15px">办理日期：</span>
-              <span class="data-text" style="display: inline-block; min-width: 80px">
-                {{ nibanList.length > 0 ? formatDate(nibanList[0].endTime) : '' }}
-              </span>
-            </div>
-          </td>
-        </tr>
+            </td>
+          </tr>
 
-        <!-- 局长批示 -->
-        <tr>
-          <td class="label-cell" rowspan="2">局长批示</td>
-          <td colspan="3" class="h-80 data-text">
-            <div v-if="isEditable('局长') || isEditable('主要领导')" class="w-full h-full">
-              <el-input
-                v-model="currentOpinion"
-                type="textarea"
-                :rows="3"
-                placeholder="请输入局长批示"
-                class="w-full h-full"
-              />
-            </div>
-            <div v-else>
+          <!-- 监督监管 -->
+          <tr>
+            <td class="label-cell">监督监管</td>
+            <td colspan="3" style="padding: 4px">
+              <div class="compact-row">
+                <div class="check-item">
+                  <span class="checkbox-mock">{{
+                    detailData.zhubandate || detailData.xiebandate ? '✔' : ''
+                  }}</span>
+                  <span>进行监督监管</span>
+                </div>
+
+                <div class="check-item">
+                  <span>主办科室办结日期：</span>
+                  <span class="date-text data-text">{{ formatDate(detailData.zhubandate) }}</span>
+                </div>
+
+                <div class="check-item">
+                  <span>协办科室办结日期：</span>
+                  <span class="date-text data-text">{{ formatDate(detailData.xiebandate) }}</span>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- 办件办理情况 -->
+          <tr>
+            <td class="label-cell">办件办理情况</td>
+            <td colspan="3" class="h-80 data-text">
               <div
-                v-for="(info, index) in ensureMinRows(directorList, 3)"
+                v-for="(info, index) in ensureMinRows(otherOpinionList, 3)"
                 :key="index"
                 class="mb-5px"
               >
-                <div>{{ info.comment }}</div>
+                <div>
+                  <span class="font-bold" v-if="info.name">【{{ info.name }}】</span>
+                  <span
+                    v-if="(info.name || '').includes('主办')"
+                    style="margin-right: 4px; font-weight: bold; color: red"
+                    >*</span
+                  >
+                  <span v-if="info.assigneeUser">{{ info.assigneeUser?.nickname }}:</span>
+                  {{ info.comment }}
+                  <span class="text-xs text-gray-400 ml-2" v-if="info.endTime">{{
+                    formatDate(info.endTime)
+                  }}</span>
+                </div>
               </div>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="3" class="signature-row">
-            <div class="flex items-center">
-              <span style="margin-right: 5px">办理人：</span>
-              <span class="data-text" style="display: inline-block; min-width: 60px">
-                {{
-                  directorList.length > 0
-                    ? directorList[directorList.length - 1].assigneeUser?.nickname
-                    : ''
-                }}
-              </span>
-              <span style="margin-left: 15px">办理日期：</span>
-              <span class="data-text" style="display: inline-block; min-width: 80px">
-                {{
-                  directorList.length > 0
-                    ? formatDate(directorList[directorList.length - 1].endTime)
-                    : ''
-                }}
-              </span>
-            </div>
-          </td>
-        </tr>
+            </td>
+          </tr>
+          <!-- 领导意见 -->
+          <tr>
+            <td class="label-cell">领导意见</td>
+            <td colspan="2" class="center-text label-cell" style="background: none">意 见</td>
+            <td class="center-text label-cell" style="background: none">日 期</td>
+          </tr>
+          <tr v-if="isEditable('领导意见')">
+            <td class="center-text data-text" style="height: 35px">
+              {{ userStore.getUser.nickname }}
+            </td>
+            <td colspan="2" class="data-text" style="padding: 4px 8px; text-align: left">
+              <el-input
+                v-model="currentOpinion"
+                type="textarea"
+                :rows="2"
+                placeholder="请输入领导意见"
+              />
+            </td>
+            <td class="center-text data-text">
+              {{ formatDate(new Date()) }}
+            </td>
+          </tr>
+          <tr
+            v-for="(info, index) in ensureMinRows(
+              leaderOpinionList,
+              isEditable('领导意见') ? 0 : 3
+            )"
+            :key="'leader-' + index"
+          >
+            <td class="center-text data-text" style="height: 35px">
+              {{ info.assigneeUser?.nickname || info.name || '' }}
+            </td>
+            <td colspan="2" class="data-text" style="padding: 4px 8px; text-align: left">
+              {{ info.comment }}
+            </td>
+            <td class="center-text data-text">
+              {{ formatDate(info.endTime) }}
+            </td>
+          </tr>
+          <!-- 分管领导批示 -->
+          <tr>
+            <td class="label-cell">分管领导批示</td>
+            <td colspan="2" class="center-text label-cell" style="background: none">意 见</td>
+            <td class="center-text label-cell" style="background: none">日 期</td>
+          </tr>
+          <tr v-if="isEditable('分管领导') || isEditable('局领导')">
+            <td class="center-text data-text" style="height: 35px">
+              {{ userStore.getUser.nickname }}
+            </td>
+            <td colspan="2" class="data-text" style="padding: 4px 8px; text-align: left">
+              <el-input
+                v-model="currentOpinion"
+                type="textarea"
+                :rows="2"
+                placeholder="请输入您的意见"
+              />
+            </td>
+            <td class="center-text data-text">
+              {{ formatDate(new Date()) }}
+            </td>
+          </tr>
+          <tr
+            v-for="(info, index) in ensureMinRows(
+              deputyLeaderList,
+              isEditable('分管领导') || isEditable('局领导') ? 0 : 3
+            )"
+            :key="'deputy-' + index"
+          >
+            <td class="center-text data-text" style="height: 35px">
+              {{ info.assigneeUser?.nickname || info.name || '' }}
+            </td>
+            <td colspan="2" class="data-text" style="padding: 4px 8px; text-align: left">
+              {{ info.comment }}
+            </td>
+            <td class="center-text data-text">
+              {{ formatDate(info.endTime) }}
+            </td>
+          </tr>
 
-        <!-- 监督监管 -->
-        <tr>
-          <td class="label-cell">监督监管</td>
-          <td colspan="3" style="padding: 4px">
-            <div class="compact-row">
-              <div class="check-item">
-                <span class="checkbox-mock">{{
-                  detailData.zhubandate || detailData.xiebandate ? '✔' : ''
-                }}</span>
-                <span>进行监督监管</span>
-              </div>
-
-              <div class="check-item">
-                <span>主办科室办结日期：</span>
-                <span class="date-text data-text">{{ formatDate(detailData.zhubandate) }}</span>
-              </div>
-
-              <div class="check-item">
-                <span>协办科室办结日期：</span>
-                <span class="date-text data-text">{{ formatDate(detailData.xiebandate) }}</span>
-              </div>
-            </div>
-          </td>
-        </tr>
-
-        <!-- 办件办理情况 -->
-        <tr>
-          <td class="label-cell">办件办理情况</td>
-          <td colspan="3" class="h-80 data-text">
-            <div
-              v-for="(info, index) in ensureMinRows(otherOpinionList, 3)"
-              :key="index"
-              class="mb-5px"
-            >
-              <div>
-                <span class="font-bold" v-if="info.name">【{{ info.name }}】</span>
-                <span
-                  v-if="(info.name || '').includes('主办')"
-                  style="margin-right: 4px; font-weight: bold; color: red"
-                  >*</span
-                >
-                <span v-if="info.assigneeUser">{{ info.assigneeUser?.nickname }}:</span>
-                {{ info.comment }}
-                <span class="text-xs text-gray-400 ml-2" v-if="info.endTime">{{
-                  formatDate(info.endTime)
-                }}</span>
-              </div>
-            </div>
-          </td>
-        </tr>
-        <!-- 领导意见 -->
-        <tr>
-          <td class="label-cell">领导意见</td>
-          <td colspan="2" class="center-text label-cell" style="background: none">意 见</td>
-          <td class="center-text label-cell" style="background: none">日 期</td>
-        </tr>
-        <tr v-if="isEditable('领导意见')">
-          <td class="center-text data-text" style="height: 35px">
-            {{ userStore.getUser.nickname }}
-          </td>
-          <td colspan="2" class="data-text" style="padding: 4px 8px; text-align: left">
-            <el-input
-              v-model="currentOpinion"
-              type="textarea"
-              :rows="2"
-              placeholder="请输入领导意见"
-            />
-          </td>
-          <td class="center-text data-text">
-            {{ formatDate(new Date()) }}
-          </td>
-        </tr>
-        <tr
-          v-for="(info, index) in ensureMinRows(leaderOpinionList, isEditable('领导意见') ? 0 : 3)"
-          :key="'leader-' + index"
-        >
-          <td class="center-text data-text" style="height: 35px">
-            {{ info.assigneeUser?.nickname || info.name || '' }}
-          </td>
-          <td colspan="2" class="data-text" style="padding: 4px 8px; text-align: left">
-            {{ info.comment }}
-          </td>
-          <td class="center-text data-text">
-            {{ formatDate(info.endTime) }}
-          </td>
-        </tr>
-        <!-- 分管领导批示 -->
-        <tr>
-          <td class="label-cell">分管领导批示</td>
-          <td colspan="2" class="center-text label-cell" style="background: none">意 见</td>
-          <td class="center-text label-cell" style="background: none">日 期</td>
-        </tr>
-        <tr v-if="isEditable('分管领导') || isEditable('局领导')">
-          <td class="center-text data-text" style="height: 35px">
-            {{ userStore.getUser.nickname }}
-          </td>
-          <td colspan="2" class="data-text" style="padding: 4px 8px; text-align: left">
-            <el-input
-              v-model="currentOpinion"
-              type="textarea"
-              :rows="2"
-              placeholder="请输入您的意见"
-            />
-          </td>
-          <td class="center-text data-text">
-            {{ formatDate(new Date()) }}
-          </td>
-        </tr>
-        <tr
-          v-for="(info, index) in ensureMinRows(
-            deputyLeaderList,
-            isEditable('分管领导') || isEditable('局领导') ? 0 : 3
-          )"
-          :key="'deputy-' + index"
-        >
-          <td class="center-text data-text" style="height: 35px">
-            {{ info.assigneeUser?.nickname || info.name || '' }}
-          </td>
-          <td colspan="2" class="data-text" style="padding: 4px 8px; text-align: left">
-            {{ info.comment }}
-          </td>
-          <td class="center-text data-text">
-            {{ formatDate(info.endTime) }}
-          </td>
-        </tr>
-
-        <!-- 阅办者 -->
-        <tr>
-          <td class="label-cell">阅办者</td>
-          <td colspan="2" class="center-text label-cell" style="background: none">意 见</td>
-          <td class="center-text label-cell" style="background: none">日 期</td>
-        </tr>
-        <tr
-          v-if="
-            isEditable('阅办') ||
-            isEditable('科室') ||
-            isEditable('办公室转发') ||
-            isEditable('办公室确认') ||
-            isEditable('主办') ||
-            isEditable('协办')
-          "
-        >
-          <td class="center-text data-text" style="height: 35px">
-            {{ userStore.getUser.nickname }}
-          </td>
-          <td colspan="2" class="data-text" style="padding: 4px 8px; text-align: left">
-            <el-input
-              v-model="currentOpinion"
-              type="textarea"
-              :rows="2"
-              placeholder="请输入您的意见"
-            />
-          </td>
-          <td class="center-text data-text">
-            {{ formatDate(new Date()) }}
-          </td>
-        </tr>
-        <tr
-          v-for="(info, index) in ensureMinRows(
-            readerList,
-            isEditable('阅办') ||
+          <!-- 阅办者 -->
+          <tr>
+            <td class="label-cell">阅办者</td>
+            <td colspan="2" class="center-text label-cell" style="background: none">意 见</td>
+            <td class="center-text label-cell" style="background: none">日 期</td>
+          </tr>
+          <tr
+            v-if="
+              isEditable('阅办') ||
+              isEditable('全局阅') ||
               isEditable('科室') ||
               isEditable('办公室转发') ||
               isEditable('办公室确认') ||
               isEditable('主办') ||
               isEditable('协办')
-              ? 0
-              : 3
-          )"
-          :key="'reader-' + index"
-        >
-          <td class="center-text data-text" style="height: 35px">
-            <span
-              v-if="(info.name || '').includes('主办')"
-              style="margin-right: 4px; font-weight: bold; color: red"
-              >*</span
-            >
-            {{ info.assigneeUser?.nickname || info.name || '' }}
-          </td>
-          <td colspan="2" class="data-text" style="padding: 4px 8px; text-align: left">
-            {{ info.comment }}
-          </td>
-          <td class="center-text data-text">
-            {{ formatDate(info.endTime) }}
-          </td>
-        </tr>
+            "
+          >
+            <td class="center-text data-text" style="height: 35px">
+              {{ userStore.getUser.nickname }}
+            </td>
+            <td colspan="2" class="data-text" style="padding: 4px 8px; text-align: left">
+              <el-input
+                v-model="currentOpinion"
+                type="textarea"
+                :rows="2"
+                placeholder="请输入您的意见"
+              />
+            </td>
+            <td class="center-text data-text">
+              {{ formatDate(new Date()) }}
+            </td>
+          </tr>
+          <tr
+            v-for="(info, index) in ensureMinRows(
+              readerList,
+              isEditable('阅办') ||
+                isEditable('全局阅') ||
+                isEditable('科室') ||
+                isEditable('办公室转发') ||
+                isEditable('办公室确认') ||
+                isEditable('主办') ||
+                isEditable('协办')
+                ? 0
+                : 3
+            )"
+            :key="'reader-' + index"
+          >
+            <td class="center-text data-text" style="height: 35px">
+              <span
+                v-if="(info.name || '').includes('主办')"
+                style="margin-right: 4px; font-weight: bold; color: red"
+                >*</span
+              >
+              {{ info.assigneeUser?.nickname || info.name || '' }}
+            </td>
+            <td colspan="2" class="data-text" style="padding: 4px 8px; text-align: left">
+              {{ info.comment }}
+            </td>
+            <td class="center-text data-text">
+              {{ formatDate(info.endTime) }}
+            </td>
+          </tr>
+        </tbody>
       </table>
     </div>
   </div>
@@ -352,7 +363,7 @@ const userStore = useUserStore()
 
 // 注入任务信息
 const props = defineProps({
-  id: propTypes.number.def(undefined),
+  id: propTypes.oneOfType([Number, String]).def(undefined),
   processInstance: propTypes.object.def({}),
   activityNodes: propTypes.array.def([]),
   taskId: propTypes.string.def(undefined), // 当前任务ID

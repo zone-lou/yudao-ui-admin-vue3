@@ -8,7 +8,7 @@
       :model="queryParams"
       ref="queryFormRef"
       :inline="true"
-      label-width="68px"
+      label-width="auto"
     >
       <el-form-item label="回复状态" prop="replyStatus">
         <el-select v-model="queryParams.replyStatus" class="!w-240px">

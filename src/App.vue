@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { isDark } from '@/utils/is'
+import { watch, onMounted } from 'vue'
 import { useAppStore } from '@/store/modules/app'
 import { useDesign } from '@/hooks/web/useDesign'
 import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
@@ -26,6 +27,20 @@ const setDefaultTheme = () => {
   appStore.setIsDark(isDarkTheme)
 }
 setDefaultTheme()
+
+// 强化全局字体放大逻辑：一旦检测到控件规模（大/中/小）变动，则顺势向 body 层抛出控制类名（如 size-large）
+watch(
+  currentSize,
+  (newSize, oldSize) => {
+    if (oldSize) {
+      document.body.classList.remove(`size-${oldSize}`)
+    }
+    if (newSize) {
+      document.body.classList.add(`size-${newSize}`)
+    }
+  },
+  { immediate: true }
+)
 </script>
 <template>
   <ConfigGlobal :size="currentSize">

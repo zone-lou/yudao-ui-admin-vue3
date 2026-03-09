@@ -68,9 +68,30 @@ export default defineComponent({
       }
     })
 
+    // 寻找深层第一个可点击的合法叶子节点并还原出其全量绝对路径
+    const findFirstLeafPath = (
+      nodes: AppRouteRecordRaw[],
+      parentPath: string = ''
+    ): string | undefined => {
+      if (!nodes || nodes.length === 0) return undefined
+      for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i]
+        if (node.meta?.hidden) continue
+
+        // 算出当前这一节在全局范围上的组合前缀
+        const currentFullPath = pathResolve(parentPath, node.path)
+
+        if (!node.children || node.children.length === 0) return currentFullPath
+        // 如果它还有肚子里的下级菜单，则把组合好的前缀送下去当爹
+        const deeplyPath = findFirstLeafPath(node.children, currentFullPath)
+        if (deeplyPath) return deeplyPath
+      }
+      return undefined
+    }
+
     // 点击事件
     const tabClick = (item: AppRouteRecordRaw, rootPath: string) => {
-      if (isUrl(item.path)) {
+      if (item.path && isUrl(item.path)) {
         window.open(item.path)
         return
       }
@@ -85,12 +106,18 @@ export default defineComponent({
       }
 
       if (item.children) {
-        permissionStore.setMenuTabRouters(
-          cloneDeep(item.children).map((v) => {
-            v.path = pathResolve(unref(tabActive), v.path)
-            return v
-          })
-        )
+        const newRouters = cloneDeep(item.children).map((v) => {
+          v.path = pathResolve(unref(tabActive), v.path)
+          return v
+        })
+        permissionStore.setMenuTabRouters(newRouters)
+
+        // 需求补充：在展开含有二级的复合顶层节点时（如“工作中心”），默认跳转至其下辖首个合规选项而不是原地罚站
+        // 注意从顶层寻根时需要注入总前缀 tabActive.value 以防止它拿到的是残缺相对路径导致跳错页
+        const firstValidPath = findFirstLeafPath(item.children, unref(tabActive))
+        if (firstValidPath) {
+          push(firstValidPath)
+        }
       } else {
         push(item.path)
         permissionStore.setMenuTabRouters([])

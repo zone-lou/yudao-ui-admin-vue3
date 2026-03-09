@@ -6,7 +6,7 @@
       :model="queryParams"
       ref="queryFormRef"
       :inline="true"
-      label-width="68px"
+      label-width="auto"
     >
       <!-- <el-form-item label="流程内码ID" prop="actinstId">
         <el-input

@@ -3,7 +3,7 @@
 
   <!-- 搜索工作栏 -->
   <ContentWrap>
-    <el-form class="-mb-15px" :model="queryParams" :inline="true" label-width="68px">
+    <el-form class="-mb-15px" :model="queryParams" :inline="true" label-width="auto">
       <el-form-item label="公众号" prop="accountId">
         <WxAccountSelect @change="onAccountChanged" />
       </el-form-item>

@@ -188,7 +188,7 @@
   <el-dialog
     v-model="approveDialogVisible"
     title="发送"
-    width="900px"
+    width="1020px"
     append-to-body
     destroy-on-close
   >
@@ -209,66 +209,152 @@
 
       <div class="mb-10px min-h-[450px]" v-loading="formLoading">
         <template v-if="approvalNodes.length > 0">
-          <el-tabs v-model="activeTab" class="w-full">
-            <el-tab-pane
-              v-for="node in approvalNodes"
-              :key="node.taskDefKey"
-              :label="node.name || node.taskName"
-              :name="node.taskDefKey"
+          <div class="flex flex-row w-full h-[450px]">
+            <!-- 左侧：节点及人员选择 Tab 区 -->
+            <div
+              class="flex-1 flex flex-col min-w-0 pr-3 border-r border-gray-200 dark:border-gray-700"
             >
-              <!-- 节点人员树区域 -->
+              <el-tabs v-model="activeTab" class="w-full flex-1 flex flex-col">
+                <el-tab-pane
+                  v-for="group in groupedApprovalNodes"
+                  :key="group.tabKey"
+                  :label="group.tabLabel"
+                  :name="group.tabKey"
+                  class="flex-1"
+                >
+                  <div
+                    class="h-[390px] flex flex-row gap-3 overflow-x-auto overflow-y-hidden pb-1 custom-scrollbar"
+                  >
+                    <!-- 节点单个卡片 -->
+                    <div
+                      v-for="node in group.nodes"
+                      :key="node.taskDefKey"
+                      class="border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-800/50 flex flex-col shadow-sm transition-shadow h-full min-w-[280px] max-w-[400px] flex-shrink-0"
+                    >
+                      <div
+                        class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 flex-none p-2 pb-1"
+                      >
+                        <el-checkbox
+                          v-model="node.checked"
+                          :label="node.name || node.taskName"
+                          size="large"
+                          class="!font-bold !text-gray-800 dark:!text-gray-200"
+                          @change="(val) => handleNodeCheckboxChange(val, node)"
+                        >
+                          {{ node.name || node.taskName }}
+                        </el-checkbox>
+                      </div>
+                      <div class="pl-2 py-1 flex-1 overflow-y-auto custom-scrollbar">
+                        <div
+                          v-if="!node.candidateUsers || node.candidateUsers.length === 0"
+                          class="text-gray-400 text-sm h-full flex items-center justify-center text-center px-4 min-h-[60px]"
+                        >
+                          无需选择审批人<br />(自动分配或无需审批)
+                        </div>
+                        <el-tree
+                          class="!bg-transparent"
+                          v-else
+                          :ref="(el) => setTreeRef(el, node.taskDefKey)"
+                          :data="node.candidateUsers"
+                          :props="{ label: 'name', children: 'children' }"
+                          show-checkbox
+                          node-key="id"
+                          default-expand-all
+                          :check-strictly="false"
+                          @check="
+                            (data, { checkedKeys }) => handleTreeCheck(node, data, checkedKeys)
+                          "
+                        >
+                          <template #default="{ data }">
+                            <span
+                              :class="{
+                                'font-bold text-gray-700 dark:text-gray-200':
+                                  data.children && data.children.length > 0,
+                                'text-blue-600 dark:text-blue-400':
+                                  !data.children || data.children.length === 0
+                              }"
+                            >
+                              {{ data.name }}
+                            </span>
+                          </template>
+                        </el-tree>
+                      </div>
+                    </div>
+                  </div>
+                </el-tab-pane>
+              </el-tabs>
+            </div>
+
+            <!-- 右侧：全局共享的 “指派与发送人员” 统筹侧栏 -->
+            <div
+              class="w-[220px] ml-2 flex flex-col bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700"
+            >
+              <!-- 上半部分：已经收到文件的人员 -->
               <div
-                class="border border-gray-200 rounded-lg bg-gray-50/50 dark:bg-gray-800/50 flex flex-col shadow-sm transition-shadow h-[400px]"
+                class="flex-1 flex flex-col min-h-0 border-b border-gray-200 dark:border-gray-700"
+                v-if="globalAssignedUsers.length > 0"
               >
                 <div
-                  class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 flex-none"
+                  class="px-2 py-1.5 text-[14px] font-bold text-gray-700 dark:text-gray-200 flex-none bg-blue-50 dark:bg-blue-900/20 rounded-t-lg"
                 >
-                  <el-checkbox
-                    v-model="node.checked"
-                    :label="node.name || node.taskName"
-                    size="large"
-                    class="!font-bold !text-gray-800 dark:!text-gray-200"
-                    @change="(val) => handleNodeCheckboxChange(val, node)"
-                  >
-                    {{ node.name || node.taskName }}
-                  </el-checkbox>
+                  已经收到文件的人员 ({{ globalAssignedUsers.length }})
                 </div>
-                <div class="pl-2 flex-1 overflow-y-auto custom-scrollbar">
+                <div class="flex-1 overflow-y-auto custom-scrollbar p-1.5">
                   <div
-                    v-if="!node.candidateUsers || node.candidateUsers.length === 0"
-                    class="text-gray-400 text-sm h-full flex items-center justify-center text-center px-4"
+                    v-for="(user, index) in globalAssignedUsers"
+                    :key="index"
+                    class="mb-1 last:mb-0 bg-white dark:bg-gray-800 px-1.5 py-1 rounded border border-gray-100 dark:border-gray-700 shadow-sm"
                   >
-                    无需选择审批人<br />(自动分配或无需审批)
-                  </div>
-                  <el-tree
-                    class="!bg-transparent"
-                    v-else
-                    :ref="(el) => setTreeRef(el, node.taskDefKey)"
-                    :data="node.candidateUsers"
-                    :props="{ label: 'name', children: 'children' }"
-                    show-checkbox
-                    node-key="id"
-                    default-expand-all
-                    :check-strictly="false"
-                    @check="(data, { checkedKeys }) => handleTreeCheck(node, data, checkedKeys)"
-                  >
-                    <template #default="{ data }">
-                      <span
-                        :class="{
-                          'font-bold text-gray-700 dark:text-gray-200':
-                            data.children && data.children.length > 0,
-                          'text-blue-600 dark:text-blue-400':
-                            !data.children || data.children.length === 0
-                        }"
+                    <div
+                      class="text-[14px] font-medium text-gray-800 dark:text-gray-300 truncate"
+                      :title="user.nickname || user.name"
+                    >
+                      {{ user.nickname || user.name }}
+                      <span class="text-[12px] text-blue-500 font-normal"
+                        >({{ user.taskName }})</span
                       >
-                        {{ data.name }}
-                      </span>
-                    </template>
-                  </el-tree>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </el-tab-pane>
-          </el-tabs>
+
+              <!-- 下半部分：准备发送的人员 -->
+              <div class="flex-1 flex flex-col min-h-0">
+                <div
+                  class="px-2 py-1.5 text-[14px] font-bold text-gray-700 dark:text-gray-200 flex-none"
+                  :class="
+                    globalAssignedUsers.length === 0
+                      ? 'bg-green-50 dark:bg-green-900/20 rounded-t-lg'
+                      : 'bg-green-50 dark:bg-green-900/20'
+                  "
+                >
+                  准备发送的人员 ({{ currentSelectedUsers.length }})
+                </div>
+                <div class="flex-1 overflow-y-auto custom-scrollbar p-1.5">
+                  <div
+                    v-if="currentSelectedUsers.length === 0"
+                    class="text-xs text-center text-gray-400 mt-2"
+                    >暂未勾选</div
+                  >
+                  <div
+                    v-for="(user, index) in currentSelectedUsers"
+                    :key="'send_' + index"
+                    class="mb-1 last:mb-0 bg-white dark:bg-gray-800 px-1.5 py-1 rounded border border-green-100 dark:border-gray-700 shadow-sm flex items-center gap-1"
+                  >
+                    <div
+                      class="text-[14px] font-medium text-gray-800 dark:text-gray-300 flex-1 truncate"
+                      :title="user.nickname || user.name"
+                    >
+                      {{ user.nickname || user.name }}
+                      <span class="text-[12px] text-green-600 font-normal"
+                        >({{ user.taskName }})</span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </template>
         <div
           v-else-if="!formLoading"
@@ -624,13 +710,120 @@ const loadApprovalNodes = async () => {
       }
     }
     approvalNodes.value = data || []
-    if (approvalNodes.value.length > 0) {
-      activeTab.value = approvalNodes.value[0].taskDefKey
+    if (groupedApprovalNodes.value.length > 0) {
+      activeTab.value = groupedApprovalNodes.value[0].tabKey
     }
   } finally {
     formLoading.value = false
   }
 }
+
+/** 计算属性：利用 flowName 将 approvalNodes 分组，并基于 flowSort 排序 */
+const groupedApprovalNodes = computed(() => {
+  const map: Record<string, { tabKey: string; tabLabel: string; sort: number; nodes: any[] }> = {}
+
+  approvalNodes.value.forEach((node) => {
+    // 找不到 flowName 时，回退保底使用 taskName 作为 Tab 标题
+    const key = node.flowName || node.name || node.taskName || '无归类'
+    if (!map[key]) {
+      // 若没有提供 flowSort，默认给一个相对大的极大值以保证它排在后面
+      const sortValue = node.flowSort != null ? Number(node.flowSort) : 9999
+      map[key] = {
+        tabKey: key, // 用 flowName 本身作为 el-tabs 的 name（只要唯一）
+        tabLabel: key,
+        sort: sortValue,
+        nodes: []
+      }
+    } else {
+      // 同组内以找到的含有非空 sort 的作为整个组的权威依据去更新
+      if (node.flowSort != null && map[key].sort === 9999) {
+        map[key].sort = Number(node.flowSort)
+      }
+    }
+    map[key].nodes.push(node)
+  })
+
+  // 转成数组并依据 sort 排序，如果组间 sort 一致，再利用原来对"主办"关键字的前置要求补充兜底排序
+  const groupArr = Object.values(map)
+  groupArr.sort((a, b) => {
+    if (a.sort !== b.sort) {
+      return a.sort - b.sort
+    }
+    // 当排序号一样或者没传均等于 9999 时，兼顾保留“主办”在前面的原始业务逻辑
+    if (a.tabLabel.includes('主办') && !b.tabLabel.includes('主办')) return -1
+    if (!a.tabLabel.includes('主办') && b.tabLabel.includes('主办')) return 1
+    return 0
+  })
+
+  return groupArr
+})
+
+/** 计算属性：全局提取所有节点下已经被勾选过分配的人员名单用于右侧栏汇总展示 */
+const globalAssignedUsers = ref<any[]>([])
+
+// 监听 approvalNodes 变化，被动提取汇总（为能进行双向绑定，改为 watch 响应式对象）
+watch(
+  () => approvalNodes.value,
+  (nodes) => {
+    // 只有在弹窗挂载或获取到节点时初始化。若已有记录，不再盲目清空以避免重绘导致复选框闪烁丢失勾选状态，
+    // 这里采用重新构建赋值的方式。
+    const users: any[] = []
+    nodes.forEach((node) => {
+      if (node.assignedUsers && node.assignedUsers.length > 0) {
+        node.assignedUsers.forEach((user) => {
+          users.push({
+            id: user.id || Math.random(),
+            name: user.name,
+            nickname: user.nickname,
+            deptName: user.deptName,
+            taskName: node.taskName || node.name || '未知环节',
+            taskDefKey: node.taskDefKey // 保留其归属的树图 key 以备联动
+          })
+        })
+      }
+    })
+    globalAssignedUsers.value = users
+  },
+  { deep: true, immediate: true }
+)
+
+/** 计算属性：全局提取当前所有树结构中被勾选的人员信息（即本次准备发送的人员） */
+const currentSelectedUsers = ref<any[]>([])
+
+// 为了能够响应树内部深层的勾选变动，我们每次在 handleTreeCheck 等操作发生后手动重算该队列
+const refreshCurrentSelectedUsers = () => {
+  const users: any[] = []
+  if (!approvalNodes.value || !userTreeRefs.value) return
+
+  approvalNodes.value.forEach((node) => {
+    // 必须当前大节点被勾选才算在此次发送队列中
+    if (!node.checked) return
+    const treeRef = userTreeRefs.value[node.taskDefKey]
+    if (treeRef) {
+      const checkedNodes = treeRef.getCheckedNodes(true, false) // leafOnly = true
+      checkedNodes.forEach((n: any) => {
+        if (n.id && (n.nickname || n.name)) {
+          users.push({
+            id: n.id,
+            nickname: n.nickname || n.name,
+            deptName: n.deptName,
+            taskName: node.taskName || node.name || '未知环节'
+          })
+        }
+      })
+    }
+  })
+  currentSelectedUsers.value = users
+}
+
+// 监听外层大卡片的主选中状态（checkbox），一旦取消或者勾选整块区域，刷新右栏
+watch(
+  () => approvalNodes.value.map((n) => n.checked),
+  () => {
+    refreshCurrentSelectedUsers()
+  },
+  { deep: true }
+)
 
 /** 构建部门树 */
 const buildDeptTree = (users: any[]) => {
@@ -691,12 +884,21 @@ const handleTreeCheck = (node: any, data: any, checkedKeys: any[]) => {
         treeRef.setCheckedKeys([])
         node.checked = false
       }
+      // 更新右侧实时准备发送人员展示列
+      nextTick(() => {
+        refreshCurrentSelectedUsers()
+      })
       return
     }
   }
 
   // 当选中任何人员时，自动勾选父级节点；如果一个人都没选中，则自动取消该节点勾选
   node.checked = checkedKeys.length > 0
+
+  // 更新右侧实时准备发送人员展示列
+  nextTick(() => {
+    refreshCurrentSelectedUsers()
+  })
 }
 
 /** 节点级别的全选/反选处理 */
@@ -755,7 +957,9 @@ const handleApproveConfirm = async () => {
   // 校验节点下的人员
   // 遍历 selectedNodes
   const nextNodeAssignees: Record<string, number[]> = {}
+  const debugAssigneeNames: Record<string, string[]> = {}
   const addSignUserIds: number[] = []
+  const debugAddSignUserNames: string[] = []
   const variables: Record<string, any> = {}
 
   for (const node of selectedNodes) {
@@ -791,10 +995,32 @@ const handleApproveConfirm = async () => {
     // 需求：如果节点包含 _internal_loop，人员放入 addSignUserIds
     if (node.taskDefKey.includes('_internal_loop')) {
       addSignUserIds.push(...userIds)
+      debugAddSignUserNames.push(
+        ...checkedNodes.filter((n: any) => n.id && n.nickname).map((n: any) => n.nickname)
+      )
+      // 同步装填显示映射表，免得上方表格中该项显示出空数组 []
+      debugAssigneeNames[node.taskDefKey] = checkedNodes
+        .filter((n: any) => n.id && n.nickname)
+        .map((n: any) => n.nickname)
     } else {
       nextNodeAssignees[node.taskDefKey] = userIds
+      debugAssigneeNames[node.taskDefKey] = checkedNodes
+        .filter((n: any) => n.id && n.nickname)
+        .map((n: any) => n.nickname)
     }
   }
+
+  // ============== 对外输出开发辅助日志 ==============
+  const debugLogNodes = selectedNodes.map((n) => ({
+    节点名称: n.taskName || n.name,
+    分配人员名称: debugAssigneeNames[n.taskDefKey] || []
+  }))
+  console.log('【收文发送 - 节点及人员勾选日志】')
+  console.table(debugLogNodes)
+  if (addSignUserIds.length > 0) {
+    console.log('【内循环加签人员】:', debugAddSignUserNames)
+  }
+  // ===============================================
 
   // 构造提交数据
   const data = {
@@ -1081,5 +1307,25 @@ const filterTreeMySelf = (treeData: any[], currentUserId: number) => {
       color: #6db5ff;
     }
   }
+}
+
+/* 优化横向排列时产生的多重滚动条视觉干扰 */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgb(144 147 153 / 30%);
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(144 147 153 / 60%);
 }
 </style>

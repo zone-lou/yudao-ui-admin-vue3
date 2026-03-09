@@ -6,7 +6,7 @@
       :model="queryParams"
       ref="queryFormRef"
       :inline="true"
-      label-width="68px"
+      label-width="auto"
     >
       <el-form-item label="属性项" prop="propertyId">
         <el-select v-model="queryParams.propertyId" class="!w-240px" disabled>

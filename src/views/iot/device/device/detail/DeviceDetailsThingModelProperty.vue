@@ -7,7 +7,7 @@
       :model="queryParams"
       ref="queryFormRef"
       :inline="true"
-      label-width="68px"
+      label-width="auto"
       @submit.prevent
     >
       <el-form-item label="" prop="keyword">

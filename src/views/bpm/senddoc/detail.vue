@@ -4,245 +4,253 @@
       <div class="doc-title">义乌市自然资源和规划局发文拟稿单</div>
 
       <table class="oa-table">
-        <tr>
-          <td class="label-cell">标 题</td>
-          <td colspan="3" class="data-text" style="font-size: 16px; font-weight: bold">
-            {{ detailData.subject }}
-          </td>
-        </tr>
+        <tbody>
+          <tr>
+            <td class="label-cell">标 题</td>
+            <td colspan="3" class="data-text" style="font-size: 16px; font-weight: bold">
+              {{ detailData.subject }}
+            </td>
+          </tr>
 
-        <tr>
-          <td class="label-cell">发文字号</td>
-          <td class="data-text">
-            {{ formatSendDocNumber(detailData.sendDocNumber) }}
-          </td>
-          <td class="label-cell" style="width: 100px">秘密等级</td>
-          <td class="data-text" style="width: 25%">
-            {{ detailData.secretDegree }}
-          </td>
-        </tr>
+          <tr>
+            <td class="label-cell">发文字号</td>
+            <td class="data-text">
+              {{ formatSendDocNumber(detailData.sendDocNumber) }}
+            </td>
+            <td class="label-cell" style="width: 100px">秘密等级</td>
+            <td class="data-text" style="width: 25%">
+              {{ detailData.secretDegree }}
+            </td>
+          </tr>
 
-        <tr>
-          <td class="label-cell">紧急程度</td>
-          <td colspan="3" class="data-text">
-            <dict-tag :type="DICT_TYPE.BPM_EMERGENCY_DEGREE" :value="detailData.urgencyDegree" />
-          </td>
-        </tr>
+          <tr>
+            <td class="label-cell">紧急程度</td>
+            <td colspan="3" class="data-text">
+              <dict-tag
+                v-if="detailData.urgencyDegree !== undefined"
+                :type="DICT_TYPE.BPM_EMERGENCY_DEGREE"
+                :value="detailData.urgencyDegree"
+              />
+            </td>
+          </tr>
 
-        <tr>
-          <td class="label-cell">拟 稿</td>
-          <td
-            colspan="3"
-            class="data-text"
-            style="position: relative; height: 150px; padding-bottom: 30px"
-          >
-            <div class="mb-2">
-              <span class="font-bold">【发文内容】：</span>
-              <div style="white-space: pre-wrap">{{ detailData.sendDocDraft }}</div>
-            </div>
-
-            <div
-              class="flex justify-between items-center"
-              style="
-                position: absolute;
-                right: 8px;
-                bottom: 5px;
-                left: 8px;
-                font-size: 12px;
-                color: #333;
-              "
+          <tr>
+            <td class="label-cell">拟 稿</td>
+            <td
+              colspan="3"
+              class="data-text"
+              style="position: relative; height: 150px; padding-bottom: 30px"
             >
-              <span
-                >办理人：<span class="data-text">{{ detailData.draftPerson }}</span></span
-              >
-              <span
-                >所属部门：<span class="data-text">{{ detailData.sendDept }}</span></span
-              >
-              <span
-                >办理日期：<span class="data-text">{{
-                  formatDate(detailData.draftDate)
-                }}</span></span
-              >
-            </div>
-          </td>
-        </tr>
+              <div class="mb-2">
+                <span class="font-bold">【发文内容】：</span>
+                <div style="white-space: pre-wrap">{{ detailData.sendDocDraft }}</div>
+              </div>
 
-        <tr class="print-hide-row">
-          <td class="label-cell" style="border-top: 1px solid #d71920">附 件</td>
-          <td colspan="3" class="data-text" style="border-top: 1px solid #d71920">
-            <div v-if="fileList.length > 0">
               <div
-                v-for="(file, index) in fileList"
-                :key="index"
-                class="flex items-center gap-2 mb-1"
+                class="flex justify-between items-center"
+                style="
+                  position: absolute;
+                  right: 8px;
+                  bottom: 5px;
+                  left: 8px;
+                  font-size: 12px;
+                  color: #333;
+                "
               >
-                <span>{{ file.name }}</span>
-                <el-button link type="primary" size="small" @click="handleDownload(file)"
-                  >下载</el-button
+                <span
+                  >办理人：<span class="data-text">{{ detailData.draftPerson }}</span></span
+                >
+                <span
+                  >所属部门：<span class="data-text">{{ detailData.sendDept }}</span></span
+                >
+                <span
+                  >办理日期：<span class="data-text">{{
+                    formatDate(detailData.draftDate)
+                  }}</span></span
                 >
               </div>
-            </div>
-            <div v-else class="text-gray-400">无</div>
-          </td>
-        </tr>
+            </td>
+          </tr>
 
-        <tr v-if="hasNode('主办') || checkList.length > 0">
-          <td class="label-cell">主办单位审核</td>
-          <td colspan="3" class="data-text p-0">
-            <div v-if="isEditable('主办')" class="p-2">
-              <el-input
-                v-model="currentOpinion"
-                type="textarea"
-                :rows="2"
-                placeholder="请输入主办单位审核意见"
-              />
-            </div>
-            <div v-for="(info, index) in checkList" :key="index" class="approval-item">
-              <div class="flex justify-between items-center w-full">
-                <div class="flex-1">{{ info.comment }}</div>
-                <div class="text-right whitespace-nowrap ml-4">
-                  <span class="mr-2">{{ info.assigneeUser?.nickname }}</span>
-                  <span>{{ formatDate(info.endTime) }}</span>
+          <tr class="print-hide-row">
+            <td class="label-cell" style="border-top: 1px solid #d71920">附 件</td>
+            <td colspan="3" class="data-text" style="border-top: 1px solid #d71920">
+              <div v-if="fileList.length > 0">
+                <div
+                  v-for="(file, index) in fileList"
+                  :key="index"
+                  class="flex items-center gap-2 mb-1"
+                >
+                  <span>{{ file.name }}</span>
+                  <el-button link type="primary" size="small" @click="handleDownload(file)"
+                    >下载</el-button
+                  >
                 </div>
               </div>
-            </div>
-          </td>
-        </tr>
+              <div v-else class="text-gray-400">无</div>
+            </td>
+          </tr>
 
-        <tr v-if="hasNode('法制') || legalList.length > 0">
-          <td class="label-cell">法制机构审核</td>
-          <td colspan="3" class="data-text p-0">
-            <div v-if="isEditable('法制')" class="p-2">
-              <el-input
-                v-model="currentOpinion"
-                type="textarea"
-                :rows="2"
-                placeholder="请输入法制机构审核意见"
-              />
-            </div>
-            <div v-for="(info, index) in legalList" :key="index" class="approval-item">
-              <div class="flex justify-between items-center w-full">
-                <div class="flex-1">{{ info.comment }}</div>
-                <div class="text-right whitespace-nowrap ml-4">
-                  <span class="mr-2">{{ info.assigneeUser?.nickname }}</span>
-                  <span>{{ formatDate(info.endTime) }}</span>
-                </div>
-              </div>
-            </div>
-          </td>
-        </tr>
-
-        <tr v-if="hasNode('办公室') || formatList.length > 0">
-          <td class="label-cell">办公室意见</td>
-          <td colspan="3" class="data-text p-0">
-            <div v-if="isEditable('办公室')" class="p-2">
-              <el-input
-                v-model="currentOpinion"
-                type="textarea"
-                :rows="2"
-                placeholder="请输入办公室意见"
-              />
-            </div>
-            <div v-for="(info, index) in formatList" :key="index" class="approval-item">
-              <div class="flex justify-between items-center w-full">
-                <div class="flex-1">{{ info.comment }}</div>
-                <div class="text-right whitespace-nowrap ml-4">
-                  <span class="mr-2">{{ info.assigneeUser?.nickname }}</span>
-                  <span>{{ formatDate(info.endTime) }}</span>
-                </div>
-              </div>
-            </div>
-          </td>
-        </tr>
-
-        <tr v-if="hasNode('分管') || leaderReviewList.length > 0">
-          <td class="label-cell">分管领导审阅</td>
-          <td colspan="3" class="data-text p-0">
-            <div v-if="isEditable('分管')" class="p-2">
-              <el-input
-                v-model="currentOpinion"
-                type="textarea"
-                :rows="2"
-                placeholder="请输入审阅意见"
-              />
-            </div>
-            <div v-for="(info, index) in leaderReviewList" :key="index" class="approval-item">
-              <div class="flex justify-between items-center w-full">
-                <div class="flex-1">{{ info.comment }}</div>
-                <div class="text-right whitespace-nowrap ml-4">
-                  <span class="mr-2">{{ info.assigneeUser?.nickname }}</span>
-                  <span>{{ formatDate(info.endTime) }}</span>
-                </div>
-              </div>
-            </div>
-          </td>
-        </tr>
-
-        <tr>
-          <td class="label-cell">局长签发</td>
-          <td
-            colspan="3"
-            class="data-text"
-            style="position: relative; height: 120px; padding-bottom: 30px"
-          >
-            <div class="w-full h-full">
-              <div v-if="isEditable('局长') || isEditable('签发')">
+          <tr v-if="hasNode('主办') || checkList.length > 0">
+            <td class="label-cell">主办单位审核</td>
+            <td colspan="3" class="data-text p-0">
+              <div v-if="isEditable('主办')" class="p-2">
                 <el-input
                   v-model="currentOpinion"
                   type="textarea"
-                  :rows="3"
-                  placeholder="请输入签发意见"
-                  class="no-border-input"
+                  :rows="2"
+                  placeholder="请输入主办单位审核意见"
                 />
               </div>
-              <div v-else>
-                <div
-                  v-for="(info, index) in ensureMinRows(signerList, 1)"
-                  :key="index"
-                  class="mb-1"
-                >
-                  {{ info.comment }}
+              <div v-for="(info, index) in checkList" :key="index" class="approval-item">
+                <div class="flex justify-between items-center w-full">
+                  <div class="flex-1">{{ info.comment }}</div>
+                  <div class="text-right whitespace-nowrap ml-4">
+                    <span class="mr-2">{{ info.assigneeUser?.nickname }}</span>
+                    <span>{{ formatDate(info.endTime) }}</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            </td>
+          </tr>
 
-            <div
-              class="flex items-center justify-end"
-              style="position: absolute; right: 8px; bottom: 5px"
+          <tr v-if="hasNode('法制') || legalList.length > 0">
+            <td class="label-cell">法制机构审核</td>
+            <td colspan="3" class="data-text p-0">
+              <div v-if="isEditable('法制')" class="p-2">
+                <el-input
+                  v-model="currentOpinion"
+                  type="textarea"
+                  :rows="2"
+                  placeholder="请输入法制机构审核意见"
+                />
+              </div>
+              <div v-for="(info, index) in legalList" :key="index" class="approval-item">
+                <div class="flex justify-between items-center w-full">
+                  <div class="flex-1">{{ info.comment }}</div>
+                  <div class="text-right whitespace-nowrap ml-4">
+                    <span class="mr-2">{{ info.assigneeUser?.nickname }}</span>
+                    <span>{{ formatDate(info.endTime) }}</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <tr v-if="hasNode('办公室') || formatList.length > 0">
+            <td class="label-cell">办公室意见</td>
+            <td colspan="3" class="data-text p-0">
+              <div v-if="isEditable('办公室')" class="p-2">
+                <el-input
+                  v-model="currentOpinion"
+                  type="textarea"
+                  :rows="2"
+                  placeholder="请输入办公室意见"
+                />
+              </div>
+              <div v-for="(info, index) in formatList" :key="index" class="approval-item">
+                <div class="flex justify-between items-center w-full">
+                  <div class="flex-1">{{ info.comment }}</div>
+                  <div class="text-right whitespace-nowrap ml-4">
+                    <span class="mr-2">{{ info.assigneeUser?.nickname }}</span>
+                    <span>{{ formatDate(info.endTime) }}</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <tr v-if="hasNode('分管') || leaderReviewList.length > 0">
+            <td class="label-cell">分管领导审阅</td>
+            <td colspan="3" class="data-text p-0">
+              <div v-if="isEditable('分管')" class="p-2">
+                <el-input
+                  v-model="currentOpinion"
+                  type="textarea"
+                  :rows="2"
+                  placeholder="请输入审阅意见"
+                />
+              </div>
+              <div v-for="(info, index) in leaderReviewList" :key="index" class="approval-item">
+                <div class="flex justify-between items-center w-full">
+                  <div class="flex-1">{{ info.comment }}</div>
+                  <div class="text-right whitespace-nowrap ml-4">
+                    <span class="mr-2">{{ info.assigneeUser?.nickname }}</span>
+                    <span>{{ formatDate(info.endTime) }}</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="label-cell">局长签发</td>
+            <td
+              colspan="3"
+              class="data-text"
+              style="position: relative; height: 120px; padding-bottom: 30px"
             >
-              <span style="margin-right: 5px">签发人：</span>
-              <span
-                class="data-text"
-                style="
-                  display: inline-block;
-                  min-width: 60px;
-                  text-align: center;
-                  border-bottom: 1px solid #333;
-                "
+              <div class="w-full h-full">
+                <div v-if="isEditable('局长') || isEditable('签发')">
+                  <el-input
+                    v-model="currentOpinion"
+                    type="textarea"
+                    :rows="3"
+                    placeholder="请输入签发意见"
+                    class="no-border-input"
+                  />
+                </div>
+                <div v-else>
+                  <div
+                    v-for="(info, index) in ensureMinRows(signerList, 1)"
+                    :key="index"
+                    class="mb-1"
+                  >
+                    {{ info.comment }}
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="flex items-center justify-end"
+                style="position: absolute; right: 8px; bottom: 5px"
               >
-                {{
-                  signerList.length > 0
-                    ? signerList[signerList.length - 1].assigneeUser?.nickname
-                    : detailData.issuedName
-                }}
-              </span>
-              <span style="margin-left: 15px">日期：</span>
-              <span
-                class="data-text"
-                style="
-                  display: inline-block;
-                  min-width: 80px;
-                  text-align: center;
-                  border-bottom: 1px solid #333;
-                "
-              >
-                {{
-                  signerList.length > 0 ? formatDate(signerList[signerList.length - 1].endTime) : ''
-                }}
-              </span>
-            </div>
-          </td>
-        </tr>
+                <span style="margin-right: 5px">签发人：</span>
+                <span
+                  class="data-text"
+                  style="
+                    display: inline-block;
+                    min-width: 60px;
+                    text-align: center;
+                    border-bottom: 1px solid #333;
+                  "
+                >
+                  {{
+                    signerList.length > 0
+                      ? signerList[signerList.length - 1].assigneeUser?.nickname
+                      : detailData.issuedName
+                  }}
+                </span>
+                <span style="margin-left: 15px">日期：</span>
+                <span
+                  class="data-text"
+                  style="
+                    display: inline-block;
+                    min-width: 80px;
+                    text-align: center;
+                    border-bottom: 1px solid #333;
+                  "
+                >
+                  {{
+                    signerList.length > 0
+                      ? formatDate(signerList[signerList.length - 1].endTime)
+                      : ''
+                  }}
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
       </table>
     </div>
   </div>
@@ -258,7 +266,7 @@ import { useUserStore } from '@/store/modules/user'
 defineOptions({ name: 'BpmSendDocDetail' })
 
 const props = defineProps({
-  id: propTypes.number.def(undefined),
+  id: propTypes.oneOfType([Number, String]).def(undefined),
   taskId: propTypes.string.def(undefined),
   currentNode: propTypes.object.def({}),
   activityNodes: propTypes.array.def([])

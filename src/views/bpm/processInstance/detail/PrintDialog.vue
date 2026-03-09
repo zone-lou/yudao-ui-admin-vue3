@@ -380,8 +380,8 @@ const printObj = ref({
 </script>
 
 <template>
-  <el-dialog v-loading="loading" v-model="visible" :show-close="false" width="900px" top="5vh">
-    <div class="print-dialog-scroll">
+  <el-dialog v-model="visible" :show-close="false" width="900px" top="5vh">
+    <div class="print-dialog-scroll" v-loading="loading">
       <div id="printDivTag" style="word-break: break-all">
         <div v-if="isCustomTemplate" v-html="customTemplateHtml" class="custom-print-wrap"></div>
         <div v-else-if="printData?.printTemplateEnable" v-html="getPrintTemplateHTML()"></div>

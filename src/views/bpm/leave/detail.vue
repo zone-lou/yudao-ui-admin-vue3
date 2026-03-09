@@ -9,147 +9,149 @@
         <col width="130px" />
         <col />
       </colgroup>
-      <tr>
-        <td class="label-cell">申请人</td>
-        <td class="input-cell">{{ startUser }}</td>
-        <td class="label-cell">所在科室</td>
-        <td class="input-cell">{{ deptName }}</td>
-      </tr>
+      <tbody>
+        <tr>
+          <td class="label-cell">申请人</td>
+          <td class="input-cell">{{ startUser }}</td>
+          <td class="label-cell">所在科室</td>
+          <td class="input-cell">{{ deptName }}</td>
+        </tr>
 
-      <tr>
-        <td class="label-cell">请假类型</td>
-        <td class="input-cell">{{ leaveType }}</td>
-        <td class="label-cell">申请日期</td>
-        <td class="input-cell">{{ applyDate }}</td>
-      </tr>
+        <tr>
+          <td class="label-cell">请假类型</td>
+          <td class="input-cell">{{ leaveType }}</td>
+          <td class="label-cell">申请日期</td>
+          <td class="input-cell">{{ applyDate }}</td>
+        </tr>
 
-      <tr>
-        <td class="label-cell">请假开始 从</td>
-        <td class="input-cell">{{ startTime }}</td>
-        <td class="label-cell">时段</td>
-        <td class="input-cell">{{ startSession }}</td>
-      </tr>
+        <tr>
+          <td class="label-cell">请假开始 从</td>
+          <td class="input-cell">{{ startTime }}</td>
+          <td class="label-cell">时段</td>
+          <td class="input-cell">{{ startSession }}</td>
+        </tr>
 
-      <tr>
-        <td class="label-cell">请假结束 至</td>
-        <td class="input-cell">{{ endTime }}</td>
-        <td class="label-cell">时段</td>
-        <td class="input-cell">{{ endSession }}</td>
-      </tr>
+        <tr>
+          <td class="label-cell">请假结束 至</td>
+          <td class="input-cell">{{ endTime }}</td>
+          <td class="label-cell">时段</td>
+          <td class="input-cell">{{ endSession }}</td>
+        </tr>
 
-      <tr>
-        <td class="label-cell">请假天数</td>
-        <td class="input-cell" colspan="3">{{ leaveDays }} 天</td>
-      </tr>
+        <tr>
+          <td class="label-cell">请假天数</td>
+          <td class="input-cell" colspan="3">{{ leaveDays }} 天</td>
+        </tr>
 
-      <tr class="print-hide-row">
-        <td class="label-cell">附件列表</td>
-        <td class="input-cell" colspan="3">
-          <div v-if="fileList.length > 0">
-            <div v-for="(file, index) in fileList" :key="index" style="margin-bottom: 2px">
-              <el-link type="primary" @click="previewFile(file)" :underline="false">
-                {{ file.name }}
-              </el-link>
+        <tr class="print-hide-row">
+          <td class="label-cell">附件列表</td>
+          <td class="input-cell" colspan="3">
+            <div v-if="fileList.length > 0">
+              <div v-for="(file, index) in fileList" :key="index" style="margin-bottom: 2px">
+                <el-link type="primary" @click="previewFile(file)" :underline="false">
+                  {{ file.name }}
+                </el-link>
+              </div>
             </div>
-          </div>
-          <span v-else>无</span>
-        </td>
-      </tr>
+            <span v-else>无</span>
+          </td>
+        </tr>
 
-      <tr>
-        <td class="label-cell">请假事由</td>
-        <td
-          colspan="3"
-          class="input-cell h-reason"
-          style="padding: 10px; text-align: left; vertical-align: top"
-        >
-          {{ reason }}
-        </td>
-      </tr>
+        <tr>
+          <td class="label-cell">请假事由</td>
+          <td
+            colspan="3"
+            class="input-cell h-reason"
+            style="padding: 10px; text-align: left; vertical-align: top"
+          >
+            {{ reason }}
+          </td>
+        </tr>
 
-      <tr>
-        <td class="label-cell" rowspan="2">科室(单位)负责人意见</td>
-        <td
-          colspan="3"
-          class="input-cell h-large"
-          style="padding: 10px; text-align: left; vertical-align: top"
-        >
-          {{ deptHeadContent }}
-        </td>
-      </tr>
-      <tr>
-        <td colspan="3" class="signature-row">
-          <span class="sig-item"
-            >办理人：<span class="sig-line">{{ deptHeadHandler }}</span></span
+        <tr>
+          <td class="label-cell" rowspan="2">科室(单位)负责人意见</td>
+          <td
+            colspan="3"
+            class="input-cell h-large"
+            style="padding: 10px; text-align: left; vertical-align: top"
           >
-          <span class="sig-item"
-            >日期：<span class="sig-line">{{ deptHeadDate }}</span></span
-          >
-        </td>
-      </tr>
+            {{ deptHeadContent }}
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3" class="signature-row">
+            <span class="sig-item"
+              >办理人：<span class="sig-line">{{ deptHeadHandler }}</span></span
+            >
+            <span class="sig-item"
+              >日期：<span class="sig-line">{{ deptHeadDate }}</span></span
+            >
+          </td>
+        </tr>
 
-      <tr>
-        <td class="label-cell" rowspan="2">办公室意见</td>
-        <td
-          colspan="3"
-          class="input-cell h-large"
-          style="padding: 10px; text-align: left; vertical-align: top"
-        >
-          {{ officeContent }}
-        </td>
-      </tr>
-      <tr>
-        <td colspan="3" class="signature-row">
-          <span class="sig-item"
-            >办理人：<span class="sig-line">{{ officeHandler }}</span></span
+        <tr>
+          <td class="label-cell" rowspan="2">办公室意见</td>
+          <td
+            colspan="3"
+            class="input-cell h-large"
+            style="padding: 10px; text-align: left; vertical-align: top"
           >
-          <span class="sig-item"
-            >日期：<span class="sig-line">{{ officeDate }}</span></span
-          >
-        </td>
-      </tr>
+            {{ officeContent }}
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3" class="signature-row">
+            <span class="sig-item"
+              >办理人：<span class="sig-line">{{ officeHandler }}</span></span
+            >
+            <span class="sig-item"
+              >日期：<span class="sig-line">{{ officeDate }}</span></span
+            >
+          </td>
+        </tr>
 
-      <tr>
-        <td class="label-cell" rowspan="2">局分管领导意见</td>
-        <td
-          colspan="3"
-          class="input-cell h-large"
-          style="padding: 10px; text-align: left; vertical-align: top"
-        >
-          {{ deputyLeaderContent }}
-        </td>
-      </tr>
-      <tr>
-        <td colspan="3" class="signature-row">
-          <span class="sig-item"
-            >办理人：<span class="sig-line">{{ deputyLeaderHandler }}</span></span
+        <tr>
+          <td class="label-cell" rowspan="2">局分管领导意见</td>
+          <td
+            colspan="3"
+            class="input-cell h-large"
+            style="padding: 10px; text-align: left; vertical-align: top"
           >
-          <span class="sig-item"
-            >日期：<span class="sig-line">{{ deputyLeaderDate }}</span></span
-          >
-        </td>
-      </tr>
+            {{ deputyLeaderContent }}
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3" class="signature-row">
+            <span class="sig-item"
+              >办理人：<span class="sig-line">{{ deputyLeaderHandler }}</span></span
+            >
+            <span class="sig-item"
+              >日期：<span class="sig-line">{{ deputyLeaderDate }}</span></span
+            >
+          </td>
+        </tr>
 
-      <tr>
-        <td class="label-cell" rowspan="2">局主要领导意见</td>
-        <td
-          colspan="3"
-          class="input-cell h-large"
-          style="padding: 10px; text-align: left; vertical-align: top"
-        >
-          {{ mainLeaderContent }}
-        </td>
-      </tr>
-      <tr>
-        <td colspan="3" class="signature-row">
-          <span class="sig-item"
-            >办理人：<span class="sig-line">{{ mainLeaderHandler }}</span></span
+        <tr>
+          <td class="label-cell" rowspan="2">局主要领导意见</td>
+          <td
+            colspan="3"
+            class="input-cell h-large"
+            style="padding: 10px; text-align: left; vertical-align: top"
           >
-          <span class="sig-item"
-            >日期：<span class="sig-line">{{ mainLeaderDate }}</span></span
-          >
-        </td>
-      </tr>
+            {{ mainLeaderContent }}
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3" class="signature-row">
+            <span class="sig-item"
+              >办理人：<span class="sig-line">{{ mainLeaderHandler }}</span></span
+            >
+            <span class="sig-item"
+              >日期：<span class="sig-line">{{ mainLeaderDate }}</span></span
+            >
+          </td>
+        </tr>
+      </tbody>
     </table>
   </div>
 </template>

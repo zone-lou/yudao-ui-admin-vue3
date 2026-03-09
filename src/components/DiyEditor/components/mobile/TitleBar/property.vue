@@ -21,7 +21,7 @@
             </el-tooltip>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="偏移量" prop="marginLeft" label-width="70px">
+        <el-form-item label="偏移量" prop="marginLeft" label-width="auto">
           <el-slider
             v-model="formData.marginLeft"
             :max="100"
@@ -30,7 +30,7 @@
             input-size="small"
           />
         </el-form-item>
-        <el-form-item label="高度" prop="height" label-width="70px">
+        <el-form-item label="高度" prop="height" label-width="auto">
           <el-slider
             v-model="formData.height"
             :max="200"

@@ -1,6 +1,6 @@
 <template>
   <ContentWrap>
-    <el-form :model="queryParams" ref="queryFormRef" :inline="true" label-width="70px">
+    <el-form :model="queryParams" ref="queryFormRef" :inline="true" label-width="auto">
       <el-row :gutter="20">
         <el-col :span="6">
           <el-form-item label="办件名称" prop="name" class="w-full">

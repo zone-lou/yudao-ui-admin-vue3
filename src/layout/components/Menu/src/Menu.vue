@@ -1,5 +1,5 @@
 <script lang="tsx">
-import { PropType } from 'vue'
+import { PropType, inject } from 'vue'
 import { ElMenu, ElScrollbar } from 'element-plus'
 import { useAppStore } from '@/store/modules/app'
 import { usePermissionStore } from '@/store/modules/permission'
@@ -29,6 +29,9 @@ export default defineComponent({
     const { push, currentRoute } = useRouter()
 
     const permissionStore = usePermissionStore()
+
+    // 接收 AppView.vue 提供下来的局部无感刷新方法（带 fallback 以平息警告）
+    const reload = inject<(() => void) | undefined>('reload', undefined)
 
     const menuMode = computed((): 'vertical' | 'horizontal' => {
       // 竖
@@ -72,7 +75,15 @@ export default defineComponent({
       if (isUrl(index)) {
         window.open(index)
       } else {
-        push(index)
+        // 当侧边栏点击目标和目前系统身处的地址相同时，不再走底层拦截失效的 push 流程
+        // 而是直接执行祖父级布局容器暴露出来的 reload 无感刷新方法，促使关联此路经的路由组件重走钩子以达成数据更新
+        if (index === unref(currentRoute).path || index === unref(currentRoute).fullPath) {
+          if (reload) {
+            reload()
+          }
+        } else {
+          push(index)
+        }
       }
     }
 

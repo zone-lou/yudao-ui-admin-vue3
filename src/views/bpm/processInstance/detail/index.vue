@@ -229,7 +229,7 @@ const getDetail = () => {
 }
 
 /** 加载流程实例 */
-const BusinessFormComponent = ref<any>(null) // 异步组件
+const BusinessFormComponent = shallowRef<any>(null) // 异步组件（使用 shallowRef 避免过重深层响应）
 const businessFormComponentRef = ref<any>(null) // 业务表单组件实例
 /** 获取审批详情 */
 const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])

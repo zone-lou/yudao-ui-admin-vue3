@@ -3,7 +3,7 @@
 
   <!-- 搜索 -->
   <ContentWrap>
-    <el-form ref="queryFormRef" :inline="true" :model="queryParams" label-width="68px">
+    <el-form ref="queryFormRef" :inline="true" :model="queryParams" label-width="auto">
       <el-form-item label="商品名称" prop="spuName">
         <el-input
           v-model="queryParams.spuName"

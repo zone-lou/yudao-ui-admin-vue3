@@ -10,196 +10,203 @@
         <col />
       </colgroup>
 
-      <tr class="h-row">
-        <td class="label-cell">会议名称</td>
-        <td>{{ title }}</td>
-        <td class="label-cell">会议时间</td>
-        <td>{{ startDate }}</td>
-      </tr>
+      <tbody>
+        <tr class="h-row">
+          <td class="label-cell">会议名称</td>
+          <td>{{ title }}</td>
+          <td class="label-cell">会议时间</td>
+          <td>{{ startDate }}</td>
+        </tr>
 
-      <tr class="h-row">
-        <td class="label-cell">会议地点</td>
-        <td>{{ venue }}</td>
-        <td class="label-cell">召集单位<br />及召集人</td>
-        <td>{{ joinUnit }}</td>
-      </tr>
+        <tr class="h-row">
+          <td class="label-cell">会议地点</td>
+          <td>{{ venue }}</td>
+          <td class="label-cell">召集单位<br />及召集人</td>
+          <td>{{ joinUnit }}</td>
+        </tr>
 
-      <tr class="h-row">
-        <td class="label-cell">我局参会科室</td>
-        <td>{{ offerUnit }}</td>
-        <td class="label-cell">我局参会人员</td>
-        <td>{{ offerPerson }}</td>
-      </tr>
+        <tr class="h-row">
+          <td class="label-cell">我局参会科室</td>
+          <td>{{ offerUnit }}</td>
+          <td class="label-cell">我局参会人员</td>
+          <td>{{ offerPerson }}</td>
+        </tr>
 
-      <tr>
-        <td class="label-cell">会议主要内容<br />及我局承办事项</td>
-        <td colspan="3" class="h-large" style="padding: 10px">
-          <div class="editor-content-view" v-html="content || ''"></div>
-        </td>
-      </tr>
+        <tr>
+          <td class="label-cell">会议主要内容<br />及我局承办事项</td>
+          <td colspan="3" class="h-large" style="padding: 10px">
+            <div class="editor-content-view" v-html="content || ''"></div>
+          </td>
+        </tr>
 
-      <tr>
-        <td class="label-cell">参会人员<br />会议表态情况<br />及建议意见</td>
-        <td colspan="3" class="h-medium" style="padding: 10px">
-          {{ situation }}
-        </td>
-      </tr>
+        <tr>
+          <td class="label-cell">参会人员<br />会议表态情况<br />及建议意见</td>
+          <td colspan="3" class="h-medium" style="padding: 10px">
+            {{ situation }}
+          </td>
+        </tr>
 
-      <tr>
-        <td class="label-cell">附件</td>
-        <td colspan="3" style="padding: 10px">
-          <div v-if="fileList.length > 0">
-            <div v-for="(file, index) in fileList" :key="index" style="margin-bottom: 2px">
-              <el-link type="primary" @click="handlePreview(file)" :underline="false">
-                {{ file.name }}
-              </el-link>
+        <tr>
+          <td class="label-cell">附件</td>
+          <td colspan="3" style="padding: 10px">
+            <div v-if="fileList.length > 0">
+              <div v-for="(file, index) in fileList" :key="index" style="margin-bottom: 2px">
+                <el-link type="primary" @click="handlePreview(file)" :underline="false">
+                  {{ file.name }}
+                </el-link>
+              </div>
             </div>
-          </div>
-          <span v-else>无</span>
-        </td>
-      </tr>
+            <span v-else>无</span>
+          </td>
+        </tr>
 
-      <!-- 科室负责人审核 -->
-      <tr v-if="isEditable('科室负责人')">
-        <td class="label-cell" rowspan="2">科室负责人审核</td>
-        <td colspan="3" class="h-medium data-text" style="padding: 10px">
-          <el-input
-            v-model="currentOpinion"
-            type="textarea"
-            :rows="3"
-            placeholder="请输入您的意见"
-            class="w-full h-full"
-          />
-        </td>
-      </tr>
-      <tr v-else-if="deptHeadContent || deptHeadHandler">
-        <td class="label-cell" rowspan="2">科室负责人审核</td>
-        <td colspan="3" style="height: 50px; padding: 10px">{{ deptHeadContent }}</td>
-      </tr>
-      <tr v-else>
-        <!-- 如果没有科室负责人节点意见且当前不可编辑，保持空行 -->
-        <td class="label-cell" rowspan="2">科室负责人审核</td>
-        <td colspan="3" style="height: 50px; padding: 10px"></td>
-      </tr>
+        <!-- 科室负责人审核 -->
+        <tr v-if="isEditable('科室负责人')">
+          <td class="label-cell" rowspan="2">科室负责人审核</td>
+          <td colspan="3" class="h-medium data-text" style="padding: 10px">
+            <el-input
+              v-model="currentOpinion"
+              type="textarea"
+              :rows="3"
+              placeholder="请输入您的意见"
+              class="w-full h-full"
+            />
+          </td>
+        </tr>
+        <tr v-else-if="deptHeadContent || deptHeadHandler">
+          <td class="label-cell" rowspan="2">科室负责人审核</td>
+          <td colspan="3" style="height: 50px; padding: 10px">{{ deptHeadContent }}</td>
+        </tr>
+        <tr v-else>
+          <!-- 如果没有科室负责人节点意见且当前不可编辑，保持空行 -->
+          <td class="label-cell" rowspan="2">科室负责人审核</td>
+          <td colspan="3" style="height: 50px; padding: 10px"></td>
+        </tr>
 
-      <tr v-if="isEditable('科室负责人')">
-        <td colspan="3" class="footer-row">
-          <div class="footer-content" style="justify-content: flex-start; padding-left: 20px">
-            <span
-              >办理人员：<span class="sign-input">{{ userStore.getUser.nickname }}</span></span
-            >
-            <span
-              >办理日期：<span class="sign-input">{{ formatDate(new Date()) }}</span></span
-            >
-          </div>
-        </td>
-      </tr>
-      <tr v-else>
-        <td colspan="3" class="footer-row">
-          <div class="footer-content" style="justify-content: flex-start; padding-left: 20px">
-            <span
-              >办理人员：<span class="sign-input">{{ deptHeadHandler }}</span></span
-            >
-            <span
-              >办理日期：<span class="sign-input">{{ deptHeadDate }}</span></span
-            >
-          </div>
-        </td>
-      </tr>
+        <tr v-if="isEditable('科室负责人')">
+          <td colspan="3" class="footer-row">
+            <div class="footer-content" style="justify-content: flex-start; padding-left: 20px">
+              <span
+                >办理人员：<span class="sign-input">{{ userStore.getUser.nickname }}</span></span
+              >
+              <span
+                >办理日期：<span class="sign-input">{{ formatDate(new Date()) }}</span></span
+              >
+            </div>
+          </td>
+        </tr>
+        <tr v-else>
+          <td colspan="3" class="footer-row">
+            <div class="footer-content" style="justify-content: flex-start; padding-left: 20px">
+              <span
+                >办理人员：<span class="sign-input">{{ deptHeadHandler }}</span></span
+              >
+              <span
+                >办理日期：<span class="sign-input">{{ deptHeadDate }}</span></span
+              >
+            </div>
+          </td>
+        </tr>
 
-      <tr>
-        <td class="label-cell">分管领导阅签</td>
-        <td colspan="3" class="nested-table-container">
-          <table class="nested-table">
-            <tr>
-              <td class="sub-header" style="width: 60%">办理意见</td>
-              <td class="sub-header" style="width: 20%">办理人员</td>
-              <td class="sub-header" style="width: 20%">办理日期</td>
-            </tr>
-            <tr v-if="isEditable('分管领导') || isEditable('局领导')">
-              <td class="sub-content" style="padding: 4px 8px">
-                <el-input
-                  v-model="currentOpinion"
-                  type="textarea"
-                  :rows="2"
-                  placeholder="请输入您的意见"
-                />
-              </td>
-              <td class="sub-content" style="text-align: center; vertical-align: middle">
-                {{ userStore.getUser.nickname }}
-              </td>
-              <td class="sub-content" style="text-align: center; vertical-align: middle">
-                {{ formatDate(new Date()) }}
-              </td>
-            </tr>
-            <tr v-for="(item, index) in deputyLeaderList" :key="index">
-              <td class="sub-content">{{ item.comment }}</td>
-              <td class="sub-content" style="text-align: center">{{
-                item.assigneeUser?.nickname
-              }}</td>
-              <td class="sub-content" style="text-align: center">{{ formatDate(item.endTime) }}</td>
-            </tr>
-            <!-- 当既不可编辑，也没有数据时，兜底显示一行空行 -->
-            <tr
-              v-if="
-                deputyLeaderList.length === 0 && !(isEditable('分管领导') || isEditable('局领导'))
-              "
-            >
-              <td class="sub-content"></td>
-              <td class="sub-content"></td>
-              <td class="sub-content"></td>
-            </tr>
-          </table>
-        </td>
-      </tr>
+        <tr>
+          <td class="label-cell">分管领导阅签</td>
+          <td colspan="3" class="nested-table-container">
+            <table class="nested-table">
+              <tbody>
+                <tr>
+                  <td class="sub-header" style="width: 60%">办理意见</td>
+                  <td class="sub-header" style="width: 20%">办理人员</td>
+                  <td class="sub-header" style="width: 20%">办理日期</td>
+                </tr>
+                <tr v-if="isEditable('分管领导') || isEditable('局领导')">
+                  <td class="sub-content" style="padding: 4px 8px">
+                    <el-input
+                      v-model="currentOpinion"
+                      type="textarea"
+                      :rows="2"
+                      placeholder="请输入您的意见"
+                    />
+                  </td>
+                  <td class="sub-content" style="text-align: center; vertical-align: middle">
+                    {{ userStore.getUser.nickname }}
+                  </td>
+                  <td class="sub-content" style="text-align: center; vertical-align: middle">
+                    {{ formatDate(new Date()) }}
+                  </td>
+                </tr>
+                <tr v-for="(item, index) in deputyLeaderList" :key="index">
+                  <td class="sub-content">{{ item.comment }}</td>
+                  <td class="sub-content" style="text-align: center">{{
+                    item.assigneeUser?.nickname
+                  }}</td>
+                  <td class="sub-content" style="text-align: center">{{
+                    formatDate(item.endTime)
+                  }}</td>
+                </tr>
+                <!-- 当既不可编辑，也没有数据时，兜底显示一行空行 -->
+                <tr
+                  v-if="
+                    deputyLeaderList.length === 0 &&
+                    !(isEditable('分管领导') || isEditable('局领导'))
+                  "
+                >
+                  <td class="sub-content"></td>
+                  <td class="sub-content"></td>
+                  <td class="sub-content"></td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
 
-      <!-- 局长阅签 -->
-      <tr v-if="isEditable('局长') || isEditable('主要领导')">
-        <td class="label-cell" rowspan="2">局长阅签</td>
-        <td colspan="3" class="h-medium data-text" style="padding: 10px">
-          <el-input
-            v-model="currentOpinion"
-            type="textarea"
-            :rows="3"
-            placeholder="请输入局长批示"
-            class="w-full h-full"
-          />
-        </td>
-      </tr>
-      <tr v-else-if="directorContent || directorHandler">
-        <td class="label-cell" rowspan="2">局长阅签</td>
-        <td colspan="3" style="height: 50px; padding: 10px">{{ directorContent }}</td>
-      </tr>
-      <tr v-else>
-        <!-- 局长未审批时占位空行 -->
-        <td class="label-cell" rowspan="2">局长阅签</td>
-        <td colspan="3" style="height: 50px; padding: 10px"></td>
-      </tr>
+        <!-- 局长阅签 -->
+        <tr v-if="isEditable('局长') || isEditable('主要领导')">
+          <td class="label-cell" rowspan="2">局长阅签</td>
+          <td colspan="3" class="h-medium data-text" style="padding: 10px">
+            <el-input
+              v-model="currentOpinion"
+              type="textarea"
+              :rows="3"
+              placeholder="请输入局长批示"
+              class="w-full h-full"
+            />
+          </td>
+        </tr>
+        <tr v-else-if="directorContent || directorHandler">
+          <td class="label-cell" rowspan="2">局长阅签</td>
+          <td colspan="3" style="height: 50px; padding: 10px">{{ directorContent }}</td>
+        </tr>
+        <tr v-else>
+          <!-- 局长未审批时占位空行 -->
+          <td class="label-cell" rowspan="2">局长阅签</td>
+          <td colspan="3" style="height: 50px; padding: 10px"></td>
+        </tr>
 
-      <tr v-if="isEditable('局长') || isEditable('主要领导')">
-        <td colspan="3" class="footer-row">
-          <div class="footer-content" style="justify-content: center">
-            <span
-              >办理人员：<span class="sign-input">{{ userStore.getUser.nickname }}</span></span
-            >
-            <span style="margin-left: 50px"
-              >日期：<span class="sign-input">{{ formatDate(new Date()) }}</span></span
-            >
-          </div>
-        </td>
-      </tr>
-      <tr v-else>
-        <td colspan="3" class="footer-row">
-          <div class="footer-content" style="justify-content: center">
-            <span
-              >办理人员：<span class="sign-input">{{ directorHandler }}</span></span
-            >
-            <span style="margin-left: 50px"
-              >日期：<span class="sign-input">{{ directorDate }}</span></span
-            >
-          </div>
-        </td>
-      </tr>
+        <tr v-if="isEditable('局长') || isEditable('主要领导')">
+          <td colspan="3" class="footer-row">
+            <div class="footer-content" style="justify-content: center">
+              <span
+                >办理人员：<span class="sign-input">{{ userStore.getUser.nickname }}</span></span
+              >
+              <span style="margin-left: 50px"
+                >日期：<span class="sign-input">{{ formatDate(new Date()) }}</span></span
+              >
+            </div>
+          </td>
+        </tr>
+        <tr v-else>
+          <td colspan="3" class="footer-row">
+            <div class="footer-content" style="justify-content: center">
+              <span
+                >办理人员：<span class="sign-input">{{ directorHandler }}</span></span
+              >
+              <span style="margin-left: 50px"
+                >日期：<span class="sign-input">{{ directorDate }}</span></span
+              >
+            </div>
+          </td>
+        </tr>
+      </tbody>
     </table>
   </div>
 </template>

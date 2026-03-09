@@ -152,10 +152,11 @@
           >
             <el-select
               v-model="formData.nextNode"
-              placeholder="请选择下一节点"
+              placeholder="请选择办公室主任"
               @change="nodeChange"
               value-key="conditionExpression"
               :empty-values="[null, undefined]"
+              des
             >
               <el-option
                 v-for="dict in nextNodeOptions"
@@ -167,14 +168,14 @@
           </el-form-item>
 
           <el-form-item
-            label="审批人"
+            label="转给办公室主任"
             prop="tempNextUserSelectAssignees"
             required
             v-if="!formData.processInstanceId"
           >
             <el-select
               v-model="formData.tempNextUserSelectAssignees"
-              placeholder="请选择审批人"
+              placeholder="请选择办公室主任"
               :multiple="multipleFlag"
             >
               <el-option

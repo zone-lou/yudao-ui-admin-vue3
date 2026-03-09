@@ -42,3 +42,54 @@
 .el-sub-menu__title .el-badge * {
   vertical-align: baseline !important;
 }
+
+/* ========== 全局大小缩放接管区 ========== */
+/* 强制提升大号体系至 16px */
+.size-large {
+  --el-font-size-base: 16px;
+
+  .el-form-item__label,
+  .el-card__header,
+  .el-descriptions__label,
+  .el-descriptions__content,
+  .el-table {
+    font-size: 16px !important;
+  }
+}
+
+/* 强制提升基准与死硬文本至 15px */
+body:not(.size-large):not(.size-small) {
+  --el-font-size-base: 15px;
+
+  .el-form-item__label,
+  .el-card__header,
+  .el-descriptions__label,
+  .el-descriptions__content,
+  .el-table {
+    font-size: 15px !important;
+  }
+}
+.size-default {
+  --el-font-size-base: 15px;
+
+  .el-form-item__label,
+  .el-card__header,
+  .el-descriptions__label,
+  .el-descriptions__content,
+  .el-table {
+    font-size: 15px !important;
+  }
+}
+
+/* 收缩基准与死硬文本至 14px */
+.size-small {
+  --el-font-size-base: 14px;
+
+  .el-form-item__label,
+  .el-card__header,
+  .el-descriptions__label,
+  .el-descriptions__content,
+  .el-table {
+    font-size: 14px !important;
+  }
+}
