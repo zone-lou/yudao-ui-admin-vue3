@@ -221,11 +221,11 @@ const detailForm = ref({
 const writableFields: Array<string> = [] // 表单可以编辑的字段
 
 /** 获得详情 */
-const getDetail = () => {
-  // 获得审批详情
-  getApprovalDetail()
-  // 获得流程模型视图
-  getProcessModelView()
+const getDetail = async () => {
+  // 必须先获得审批详情以确保拿到最实时的待办 todoTask 数据
+  await getApprovalDetail()
+  // 再获取依赖于前者的流程模型视图补丁
+  await getProcessModelView()
 }
 
 /** 加载流程实例 */
@@ -316,9 +316,14 @@ const getApprovalDetail = async () => {
 
     // 只有当存在待办任务时，才去匹配当前节点和获取下一节点信息
     if (data.todoTask) {
-      currentNode.value = activityNodes.value.find(
-        (item) => item.id === data.todoTask.taskDefinitionKey
-      )
+      currentNode.value = activityNodes.value.find((item) => {
+        // 先尝试名称匹配、再尝试任务 ID 包含、最后尝试原有的 taskDefinitionKey
+        return (
+          item.name === data.todoTask.name ||
+          (item.tasks && item.tasks.some((t) => t.id === data.todoTask.id)) ||
+          String(item.id) === data.todoTask.taskDefinitionKey
+        )
+      })
       // 获取当前节点信息
       await getNextApprovalNodes()
     } else {
@@ -339,6 +344,53 @@ const getProcessModelView = async () => {
   }
   const data = await ProcessInstanceApi.getProcessInstanceBpmnModelView(props.id)
   if (data) {
+    // 【核心修复】单人内转加签等导致后续审批仍滞留本节点时，后端的视图计算引擎可能判定其原生任务完成而将其遗漏出 unfinished 名单。
+    // 在这里前端依照绝对真实的 todoTask 所在节点，以及全量 activityNodes 的最终状态进行兜底修正。
+    if (!data.unfinishedTaskActivityIds) {
+      data.unfinishedTaskActivityIds = []
+    }
+
+    // 方案 1：当前账号的唯一确切的待办指派节点 (有确切 BPMN key 则依然放入)
+    if (processInstance.value?.todoTask?.taskDefinitionKey) {
+      const pendingKey = processInstance.value.todoTask.taskDefinitionKey
+      if (!data.unfinishedTaskActivityIds.includes(pendingKey)) {
+        data.unfinishedTaskActivityIds.push(pendingKey)
+      }
+    }
+
+    // 方案 2：全量扫描审批流记录，提取出所有的正在进行中的节点显示名称（Name）
+    if (!data.unfinishedNodeNames) {
+      data.unfinishedNodeNames = []
+    }
+
+    const unfinishedStatuses = [0, 1, 6, 7] // 涵盖审批中、委派中、审批通过中等所有未结案状态
+
+    // 2.1 从时间线树形节点 `activityNodes` 扫描补缺
+    if (activityNodes.value && activityNodes.value.length > 0) {
+      activityNodes.value.forEach((node) => {
+        const isRunning =
+          unfinishedStatuses.includes(node.status) ||
+          (node.tasks && node.tasks.some((task) => unfinishedStatuses.includes(task.status)))
+
+        if (isRunning && node.name) {
+          if (!data.unfinishedNodeNames.includes(node.name)) {
+            data.unfinishedNodeNames.push(node.name)
+          }
+        }
+      })
+    }
+
+    // 2.2 防御后端 activityNode status 异常早产闭包（被强行置 2），启用底层物理任务表 data.tasks 兜底扫描
+    if (data.tasks && data.tasks.length > 0) {
+      data.tasks.forEach((task: any) => {
+        // 如果物理存在，且不在已完成(2)、拒绝(3)、取消(4)、退回(5)等终态
+        if (unfinishedStatuses.includes(task.status) || task.status === undefined) {
+          if (task.name && !data.unfinishedNodeNames.includes(task.name)) {
+            data.unfinishedNodeNames.push(task.name)
+          }
+        }
+      })
+    }
     processModelView.value = data
   }
 }

@@ -71,7 +71,10 @@
           <tr>
             <td class="label-cell" rowspan="2">拟办意见</td>
             <td colspan="3" class="h-80 data-text">
-              <div v-if="isEditable('拟办') || isEditable('发起')" class="w-full h-full">
+              <div
+                v-if="isEditable('拟办') || isEditable('发起')"
+                class="w-full h-full print-hide-row"
+              >
                 <el-input
                   v-model="currentOpinion"
                   type="textarea"
@@ -107,7 +110,10 @@
           <tr>
             <td class="label-cell" rowspan="2">局长批示</td>
             <td colspan="3" class="h-80 data-text">
-              <div v-if="isEditable('局长') || isEditable('主要领导')" class="w-full h-full">
+              <div
+                v-if="isEditable('局长') || isEditable('主要领导')"
+                class="w-full h-full print-hide-row"
+              >
                 <el-input
                   v-model="currentOpinion"
                   type="textarea"
@@ -206,7 +212,7 @@
             <td colspan="2" class="center-text label-cell" style="background: none">意 见</td>
             <td class="center-text label-cell" style="background: none">日 期</td>
           </tr>
-          <tr v-if="isEditable('领导意见')">
+          <tr v-if="isEditable('领导意见')" class="print-hide-row">
             <td class="center-text data-text" style="height: 35px">
               {{ userStore.getUser.nickname }}
             </td>
@@ -245,7 +251,7 @@
             <td colspan="2" class="center-text label-cell" style="background: none">意 见</td>
             <td class="center-text label-cell" style="background: none">日 期</td>
           </tr>
-          <tr v-if="isEditable('分管领导') || isEditable('局领导')">
+          <tr v-if="isEditable('分管领导') || isEditable('局领导')" class="print-hide-row">
             <td class="center-text data-text" style="height: 35px">
               {{ userStore.getUser.nickname }}
             </td>
@@ -295,6 +301,7 @@
               isEditable('主办') ||
               isEditable('协办')
             "
+            class="print-hide-row"
           >
             <td class="center-text data-text" style="height: 35px">
               {{ userStore.getUser.nickname }}
@@ -516,6 +523,10 @@ const processActivityNodes = () => {
             leaderOpinionList.value.push(info)
           } else if (
             name.includes('阅办') ||
+            name.includes('全局阅') ||
+            name.includes('全局阅批') ||
+            name.includes('全局阅审批') ||
+            name.includes('全局传阅') ||
             name.includes('科室') ||
             name.includes('办公室转发') ||
             name.includes('办公室确认') ||

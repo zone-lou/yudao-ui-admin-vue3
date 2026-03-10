@@ -11,6 +11,7 @@ const userStore = useUserStore()
 
 const visible = ref(false)
 const loading = ref(false)
+const printBtnRef = ref()
 
 const printData = ref()
 const userName = computed(() => userStore.user.nickname ?? '')
@@ -275,8 +276,10 @@ const preparePrintData = (rawData: any) => {
   const opinionTasks = tasks.filter((t: any) => t.name === '领导意见' && t.approveName)
   data.leaderOpinionHtml = buildDynamicSectionHtml('领导意见', opinionTasks, 3)
 
-  const readerNames = ['主办科室', '协办科室', '办公室转发']
-  const readerTasks = tasks.filter((t: any) => readerNames.includes(t.name) && t.approveName)
+  const readerNames = ['主办科室', '协办科室', '办公室转发', '全局阅批', '全局阅审批', '全局传阅']
+  const readerTasks = tasks.filter(
+    (t: any) => readerNames.includes(t.name) || (t.name.includes('全局阅') && t.approveName)
+  )
   data.readerSectionHtml = buildDynamicSectionHtml('阅办者', readerTasks, 3)
 
   return data
@@ -331,6 +334,15 @@ const open = async (id: string) => {
   } finally {
     loading.value = false
     visible.value = true
+
+    // 静默唤起系统打印：数据渲染完毕后直接触发打印指令按钮的点击
+    nextTick(() => {
+      setTimeout(() => {
+        if (printBtnRef.value && printBtnRef.value.$el) {
+          printBtnRef.value.$el.click()
+        }
+      }, 500)
+    })
   }
 }
 
@@ -375,42 +387,45 @@ const printObj = ref({
   id: 'printDivTag',
   popTitle: '&nbsp',
   extraHead: '',
-  zIndex: 20003
+  zIndex: 20003,
+  closeCallback() {
+    visible.value = false
+  }
 })
 </script>
 
 <template>
-  <el-dialog v-model="visible" :show-close="false" width="900px" top="5vh">
-    <div class="print-dialog-scroll" v-loading="loading">
-      <div id="printDivTag" style="word-break: break-all">
-        <div v-if="isCustomTemplate" v-html="customTemplateHtml" class="custom-print-wrap"></div>
-        <div v-else-if="printData?.printTemplateEnable" v-html="getPrintTemplateHTML()"></div>
-        <div v-else>
-          <h2 class="text-center">{{ printData?.processInstance?.name }}</h2>
-          <table class="mt-20px w-100%" border="1" style="border-collapse: collapse">
-            <tbody>
-              <tr>
-                <td class="p-5px w-25%">发起人</td>
-                <td class="p-5px w-25%">{{ printData?.processInstance?.startUser?.nickname }}</td>
-                <td class="p-5px w-25%">发起时间</td>
-                <td class="p-5px w-25%">{{ formatDate(printData?.processInstance?.startTime) }}</td>
-              </tr>
-              <tr v-for="item in formFields" :key="item.id">
-                <td class="p-5px w-20%">{{ item.name }}</td>
-                <td class="p-5px w-80%" colspan="3"><div v-html="item.html"></div></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+  <!-- 直接剥离 el-dialog，彻底断绝全局遮罩层的生成；转为静默 DIV 容器 -->
+  <div v-if="visible" class="hidden-print-dialog">
+    <div
+      id="printDivTag"
+      style="width: 900px; padding: 20px; word-break: break-all; background: white"
+    >
+      <div v-if="isCustomTemplate" v-html="customTemplateHtml" class="custom-print-wrap"></div>
+      <div v-else-if="printData?.printTemplateEnable" v-html="getPrintTemplateHTML()"></div>
+      <div v-else>
+        <h2 class="text-center">{{ printData?.processInstance?.name }}</h2>
+        <table class="mt-20px w-100%" border="1" style="border-collapse: collapse">
+          <tbody>
+            <tr>
+              <td class="p-5px w-25%">发起人</td>
+              <td class="p-5px w-25%">{{ printData?.processInstance?.startUser?.nickname }}</td>
+              <td class="p-5px w-25%">发起时间</td>
+              <td class="p-5px w-25%">{{ formatDate(printData?.processInstance?.startTime) }}</td>
+            </tr>
+            <tr v-for="item in formFields" :key="item.id">
+              <td class="p-5px w-20%">{{ item.name }}</td>
+              <td class="p-5px w-80%" colspan="3"><div v-html="item.html"></div></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
-    <template #footer>
-      <div class="dialog-footer">
-        <el-button @click="visible = false">取 消</el-button>
-        <el-button type="primary" v-print="printObj"> 打 印</el-button>
-      </div>
-    </template>
-  </el-dialog>
+    <!-- 隐秘按钮，充当唤醒指令与组件销毁的衔接桥梁 -->
+    <el-button type="primary" v-print="printObj" ref="printBtnRef" style="display: none">
+      打 印</el-button
+    >
+  </div>
 </template>
 
 <style scoped>
@@ -449,10 +464,37 @@ const printObj = ref({
     padding: 0 !important;
     box-shadow: none !important;
   }
+
+  /* ========== 核心安全修正：防止分页切断表格行 ========== */
+
+  /* 不要给 table 元素加 avoid，否则第一页放不下哪怕一行，其都会直接排斥整张表到下一页 */
+  tr,
+  td,
+  th {
+    page-break-inside: avoid !important;
+  }
+
+  /* ========== 核心视觉修正：防止审批途中的输入框及预留空位被打印 ========== */
+
+  /* 在流程进行中打印时，表单如果存在开启状态的可编辑输入框，不应将其外溢至打印板上。
+     配套的 .print-hide-row 将专门用来收割那些因没有数据而在打印中徒留空白的空外壳。 */
+  .el-input,
+  .el-textarea,
+  input,
+  textarea,
+  .print-hide-row {
+    display: none !important;
+  }
 }
 
-/* 确保不光是打印，就连普通预览弹窗里也不显示含该类的行 */
-.print-dialog-scroll .print-hide-row {
-  display: none !important;
+/* 隐藏外置渲染弹框不影响打印实体被截取，利用透明度隐藏而不是脱离树，防白屏 */
+.hidden-print-dialog {
+  position: fixed !important;
+  z-index: -9999 !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
 }
+
+/* 如果原来配置了 print-hide-row 来隐藏空行，目前发现它反而把局长批示等吞没而导致弹窗不显，
+   我们在此把这个强制隐藏拔除，让 DOM 忠实渲染，由打印时依靠原生表现或由模板真实渲染。 */
 </style>

@@ -302,10 +302,28 @@ const setProcessStatus = (view: any) => {
     unfinishedTaskActivityIds,
     finishedTaskActivityIds,
     finishedSequenceFlowActivityIds,
-    rejectedTaskActivityIds
+    rejectedTaskActivityIds,
+    unfinishedNodeNames
   } = view
   const canvas = bpmnViewer.value.get('canvas')
   const elementRegistry = bpmnViewer.value.get('elementRegistry')
+
+  // 将通过 Name 匹配到的实际 Activity_ID 混入到 unfinishedTaskActivityIds 中
+  let finalUnfinishedIds = Array.isArray(unfinishedTaskActivityIds)
+    ? [...unfinishedTaskActivityIds]
+    : []
+
+  if (Array.isArray(unfinishedNodeNames) && unfinishedNodeNames.length > 0) {
+    const allElements = elementRegistry.getAll()
+    allElements.forEach((element: any) => {
+      const elName = element.businessObject?.name
+      if (elName && unfinishedNodeNames.includes(elName)) {
+        if (!finalUnfinishedIds.includes(element.id)) {
+          finalUnfinishedIds.push(element.id)
+        }
+      }
+    })
+  }
 
   // 已完成节点
   if (Array.isArray(finishedSequenceFlowActivityIds)) {
@@ -313,20 +331,31 @@ const setProcessStatus = (view: any) => {
       if (item != null) {
         canvas.addMarker(item, 'success')
         const element = elementRegistry.get(item)
-        const conditionExpression = element.businessObject.conditionExpression
+        const conditionExpression = element?.businessObject?.conditionExpression
         if (conditionExpression) {
           canvas.addMarker(item, 'condition-expression')
         }
       }
     })
   }
+  // 已完成节点
   if (Array.isArray(finishedTaskActivityIds)) {
-    finishedTaskActivityIds.forEach((item: any) => canvas.addMarker(item, 'success'))
+    finishedTaskActivityIds.forEach((item: any) => {
+      // 冲突保护：如果一个节点既在已完成列表，又被标记为未完全结束（比如通过循环加签或Name名称软拦截），
+      // 那么不应该为其挂载表示完全竣工的高亮 success(绿色)，而是留给后面的 unfinished 判定挂载 primary(蓝色)
+      if (!finalUnfinishedIds.includes(item)) {
+        canvas.addMarker(item, 'success')
+      }
+    })
   }
 
   // 未完成节点
-  if (Array.isArray(unfinishedTaskActivityIds)) {
-    unfinishedTaskActivityIds.forEach((item: any) => canvas.addMarker(item, 'primary'))
+  if (finalUnfinishedIds.length > 0) {
+    finalUnfinishedIds.forEach((item: any) => {
+      // 为了防止后端传参中同时包含，在强制标记蓝色的同时，先把绿色的 marker 拔除确保万无一失
+      canvas.removeMarker(item, 'success')
+      canvas.addMarker(item, 'primary')
+    })
   }
 
   // 被拒绝节点
