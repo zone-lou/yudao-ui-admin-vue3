@@ -21,7 +21,7 @@
       @click="isOnlyEndNode ? handleDirectFinish() : openApproveDialog()"
     >
       <Icon icon="ep:select" />&nbsp;
-      {{ isOnlyEndNode ? '办结' : getButtonDisplayName(OperationButtonType.APPROVE) }}
+      {{ getButtonDisplayName(OperationButtonType.APPROVE) }}
     </el-button>
 
     <!-- 【减签】按钮 -->
@@ -558,12 +558,21 @@ const handleDirectFinish = async () => {
   }
 
   // 若开启了在线签名要求，为了复用原有交互，回退到打开详实发送弹窗由其管理（如确有此需求可在这里唤起签版）
-  if (runningTask.value?.signEnable && !approveReasonForm.signPicUrl) {
+  const defName = (props.processDefinition?.name || props.processInstance?.name || '').toLowerCase()
+  const customPath = (props.processDefinition?.formCustomViewPath || '').toLowerCase()
+  const isSpecialForm =
+    defName.includes('请假') ||
+    defName.includes('外出') ||
+    defName.includes('公出') ||
+    customPath.includes('leave') ||
+    customPath.includes('timeexplain')
+
+  if (runningTask.value?.signEnable && !approveReasonForm.signPicUrl && !isSpecialForm) {
     return openApproveDialog()
   }
 
   try {
-    await message.confirm('是否办结？', '流程办结提示')
+    await message.confirm('是否确认提交？', '办理提示')
   } catch {
     return
   }
@@ -610,7 +619,7 @@ const handleDirectFinish = async () => {
   formLoading.value = true
   try {
     await TaskApi.approveTask(data)
-    message.success('办结操作成功')
+    message.success('提交操作成功')
     approveDialogVisible.value = false
     reload()
   } finally {
@@ -638,6 +647,24 @@ const openApproveDialog = async () => {
       }
       approveReasonForm.reason = opinion // 自动填充
       requireDialogReasonInput.value = false
+
+      // 新增：对于固定不需要选人的表单类型，在意见获取完毕后直接截流放行
+      const defName = (
+        props.processDefinition?.name ||
+        props.processInstance?.name ||
+        ''
+      ).toLowerCase()
+      const customPath = (props.processDefinition?.formCustomViewPath || '').toLowerCase()
+      if (
+        defName.includes('请假') ||
+        defName.includes('外出') ||
+        defName.includes('公出') ||
+        customPath.includes('leave') ||
+        customPath.includes('timeexplain')
+      ) {
+        await handleDirectFinish()
+        return // 彻底截流，不继续向下运行弹出 Dialog 的代码
+      }
     } else {
       approveReasonForm.reason = ''
       requireDialogReasonInput.value = true

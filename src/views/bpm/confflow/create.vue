@@ -68,9 +68,9 @@
             </el-col>
           </el-row>
 
-          <el-form-item label="会议主要内容及我局承办事项" prop="situation">
+          <el-form-item label="会议主要内容及我局承办事项" prop="content">
             <el-input
-              v-model="formData.remark"
+              v-model="formData.content"
               type="textarea"
               :autosize="{ minRows: 2, maxRows: 4 }"
               placeholder="会议主要内容及我局承办事项"
@@ -189,7 +189,7 @@ const formData = ref({
   offerUnit: undefined,
   offerPerson: undefined,
   situation: undefined,
-  content: '', // 富文本默认为空字符串
+  content: '',
   remark: undefined,
   attachFilePath: '',
   // 流程字段

@@ -71,20 +71,45 @@
         <tr>
           <td class="label-cell" rowspan="2">科室(单位)负责人意见</td>
           <td
-            colspan="3"
             class="input-cell h-large"
+            colspan="3"
             style="padding: 10px; text-align: left; vertical-align: top"
           >
-            {{ deptHeadContent }}
+            <div
+              v-if="isEditable('科室') || isEditable('负责人')"
+              class="w-full h-full print-hide-row"
+            >
+              <el-input
+                v-model="currentOpinion"
+                type="textarea"
+                :rows="1"
+                placeholder="请输入科室(单位)负责人意见"
+                class="w-full h-full"
+                style="border: none"
+              />
+            </div>
+            <div v-else>
+              <div v-for="(info, index) in ensureMinRows(deptHeadList, 1)" :key="index">
+                {{ info.comment }}
+              </div>
+            </div>
           </td>
         </tr>
         <tr>
           <td colspan="3" class="signature-row">
             <span class="sig-item"
-              >办理人：<span class="sig-line">{{ deptHeadHandler }}</span></span
+              >办理人：<span class="sig-line">{{
+                deptHeadList.length > 0
+                  ? deptHeadList[deptHeadList.length - 1].assigneeUser?.nickname
+                  : ''
+              }}</span></span
             >
             <span class="sig-item"
-              >日期：<span class="sig-line">{{ deptHeadDate }}</span></span
+              >日期：<span class="sig-line">{{
+                deptHeadList.length > 0
+                  ? formatDate(deptHeadList[deptHeadList.length - 1].endTime)
+                  : ''
+              }}</span></span
             >
           </td>
         </tr>
@@ -92,20 +117,43 @@
         <tr>
           <td class="label-cell" rowspan="2">办公室意见</td>
           <td
-            colspan="3"
             class="input-cell h-large"
+            colspan="3"
             style="padding: 10px; text-align: left; vertical-align: top"
           >
-            {{ officeContent }}
+            <div v-if="isEditable('办公室')" class="w-full h-full print-hide-row">
+              <el-input
+                v-model="currentOpinion"
+                type="textarea"
+                :rows="1"
+                placeholder="请输入办公室意见"
+                class="w-full h-full"
+              />
+            </div>
+            <div v-else>
+              <div
+                v-for="(info, index) in ensureMinRows(officeList, 1)"
+                :key="index"
+                class="mb-5px"
+              >
+                <div>{{ info.comment }}</div>
+              </div>
+            </div>
           </td>
         </tr>
         <tr>
           <td colspan="3" class="signature-row">
             <span class="sig-item"
-              >办理人：<span class="sig-line">{{ officeHandler }}</span></span
+              >办理人：<span class="sig-line">{{
+                officeList.length > 0
+                  ? officeList[officeList.length - 1].assigneeUser?.nickname
+                  : ''
+              }}</span></span
             >
             <span class="sig-item"
-              >日期：<span class="sig-line">{{ officeDate }}</span></span
+              >日期：<span class="sig-line">{{
+                officeList.length > 0 ? formatDate(officeList[officeList.length - 1].endTime) : ''
+              }}</span></span
             >
           </td>
         </tr>
@@ -113,20 +161,48 @@
         <tr>
           <td class="label-cell" rowspan="2">局分管领导意见</td>
           <td
-            colspan="3"
             class="input-cell h-large"
+            colspan="3"
             style="padding: 10px; text-align: left; vertical-align: top"
           >
-            {{ deputyLeaderContent }}
+            <div
+              v-if="isEditable('分管') || isEditable('局领导')"
+              class="w-full h-full print-hide-row"
+            >
+              <el-input
+                v-model="currentOpinion"
+                type="textarea"
+                :rows="1"
+                placeholder="请输入局分管领导意见"
+                class="w-full h-full"
+              />
+            </div>
+            <div v-else>
+              <div
+                v-for="(info, index) in ensureMinRows(deputyLeaderList, 1)"
+                :key="index"
+                class="mb-5px"
+              >
+                <div>{{ info.comment }}</div>
+              </div>
+            </div>
           </td>
         </tr>
         <tr>
           <td colspan="3" class="signature-row">
             <span class="sig-item"
-              >办理人：<span class="sig-line">{{ deputyLeaderHandler }}</span></span
+              >办理人：<span class="sig-line">{{
+                deputyLeaderList.length > 0
+                  ? deputyLeaderList[deputyLeaderList.length - 1].assigneeUser?.nickname
+                  : ''
+              }}</span></span
             >
             <span class="sig-item"
-              >日期：<span class="sig-line">{{ deputyLeaderDate }}</span></span
+              >日期：<span class="sig-line">{{
+                deputyLeaderList.length > 0
+                  ? formatDate(deputyLeaderList[deputyLeaderList.length - 1].endTime)
+                  : ''
+              }}</span></span
             >
           </td>
         </tr>
@@ -134,20 +210,48 @@
         <tr>
           <td class="label-cell" rowspan="2">局主要领导意见</td>
           <td
-            colspan="3"
             class="input-cell h-large"
+            colspan="3"
             style="padding: 10px; text-align: left; vertical-align: top"
           >
-            {{ mainLeaderContent }}
+            <div
+              v-if="isEditable('主要领导') || isEditable('局长')"
+              class="w-full h-full print-hide-row"
+            >
+              <el-input
+                v-model="currentOpinion"
+                type="textarea"
+                :rows="1"
+                placeholder="请输入局主要领导意见"
+                class="w-full h-full"
+              />
+            </div>
+            <div v-else>
+              <div
+                v-for="(info, index) in ensureMinRows(mainLeaderList, 1)"
+                :key="index"
+                class="mb-5px"
+              >
+                <div>{{ info.comment }}</div>
+              </div>
+            </div>
           </td>
         </tr>
         <tr>
           <td colspan="3" class="signature-row">
             <span class="sig-item"
-              >办理人：<span class="sig-line">{{ mainLeaderHandler }}</span></span
+              >办理人：<span class="sig-line">{{
+                mainLeaderList.length > 0
+                  ? mainLeaderList[mainLeaderList.length - 1].assigneeUser?.nickname
+                  : ''
+              }}</span></span
             >
             <span class="sig-item"
-              >日期：<span class="sig-line">{{ mainLeaderDate }}</span></span
+              >日期：<span class="sig-line">{{
+                mainLeaderList.length > 0
+                  ? formatDate(mainLeaderList[mainLeaderList.length - 1].endTime)
+                  : ''
+              }}</span></span
             >
           </td>
         </tr>
@@ -168,8 +272,11 @@ import * as ConfigApi from '@/api/infra/config'
 defineOptions({ name: 'BpmTimeExplainDetail' })
 
 const props = defineProps({
-  id: propTypes.number.def(undefined),
-  activityNodes: propTypes.array.def([])
+  id: propTypes.oneOfType([Number, String]).def(undefined),
+  processInstance: propTypes.object.def({}),
+  activityNodes: propTypes.array.def([]),
+  taskId: propTypes.string.def(undefined), // 当前任务ID
+  currentNode: propTypes.object.def({}) // 当前节点信息
 })
 
 const { query } = useRoute()
@@ -222,24 +329,37 @@ const endTime = computed(() => formatDate(detailData.value.checkEnd))
 const endSession = computed(() => getPeriod(detailData.value.checkEnd))
 const leaveDays = computed(() => detailData.value.days)
 const reason = computed(() => detailData.value.reason)
-const fileNames = computed(() => fileList.value.map((f) => f.name).join('、'))
 
-// Historical Opinions
-const deptHeadContent = ref('')
-const deptHeadHandler = ref('')
-const deptHeadDate = ref('')
+// Historical Opinions list
+const deptHeadList = ref<any[]>([]) // 科室(单位)负责人意见
+const officeList = ref<any[]>([]) // 办公室意见
+const deputyLeaderList = ref<any[]>([]) // 局分管领导意见
+const mainLeaderList = ref<any[]>([]) // 局主要领导意见
+const currentOpinion = ref('') // 当前正在填写的审批意见
 
-const officeContent = ref('')
-const officeHandler = ref('')
-const officeDate = ref('')
+/** 判断当前节点是否可编辑 */
+const isEditable = (keyword: string) => {
+  if (!props.taskId) return false
+  const nodeName = props.currentNode?.name || ''
+  return nodeName.indexOf(keyword) !== -1
+}
 
-const deputyLeaderContent = ref('')
-const deputyLeaderHandler = ref('')
-const deputyLeaderDate = ref('')
+/** 暴露给父组件的方法：获取当前填写的意见 */
+const getOpinion = () => {
+  return currentOpinion.value
+}
 
-const mainLeaderContent = ref('')
-const mainLeaderHandler = ref('')
-const mainLeaderDate = ref('')
+/** 确保列表至少有 minRows 行空数据 */
+const ensureMinRows = (list: any[], minRows: number) => {
+  const res = [...list]
+  if (res.length < minRows) {
+    const emptyCount = minRows - res.length
+    for (let i = 0; i < emptyCount; i++) {
+      res.push({ comment: '', isPlaceholder: true })
+    }
+  }
+  return res
+}
 
 /** 格式化日期 (兼容时间戳) */
 const formatDate = (val: any) => {
@@ -265,7 +385,7 @@ const getInfo = async () => {
   detailLoading.value = true
   try {
     fileViewBaseUrl.value = await ConfigApi.getConfigKey('url.fileview.address')
-    const res = await TimeExplainApi.getTimeExplain(queryId)
+    const res = await TimeExplainApi.getTimeExplain(Number(queryId))
     detailData.value = res || {}
     processFileList(res.filepath)
     processActivityNodes()
@@ -278,30 +398,50 @@ const getInfo = async () => {
 const processActivityNodes = () => {
   if (!props.activityNodes || props.activityNodes.length === 0) return
 
+  // 清空
+  deptHeadList.value = []
+  officeList.value = []
+  deputyLeaderList.value = []
+  mainLeaderList.value = []
+
+  const userId = userStore.getUser.id
   props.activityNodes.forEach((node: any) => {
+    // 新增：过滤掉“备案”性质的节点意见显示
+    const nodeName = node.name || ''
+    if (nodeName.includes('备案')) {
+      return
+    }
+
     if (node.tasks && node.tasks.length > 0) {
       node.tasks.forEach((task: any) => {
+        // 状态 1 为处理中，2 为通过/结束
+        if (task.status === 1) {
+          if (task.assigneeUser?.id === userId && task.reason) {
+            currentOpinion.value = task.reason
+          }
+          return
+        }
+
         if (task.reason) {
           const name = node.name || ''
           const info = {
+            name: name,
             comment: task.reason,
             assigneeUser: task.assigneeUser,
             endTime: node.endTime || task.endTime
           }
-          const setOpinion = (contentRef, handlerRef, dateRef) => {
-            contentRef.value = info.comment
-            handlerRef.value = info.assigneeUser?.nickname
-            dateRef.value = formatDate(info.endTime)
-          }
 
-          if (name.includes('科室负责人') || name.includes('单位负责人')) {
-            setOpinion(deptHeadContent, deptHeadHandler, deptHeadDate)
+          if (name.includes('科室') || name.includes('负责人')) {
+            deptHeadList.value.push(info)
           } else if (name.includes('办公室')) {
-            setOpinion(officeContent, officeHandler, officeDate)
-          } else if (name.includes('分管领导')) {
-            setOpinion(deputyLeaderContent, deputyLeaderHandler, deputyLeaderDate)
-          } else if (name.includes('主要领导')) {
-            setOpinion(mainLeaderContent, mainLeaderHandler, mainLeaderDate)
+            officeList.value.push(info)
+          } else if (name.includes('分管') || name.includes('局领导')) {
+            deputyLeaderList.value.push(info)
+          } else if (name.includes('主要领导') || name.includes('局长')) {
+            mainLeaderList.value.push(info)
+          } else {
+            // 没有精准命中的就放入主要的里面兜底
+            deptHeadList.value.push(info)
           }
         }
       })
@@ -340,15 +480,6 @@ const processFileList = (pathStr: string | undefined) => {
     .filter(Boolean)
 }
 
-/** 文件大小格式化 */
-const formatFileSize = (bytes: number) => {
-  if (!bytes) return '-'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-}
-
 /** 预览文件 */
 const handlePreview = (file: any) => {
   if (!file || !file.url) return
@@ -369,18 +500,10 @@ const handlePreview = (file: any) => {
   window.open(previewUrl, '_blank')
 }
 
-/** 下载文件 */
-const handleDownload = (file: any) => {
-  const link = document.createElement('a')
-  link.style.display = 'none'
-  link.href = file.url
-  link.setAttribute('download', file.name)
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-}
-
-defineExpose({ open: getInfo })
+defineExpose({
+  open: getInfo,
+  getOpinion
+})
 
 onMounted(() => {
   getInfo()
@@ -388,6 +511,12 @@ onMounted(() => {
 </script>
 
 <style scoped>
+@media print {
+  .print-hide-row {
+    display: none !important;
+  }
+}
+
 .oa-container {
   width: 100%;
   max-width: 900px;
@@ -431,6 +560,8 @@ onMounted(() => {
 
 .input-cell {
   min-height: 24px;
+  text-align: left;
+  vertical-align: top;
   background-color: #fff;
 }
 
@@ -459,12 +590,20 @@ onMounted(() => {
   min-width: 80px;
   padding-left: 5px;
   text-align: left;
+
+  /* 下面这行改为 none，去除下划线 */
   border-bottom: none;
 }
 
-@media print {
-  .print-hide-row {
-    display: none !important;
-  }
+/* 隐藏已废弃的预览专用 CSS */
+
+/* 强制使得表单的文本域撑满外层 td 单元格的高度 */
+:deep(.h-large .el-textarea) {
+  height: 100%;
+}
+
+:deep(.h-large .el-textarea__inner) {
+  height: 100%;
+  resize: none; /* 顺便去掉重置大小手柄以保持页面规整 */
 }
 </style>

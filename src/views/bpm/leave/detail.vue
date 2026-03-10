@@ -75,16 +75,41 @@
             class="input-cell h-large"
             style="padding: 10px; text-align: left; vertical-align: top"
           >
-            {{ deptHeadContent }}
+            <div
+              v-if="isEditable('科室') || isEditable('负责人')"
+              class="w-full h-full print-hide-row"
+            >
+              <el-input
+                v-model="currentOpinion"
+                type="textarea"
+                :rows="1"
+                placeholder="请输入科室(单位)负责人意见"
+                class="w-full h-full"
+                style="border: none"
+              />
+            </div>
+            <div v-else>
+              <div v-for="(info, index) in ensureMinRows(deptHeadList, 1)" :key="index">
+                {{ info.comment }}
+              </div>
+            </div>
           </td>
         </tr>
         <tr>
           <td colspan="3" class="signature-row">
             <span class="sig-item"
-              >办理人：<span class="sig-line">{{ deptHeadHandler }}</span></span
+              >办理人：<span class="sig-line">{{
+                deptHeadList.length > 0
+                  ? deptHeadList[deptHeadList.length - 1].assigneeUser?.nickname
+                  : ''
+              }}</span></span
             >
             <span class="sig-item"
-              >日期：<span class="sig-line">{{ deptHeadDate }}</span></span
+              >日期：<span class="sig-line">{{
+                deptHeadList.length > 0
+                  ? formatDate(deptHeadList[deptHeadList.length - 1].endTime)
+                  : ''
+              }}</span></span
             >
           </td>
         </tr>
@@ -96,16 +121,39 @@
             class="input-cell h-large"
             style="padding: 10px; text-align: left; vertical-align: top"
           >
-            {{ officeContent }}
+            <div v-if="isEditable('办公室')" class="w-full h-full print-hide-row">
+              <el-input
+                v-model="currentOpinion"
+                type="textarea"
+                :rows="1"
+                placeholder="请输入办公室意见"
+                class="w-full h-full"
+              />
+            </div>
+            <div v-else>
+              <div
+                v-for="(info, index) in ensureMinRows(officeList, 1)"
+                :key="index"
+                class="mb-5px"
+              >
+                <div>{{ info.comment }}</div>
+              </div>
+            </div>
           </td>
         </tr>
         <tr>
           <td colspan="3" class="signature-row">
             <span class="sig-item"
-              >办理人：<span class="sig-line">{{ officeHandler }}</span></span
+              >办理人：<span class="sig-line">{{
+                officeList.length > 0
+                  ? officeList[officeList.length - 1].assigneeUser?.nickname
+                  : ''
+              }}</span></span
             >
             <span class="sig-item"
-              >日期：<span class="sig-line">{{ officeDate }}</span></span
+              >日期：<span class="sig-line">{{
+                officeList.length > 0 ? formatDate(officeList[officeList.length - 1].endTime) : ''
+              }}</span></span
             >
           </td>
         </tr>
@@ -117,16 +165,44 @@
             class="input-cell h-large"
             style="padding: 10px; text-align: left; vertical-align: top"
           >
-            {{ deputyLeaderContent }}
+            <div
+              v-if="isEditable('分管') || isEditable('局领导')"
+              class="w-full h-full print-hide-row"
+            >
+              <el-input
+                v-model="currentOpinion"
+                type="textarea"
+                :rows="1"
+                placeholder="请输入局分管领导意见"
+                class="w-full h-full"
+              />
+            </div>
+            <div v-else>
+              <div
+                v-for="(info, index) in ensureMinRows(deputyLeaderList, 1)"
+                :key="index"
+                class="mb-5px"
+              >
+                <div>{{ info.comment }}</div>
+              </div>
+            </div>
           </td>
         </tr>
         <tr>
           <td colspan="3" class="signature-row">
             <span class="sig-item"
-              >办理人：<span class="sig-line">{{ deputyLeaderHandler }}</span></span
+              >办理人：<span class="sig-line">{{
+                deputyLeaderList.length > 0
+                  ? deputyLeaderList[deputyLeaderList.length - 1].assigneeUser?.nickname
+                  : ''
+              }}</span></span
             >
             <span class="sig-item"
-              >日期：<span class="sig-line">{{ deputyLeaderDate }}</span></span
+              >日期：<span class="sig-line">{{
+                deputyLeaderList.length > 0
+                  ? formatDate(deputyLeaderList[deputyLeaderList.length - 1].endTime)
+                  : ''
+              }}</span></span
             >
           </td>
         </tr>
@@ -138,16 +214,44 @@
             class="input-cell h-large"
             style="padding: 10px; text-align: left; vertical-align: top"
           >
-            {{ mainLeaderContent }}
+            <div
+              v-if="isEditable('主要领导') || isEditable('局长')"
+              class="w-full h-full print-hide-row"
+            >
+              <el-input
+                v-model="currentOpinion"
+                type="textarea"
+                :rows="1"
+                placeholder="请输入局主要领导意见"
+                class="w-full h-full"
+              />
+            </div>
+            <div v-else>
+              <div
+                v-for="(info, index) in ensureMinRows(mainLeaderList, 1)"
+                :key="index"
+                class="mb-5px"
+              >
+                <div>{{ info.comment }}</div>
+              </div>
+            </div>
           </td>
         </tr>
         <tr>
           <td colspan="3" class="signature-row">
             <span class="sig-item"
-              >办理人：<span class="sig-line">{{ mainLeaderHandler }}</span></span
+              >办理人：<span class="sig-line">{{
+                mainLeaderList.length > 0
+                  ? mainLeaderList[mainLeaderList.length - 1].assigneeUser?.nickname
+                  : ''
+              }}</span></span
             >
             <span class="sig-item"
-              >日期：<span class="sig-line">{{ mainLeaderDate }}</span></span
+              >日期：<span class="sig-line">{{
+                mainLeaderList.length > 0
+                  ? formatDate(mainLeaderList[mainLeaderList.length - 1].endTime)
+                  : ''
+              }}</span></span
             >
           </td>
         </tr>
@@ -158,7 +262,6 @@
 
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { dateUtil } from '@/utils/dateUtil'
 import { formatDate } from '@/utils/formatTime'
 import { propTypes } from '@/utils/propTypes'
 import * as LeaveApi from '@/api/bpm/leave'
@@ -166,7 +269,6 @@ import { useUserStore } from '@/store/modules/user'
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Base64 } from 'js-base64'
 import * as ConfigApi from '@/api/infra/config'
 
 defineOptions({ name: 'LeaveDetail' })
@@ -219,35 +321,115 @@ const endTime = computed(() => formatDate(detailData.value.qxjEndDate))
 const endSession = computed(() => getPeriod(detailData.value.qxjEndDate))
 const leaveDays = computed(() => detailData.value.totalTs)
 const reason = computed(() => detailData.value.sjReason)
-const fileNames = computed(() => fileList.value.map((f) => f.name).join('、'))
-
-// Historical Opinions
-const deptHeadContent = ref('')
-const deptHeadHandler = ref('')
-const deptHeadDate = ref('')
-
-const officeContent = ref('')
-const officeHandler = ref('')
-const officeDate = ref('')
-
-const deputyLeaderContent = ref('')
-const deputyLeaderHandler = ref('')
-const deputyLeaderDate = ref('')
-
-const mainLeaderContent = ref('')
-const mainLeaderHandler = ref('')
-const mainLeaderDate = ref('')
 
 const { query } = useRoute() // 查询参数
 
 const props = defineProps({
-  id: propTypes.number.def(undefined),
-  activityNodes: propTypes.array.def([])
+  id: propTypes.oneOfType([Number, String]).def(undefined),
+  processInstance: propTypes.object.def({}),
+  activityNodes: propTypes.array.def([]),
+  taskId: propTypes.string.def(undefined), // 当前任务ID
+  currentNode: propTypes.object.def({}) // 当前节点信息
 })
 
 const detailLoading = ref(false) // 表单的加载中
 const detailData = ref<any>({}) // 详情数据
 const queryId = query.id as unknown as number
+const currentOpinion = ref('') // 当前正在填写的审批意见
+
+// 历史审批意见分类
+const deptHeadList = ref<any[]>([]) // 科室(单位)负责人意见
+const officeList = ref<any[]>([]) // 办公室意见
+const deputyLeaderList = ref<any[]>([]) // 局分管领导意见
+const mainLeaderList = ref<any[]>([]) // 局主要领导意见
+
+/** 判断当前节点是否可编辑 */
+const isEditable = (keyword: string) => {
+  if (!props.taskId) return false
+  const nodeName = props.currentNode?.name || ''
+  return nodeName.indexOf(keyword) !== -1
+}
+
+/** 暴露给父组件的方法：获取当前填写的意见 */
+const getOpinion = () => {
+  return currentOpinion.value
+}
+
+/** 确保列表至少有 minRows 行空数据 */
+const ensureMinRows = (list: any[], minRows: number) => {
+  const res = [...list]
+  if (res.length < minRows) {
+    const emptyCount = minRows - res.length
+    for (let i = 0; i < emptyCount; i++) {
+      res.push({ comment: '', isPlaceholder: true })
+    }
+  }
+  return res
+}
+
+/** 分类处理审批节点意见 */
+const processActivityNodes = () => {
+  if (!props.activityNodes || props.activityNodes.length === 0) return
+
+  // 清空
+  deptHeadList.value = []
+  officeList.value = []
+  deputyLeaderList.value = []
+  mainLeaderList.value = []
+
+  const userId = userStore.getUser.id
+  props.activityNodes.forEach((node: any) => {
+    // 新增：过滤掉“备案”性质的节点意见显示
+    const nodeName = node.name || ''
+    if (nodeName.includes('备案')) {
+      return
+    }
+
+    if (node.tasks && node.tasks.length > 0) {
+      node.tasks.forEach((task: any) => {
+        // 状态 1 为处理中，2 为通过/结束
+        if (task.status === 1) {
+          if (task.assigneeUser?.id === userId && task.reason) {
+            currentOpinion.value = task.reason
+          }
+          return
+        }
+
+        if (task.reason) {
+          const name = node.name || ''
+          const info = {
+            name: name,
+            comment: task.reason,
+            assigneeUser: task.assigneeUser,
+            endTime: node.endTime || task.endTime
+          }
+
+          if (name.includes('科室') || name.includes('负责人')) {
+            deptHeadList.value.push(info)
+          } else if (name.includes('办公室')) {
+            officeList.value.push(info)
+          } else if (name.includes('分管') || name.includes('局领导')) {
+            deputyLeaderList.value.push(info)
+          } else if (name.includes('主要领导') || name.includes('局长')) {
+            mainLeaderList.value.push(info)
+          } else {
+            // 没有精准命中的就放入主要的里面兜底
+            deptHeadList.value.push(info)
+          }
+        }
+      })
+    }
+  })
+}
+
+// 监听 activityNodes 变化
+watch(
+  () => props.activityNodes,
+  () => {
+    processActivityNodes()
+  },
+  { immediate: true }
+)
 
 // 动态获取的文件服务基地址
 const fileViewBaseUrl = ref('')
@@ -303,71 +485,23 @@ const previewFile = (file: any) => {
   }
 
   const kkBaseUrl = fileViewBaseUrl.value || 'http://192.168.50.239:8012/onlinePreview?url='
-  const encodedUrl = Base64.encode(fullUrl)
+  const encodedUrl = btoa(encodeURIComponent(fullUrl))
   const previewUrl = `${kkBaseUrl}${encodeURIComponent(encodedUrl)}`
 
   window.open(previewUrl, '_blank')
 }
-
-// 文件类型标识已被清理
 
 /** 获得数据 */
 const getInfo = async () => {
   detailLoading.value = true
   try {
     fileViewBaseUrl.value = await ConfigApi.getConfigKey('url.fileview.address')
-    detailData.value = await LeaveApi.leaveApi.getleave(props.id || queryId)
-    console.log(detailData)
-    processActivityNodes()
+    detailData.value = await LeaveApi.leaveApi.getleave(Number(props.id || queryId))
+    // 获取数据后不必立刻掉 processActivityNodes，因为顶端已经配置了 immediate 的 watch 来响应
   } finally {
     detailLoading.value = false
   }
 }
-
-/** 分类处理审批节点意见 */
-const processActivityNodes = () => {
-  if (!props.activityNodes || props.activityNodes.length === 0) return
-
-  props.activityNodes.forEach((node: any) => {
-    if (node.tasks && node.tasks.length > 0) {
-      node.tasks.forEach((task: any) => {
-        if (task.reason) {
-          const name = node.name || ''
-          const info = {
-            comment: task.reason,
-            assigneeUser: task.assigneeUser,
-            endTime: node.endTime || task.endTime
-          }
-          const setOpinion = (contentRef, handlerRef, dateRef) => {
-            contentRef.value = info.comment
-            handlerRef.value = info.assigneeUser?.nickname
-            dateRef.value = formatDate(info.endTime)
-          }
-
-          if (name.includes('科室负责人') || name.includes('单位负责人')) {
-            setOpinion(deptHeadContent, deptHeadHandler, deptHeadDate)
-          } else if (name.includes('办公室')) {
-            setOpinion(officeContent, officeHandler, officeDate)
-          } else if (name.includes('分管领导')) {
-            setOpinion(deputyLeaderContent, deputyLeaderHandler, deputyLeaderDate)
-          } else if (name.includes('主要领导')) {
-            setOpinion(mainLeaderContent, mainLeaderHandler, mainLeaderDate)
-          }
-        }
-      })
-    }
-  })
-}
-
-// 监听 activityNodes 变化
-watch(
-  () => props.activityNodes,
-  () => {
-    processActivityNodes()
-  },
-  { immediate: true }
-)
-defineExpose({ open: getInfo })
 
 // 新增：根据时间戳判断上午/下午
 const getPeriod = (val: any) => {
@@ -380,6 +514,12 @@ const getPeriod = (val: any) => {
 /** 初始化 **/
 onMounted(() => {
   getInfo()
+})
+
+// 为外部开放必需的属性
+defineExpose({
+  open: getInfo,
+  getOpinion
 })
 </script>
 <style scoped>
@@ -442,6 +582,8 @@ onMounted(() => {
 
 .input-cell {
   min-height: 24px;
+  text-align: left;
+  vertical-align: top;
   background-color: #fff;
 }
 
@@ -476,4 +618,14 @@ onMounted(() => {
 }
 
 /* 隐藏已废弃的预览专用 CSS */
+
+/* 强制使得表单的文本域撑满外层 td 单元格的高度 */
+:deep(.h-large .el-textarea) {
+  height: 100%;
+}
+
+:deep(.h-large .el-textarea__inner) {
+  height: 100%;
+  resize: none; /* 顺便去掉重置大小手柄以保持页面规整 */
+}
 </style>
