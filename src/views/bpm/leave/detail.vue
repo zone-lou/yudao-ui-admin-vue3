@@ -484,6 +484,11 @@ const previewFile = (file: any) => {
     fullUrl = window.location.origin + fullUrl
   }
 
+  // 内外网预览地址转换
+  if (externalPrefix.value && internalPrefix.value && fullUrl.includes(externalPrefix.value)) {
+    fullUrl = fullUrl.replace(externalPrefix.value, internalPrefix.value)
+  }
+
   const kkBaseUrl = fileViewBaseUrl.value || 'http://192.168.50.239:8012/onlinePreview?url='
   const encodedUrl = btoa(encodeURIComponent(fullUrl))
   const previewUrl = `${kkBaseUrl}${encodeURIComponent(encodedUrl)}`
@@ -491,11 +496,16 @@ const previewFile = (file: any) => {
   window.open(previewUrl, '_blank')
 }
 
+const externalPrefix = ref('') // 外网地址前缀
+const internalPrefix = ref('') // 内网地址前缀
+
 /** 获得数据 */
 const getInfo = async () => {
   detailLoading.value = true
   try {
     fileViewBaseUrl.value = await ConfigApi.getConfigKey('url.fileview.address')
+    externalPrefix.value = await ConfigApi.getConfigKey('url.external.prefix')
+    internalPrefix.value = await ConfigApi.getConfigKey('url.internal.prefix')
     detailData.value = await LeaveApi.leaveApi.getleave(Number(props.id || queryId))
     // 获取数据后不必立刻掉 processActivityNodes，因为顶端已经配置了 immediate 的 watch 来响应
   } finally {

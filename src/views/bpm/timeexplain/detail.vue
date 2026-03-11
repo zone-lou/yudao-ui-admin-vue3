@@ -377,6 +377,9 @@ const getPeriod = (val: any) => {
   return hours < 12 ? '上午' : '下午'
 }
 
+const externalPrefix = ref('') // 外网地址前缀
+const internalPrefix = ref('') // 内网地址前缀
+
 /** 获取详情数据 */
 const getInfo = async () => {
   const queryId = props.id || (query.id as unknown as number)
@@ -385,6 +388,8 @@ const getInfo = async () => {
   detailLoading.value = true
   try {
     fileViewBaseUrl.value = await ConfigApi.getConfigKey('url.fileview.address')
+    externalPrefix.value = await ConfigApi.getConfigKey('url.external.prefix')
+    internalPrefix.value = await ConfigApi.getConfigKey('url.internal.prefix')
     const res = await TimeExplainApi.getTimeExplain(Number(queryId))
     detailData.value = res || {}
     processFileList(res.filepath)
@@ -490,6 +495,11 @@ const handlePreview = (file: any) => {
 
   if (fullUrl.startsWith('/')) {
     fullUrl = window.location.origin + fullUrl
+  }
+
+  // 内外网预览地址转换
+  if (externalPrefix.value && internalPrefix.value && fullUrl.includes(externalPrefix.value)) {
+    fullUrl = fullUrl.replace(externalPrefix.value, internalPrefix.value)
   }
 
   // 2. Base64 编码

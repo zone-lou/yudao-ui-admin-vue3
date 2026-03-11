@@ -96,6 +96,9 @@ const fileViewBaseUrl = ref('')
 // const previewUrl = ref('') // 已移除
 // const previewType = ref('image') // 已移除
 
+const externalPrefix = ref('') // 外网地址前缀
+const internalPrefix = ref('') // 内网地址前缀
+
 /** 获取详情数据 */
 const getInfo = async () => {
   const queryId = props.id || (query.id as unknown as number)
@@ -104,6 +107,8 @@ const getInfo = async () => {
   detailLoading.value = true
   try {
     fileViewBaseUrl.value = await ConfigApi.getConfigKey('url.fileview.address')
+    externalPrefix.value = await ConfigApi.getConfigKey('url.external.prefix')
+    internalPrefix.value = await ConfigApi.getConfigKey('url.internal.prefix')
     const res = await ReceiveDocApi.getReceiveDoc(queryId)
     detailData.value = res
     processFileList(res.attachFilePath)
@@ -172,6 +177,11 @@ const handlePreview = (file: any) => {
   // if (fullUrl.startsWith('/')) {
   //    fullUrl = window.location.origin + fullUrl
   // }
+
+  // 内外网预览地址转换
+  if (externalPrefix.value && internalPrefix.value && fullUrl.includes(externalPrefix.value)) {
+    fullUrl = fullUrl.replace(externalPrefix.value, internalPrefix.value)
+  }
 
   // 2. 将文件链接进行 Base64 编码 (使用 js-base64 库处理，支持中文更友好)
   const encodedUrl = Base64.encode(fullUrl)

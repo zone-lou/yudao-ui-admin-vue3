@@ -433,6 +433,9 @@ const ensureMinRows = (list: any[], minRows: number) => {
   return res
 }
 
+const externalPrefix = ref('') // 外网地址前缀
+const internalPrefix = ref('') // 内网地址前缀
+
 /** 获取详情 */
 const getInfo = async () => {
   const queryId = props.id || query.id
@@ -442,6 +445,8 @@ const getInfo = async () => {
   detailLoading.value = true
   try {
     fileViewBaseUrl.value = await ConfigApi.getConfigKey('url.fileview.address')
+    externalPrefix.value = await ConfigApi.getConfigKey('url.external.prefix')
+    internalPrefix.value = await ConfigApi.getConfigKey('url.internal.prefix')
     const data = await ReceiveDocApi.ReceiveDocApi.getReceiveDoc(queryId)
     detailData.value = data
 
@@ -590,6 +595,12 @@ const handlePreview = (file: any) => {
   if (!file || !file.url) return
   const kkBaseUrl = fileViewBaseUrl.value || 'http://192.168.50.239:8012'
   let fullUrl = file.url
+
+  // 内外网预览地址转换
+  if (externalPrefix.value && internalPrefix.value && fullUrl.includes(externalPrefix.value)) {
+    fullUrl = fullUrl.replace(externalPrefix.value, internalPrefix.value)
+  }
+
   const encodedUrl = Base64.encode(fullUrl)
   const previewUrl = `${kkBaseUrl}${encodeURIComponent(encodedUrl)}`
   window.open(previewUrl, '_blank')
