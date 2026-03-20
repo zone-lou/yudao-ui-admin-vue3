@@ -1,6 +1,6 @@
 <template>
   <div v-loading="detailLoading">
-    <template v-if="viewType === 'oaForm'">
+    <template v-if="viewType !== 'basic'">
       <div id="printDivTag" class="form-scroll-area">
         <div class="oa-container">
           <div class="doc-title">义乌市国土资源局行政诉讼审批表</div>
@@ -331,7 +331,7 @@
       </div>
     </template>
 
-    <template v-else>
+    <template v-if="viewType === 'basic'">
       <el-descriptions title="基本信息" :column="2" border size="large" class="mb-20px">
         <el-descriptions-item label="原告" label-align="center" align="center">
           {{ detailData.sqr }}

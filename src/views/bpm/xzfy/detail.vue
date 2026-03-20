@@ -1,6 +1,6 @@
 <template>
   <div v-loading="detailLoading">
-    <div v-if="viewType !== 'oaForm'">
+    <div v-if="viewType === 'basic'">
       <el-descriptions title="基本信息" :column="2" border size="large" class="mb-20px">
         <el-descriptions-item label="申请人" label-align="center" align="center">
           {{ detailData.sqr }}
@@ -121,8 +121,8 @@
       </div>
     </div>
 
-    <!-- 视角二：纯OA红头审批表 -->
-    <div v-if="viewType === 'oaForm'">
+    <!-- 红头审批表：原生直接展示，或当并非 basic 模式时展出 -->
+    <div v-if="viewType !== 'basic'">
       <div id="printDivTag">
         <div class="oa-container">
           <div class="doc-title">义乌市自然资源和规划局行政复议审批表</div>

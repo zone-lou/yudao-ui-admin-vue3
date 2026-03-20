@@ -62,8 +62,7 @@
         </div> -->
 
         <el-tabs v-model="activeTab">
-          <!-- 表单信息 -->
-          <el-tab-pane label="审批详情" name="form">
+          <el-tab-pane label="审批单" name="form">
             <div class="form-scroll-area">
               <el-scrollbar>
                 <el-row>
@@ -103,10 +102,10 @@
             </div>
           </el-tab-pane>
 
-          <!-- 行政审批表专属扩展页 -->
+          <!-- 详情信息底表 (只针对复议/诉讼呈现) -->
           <el-tab-pane
-            label="审批表"
-            name="oaForm"
+            label="详情信息"
+            name="basicForm"
             v-if="
               processDefinition?.formCustomViewPath?.includes('xzfy') ||
               processDefinition?.formCustomViewPath?.includes('xzss')
@@ -122,8 +121,7 @@
                         :taskId="taskId"
                         :currentNode="currentNode"
                         :activityNodes="activityNodes"
-                        viewType="oaForm"
-                        ref="oaFormComponentRef"
+                        viewType="basic"
                       />
                     </div>
                   </el-col>
@@ -263,7 +261,6 @@ const getDetail = async () => {
 /** 加载流程实例 */
 const BusinessFormComponent = shallowRef<any>(null) // 异步组件（使用 shallowRef 避免过重深层响应）
 const businessFormComponentRef = ref<any>(null) // 业务表单组件实例
-const oaFormComponentRef = ref<any>(null) // 审批表(红头)独立组件实例
 /** 获取审批详情 */
 const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])
 
@@ -467,9 +464,6 @@ const activeTab = ref('form')
 
 /** 获取业务表单的审批意见 */
 const getBusinessFormReason = computed(() => {
-  if (activeTab.value === 'oaForm' && oaFormComponentRef.value?.getOpinion) {
-    return async () => oaFormComponentRef.value.getOpinion()
-  }
   if (businessFormComponentRef.value?.getOpinion) {
     return async () => businessFormComponentRef.value.getOpinion()
   }
