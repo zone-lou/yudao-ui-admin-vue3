@@ -16,7 +16,7 @@
         />
       </el-form-item>
       <el-form-item label="人员类型" prop="staffType">
-        <el-select v-model="formData.staffType" placeholder="请选择人员类型" >
+        <el-select v-model="formData.staffType" placeholder="请选择人员类型">
           <el-option
             v-for="dict in getStrDictOptions(DICT_TYPE.DUTY_STAFF_TYPE)"
             :key="dict.value"
@@ -26,7 +26,13 @@
         </el-select>
       </el-form-item>
       <el-form-item label="人员" prop="userId">
-        <el-select v-model="formData.userId" clearable placeholder="请输入人员" class="!w-240px">
+        <el-select
+          v-model="formData.userId"
+          clearable
+          placeholder="请输入人员"
+          @change="handleUserChange"
+          class="!w-240px"
+        >
           <el-option
             v-for="item in userList"
             :key="item.id"
@@ -113,6 +119,19 @@ const submitForm = async () => {
     emit('success')
   } finally {
     formLoading.value = false
+  }
+}
+
+const handleUserChange = (userId: number) => {
+  // 如果清空了选择，也同步清空姓名
+  if (!userId) {
+    formData.value.staffName = undefined
+    return
+  }
+  // 从 userList 中找到选中的用户，并将 nickname 赋值给 staffName
+  const selectedUser = userList.value.find((item) => item.id === userId)
+  if (selectedUser) {
+    formData.value.staffName = selectedUser.nickname as any
   }
 }
 

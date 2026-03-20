@@ -41,7 +41,7 @@ const errorMap: Record<string, string> = {
 }
 
 const errorMsg = computed(() => {
-  const code = route.query.code as string
+  const code = route.query.error as string
   return errorMap[code] || errorMap['default']
 })
 

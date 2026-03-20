@@ -17,35 +17,37 @@
           <td class="input-cell">{{ deptName }}</td>
         </tr>
 
-        <tr>
-          <td class="label-cell">外出类型</td>
-          <td class="input-cell">{{ leaveType }}</td>
-          <td class="label-cell">申请日期</td>
-          <td class="input-cell">{{ applyDate }}</td>
-        </tr>
+        <!--        <tr>-->
+        <!--          <td class="label-cell">外出类型</td>-->
+        <!--          <td class="input-cell">{{ leaveType }}</td>-->
+        <!--          <td class="label-cell">申请日期</td>-->
+        <!--          <td class="input-cell">{{ applyDate }}</td>-->
+        <!--        </tr>-->
 
         <tr>
-          <td class="label-cell">开始时间 从</td>
+          <td class="label-cell">公出开始 从</td>
           <td class="input-cell">{{ startTime }}</td>
           <td class="label-cell">时段</td>
           <td class="input-cell">{{ startSession }}</td>
         </tr>
 
         <tr>
-          <td class="label-cell">结束时间 至</td>
+          <td class="label-cell">公出结束 至</td>
           <td class="input-cell">{{ endTime }}</td>
           <td class="label-cell">时段</td>
           <td class="input-cell">{{ endSession }}</td>
         </tr>
 
         <tr>
-          <td class="label-cell">外出天数</td>
-          <td class="input-cell" colspan="3">{{ leaveDays }} 天</td>
+          <td class="label-cell">出发地</td>
+          <td class="input-cell">{{ startPlace }}</td>
+          <td class="label-cell">目的地</td>
+          <td class="input-cell">{{ endPlace }}</td>
         </tr>
 
-        <tr class="print-hide-row">
+        <tr>
           <td class="label-cell">附件列表</td>
-          <td class="input-cell" colspan="3">
+          <td class="input-cell">
             <div v-if="fileList.length > 0">
               <div v-for="(file, index) in fileList" :key="index" style="margin-bottom: 2px">
                 <el-link type="primary" @click="handlePreview(file)" :underline="false">
@@ -55,7 +57,28 @@
             </div>
             <span v-else>无</span>
           </td>
+          <td class="label-cell">天数</td>
+          <td class="input-cell">{{ leaveDays }} 天</td>
         </tr>
+
+        <!--        <tr>-->
+        <!--          <td class="label-cell">外出天数</td>-->
+        <!--          <td class="input-cell" colspan="3">{{ leaveDays }} 天</td>-->
+        <!--        </tr>-->
+
+        <!--        <tr class="print-hide-row">-->
+        <!--          <td class="label-cell">附件列表</td>-->
+        <!--          <td class="input-cell" colspan="3">-->
+        <!--            <div v-if="fileList.length > 0">-->
+        <!--              <div v-for="(file, index) in fileList" :key="index" style="margin-bottom: 2px">-->
+        <!--                <el-link type="primary" @click="handlePreview(file)" :underline="false">-->
+        <!--                  {{ file.name }}-->
+        <!--                </el-link>-->
+        <!--              </div>-->
+        <!--            </div>-->
+        <!--            <span v-else>无</span>-->
+        <!--          </td>-->
+        <!--        </tr>-->
 
         <tr>
           <td class="label-cell">外出事由</td>
@@ -329,6 +352,8 @@ const endTime = computed(() => formatDate(detailData.value.checkEnd))
 const endSession = computed(() => getPeriod(detailData.value.checkEnd))
 const leaveDays = computed(() => detailData.value.days)
 const reason = computed(() => detailData.value.reason)
+const startPlace = computed(() => detailData.value.startPlace)
+const endPlace = computed(() => detailData.value.endPlace)
 
 // Historical Opinions list
 const deptHeadList = ref<any[]>([]) // 科室(单位)负责人意见

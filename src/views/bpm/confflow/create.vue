@@ -102,7 +102,7 @@
             />
           </el-form-item> -->
 
-          <el-form-item label="下一审批节点" prop="nextNode" required>
+          <el-form-item label="登记转出" prop="nextNode" required>
             <el-select
               v-model="formData.nextNode"
               placeholder="请选择下一节点"
@@ -118,10 +118,10 @@
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="审批人" prop="tempNextUserSelectAssignees" required>
+          <el-form-item label="科室负责人" prop="tempNextUserSelectAssignees" required>
             <el-select
               v-model="formData.tempNextUserSelectAssignees"
-              placeholder="请选择审批人"
+              placeholder="请选择科室负责人"
               :multiple="multipleFlag"
             >
               <el-option

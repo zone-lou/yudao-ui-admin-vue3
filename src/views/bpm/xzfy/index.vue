@@ -161,40 +161,40 @@
           <dict-tag :type="DICT_TYPE.BPM_XZFY_CLASS3" :value="scope.row.lb3" />
         </template>
       </el-table-column>
-      <el-table-column label="承办人" align="center" prop="cbr" />
-      <el-table-column
-        label="承办日期"
-        align="center"
-        prop="cbRq"
-        :formatter="dateFormatter"
-        width="180px"
-      />
-      <el-table-column
-        label="送复议机关日期"
-        align="center"
-        prop="sfyjgRq"
-        :formatter="dateFormatter"
-        width="180px"
-      />
-      <el-table-column label="行政区（街道、村）" align="center" prop="xzq" />
-      <el-table-column label="监督监管" align="center" prop="issupervise">
-        <template #default="scope">
-          {{ formatBoolean(scope.row.issupervise) }}
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="办理时限"
-        align="center"
-        prop="zhubandate"
-        :formatter="dateFormatter"
-        width="180px"
-      />
-      <el-table-column label="是否已寄件提醒" align="center" prop="mailTip">
-        <template #default="scope">
-          {{ formatBoolean(scope.row.mailTip) }}
-        </template>
-      </el-table-column>
-      <el-table-column label="流程实例的编号" align="center" prop="processInstanceId" />
+<!--      <el-table-column label="承办人" align="center" prop="cbr" />-->
+<!--      <el-table-column-->
+<!--        label="承办日期"-->
+<!--        align="center"-->
+<!--        prop="cbRq"-->
+<!--        :formatter="dateFormatter"-->
+<!--        width="180px"-->
+<!--      />-->
+<!--      <el-table-column-->
+<!--        label="送复议机关日期"-->
+<!--        align="center"-->
+<!--        prop="sfyjgRq"-->
+<!--        :formatter="dateFormatter"-->
+<!--        width="180px"-->
+<!--      />-->
+<!--      <el-table-column label="行政区（街道、村）" align="center" prop="xzq" />-->
+<!--      <el-table-column label="监督监管" align="center" prop="issupervise">-->
+<!--        <template #default="scope">-->
+<!--          {{ formatBoolean(scope.row.issupervise) }}-->
+<!--        </template>-->
+<!--      </el-table-column>-->
+<!--      <el-table-column-->
+<!--        label="办理时限"-->
+<!--        align="center"-->
+<!--        prop="zhubandate"-->
+<!--        :formatter="dateFormatter"-->
+<!--        width="180px"-->
+<!--      />-->
+<!--      <el-table-column label="是否已寄件提醒" align="center" prop="mailTip">-->
+<!--        <template #default="scope">-->
+<!--          {{ formatBoolean(scope.row.mailTip) }}-->
+<!--        </template>-->
+<!--      </el-table-column>-->
+<!--      <el-table-column label="流程实例的编号" align="center" prop="processInstanceId" />-->
       <el-table-column label="操作" align="center" min-width="120px">
         <template #default="scope">
           <el-button

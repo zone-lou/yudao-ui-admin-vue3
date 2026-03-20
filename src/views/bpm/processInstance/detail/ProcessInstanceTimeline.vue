@@ -1,7 +1,5 @@
-<!-- 审批详情的右侧：审批流 -->
 <template>
   <el-timeline class="p-20px">
-    <!-- 遍历每个审批节点 -->
     <el-timeline-item
       v-for="(activity, index) in activityNodes"
       :key="index"
@@ -26,13 +24,11 @@
         </div>
       </template>
       <div class="flex flex-col items-start gap2" :id="`activity-task-${activity.id}-${index}`">
-        <!-- 第一行：节点名称、时间 -->
         <div class="flex w-full">
           <div class="font-bold">
             {{ activity.name }}
             <span v-if="activity.status === TaskStatusEnum.SKIP">【跳过】</span>
           </div>
-          <!-- 信息：时间 -->
           <div
             v-if="activity.status !== TaskStatusEnum.NOT_START"
             class="text-#a5a5a5 text-13px mt-1 ml-auto"
@@ -51,7 +47,7 @@
             查看子流程
           </el-button>
         </div>
-        <!-- 需要自定义选择审批人 -->
+
         <div
           class="flex flex-wrap gap2 items-center"
           v-if="
@@ -62,7 +58,6 @@
                 CandidateStrategy.APPROVE_USER_SELECT === activity.candidateStrategy))
           "
         >
-          <!--  && activity.nodeType === NodeType.USER_TASK_NODE -->
           <el-tooltip content="添加用户" placement="left">
             <el-button
               class="!px-6px"
@@ -71,8 +66,12 @@
               <img class="w-18px text-#ccc" src="@/assets/svgs/bpm/add-user.svg" alt="" />
             </el-button>
           </el-tooltip>
+
           <div
-            v-for="(user, idx1) in customApproveUsers[activity.id]"
+            v-for="(user, idx1) in getVisibleList(
+              customApproveUsers[activity.id],
+              `${activity.id}-custom`
+            )"
             :key="idx1"
             class="bg-gray-100 h-35px rounded-3xl flex items-center pr-8px dark:color-gray-600 position-relative"
           >
@@ -82,15 +81,31 @@
             </el-avatar>
             {{ user.nickname }}
           </div>
+          <el-button
+            v-if="customApproveUsers[activity.id]?.length > 10"
+            type="primary"
+            link
+            class="!ml-1 h-35px"
+            @click="toggleExpand(`${activity.id}-custom`)"
+          >
+            {{ expandedMap[`${activity.id}-custom`] ? '收起' : '展开' }}
+            <el-icon class="ml-2px">
+              <ArrowUp v-if="expandedMap[`${activity.id}-custom`]" />
+              <ArrowDown v-else />
+            </el-icon>
+          </el-button>
         </div>
+
         <div v-else class="flex items-center flex-wrap mt-1 gap2">
-          <!-- 情况一：遍历每个审批节点下的【进行中】task 任务 -->
-          <div v-for="(task, idx) in activity.tasks" :key="idx" class="flex flex-col pr-2 gap2">
+          <div
+            v-for="(task, idx) in getVisibleList(activity.tasks, `${activity.id}-tasks`)"
+            :key="idx"
+            class="flex flex-col pr-2 gap2"
+          >
             <div
               class="position-relative flex flex-wrap gap2"
               v-if="task.assigneeUser || task.ownerUser"
             >
-              <!-- 信息：头像昵称 -->
               <div
                 class="bg-gray-100 h-35px rounded-3xl flex items-center pr-8px dark:color-gray-600 position-relative"
               >
@@ -118,7 +133,6 @@
                   </el-avatar>
                   {{ task.ownerUser?.nickname }}
                 </template>
-                <!-- 信息：任务 ICON -->
                 <div
                   v-if="props.showStatusIcon && onlyStatusIconShow.includes(task.status)"
                   class="position-absolute top-19px left-23px rounded-full flex items-center p-1px border-2 border-white border-solid"
@@ -136,7 +150,6 @@
                 "
                 class="text-#a5a5a5 text-13px mt-1 w-full bg-#f8f8fa p2 rounded-md"
               >
-                <!-- TODO lesan：这里如果是办理，需要是办理意见 -->
                 审批意见：{{ task.reason }}
               </div>
               <div
@@ -152,9 +165,25 @@
               </div>
             </teleport>
           </div>
-          <!-- 情况二：遍历每个审批节点下的【候选的】task 任务。例如说，1）依次审批，2）未来的审批任务等 -->
+          <el-button
+            v-if="activity.tasks?.length > 10"
+            type="primary"
+            link
+            class="!ml-1 h-35px"
+            @click="toggleExpand(`${activity.id}-tasks`)"
+          >
+            {{ expandedMap[`${activity.id}-tasks`] ? '收起' : '展开' }}
+            <el-icon class="ml-2px">
+              <ArrowUp v-if="expandedMap[`${activity.id}-tasks`]" />
+              <ArrowDown v-else />
+            </el-icon>
+          </el-button>
+
           <div
-            v-for="(user, idx1) in activity.candidateUsers"
+            v-for="(user, idx1) in getVisibleList(
+              activity.candidateUsers,
+              `${activity.id}-candidate`
+            )"
             :key="idx1"
             class="bg-gray-100 h-35px rounded-3xl flex items-center pr-8px dark:color-gray-600 position-relative"
           >
@@ -164,7 +193,6 @@
             </el-avatar>
             {{ user.nickname }}
 
-            <!-- 信息：任务 ICON -->
             <div
               v-if="props.showStatusIcon"
               class="position-absolute top-20px left-24px rounded-full flex items-center p-1px border-2 border-white border-solid"
@@ -173,22 +201,46 @@
               <Icon :size="11" :icon="statusIconMap2['-1']?.icon" color="#FFFFFF" />
             </div>
           </div>
+          <el-button
+            v-if="activity.candidateUsers?.length > 10"
+            type="primary"
+            link
+            class="!ml-1 h-35px"
+            @click="toggleExpand(`${activity.id}-candidate`)"
+          >
+            {{ expandedMap[`${activity.id}-candidate`] ? '收起' : '展开' }}
+            <el-icon class="ml-2px">
+              <ArrowUp v-if="expandedMap[`${activity.id}-candidate`]" />
+              <ArrowDown v-else />
+            </el-icon>
+          </el-button>
         </div>
       </div>
     </el-timeline-item>
   </el-timeline>
 
-  <!-- 用户选择弹窗 -->
   <UserSelectForm ref="userSelectFormRef" @confirm="handleUserSelectConfirm" />
 </template>
 
 <script lang="ts" setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { formatDate } from '@/utils/formatTime'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { TaskStatusEnum } from '@/api/bpm/task'
 import { NodeType, CandidateStrategy } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { isEmpty } from '@/utils/is'
-import { Check, Close, Loading, Clock, Minus, Delete, ArrowDown } from '@element-plus/icons-vue'
+// 【重要】引入了 ArrowUp 图标
+import {
+  Check,
+  Close,
+  Loading,
+  Clock,
+  Minus,
+  Delete,
+  ArrowDown,
+  ArrowUp
+} from '@element-plus/icons-vue'
 import starterSvg from '@/assets/svgs/bpm/starter.svg'
 import auditorSvg from '@/assets/svgs/bpm/auditor.svg'
 import copySvg from '@/assets/svgs/bpm/copy.svg'
@@ -211,6 +263,27 @@ const props = withDefaults(
   }
 )
 const { push } = useRouter() // 路由
+
+// === 新增：处理列表折叠展开的逻辑 ===
+const expandedMap = ref<Record<string, boolean>>({}) // 记录不同列表的展开状态
+const LIMIT_COUNT = 10 // 最大默认显示数量
+
+// 获取显示的列表内容
+const getVisibleList = (list: any[] | undefined, key: string) => {
+  if (!list) return []
+  // 如果处于展开状态 或者 列表总数小于限制，则全量返回
+  if (expandedMap.value[key] || list.length <= LIMIT_COUNT) {
+    return list
+  }
+  // 否则截取前 10 个
+  return list.slice(0, LIMIT_COUNT)
+}
+
+// 切换展开/收起状态
+const toggleExpand = (key: string) => {
+  expandedMap.value[key] = !expandedMap.value[key]
+}
+// === 新增逻辑结束 ===
 
 // 审批节点
 const statusIconMap2 = {
