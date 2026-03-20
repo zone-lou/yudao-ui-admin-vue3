@@ -303,9 +303,8 @@ const getApprovalDetail = async () => {
     processInstance.value = data.processInstance
     processDefinition.value = data.processDefinition
 
-    // Check if it's ReceiveDoc to trigger full width mode
-    const path = processDefinition.value.formCustomViewPath || ''
-    isFullWidth.value = path.includes('bpm/receivedoc/detail')
+    // 强制开启全宽模式，以全局隐藏右侧流程条 (根据客户需求)
+    isFullWidth.value = true
 
     // 设置表单信息
     if (processDefinition.value.formType === BpmModelFormType.NORMAL) {
