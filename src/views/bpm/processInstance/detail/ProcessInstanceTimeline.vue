@@ -23,7 +23,10 @@
           </div>
         </div>
       </template>
-      <div class="flex flex-col items-start gap2" :id="`activity-task-${activity.id}-${index}`">
+      <div
+        class="flex flex-col items-start gap2"
+        :id="`activity-task-${uid}-${activity.id}-${index}`"
+      >
         <div class="flex w-full">
           <div class="font-bold">
             {{ activity.name }}
@@ -142,7 +145,7 @@
                 </div>
               </div>
             </div>
-            <teleport defer :to="`#activity-task-${activity.id}-${index}`">
+            <teleport defer :to="`#activity-task-${uid}-${activity.id}-${index}`">
               <div
                 v-if="
                   task.reason &&
@@ -230,6 +233,7 @@ import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { TaskStatusEnum } from '@/api/bpm/task'
 import { NodeType, CandidateStrategy } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { isEmpty } from '@/utils/is'
+import { getCurrentInstance } from 'vue'
 // 【重要】引入了 ArrowUp 图标
 import {
   Check,
@@ -251,6 +255,10 @@ import transactorSvg from '@/assets/svgs/bpm/transactor.svg'
 import childProcessSvg from '@/assets/svgs/bpm/child-process.svg'
 
 defineOptions({ name: 'BpmProcessInstanceTimeline' })
+
+const instance = getCurrentInstance()
+const uid = instance?.uid || Math.floor(Math.random() * 10000000)
+
 const props = withDefaults(
   defineProps<{
     activityNodes: ProcessInstanceApi.ApprovalNodeInfo[] // 审批节点信息

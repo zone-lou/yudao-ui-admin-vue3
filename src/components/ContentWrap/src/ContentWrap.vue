@@ -34,3 +34,9 @@ defineProps({
     <slot></slot>
   </ElCard>
 </template>
+
+<style lang="scss" scoped>
+:deep(.el-card__header) {
+  --el-card-padding: 12px;
+}
+</style>

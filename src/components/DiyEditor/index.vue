@@ -136,7 +136,7 @@
       <!-- 右侧：属性面板（ComponentContainerProperty） -->
       <el-aside v-if="selectedComponent?.property" class="editor-right" width="350px">
         <el-card
-          body-class="h-[calc(100%-var(--el-card-padding)-var(--el-card-padding))]"
+          body-class="h-[calc(100%-var()-var(--el-card-padding))]"
           class="h-full"
           shadow="never"
         >

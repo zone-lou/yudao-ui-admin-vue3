@@ -168,7 +168,8 @@ const handlePreview = (file: any) => {
   }
 
   // 1. 准备基础数据
-  const kkBaseUrl = fileViewBaseUrl.value || 'http://192.168.50.239:8012'
+  // const kkBaseUrl = fileViewBaseUrl.value || 'http://192.168.50.239:8012'
+  const kkBaseUrl = fileViewBaseUrl.value
   let fullUrl = file.url
 
   // 【注意】如果 file.url 是相对路径 (如 /admin-api/file/...)，

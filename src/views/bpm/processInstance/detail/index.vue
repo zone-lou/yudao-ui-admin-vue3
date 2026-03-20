@@ -103,6 +103,38 @@
             </div>
           </el-tab-pane>
 
+          <!-- 行政审批表专属扩展页 -->
+          <el-tab-pane
+            label="审批表"
+            name="oaForm"
+            v-if="
+              processDefinition?.formCustomViewPath?.includes('xzfy') ||
+              processDefinition?.formCustomViewPath?.includes('xzss')
+            "
+          >
+            <div class="form-scroll-area">
+              <el-scrollbar>
+                <el-row>
+                  <el-col :span="isFullWidth ? 24 : 17" class="!flex !flex-col formCol">
+                    <div class="form-box flex flex-col mb-30px flex-1">
+                      <BusinessFormComponent
+                        :id="processInstance.businessKey"
+                        :taskId="taskId"
+                        :currentNode="currentNode"
+                        :activityNodes="activityNodes"
+                        viewType="oaForm"
+                        ref="oaFormComponentRef"
+                      />
+                    </div>
+                  </el-col>
+                  <el-col :span="7" v-if="!isFullWidth">
+                    <ProcessInstanceTimeline :activity-nodes="activityNodes" />
+                  </el-col>
+                </el-row>
+              </el-scrollbar>
+            </div>
+          </el-tab-pane>
+
           <!-- 流程图 -->
           <el-tab-pane label="流程图" name="diagram">
             <div class="form-scroll-area">
@@ -231,6 +263,7 @@ const getDetail = async () => {
 /** 加载流程实例 */
 const BusinessFormComponent = shallowRef<any>(null) // 异步组件（使用 shallowRef 避免过重深层响应）
 const businessFormComponentRef = ref<any>(null) // 业务表单组件实例
+const oaFormComponentRef = ref<any>(null) // 审批表(红头)独立组件实例
 /** 获取审批详情 */
 const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])
 
@@ -435,6 +468,9 @@ const activeTab = ref('form')
 
 /** 获取业务表单的审批意见 */
 const getBusinessFormReason = computed(() => {
+  if (activeTab.value === 'oaForm' && oaFormComponentRef.value?.getOpinion) {
+    return async () => oaFormComponentRef.value.getOpinion()
+  }
   if (businessFormComponentRef.value?.getOpinion) {
     return async () => businessFormComponentRef.value.getOpinion()
   }
