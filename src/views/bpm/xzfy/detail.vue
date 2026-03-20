@@ -273,7 +273,9 @@
 
               <!-- 局领导意见 (多人列表) -->
               <tr>
-                <td class="label-cell" rowspan="2">局领导<br />意见</td>
+                <td class="label-cell" :rowspan="getDynamicRowspan(['分管局长'], lingdaoList)"
+                  >局领导<br />意见</td
+                >
                 <td class="label-cell sub-header">办理意见</td>
                 <td class="label-cell sub-header">办理人员</td>
                 <td class="label-cell sub-header">办理日期</td>
@@ -304,7 +306,11 @@
 
               <!-- 科室单位办理意见 (多人列表) -->
               <tr>
-                <td class="label-cell" rowspan="2">科室单位<br />办理意见</td>
+                <td
+                  class="label-cell"
+                  :rowspan="getDynamicRowspan(['相关单位', '法规科办理'], keshiList)"
+                  >科室单位<br />办理意见</td
+                >
                 <td class="label-cell sub-header">办理意见</td>
                 <td class="label-cell sub-header">办理人员</td>
                 <td class="label-cell sub-header">办理日期</td>
@@ -429,13 +435,27 @@ const formatFyJg = (val: any) => {
 
 // ============== 审批意见内联填报设置 =================
 const currentOpinion = ref('')
-const getOpinion = () => currentOpinion.value
 
 /** 检查节点是否出于当前激活环节 */
 const isEditable = (keyword: string) => {
   if (!props.taskId) return false
   const nodeName = props.currentNode?.name || ''
   return nodeName.includes(keyword)
+}
+
+const getOpinion = () => {
+  const keys = ['拟办', '法规科交办', '局长', '分管局长', '相关单位', '法规科办理']
+  if (!keys.some((key) => isEditable(key))) {
+    return undefined
+  }
+  return currentOpinion.value
+}
+
+/** 动态计算跨行行数以避免审批条数堆叠引发的边界错位 */
+const getDynamicRowspan = (editKeys: string[], list: any[]) => {
+  const isEdit = editKeys.some((key) => isEditable(key))
+  const dataRows = (isEdit ? 1 : 0) + list.length
+  return 1 + Math.max(1, dataRows) // 1个表头基底 + 至少1行数据体兜底
 }
 
 // ============== 审批意见节点数据 =================
@@ -538,11 +558,12 @@ onMounted(() => {
 }
 
 #printDivTag .oa-container {
-  width: 800px;
+  width: 1100px;
+  max-width: 100%;
   padding: 40px;
   margin: 0 auto;
   background-color: #fff;
-  box-shadow: 0 0 10px rgb(0 0 0 / 10%);
+  box-shadow: none;
 }
 
 #printDivTag .doc-title {

@@ -601,7 +601,6 @@ const formatSsLx = (val: any) => {
 
 // ============== 审批意见内联填报设置 =================
 const currentOpinion = ref('')
-const getOpinion = () => currentOpinion.value
 
 /** 检查节点是否出于当前激活环节 */
 const isEditable = (keyword: string) => {
@@ -612,6 +611,25 @@ const isEditable = (keyword: string) => {
   if (nodeName.includes('(上诉)')) return false
 
   return nodeName.includes(keyword)
+}
+
+const getOpinion = () => {
+  const keys = [
+    '拟办',
+    '法规科审核',
+    '协助人员',
+    '协办科室',
+    '分管领导',
+    '分管局长',
+    '局长',
+    '主要领导',
+    '承办人员',
+    '法规科承办'
+  ]
+  if (!keys.some((key) => isEditable(key))) {
+    return undefined
+  }
+  return currentOpinion.value
 }
 
 // ============== 审批意见节点数据 =================
@@ -722,11 +740,12 @@ onMounted(() => {
 }
 
 #printDivTag .oa-container {
-  width: 800px;
+  width: 1100px;
+  max-width: 100%;
   padding: 40px;
   margin: 0 auto;
   background-color: #fff;
-  box-shadow: 0 0 10px rgb(0 0 0 / 10%);
+  box-shadow: none;
 }
 
 #printDivTag .doc-title {

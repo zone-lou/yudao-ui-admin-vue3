@@ -442,12 +442,13 @@ onMounted(() => {
 
 <style scoped>
 .oa-container {
-  width: 800px;
+  width: 1100px;
+  max-width: 100%;
   padding: 30px 40px;
   margin: 0 auto;
   font-family: SimSun, 'Songti SC', STSong, serif;
   background-color: #fff;
-  box-shadow: 0 0 10px rgb(0 0 0 / 10%);
+  box-shadow: none;
 }
 
 /* 标题样式 */
