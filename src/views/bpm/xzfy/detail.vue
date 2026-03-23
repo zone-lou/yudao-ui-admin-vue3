@@ -27,9 +27,6 @@
         <el-descriptions-item label="诉讼案号" label-align="center" align="center">
           {{ detailData.tdZl }}
         </el-descriptions-item>
-        <!--        <el-descriptions-item label="办理时限" label-align="center" align="center">-->
-        <!--          {{ formatDate(detailData.zhubandate) }}-->
-        <!--        </el-descriptions-item>-->
 
         <el-descriptions-item label="案件分类" label-align="center" align="center">
           <dict-tag :type="DICT_TYPE.BPM_XZFY_CLASS1" :value="detailData.lb1" />
@@ -44,19 +41,6 @@
         <el-descriptions-item label="复议请求" label-align="center" align="center" :span="3">
           {{ detailData.fyNr }}
         </el-descriptions-item>
-
-        <!--        <el-descriptions-item label="承办人" label-align="center" align="center">-->
-        <!--          {{ detailData.cbr }}-->
-        <!--        </el-descriptions-item>-->
-        <!--        <el-descriptions-item label="承办日期" label-align="center" align="center">-->
-        <!--          {{ formatDate(detailData.cbRq) }}-->
-        <!--        </el-descriptions-item>-->
-        <!--        <el-descriptions-item label="行政区" label-align="center" align="center">-->
-        <!--          {{ detailData.xzq }}-->
-        <!--        </el-descriptions-item>-->
-        <!--        <el-descriptions-item label="监督监管" label-align="center" align="center">-->
-        <!--          {{ formatBoolean(detailData.issupervise) }}-->
-        <!--        </el-descriptions-item>-->
       </el-descriptions>
 
       <el-descriptions
@@ -73,9 +57,6 @@
         <el-descriptions-item label="复议结果" label-align="center" align="center">
           {{ formatFyJg(getKzData().fyJg) }}
         </el-descriptions-item>
-        <!--        <el-descriptions-item label="转业务科室日期" label-align="center" align="center">-->
-        <!--          {{ formatDate(getKzData().zksRq) }}-->
-        <!--        </el-descriptions-item>-->
         <el-descriptions-item label="是否装订" label-align="center" align="center">
           {{ formatBoolean(getKzData().sfZd) }}
         </el-descriptions-item>
@@ -191,6 +172,36 @@
                 <td class="label-cell">科室办理办结日期</td>
                 <td class="data-text center-text">
                   {{ formatDate(detailData.zhubandate) }}
+                </td>
+              </tr>
+
+              <tr>
+                <td class="label-cell">复议附件</td>
+                <td colspan="3" class="data-text" style="padding: 6px 8px">
+                  <div
+                    v-if="getBaseAttachCount() > 0"
+                    style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start"
+                  >
+                    <el-button
+                      v-for="(file, index) in allDocAttachments.filter((a) =>
+                        isBaseAttach(a.taskId)
+                      )"
+                      :key="index"
+                      link
+                      type="primary"
+                      @click="handleDownload(file.filepath)"
+                      style="
+                        text-align: left;
+                        white-space: normal;
+                        height: auto;
+                        line-height: 1.5;
+                        padding: 2px 0;
+                      "
+                    >
+                      <Icon icon="ep:paperclip" class="mr-1" />{{ file.filename }}
+                    </el-button>
+                  </div>
+                  <span v-else style="color: #909399; font-size: 14px">暂无附件</span>
                 </td>
               </tr>
 
@@ -479,7 +490,7 @@
       </div>
     </div>
 
-    <el-dialog v-model="attachDialogVisible" title="评论附件信息" width="800px" append-to-body>
+    <el-dialog v-model="attachDialogVisible" title="附件信息" width="800px" append-to-body>
       <el-table :data="currentAttachments" border>
         <el-table-column label="序号" type="index" width="60" align="center" />
         <el-table-column label="文件名称" prop="filename" align="center" show-overflow-tooltip />
@@ -498,7 +509,7 @@
                 >下载查看</el-button
               >
               <el-button
-                v-if="row.taskId === props.taskId"
+                v-if="row.taskId === props.taskId && props.taskId"
                 link
                 type="danger"
                 @click="handleDeleteAttach(row)"
@@ -561,6 +572,16 @@ const getDocAttachments = async () => {
   }
 }
 
+// 辅助方法：判断是否为复议本身附件（taskId为空/null/undefined）
+const isBaseAttach = (taskId: any) => {
+  return !taskId || taskId === 'null' || taskId === 'undefined'
+}
+
+// 统计复议本身的附件数量
+const getBaseAttachCount = () => {
+  return allDocAttachments.value.filter((a) => isBaseAttach(a.taskId)).length
+}
+
 // 统计特定 taskId 的附件数量
 const getAttachCount = (taskId?: string) => {
   if (!taskId) return 0
@@ -597,8 +618,13 @@ const handleDeleteAttach = async (row: any) => {
 
     // 重新拉取所有附件信息以更新视图
     await getDocAttachments()
+
     // 刷新弹窗里的数据
-    currentAttachments.value = allDocAttachments.value.filter((a) => a.taskId === row.taskId)
+    if (isBaseAttach(row.taskId)) {
+      currentAttachments.value = allDocAttachments.value.filter((a) => isBaseAttach(a.taskId))
+    } else {
+      currentAttachments.value = allDocAttachments.value.filter((a) => a.taskId === row.taskId)
+    }
 
     // 如果全删完了，直接关掉弹窗
     if (currentAttachments.value.length === 0) {
@@ -831,8 +857,8 @@ onMounted(() => {
   font-weight: bold;
   color: #606266;
   background-color: #f5f7fa;
-  width: 15%; /* 建议使用百分比(如12%到15%)或固定像素(如120px)，根据你的UI需求调整 */
-  word-break: keep-all; /* 防止文字意外换行破坏高度 */
+  width: 15%;
+  word-break: keep-all;
 }
 
 #printDivTag {
@@ -841,7 +867,6 @@ onMounted(() => {
   background-color: #fff;
 }
 
-/* 确保外部悬浮按钮不会被截断 */
 #printDivTag .oa-container {
   width: 1100px;
   max-width: 100%;
