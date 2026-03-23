@@ -777,12 +777,11 @@ onMounted(async () => {
 }
 
 #printDivTag .oa-container {
-  width: 1100px;
-  max-width: 100%;
+  width: 100%;
   padding: 40px;
   margin: 0 auto;
   background-color: #fff;
-  box-shadow: none;
+  box-shadow: 0 0 10px rgb(0 0 0 / 10%);
 }
 
 #printDivTag .doc-title {

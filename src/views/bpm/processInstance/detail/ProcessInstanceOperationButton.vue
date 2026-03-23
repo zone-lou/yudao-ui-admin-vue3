@@ -583,7 +583,7 @@ const handleDirectFinish = async () => {
     const opinion = await props.getBusinessFormReason()
     if (opinion !== undefined) {
       if (!opinion || opinion.trim() === '') {
-        message.warning('请先在表格内填写审批意见！')
+        message.warning('请先在表格内填写环节意见！')
         return
       }
       reason = opinion
@@ -591,7 +591,7 @@ const handleDirectFinish = async () => {
   }
 
   if (!reason || reason.trim() === '') {
-    message.warning('请填写审批意见！')
+    message.warning('请填写环节意见！')
     return
   }
 
@@ -642,7 +642,7 @@ const openApproveDialog = async () => {
     const opinion = await props.getBusinessFormReason()
     if (opinion !== undefined) {
       if (!opinion || opinion.trim() === '') {
-        message.warning('请先在表格内填写审批意见！')
+        message.warning('请先在表格内填写环节意见！')
         return
       }
       approveReasonForm.reason = opinion // 自动填充

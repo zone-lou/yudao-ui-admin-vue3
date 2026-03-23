@@ -47,5 +47,10 @@ export const CommentAttachApi = {
   // 导出评论附件 Excel
   exportCommentAttach: async (params) => {
     return await request.download({ url: `/bpm/comment-attach/export-excel`, params })
-  }
+  },
+
+  //获取流程附件
+  getAttachListByDoc: async (params: { docId: string; docType: string }) => {
+    return await request.get({ url: `/bpm/comment-attach/list-by-doc`, params })
+  },
 }
