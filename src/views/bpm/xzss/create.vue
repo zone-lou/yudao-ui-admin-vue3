@@ -418,14 +418,14 @@
                 <div class="meta-info">
                   <div class="meta-left">
                     <span
-                    >收文日期：<span class="meta-input">{{
+                      >收文日期：<span class="meta-input">{{
                         formatDate(formData.swRq)
                       }}</span></span
                     >
                   </div>
                   <div class="meta-right">
                     <span
-                    >来文号：<span class="meta-input">{{ formData.swWh }}</span></span
+                      >来文号：<span class="meta-input">{{ formData.swWh }}</span></span
                     >
                   </div>
                 </div>
@@ -438,80 +438,80 @@
                     <col style="width: 150px" />
                   </colgroup>
                   <tbody>
-                  <tr>
-                    <td class="label-cell">监督监管</td>
-                    <td class="data-text">
-                      <div
-                        class="check-item w-full h-full cursor-pointer select-none"
-                        @click="formData.issupervise = formData.issupervise === 1 ? 0 : 1"
-                      >
+                    <tr>
+                      <td class="label-cell">监督监管</td>
+                      <td class="data-text">
+                        <div
+                          class="check-item w-full h-full cursor-pointer select-none"
+                          @click="formData.issupervise = formData.issupervise === 1 ? 0 : 1"
+                        >
                           <span class="checkbox-mock">
                             <span v-if="formData.issupervise === 1">✔</span>
                           </span>
-                        进行监督监管
-                      </div>
-                    </td>
-                    <td class="label-cell">科室办理办结日期</td>
-                    <td class="data-text center-text" style="padding: 0">
-                      <el-date-picker
-                        v-model="formData.zhubandate"
-                        type="date"
-                        value-format="x"
-                        placeholder="选择日期"
-                        style="width: 100%; border: none"
-                      />
-                    </td>
-                  </tr>
+                          进行监督监管
+                        </div>
+                      </td>
+                      <td class="label-cell">科室办理办结日期</td>
+                      <td class="data-text center-text" style="padding: 0">
+                        <el-date-picker
+                          v-model="formData.zhubandate"
+                          type="date"
+                          value-format="x"
+                          placeholder="选择日期"
+                          style="width: 100%; border: none"
+                        />
+                      </td>
+                    </tr>
 
-                  <tr>
-                    <td class="label-cell" rowspan="2">拟办意见</td>
-                    <td colspan="3" class="h-80 data-text text-left"> </td>
-                  </tr>
-                  <tr>
-                    <td colspan="3" class="signature-row">
-                      <div class="sig-container">
-                        <span style="width: 40%">审批人：<span class="sign-input"></span></span>
-                        <span style="width: 40%">日期：<span class="sign-input"></span></span>
-                      </div>
-                    </td>
-                  </tr>
+                    <tr>
+                      <td class="label-cell" rowspan="2">拟办意见</td>
+                      <td colspan="3" class="h-80 data-text text-left"> </td>
+                    </tr>
+                    <tr>
+                      <td colspan="3" class="signature-row">
+                        <div class="sig-container">
+                          <span style="width: 40%">审批人：<span class="sign-input"></span></span>
+                          <span style="width: 40%">日期：<span class="sign-input"></span></span>
+                        </div>
+                      </td>
+                    </tr>
 
-                  <tr>
-                    <td class="label-cell" rowspan="2">局长意见</td>
-                    <td colspan="3" class="h-80 data-text text-left"> </td>
-                  </tr>
-                  <tr>
-                    <td colspan="3" class="signature-row">
-                      <div class="sig-container">
-                        <span style="width: 40%">审批人：<span class="sign-input"></span></span>
-                        <span style="width: 40%">日期：<span class="sign-input"></span></span>
-                      </div>
-                    </td>
-                  </tr>
+                    <tr>
+                      <td class="label-cell" rowspan="2">局长意见</td>
+                      <td colspan="3" class="h-80 data-text text-left"> </td>
+                    </tr>
+                    <tr>
+                      <td colspan="3" class="signature-row">
+                        <div class="sig-container">
+                          <span style="width: 40%">审批人：<span class="sign-input"></span></span>
+                          <span style="width: 40%">日期：<span class="sign-input"></span></span>
+                        </div>
+                      </td>
+                    </tr>
 
-                  <tr>
-                    <td class="label-cell" rowspan="2">局领导<br />意见</td>
-                    <td class="sub-header">办理意见</td>
-                    <td class="sub-header">办理人员</td>
-                    <td class="sub-header">办理日期</td>
-                  </tr>
-                  <tr>
-                    <td class="h-35 data-text"></td>
-                    <td class="h-35 data-text center-text"></td>
-                    <td class="h-35 data-text center-text"></td>
-                  </tr>
+                    <tr>
+                      <td class="label-cell" rowspan="2">局领导<br />意见</td>
+                      <td class="sub-header">办理意见</td>
+                      <td class="sub-header">办理人员</td>
+                      <td class="sub-header">办理日期</td>
+                    </tr>
+                    <tr>
+                      <td class="h-35 data-text"></td>
+                      <td class="h-35 data-text center-text"></td>
+                      <td class="h-35 data-text center-text"></td>
+                    </tr>
 
-                  <tr>
-                    <td class="label-cell" rowspan="2">科室单位<br />办理意见</td>
-                    <td class="sub-header">办理意见</td>
-                    <td class="sub-header">办理人员</td>
-                    <td class="sub-header">办理日期</td>
-                  </tr>
-                  <tr>
-                    <td class="h-35 data-text"></td>
-                    <td class="h-35 data-text center-text"></td>
-                    <td class="h-35 data-text center-text"></td>
-                  </tr>
+                    <tr>
+                      <td class="label-cell" rowspan="2">科室单位<br />办理意见</td>
+                      <td class="sub-header">办理意见</td>
+                      <td class="sub-header">办理人员</td>
+                      <td class="sub-header">办理日期</td>
+                    </tr>
+                    <tr>
+                      <td class="h-35 data-text"></td>
+                      <td class="h-35 data-text center-text"></td>
+                      <td class="h-35 data-text center-text"></td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -616,6 +616,7 @@ import { ApprovalNodeInfo } from '@/api/bpm/processInstance'
 import { XzssApi } from '@/api/bpm/xzss'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import { useUserStore } from '@/store/modules/user'
+import { useRouter, useRoute } from 'vue-router'
 
 import { XzfyApi } from '@/api/bpm/xzfy'
 import { dateUtil } from '@/utils/dateUtil'
@@ -626,6 +627,7 @@ defineOptions({ name: 'BpmXzssCreate' })
 const message = useMessage()
 const { delView } = useTagsViewStore()
 const { push, currentRoute } = useRouter()
+const route = useRoute()
 const userStore = useUserStore()
 
 const activeTab = ref('form')
@@ -941,8 +943,11 @@ const submitForm = async () => {
 
     dialogVisible.value = false
 
-    delView(unref(currentRoute))
-    await push({ name: 'BpmProcessInstanceMy' })
+    // 【关键修改】加入宏任务延迟，彻底避免页面过快重定向致使自身 tab 仍在 keep-alive 存活列队中
+    setTimeout(() => {
+      delView(unref(currentRoute))
+      push('/bpm/unified')
+    }, 200)
   } finally {
     formLoading.value = false
   }

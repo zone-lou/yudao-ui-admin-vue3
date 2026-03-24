@@ -493,6 +493,7 @@ import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { XzfyApi } from '@/api/bpm/xzfy'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/store/modules/user'
 import { dateUtil } from '@/utils/dateUtil'
 import { uploadReturnInfo } from '@/api/infra/file'
@@ -502,6 +503,7 @@ defineOptions({ name: 'BpmXzfyCreate' })
 const message = useMessage()
 const { delView } = useTagsViewStore()
 const { push, currentRoute } = useRouter()
+const route = useRoute()
 const userStore = useUserStore()
 
 const activeTab = ref('basic')
@@ -736,8 +738,11 @@ const submitForm = async () => {
 
     dialogVisible.value = false
 
-    delView(unref(currentRoute))
-    await push({ name: 'BpmProcessInstanceMy' })
+    // 【关键修改】加入宏任务延迟，彻底避免页面过快重定向致使自身 tab 仍在 keep-alive 存活列队中
+    setTimeout(() => {
+      delView(unref(currentRoute))
+      push('/bpm/unified')
+    }, 200)
   } finally {
     formLoading.value = false
   }
@@ -766,6 +771,7 @@ onMounted(async () => {
   font-weight: bold;
   border-left: 4px solid #409eff;
 }
+
 .custom-tabs {
   margin-top: -10px;
 }

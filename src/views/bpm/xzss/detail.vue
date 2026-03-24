@@ -6,7 +6,7 @@
           <div
             v-if="props.taskId"
             class="absolute print-hide-row flex items-center"
-            style="right: 40px; top: 40px"
+            style="top: 40px; right: 40px"
           >
             <el-upload
               action="#"
@@ -61,7 +61,7 @@
                     进行监督监管
                   </div>
                 </td>
-                <td class="label-cell">科室办理办结日期</td>
+                <td class="label-cell" style="white-space: nowrap">科室办理办结日期</td>
                 <td class="data-text center-text">
                   {{ formatDate(detailData.zhubandate) }}
                 </td>
@@ -72,28 +72,49 @@
                 <td colspan="3" class="data-text" style="padding: 6px 8px">
                   <div
                     v-if="getBaseAttachCount() > 0"
-                    style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start"
+                    style="display: flex; flex-direction: column; gap: 8px; align-items: flex-start"
                   >
-                    <el-button
+                    <div
                       v-for="(file, index) in allDocAttachments.filter((a) =>
                         isBaseAttach(a.taskId)
                       )"
                       :key="index"
-                      link
-                      type="primary"
-                      @click="handleDownload(file.filepath)"
-                      style="
-                        text-align: left;
-                        white-space: normal;
-                        height: auto;
-                        line-height: 1.5;
-                        padding: 2px 0;
-                      "
+                      style="display: flex; align-items: center; width: 100%"
                     >
-                      <Icon icon="ep:paperclip" class="mr-1" />{{ file.filename }}
-                    </el-button>
+                      <span
+                        class="mr-2"
+                        style="
+                          font-size: 14px;
+                          line-height: 1.5;
+                          color: #303133;
+                          word-break: break-all;
+                        "
+                      >
+                        <Icon icon="ep:paperclip" class="mr-1" />{{ file.filename }}
+                      </span>
+                      <div style="display: flex; flex-shrink: 0; align-items: center">
+                        <el-button
+                          link
+                          type="primary"
+                          size="small"
+                          @click="handlePreview(file)"
+                          style="margin-left: 0"
+                        >
+                          预览
+                        </el-button>
+                        <el-button
+                          link
+                          type="primary"
+                          size="small"
+                          @click="handleDownload(file)"
+                          style="margin-left: 8px"
+                        >
+                          下载
+                        </el-button>
+                      </div>
+                    </div>
                   </div>
-                  <span v-else style="color: #909399; font-size: 14px">暂无附件</span>
+                  <span v-else style="font-size: 14px; color: #909399">暂无附件</span>
                 </td>
               </tr>
 
@@ -118,7 +139,7 @@
                     />
                     <div
                       class="absolute whitespace-nowrap"
-                      style="left: calc(100% + 30px); bottom: 8px"
+                      style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
                       v-if="getAttachCount(props.taskId) > 0"
                     >
                       <el-button type="primary" size="small" @click="showAttachments(props.taskId)">
@@ -135,7 +156,7 @@
                       <div class="text-left break-all whitespace-pre-wrap">{{ item.comment }}</div>
                       <div
                         class="absolute whitespace-nowrap"
-                        style="left: calc(100% + 30px); top: 0"
+                        style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
                         v-if="item.taskId && getAttachCount(item.taskId) > 0"
                       >
                         <el-button
@@ -203,7 +224,7 @@
                     />
                     <div
                       class="absolute whitespace-nowrap"
-                      style="left: calc(100% + 30px); bottom: 8px"
+                      style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
                       v-if="getAttachCount(props.taskId) > 0"
                     >
                       <el-button type="primary" size="small" @click="showAttachments(props.taskId)">
@@ -214,13 +235,13 @@
                   <div v-else class="w-full h-full" style="padding: 6px 8px">
                     <div
                       v-for="(item, index) in juzhangList"
-                      :key="index"
+                      :key="'juzhang' + index"
                       class="relative w-full min-h-[24px] mb-1"
                     >
                       <div class="text-left break-all whitespace-pre-wrap">{{ item.comment }}</div>
                       <div
                         class="absolute whitespace-nowrap"
-                        style="left: calc(100% + 30px); top: 0"
+                        style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
                         v-if="item.taskId && getAttachCount(item.taskId) > 0"
                       >
                         <el-button
@@ -268,251 +289,155 @@
               </tr>
 
               <tr>
-                <td class="label-cell" rowspan="2">局领导<br />意见</td>
-                <td class="sub-header">办理意见</td>
-                <td class="sub-header">办理人员</td>
-                <td class="sub-header">办理日期</td>
+                <td
+                  class="label-cell"
+                  :rowspan="getDynamicRowspan(['分管领导', '分管局长'], lingdaoList)"
+                  >局领导<br />意见</td
+                >
+                <td class="sub-header"><div class="sub-header-text">办理意见</div></td>
+                <td class="sub-header"><div class="sub-header-text">办理人员</div></td>
+                <td class="sub-header"><div class="sub-header-text">办理日期</div></td>
               </tr>
-              <tr>
-                <td colspan="3" style="padding: 0; vertical-align: top; border: none">
-                  <table style="width: 100%; border-collapse: collapse; table-layout: fixed">
-                    <colgroup>
-                      <col style="width: auto" />
-                      <col style="width: 140px" />
-                      <col style="width: 150px" />
-                    </colgroup>
-                    <tbody>
-                      <tr
-                        v-for="(item, index) in ensureMinRows(lingdaoList, 1)"
-                        :key="index"
-                        class="h-35"
-                      >
-                        <td
-                          class="data-text"
-                          style="
-                            border: none;
-                            border-right: 1px solid #d71920;
-                            border-bottom: 1px solid #d71920;
-                            padding: 0;
-                          "
-                        >
-                          <div class="relative w-full h-full" style="padding: 6px 8px">
-                            <div class="text-left break-all whitespace-pre-wrap">{{
-                              item.comment
-                            }}</div>
-                            <div
-                              class="absolute whitespace-nowrap"
-                              style="left: calc(100% + 300px); top: 6px"
-                              v-if="item.taskId && getAttachCount(item.taskId) > 0"
-                            >
-                              <el-button
-                                type="primary"
-                                size="small"
-                                @click="showAttachments(item.taskId)"
-                              >
-                                附件({{ getAttachCount(item.taskId) }})
-                              </el-button>
-                            </div>
-                          </div>
-                        </td>
-                        <td
-                          class="data-text center-text"
-                          style="
-                            border: none;
-                            border-right: 1px solid #d71920;
-                            border-bottom: 1px solid #d71920;
-                          "
-                        >
-                          {{ item.assigneeUser?.nickname }}
-                        </td>
-                        <td
-                          class="data-text center-text"
-                          style="border: none; border-bottom: 1px solid #d71920"
-                        >
-                          {{ formatDate(item.endTime) }}
-                        </td>
-                      </tr>
-                      <tr
-                        v-if="isEditable('分管领导') || isEditable('分管局长')"
-                        class="h-35 print-hide-row"
-                      >
-                        <td
-                          class="data-text"
-                          style="
-                            border: none;
-                            border-right: 1px solid #d71920;
-                            border-bottom: 1px solid #d71920;
-                            padding: 0;
-                          "
-                        >
-                          <div class="relative w-full h-full" style="padding: 6px 8px">
-                            <el-input
-                              v-model="currentOpinion"
-                              type="textarea"
-                              autosize
-                              placeholder="请输入意见..."
-                              style="border: none"
-                            />
-                            <div
-                              class="absolute whitespace-nowrap"
-                              style="left: calc(100% + 300px); bottom: 8px"
-                              v-if="getAttachCount(props.taskId) > 0"
-                            >
-                              <el-button
-                                type="primary"
-                                size="small"
-                                @click="showAttachments(props.taskId)"
-                              >
-                                附件({{ getAttachCount(props.taskId) }})
-                              </el-button>
-                            </div>
-                          </div>
-                        </td>
-                        <td
-                          class="data-text center-text"
-                          style="
-                            border: none;
-                            border-right: 1px solid #d71920;
-                            border-bottom: 1px solid #d71920;
-                          "
-                        >
-                          {{ userStore.getUser.nickname }}
-                        </td>
-                        <td
-                          class="data-text center-text"
-                          style="border: none; border-bottom: 1px solid #d71920"
-                        >
-                          {{ formatDate(new Date()) }}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+              <tr v-if="isEditable('分管领导') || isEditable('分管局长')" class="print-hide-row">
+                <td class="h-35 data-text" style="padding: 0; vertical-align: top">
+                  <div class="w-full h-full relative" style="padding: 6px 8px">
+                    <el-input
+                      v-model="currentOpinion"
+                      type="textarea"
+                      :rows="2"
+                      placeholder="请输入分管局长意见"
+                      class="w-full h-full"
+                      style="border: none"
+                    />
+                  </div>
                 </td>
+                <td class="h-35 data-text center-text">{{ userStore.getUser.nickname }}</td>
+                <td class="h-35 data-text center-text">
+                  <div class="relative w-full h-full flex items-center justify-center">
+                    {{ formatDate(new Date()) }}
+                    <div
+                      class="absolute whitespace-nowrap"
+                      style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
+                      v-if="getAttachCount(props.taskId) > 0"
+                    >
+                      <el-button type="primary" size="small" @click="showAttachments(props.taskId)">
+                        附件({{ getAttachCount(props.taskId) }})
+                      </el-button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <template v-if="lingdaoList.length > 0">
+                <tr v-for="(item, index) in lingdaoList" :key="'lingdao' + index">
+                  <td class="h-35 data-text" style="padding: 0; vertical-align: top">
+                    <div class="relative w-full h-full" style="padding: 6px 8px">
+                      <div class="text-left break-all whitespace-pre-wrap">{{ item.comment }}</div>
+                    </div>
+                  </td>
+                  <td class="h-35 data-text center-text">{{ item.assigneeUser?.nickname }}</td>
+                  <td class="h-35 data-text center-text">
+                    <div class="relative w-full h-full flex items-center justify-center">
+                      {{ formatDate(item.endTime) }}
+                      <div
+                        class="absolute whitespace-nowrap"
+                        style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
+                        v-if="item.taskId && getAttachCount(item.taskId) > 0"
+                      >
+                        <el-button
+                          type="primary"
+                          size="small"
+                          @click="showAttachments(item.taskId)"
+                        >
+                          附件({{ getAttachCount(item.taskId) }})
+                        </el-button>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </template>
+              <tr v-else-if="!(isEditable('分管领导') || isEditable('分管局长'))">
+                <td class="h-35 data-text"></td>
+                <td class="h-35 data-text center-text"></td>
+                <td class="h-35 data-text center-text"></td>
               </tr>
 
               <tr>
-                <td class="label-cell" rowspan="2">科室单位<br />办理意见</td>
-                <td class="sub-header">办理意见</td>
-                <td class="sub-header">办理人员</td>
-                <td class="sub-header">办理日期</td>
+                <td
+                  class="label-cell"
+                  :rowspan="getDynamicRowspan(['相关单位', '法规科办理', '科室'], keshiList)"
+                  >科室单位<br />办理意见</td
+                >
+                <td class="sub-header"><div class="sub-header-text">办理意见</div></td>
+                <td class="sub-header"><div class="sub-header-text">办理人员</div></td>
+                <td class="sub-header"><div class="sub-header-text">办理日期</div></td>
               </tr>
-              <tr>
-                <td colspan="3" style="padding: 0; vertical-align: top; border: none">
-                  <table style="width: 100%; border-collapse: collapse; table-layout: fixed">
-                    <colgroup>
-                      <col style="width: auto" />
-                      <col style="width: 140px" />
-                      <col style="width: 150px" />
-                    </colgroup>
-                    <tbody>
-                      <tr
-                        v-for="(item, index) in ensureMinRows(keshiList, 1)"
-                        :key="index"
-                        class="h-35"
-                      >
-                        <td
-                          class="data-text"
-                          style="
-                            border: none;
-                            border-right: 1px solid #d71920;
-                            border-bottom: 1px solid #d71920;
-                            padding: 0;
-                          "
-                        >
-                          <div class="relative w-full h-full" style="padding: 6px 8px">
-                            <div class="text-left break-all whitespace-pre-wrap">{{
-                              item.comment
-                            }}</div>
-                            <div
-                              class="absolute whitespace-nowrap"
-                              style="left: calc(100% + 300px); top: 6px"
-                              v-if="item.taskId && getAttachCount(item.taskId) > 0"
-                            >
-                              <el-button
-                                type="primary"
-                                size="small"
-                                @click="showAttachments(item.taskId)"
-                              >
-                                附件({{ getAttachCount(item.taskId) }})
-                              </el-button>
-                            </div>
-                          </div>
-                        </td>
-                        <td
-                          class="data-text center-text"
-                          style="
-                            border: none;
-                            border-right: 1px solid #d71920;
-                            border-bottom: 1px solid #d71920;
-                          "
-                        >
-                          {{ item.assigneeUser?.nickname }}
-                        </td>
-                        <td
-                          class="data-text center-text"
-                          style="border: none; border-bottom: 1px solid #d71920"
-                        >
-                          {{ formatDate(item.endTime) }}
-                        </td>
-                      </tr>
-                      <tr
-                        v-if="
-                          isEditable('相关单位') || isEditable('法规科办理') || isEditable('科室')
-                        "
-                        class="h-35 print-hide-row"
-                      >
-                        <td
-                          class="data-text"
-                          style="
-                            border: none;
-                            border-right: 1px solid #d71920;
-                            border-bottom: 1px solid #d71920;
-                            padding: 0;
-                          "
-                        >
-                          <div class="relative w-full h-full" style="padding: 6px 8px">
-                            <el-input
-                              v-model="currentOpinion"
-                              type="textarea"
-                              autosize
-                              placeholder="请输入科室办理意见..."
-                              style="border: none"
-                            />
-                            <div
-                              class="absolute whitespace-nowrap"
-                              style="left: calc(100% + 300px); bottom: 8px"
-                              v-if="getAttachCount(props.taskId) > 0"
-                            >
-                              <el-button
-                                type="primary"
-                                size="small"
-                                @click="showAttachments(props.taskId)"
-                              >
-                                附件({{ getAttachCount(props.taskId) }})
-                              </el-button>
-                            </div>
-                          </div>
-                        </td>
-                        <td
-                          class="data-text center-text"
-                          style="
-                            border: none;
-                            border-right: 1px solid #d71920;
-                            border-bottom: 1px solid #d71920;
-                          "
-                        >
-                          {{ userStore.getUser.nickname }}
-                        </td>
-                        <td
-                          class="data-text center-text"
-                          style="border: none; border-bottom: 1px solid #d71920"
-                        >
-                          {{ formatDate(new Date()) }}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+              <tr
+                v-if="isEditable('相关单位') || isEditable('法规科办理') || isEditable('科室')"
+                class="print-hide-row"
+              >
+                <td class="h-35 data-text" style="padding: 0; vertical-align: top">
+                  <div class="w-full h-full relative" style="padding: 6px 8px">
+                    <el-input
+                      v-model="currentOpinion"
+                      type="textarea"
+                      autosize
+                      placeholder="请输入科室办理意见..."
+                      style="border: none"
+                    />
+                  </div>
                 </td>
+                <td class="h-35 data-text center-text">{{ userStore.getUser.nickname }}</td>
+                <td class="h-35 data-text center-text">
+                  <div class="relative w-full h-full flex items-center justify-center">
+                    {{ formatDate(new Date()) }}
+                    <div
+                      class="absolute whitespace-nowrap"
+                      style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
+                      v-if="getAttachCount(props.taskId) > 0"
+                    >
+                      <el-button type="primary" size="small" @click="showAttachments(props.taskId)">
+                        附件({{ getAttachCount(props.taskId) }})
+                      </el-button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <template v-if="keshiList.length > 0">
+                <tr v-for="(item, index) in keshiList" :key="'keshi' + index">
+                  <td class="h-35 data-text" style="padding: 0; vertical-align: top">
+                    <div class="relative w-full h-full" style="padding: 6px 8px">
+                      <div class="text-left break-all whitespace-pre-wrap">{{ item.comment }}</div>
+                    </div>
+                  </td>
+                  <td class="h-35 data-text center-text">{{ item.assigneeUser?.nickname }}</td>
+                  <td class="h-35 data-text center-text">
+                    <div class="relative w-full h-full flex items-center justify-center">
+                      {{ formatDate(item.endTime) }}
+                      <div
+                        class="absolute whitespace-nowrap"
+                        style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
+                        v-if="item.taskId && getAttachCount(item.taskId) > 0"
+                      >
+                        <el-button
+                          type="primary"
+                          size="small"
+                          @click="showAttachments(item.taskId)"
+                        >
+                          附件({{ getAttachCount(item.taskId) }})
+                        </el-button>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </template>
+              <tr
+                v-else-if="
+                  !(isEditable('相关单位') || isEditable('法规科办理') || isEditable('科室'))
+                "
+              >
+                <td class="h-35 data-text"></td>
+                <td class="h-35 data-text center-text"></td>
+                <td class="h-35 data-text center-text"></td>
               </tr>
             </tbody>
           </table>
@@ -676,7 +601,7 @@
       <el-table :data="currentAttachments" border>
         <el-table-column label="序号" type="index" width="60" align="center" />
         <el-table-column label="文件名称" prop="filename" align="center" show-overflow-tooltip />
-        <el-table-column label="操作" width="130" align="center">
+        <el-table-column label="操作" width="160" align="center">
           <template #default="{ row }">
             <div
               style="
@@ -687,16 +612,21 @@
                 flex-wrap: nowrap;
               "
             >
-              <el-button link type="primary" @click="handleDownload(row.filepath)"
-                >下载查看</el-button
+              <el-button link type="primary" size="small" @click="handlePreview(row)"
+                >预览</el-button
+              >
+              <el-button link type="primary" size="small" @click="handleDownload(row)"
+                >下载</el-button
               >
               <el-button
                 v-if="row.taskId === props.taskId && props.taskId"
                 link
                 type="danger"
+                size="small"
                 @click="handleDeleteAttach(row)"
-                >删除</el-button
               >
+                删除
+              </el-button>
             </div>
           </template>
         </el-table-column>
@@ -716,6 +646,8 @@ import { propTypes } from '@/utils/propTypes'
 import { DICT_TYPE } from '@/utils/dict'
 import { useUserStore } from '@/store/modules/user'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Base64 } from 'js-base64'
+import * as ConfigApi from '@/api/infra/config'
 import type { PropType } from 'vue'
 
 defineOptions({ name: 'BpmXzssDetail' })
@@ -744,6 +676,9 @@ const docList = ref<any[]>([])
 const allDocAttachments = ref<any[]>([])
 const attachDialogVisible = ref(false)
 const currentAttachments = ref<any[]>([])
+const fileViewBaseUrl = ref('')
+const externalPrefix = ref('') // 外网地址前缀
+const internalPrefix = ref('') // 内网地址前缀
 
 // 获取本单据的所有评论附件
 const getDocAttachments = async () => {
@@ -783,13 +718,38 @@ const showAttachments = (taskId?: string) => {
   attachDialogVisible.value = true
 }
 
-// 下载/预览附件
-const handleDownload = (filepath: string) => {
-  if (filepath) {
-    window.open(filepath, '_blank')
-  } else {
-    ElMessage.warning('文件路径不存在')
+// 预览附件
+const handlePreview = (file: any) => {
+  const filepath = typeof file === 'string' ? file : file.filepath
+  if (!filepath) return ElMessage.warning('文件路径不存在')
+
+  const kkBaseUrl = fileViewBaseUrl.value || 'http://192.168.50.239:8012'
+  let fullUrl = filepath
+
+  // 内外网预览地址转换
+  if (externalPrefix.value && internalPrefix.value && fullUrl.includes(externalPrefix.value)) {
+    fullUrl = fullUrl.replace(externalPrefix.value, internalPrefix.value)
   }
+
+  const encodedUrl = Base64.encode(fullUrl)
+  const previewUrl = `${kkBaseUrl}${encodeURIComponent(encodedUrl)}`
+  window.open(previewUrl, '_blank')
+}
+
+// 下载附件
+const handleDownload = (file: any) => {
+  const filepath = typeof file === 'string' ? file : file.filepath
+  const filename = typeof file === 'string' ? filepath.split('/').pop() : file.filename
+
+  if (!filepath) return ElMessage.warning('文件路径不存在')
+
+  const link = document.createElement('a')
+  link.style.display = 'none'
+  link.href = filepath
+  link.setAttribute('download', filename || '下载文件')
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
 }
 
 // 删除附件弹窗操作
@@ -836,14 +796,11 @@ const customUpload = async (options: any) => {
     const formData = new FormData()
     formData.append('file', options.file)
     const uploadRes = await uploadReturnInfo(formData)
-
     const fileResponse = uploadRes?.data || uploadRes
-    let fileId = undefined
     let fileName = options.file.name
     let fileUrl = ''
 
     if (typeof fileResponse === 'object' && fileResponse !== null) {
-      fileId = fileResponse.id
       fileName = fileResponse.name || options.file.name
       fileUrl = fileResponse.url || fileResponse.filepath
     } else if (typeof uploadRes === 'string') {
@@ -892,6 +849,11 @@ const getInfo = async (id?: number) => {
 
   detailLoading.value = true
   try {
+    // 获取预览/地址前缀配置
+    fileViewBaseUrl.value = await ConfigApi.getConfigKey('url.fileview.address')
+    externalPrefix.value = await ConfigApi.getConfigKey('url.external.prefix')
+    internalPrefix.value = await ConfigApi.getConfigKey('url.internal.prefix')
+
     const res = await XzssApi.getXzss(queryId)
     detailData.value = res || {}
 
@@ -921,6 +883,12 @@ const getInfo = async (id?: number) => {
   }
 }
 
+const getDynamicRowspan = (editKeys: string[], list: any[]) => {
+  const isEdit = editKeys.some((key) => isEditable(key))
+  const dataRows = (isEdit ? 1 : 0) + list.length
+  return 1 + Math.max(1, dataRows)
+}
+
 /** 辅助函数：获取扩展表数据 */
 const getKzData = () => {
   return detailData.value.xzssKz || detailData.value.xzsskz || {}
@@ -930,13 +898,6 @@ const getKzData = () => {
 const formatDate = (val: any) => {
   if (!val) return ''
   return dateUtil(val).format('YYYY-MM-DD')
-}
-
-/** 格式化布尔值 */
-const formatBoolean = (val: any) => {
-  if (val === 1) return '是'
-  if (val === 0) return '否'
-  return ''
 }
 
 /** 格式化诉讼类型 */
@@ -960,12 +921,18 @@ const isEditable = (keyword: string) => {
   // 屏蔽带有“(上诉)”的审批节点，强制它们使用全局原生弹窗处理
   if (nodeName.includes('(上诉)')) return false
 
+  // 特殊逻辑：排除“分管局长”对“局长”关键词的干扰
+  if (keyword === '局长' && nodeName.includes('分管')) {
+    return false
+  }
+
   return nodeName.includes(keyword)
 }
 
 const getOpinion = () => {
   const keys = [
     '拟办',
+    '法规科交办',
     '法规科审核',
     '协助人员',
     '协办科室',
@@ -974,7 +941,10 @@ const getOpinion = () => {
     '局长',
     '主要领导',
     '承办人员',
-    '法规科承办'
+    '法规科承办',
+    '相关单位',
+    '法规科办理',
+    '科室'
   ]
   if (!keys.some((key) => isEditable(key))) {
     return undefined
@@ -1059,14 +1029,6 @@ watch(
   { immediate: true }
 )
 
-const ensureMinRows = (list: any[], min: number) => {
-  const result = [...list]
-  while (result.length < min) {
-    result.push({ comment: '', taskId: '' })
-  }
-  return result
-}
-
 defineExpose({ open: getInfo, getOpinion })
 
 onMounted(() => {
@@ -1078,12 +1040,11 @@ onMounted(() => {
 /* stylelint-disable selector-id-pattern */
 
 :deep(.el-descriptions__label) {
+  width: 15%; /* 建议使用百分比(如12%到15%)或固定像素(如120px)，根据你的UI需求调整 */
   font-weight: bold;
   color: #606266;
-  background-color: #f5f7fa;
-
-  width: 15%; /* 建议使用百分比(如12%到15%)或固定像素(如120px)，根据你的UI需求调整 */
   word-break: keep-all; /* 防止文字意外换行破坏高度 */
+  background-color: #f5f7fa;
 }
 
 /* ================= 导入红头审批表专用样式 ================= */
@@ -1098,9 +1059,9 @@ onMounted(() => {
   max-width: 100%;
   padding: 40px;
   margin: 0 auto;
+  overflow: visible; /* 必须加上这个以便绝对定位元素超出表格显示 */
   background-color: #fff;
   box-shadow: none;
-  overflow: visible; /* 必须加上这个以便绝对定位元素超出表格显示 */
 }
 
 #printDivTag .doc-title {
@@ -1193,8 +1154,18 @@ onMounted(() => {
 
 #printDivTag .sub-header {
   height: 30px;
+  padding: 0 !important;
   font-weight: normal;
   text-align: center;
+  background-color: transparent !important;
+}
+
+#printDivTag .sub-header-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 
 #printDivTag .text-left {

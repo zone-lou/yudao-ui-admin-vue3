@@ -114,7 +114,7 @@
           <div
             v-if="props.taskId"
             class="absolute print-hide-row flex items-center"
-            style="right: 40px; top: 40px"
+            style="top: 40px; right: 40px"
           >
             <el-upload
               action="#"
@@ -169,7 +169,7 @@
                     进行监督监管
                   </div>
                 </td>
-                <td class="label-cell">科室办理办结日期</td>
+                <td class="label-cell" style="white-space: nowrap">科室办理办结日期</td>
                 <td class="data-text center-text">
                   {{ formatDate(detailData.zhubandate) }}
                 </td>
@@ -180,28 +180,49 @@
                 <td colspan="3" class="data-text" style="padding: 6px 8px">
                   <div
                     v-if="getBaseAttachCount() > 0"
-                    style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start"
+                    style="display: flex; flex-direction: column; gap: 8px; align-items: flex-start"
                   >
-                    <el-button
+                    <div
                       v-for="(file, index) in allDocAttachments.filter((a) =>
                         isBaseAttach(a.taskId)
                       )"
                       :key="index"
-                      link
-                      type="primary"
-                      @click="handleDownload(file.filepath)"
-                      style="
-                        text-align: left;
-                        white-space: normal;
-                        height: auto;
-                        line-height: 1.5;
-                        padding: 2px 0;
-                      "
+                      style="display: flex; align-items: center; width: 100%"
                     >
-                      <Icon icon="ep:paperclip" class="mr-1" />{{ file.filename }}
-                    </el-button>
+                      <span
+                        class="mr-2"
+                        style="
+                          font-size: 14px;
+                          line-height: 1.5;
+                          color: #303133;
+                          word-break: break-all;
+                        "
+                      >
+                        <Icon icon="ep:paperclip" class="mr-1" />{{ file.filename }}
+                      </span>
+                      <div style="display: flex; flex-shrink: 0; align-items: center">
+                        <el-button
+                          link
+                          type="primary"
+                          size="small"
+                          @click="handlePreview(file)"
+                          style="margin-left: 0"
+                        >
+                          预览
+                        </el-button>
+                        <el-button
+                          link
+                          type="primary"
+                          size="small"
+                          @click="handleDownload(file)"
+                          style="margin-left: 8px"
+                        >
+                          下载
+                        </el-button>
+                      </div>
+                    </div>
                   </div>
-                  <span v-else style="color: #909399; font-size: 14px">暂无附件</span>
+                  <span v-else style="font-size: 14px; color: #909399">暂无附件</span>
                 </td>
               </tr>
 
@@ -223,7 +244,7 @@
                     />
                     <div
                       class="absolute whitespace-nowrap"
-                      style="left: calc(100% + 30px); bottom: 8px"
+                      style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
                       v-if="getAttachCount(props.taskId) > 0"
                     >
                       <el-button type="primary" size="small" @click="showAttachments(props.taskId)">
@@ -241,7 +262,7 @@
                       <div class="text-left break-all whitespace-pre-wrap">{{ info.comment }}</div>
                       <div
                         class="absolute whitespace-nowrap"
-                        style="left: calc(100% + 30px); top: 0"
+                        style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
                         v-if="info.taskId && getAttachCount(info.taskId) > 0"
                       >
                         <el-button
@@ -299,7 +320,7 @@
                     />
                     <div
                       class="absolute whitespace-nowrap"
-                      style="left: calc(100% + 30px); bottom: 8px"
+                      style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
                       v-if="getAttachCount(props.taskId) > 0"
                     >
                       <el-button type="primary" size="small" @click="showAttachments(props.taskId)">
@@ -317,7 +338,7 @@
                       <div class="text-left break-all whitespace-pre-wrap">{{ info.comment }}</div>
                       <div
                         class="absolute whitespace-nowrap"
-                        style="left: calc(100% + 30px); top: 0"
+                        style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
                         v-if="info.taskId && getAttachCount(info.taskId) > 0"
                       >
                         <el-button
@@ -361,9 +382,9 @@
                 <td class="label-cell" :rowspan="getDynamicRowspan(['分管局长'], lingdaoList)"
                   >局领导<br />意见</td
                 >
-                <td class="label-cell sub-header">办理意见</td>
-                <td class="label-cell sub-header">办理人员</td>
-                <td class="label-cell sub-header">办理日期</td>
+                <td class="sub-header"><div class="sub-header-text">办理意见</div></td>
+                <td class="sub-header"><div class="sub-header-text">办理人员</div></td>
+                <td class="sub-header"><div class="sub-header-text">办理日期</div></td>
               </tr>
               <tr v-if="isEditable('分管局长')" class="print-hide-row">
                 <td class="h-35 data-text" style="padding: 0; vertical-align: top">
@@ -376,9 +397,15 @@
                       class="w-full h-full"
                       style="border: none"
                     />
+                  </div>
+                </td>
+                <td class="h-35 data-text center-text">{{ userStore.getUser.nickname }}</td>
+                <td class="h-35 data-text center-text">
+                  <div class="relative w-full h-full flex items-center justify-center">
+                    {{ formatDate(new Date()) }}
                     <div
                       class="absolute whitespace-nowrap"
-                      style="left: calc(100% + 320px); bottom: 8px"
+                      style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
                       v-if="getAttachCount(props.taskId) > 0"
                     >
                       <el-button type="primary" size="small" @click="showAttachments(props.taskId)">
@@ -387,17 +414,21 @@
                     </div>
                   </div>
                 </td>
-                <td class="h-35 data-text center-text">{{ userStore.getUser.nickname }}</td>
-                <td class="h-35 data-text center-text">{{ formatDate(new Date()) }}</td>
               </tr>
               <template v-if="lingdaoList.length > 0">
                 <tr v-for="(info, index) in lingdaoList" :key="index">
                   <td class="h-35 data-text" style="padding: 0; vertical-align: top">
                     <div class="relative w-full h-full" style="padding: 6px 8px">
                       <div class="text-left break-all whitespace-pre-wrap">{{ info.comment }}</div>
+                    </div>
+                  </td>
+                  <td class="h-35 data-text center-text">{{ info.assigneeUser?.nickname }}</td>
+                  <td class="h-35 data-text center-text">
+                    <div class="relative w-full h-full flex items-center justify-center">
+                      {{ formatDate(info.endTime) }}
                       <div
                         class="absolute whitespace-nowrap"
-                        style="left: calc(100% + 320px); top: 6px"
+                        style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
                         v-if="info.taskId && getAttachCount(info.taskId) > 0"
                       >
                         <el-button
@@ -410,8 +441,6 @@
                       </div>
                     </div>
                   </td>
-                  <td class="h-35 data-text center-text">{{ info.assigneeUser?.nickname }}</td>
-                  <td class="h-35 data-text center-text">{{ formatDate(info.endTime) }}</td>
                 </tr>
               </template>
               <tr v-else-if="!isEditable('分管局长')">
@@ -423,14 +452,17 @@
               <tr>
                 <td
                   class="label-cell"
-                  :rowspan="getDynamicRowspan(['相关单位', '法规科办理'], keshiList)"
+                  :rowspan="getDynamicRowspan(['相关单位', '法规科办理', '科室'], keshiList)"
                   >科室单位<br />办理意见</td
                 >
-                <td class="label-cell sub-header">办理意见</td>
-                <td class="label-cell sub-header">办理人员</td>
-                <td class="label-cell sub-header">办理日期</td>
+                <td class="sub-header"><div class="sub-header-text">办理意见</div></td>
+                <td class="sub-header"><div class="sub-header-text">办理人员</div></td>
+                <td class="sub-header"><div class="sub-header-text">办理日期</div></td>
               </tr>
-              <tr v-if="isEditable('相关单位') || isEditable('法规科办理')" class="print-hide-row">
+              <tr
+                v-if="isEditable('相关单位') || isEditable('法规科办理') || isEditable('科室')"
+                class="print-hide-row"
+              >
                 <td class="h-35 data-text" style="padding: 0; vertical-align: top">
                   <div class="w-full h-full relative" style="padding: 6px 8px">
                     <el-input
@@ -441,9 +473,15 @@
                       class="w-full h-full"
                       style="border: none"
                     />
+                  </div>
+                </td>
+                <td class="h-35 data-text center-text">{{ userStore.getUser.nickname }}</td>
+                <td class="h-35 data-text center-text">
+                  <div class="relative w-full h-full flex items-center justify-center">
+                    {{ formatDate(new Date()) }}
                     <div
                       class="absolute whitespace-nowrap"
-                      style="left: calc(100% + 320px); bottom: 8px"
+                      style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
                       v-if="getAttachCount(props.taskId) > 0"
                     >
                       <el-button type="primary" size="small" @click="showAttachments(props.taskId)">
@@ -452,17 +490,21 @@
                     </div>
                   </div>
                 </td>
-                <td class="h-35 data-text center-text">{{ userStore.getUser.nickname }}</td>
-                <td class="h-35 data-text center-text">{{ formatDate(new Date()) }}</td>
               </tr>
               <template v-if="keshiList.length > 0">
                 <tr v-for="(info, index) in keshiList" :key="'keshi' + index">
                   <td class="h-35 data-text" style="padding: 0; vertical-align: top">
                     <div class="relative w-full h-full" style="padding: 6px 8px">
                       <div class="text-left break-all whitespace-pre-wrap">{{ info.comment }}</div>
+                    </div>
+                  </td>
+                  <td class="h-35 data-text center-text">{{ info.assigneeUser?.nickname }}</td>
+                  <td class="h-35 data-text center-text">
+                    <div class="relative w-full h-full flex items-center justify-center">
+                      {{ formatDate(info.endTime) }}
                       <div
                         class="absolute whitespace-nowrap"
-                        style="left: calc(100% + 320px); top: 6px"
+                        style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
                         v-if="info.taskId && getAttachCount(info.taskId) > 0"
                       >
                         <el-button
@@ -475,11 +517,13 @@
                       </div>
                     </div>
                   </td>
-                  <td class="h-35 data-text center-text">{{ info.assigneeUser?.nickname }}</td>
-                  <td class="h-35 data-text center-text">{{ formatDate(info.endTime) }}</td>
                 </tr>
               </template>
-              <tr v-else-if="!(isEditable('相关单位') || isEditable('法规科办理'))">
+              <tr
+                v-else-if="
+                  !(isEditable('相关单位') || isEditable('法规科办理') || isEditable('科室'))
+                "
+              >
                 <td class="h-35 data-text"></td>
                 <td class="h-35 data-text center-text"></td>
                 <td class="h-35 data-text center-text"></td>
@@ -494,7 +538,7 @@
       <el-table :data="currentAttachments" border>
         <el-table-column label="序号" type="index" width="60" align="center" />
         <el-table-column label="文件名称" prop="filename" align="center" show-overflow-tooltip />
-        <el-table-column label="操作" width="130" align="center">
+        <el-table-column label="操作" width="160" align="center">
           <template #default="{ row }">
             <div
               style="
@@ -505,16 +549,21 @@
                 flex-wrap: nowrap;
               "
             >
-              <el-button link type="primary" @click="handleDownload(row.filepath)"
-                >下载查看</el-button
+              <el-button link type="primary" size="small" @click="handlePreview(row)"
+                >预览</el-button
+              >
+              <el-button link type="primary" size="small" @click="handleDownload(row)"
+                >下载</el-button
               >
               <el-button
                 v-if="row.taskId === props.taskId && props.taskId"
                 link
                 type="danger"
+                size="small"
                 @click="handleDeleteAttach(row)"
-                >删除</el-button
               >
+                删除
+              </el-button>
             </div>
           </template>
         </el-table-column>
@@ -529,6 +578,8 @@ import { XzfyApi } from '@/api/bpm/xzfy'
 import { CommentAttachApi } from '@/api/bpm/commentattach'
 import { uploadReturnInfo } from '@/api/infra/file'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Base64 } from 'js-base64'
+import * as ConfigApi from '@/api/infra/config'
 import { propTypes } from '@/utils/propTypes'
 import { DICT_TYPE } from '@/utils/dict'
 import { ref, watch, onMounted } from 'vue'
@@ -556,6 +607,9 @@ const docList = ref<any[]>([])
 const allDocAttachments = ref<any[]>([])
 const attachDialogVisible = ref(false)
 const currentAttachments = ref<any[]>([])
+const fileViewBaseUrl = ref('')
+const externalPrefix = ref('') // 外网地址前缀
+const internalPrefix = ref('') // 内网地址前缀
 
 // 获取本单据的所有评论附件
 const getDocAttachments = async () => {
@@ -595,13 +649,38 @@ const showAttachments = (taskId?: string) => {
   attachDialogVisible.value = true
 }
 
-// 下载/预览附件
-const handleDownload = (filepath: string) => {
-  if (filepath) {
-    window.open(filepath, '_blank')
-  } else {
-    ElMessage.warning('文件路径不存在')
+// 预览附件
+const handlePreview = (file: any) => {
+  const filepath = typeof file === 'string' ? file : file.filepath
+  if (!filepath) return ElMessage.warning('文件路径不存在')
+
+  const kkBaseUrl = fileViewBaseUrl.value || 'http://192.168.50.239:8012'
+  let fullUrl = filepath
+
+  // 内外网预览地址转换
+  if (externalPrefix.value && internalPrefix.value && fullUrl.includes(externalPrefix.value)) {
+    fullUrl = fullUrl.replace(externalPrefix.value, internalPrefix.value)
   }
+
+  const encodedUrl = Base64.encode(fullUrl)
+  const previewUrl = `${kkBaseUrl}${encodeURIComponent(encodedUrl)}`
+  window.open(previewUrl, '_blank')
+}
+
+// 下载附件
+const handleDownload = (file: any) => {
+  const filepath = typeof file === 'string' ? file : file.filepath
+  const filename = typeof file === 'string' ? filepath.split('/').pop() : file.filename
+
+  if (!filepath) return ElMessage.warning('文件路径不存在')
+
+  const link = document.createElement('a')
+  link.style.display = 'none'
+  link.href = filepath
+  link.setAttribute('download', filename || '下载文件')
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
 }
 
 // 删除附件弹窗操作
@@ -650,12 +729,10 @@ const customUpload = async (options: any) => {
     const uploadRes = await uploadReturnInfo(formData)
 
     const fileResponse = uploadRes?.data || uploadRes
-    let fileId = undefined
     let fileName = options.file.name
     let fileUrl = ''
 
     if (typeof fileResponse === 'object' && fileResponse !== null) {
-      fileId = fileResponse.id
       fileName = fileResponse.name || options.file.name
       fileUrl = fileResponse.url || fileResponse.filepath
     } else if (typeof uploadRes === 'string') {
@@ -702,6 +779,11 @@ const getInfo = async (id?: number) => {
 
   detailLoading.value = true
   try {
+    // 获取预览/地址前缀配置
+    fileViewBaseUrl.value = await ConfigApi.getConfigKey('url.fileview.address')
+    externalPrefix.value = await ConfigApi.getConfigKey('url.external.prefix')
+    internalPrefix.value = await ConfigApi.getConfigKey('url.internal.prefix')
+
     const res = await XzfyApi.getXzfy(queryId)
     detailData.value = res || {}
 
@@ -754,11 +836,28 @@ const currentOpinion = ref('')
 const isEditable = (keyword: string) => {
   if (!props.taskId) return false
   const nodeName = props.currentNode?.name || ''
+
+  // 为防止“局长（主要领导）”与“分管局长”产生的关键词包含冲突，显式添加分管过滤
+  if (keyword === '局长' && nodeName.includes('分管')) {
+    return false
+  }
+
   return nodeName.includes(keyword)
 }
 
 const getOpinion = () => {
-  const keys = ['拟办', '法规科交办', '局长', '分管局长', '相关单位', '法规科办理']
+  const keys = [
+    '拟办',
+    '法规科交办',
+    '局长',
+    '分管局长',
+    '相关单位',
+    '法规科办理',
+    '科室',
+    '法规科审核',
+    '分管领导',
+    '协助人员'
+  ]
   if (!keys.some((key) => isEditable(key))) {
     return undefined
   }
@@ -854,11 +953,11 @@ onMounted(() => {
 /* stylelint-disable selector-id-pattern */
 
 :deep(.el-descriptions__label) {
+  width: 15%;
   font-weight: bold;
   color: #606266;
-  background-color: #f5f7fa;
-  width: 15%;
   word-break: keep-all;
+  background-color: #f5f7fa;
 }
 
 #printDivTag {
@@ -872,9 +971,9 @@ onMounted(() => {
   max-width: 100%;
   padding: 40px;
   margin: 0 auto;
+  overflow: visible;
   background-color: #fff;
   box-shadow: none;
-  overflow: visible;
 }
 
 #printDivTag .doc-title {
@@ -967,9 +1066,18 @@ onMounted(() => {
 
 #printDivTag .sub-header {
   height: 30px;
+  padding: 0 !important;
   font-weight: normal;
   text-align: center;
   background-color: transparent !important;
+}
+
+#printDivTag .sub-header-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 
 #printDivTag .check-item {

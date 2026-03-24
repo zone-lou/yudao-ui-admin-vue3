@@ -102,37 +102,6 @@
             </div>
           </el-tab-pane>
 
-          <!-- 详情信息底表 (只针对复议/诉讼呈现) -->
-          <el-tab-pane
-            label="详情信息"
-            name="basicForm"
-            v-if="
-              processDefinition?.formCustomViewPath?.includes('xzfy') ||
-              processDefinition?.formCustomViewPath?.includes('xzss')
-            "
-          >
-            <div class="form-scroll-area">
-              <el-scrollbar>
-                <el-row>
-                  <el-col :span="isFullWidth ? 24 : 17" class="!flex !flex-col formCol">
-                    <div class="form-box flex flex-col mb-30px flex-1">
-                      <BusinessFormComponent
-                        :id="processInstance.businessKey"
-                        :taskId="taskId"
-                        :currentNode="currentNode"
-                        :activityNodes="activityNodes"
-                        viewType="basic"
-                      />
-                    </div>
-                  </el-col>
-                  <el-col :span="7" v-if="!isFullWidth">
-                    <ProcessInstanceTimeline :activity-nodes="activityNodes" />
-                  </el-col>
-                </el-row>
-              </el-scrollbar>
-            </div>
-          </el-tab-pane>
-
           <!-- 流程图 -->
           <el-tab-pane label="流程图" name="diagram">
             <div class="form-scroll-area">
