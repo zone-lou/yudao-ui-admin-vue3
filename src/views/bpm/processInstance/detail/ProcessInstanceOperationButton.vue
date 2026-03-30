@@ -56,11 +56,11 @@
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="审批意见" prop="reason">
+          <el-form-item label="办理意见" prop="reason">
             <el-input
               v-model="deleteSignForm.reason"
               clearable
-              placeholder="请输入审批意见"
+              placeholder="请输入办理意见"
               type="textarea"
               :rows="3"
             />
@@ -152,7 +152,7 @@
           label-width="100px"
         >
           <el-form-item label="取消理由" prop="cancelReason">
-            <span class="text-#878c93 text-12px">&nbsp; 取消后，该审批流程将自动结束</span>
+            <span class="text-#878c93 text-12px">&nbsp; 取消后，该办理流程将自动结束</span>
             <el-input
               v-model="cancelForm.cancelReason"
               clearable
@@ -198,11 +198,11 @@
       :rules="approveReasonRule"
       label-width="90px"
     >
-      <el-form-item prop="reason" label="审批意见" v-if="requireDialogReasonInput">
+      <el-form-item prop="reason" label="办理意见" v-if="requireDialogReasonInput">
         <el-input
           v-model="approveReasonForm.reason"
           type="textarea"
-          placeholder="请输入审批意见"
+          placeholder="请输入办理意见"
           :rows="3"
         />
       </el-form-item>
@@ -249,7 +249,7 @@
                           v-if="!node.candidateUsers || node.candidateUsers.length === 0"
                           class="text-gray-400 text-sm h-full flex items-center justify-center text-center px-4 min-h-[60px]"
                         >
-                          无需选择审批人<br />(自动分配或无需审批)
+                          无需选择办理人<br />(自动分配或无需办理)
                         </div>
                         <el-tree
                           class="!bg-transparent"
@@ -360,7 +360,7 @@
           v-else-if="!formLoading"
           class="flex items-center justify-center h-[450px] text-gray-400"
         >
-          暂无需要选择的审批节点
+          暂无需要选择的办理节点
         </div>
       </div>
     </el-form>
@@ -423,11 +423,11 @@ const popOverVisible = ref({
 }) // 气泡卡是否展示
 const returnList = ref([] as any) // 退回节点
 const runningTask = ref<any>() // 运行中的任务
-const nodeTypeName = ref('审批') // 节点类型名称
+const nodeTypeName = ref('办理') // 节点类型名称
 const approveForm = ref<any>({}) // 审批通过时，额外的补充信息
 const approveFormFApi = ref<any>({}) // approveForms 的 fAPi
 
-const nextAssigneesTimelineRef = ref() // 下一个节点审批人时间线组件的引用
+const nextAssigneesTimelineRef = ref() // 下一个节点办理人时间线组件的引用
 const reasonRequire = ref()
 const requireDialogReasonInput = ref(false)
 const approveFormRef = ref<FormInstance>()
@@ -440,7 +440,7 @@ const approveReasonRule = computed(() => {
   return {
     reason: [{ required: true, message: nodeTypeName.value + '意见不能为空', trigger: 'blur' }],
     signPicUrl: [{ required: true, message: '签名不能为空', trigger: 'change' }],
-    nextAssignees: [{ required: true, message: '审批人不能为空', trigger: 'blur' }]
+    nextAssignees: [{ required: true, message: '办理人不能为空', trigger: 'blur' }]
   }
 })
 
@@ -452,7 +452,7 @@ const deleteSignForm = reactive({
 })
 const deleteSignFormRule = reactive<FormRules<typeof deleteSignForm>>({
   deleteSignTaskId: [{ required: true, message: '减签人员不能为空', trigger: 'change' }],
-  reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }]
+  reason: [{ required: true, message: '办理意见不能为空', trigger: 'blur' }]
 })
 
 // 退回表单
@@ -527,7 +527,7 @@ const closePopover = (type: string, formRef: FormInstance | undefined) => {
     formRef.resetFields()
   }
   popOverVisible.value[type] = false
-  // 清理 Timeline 组件中的自定义审批人数据
+  // 清理 Timeline 组件中的自定义办理人数据
   if (nextAssigneesTimelineRef.value) {
     nextAssigneesTimelineRef.value.batchSetCustomApproveUsers({})
   }
@@ -627,7 +627,7 @@ const handleDirectFinish = async () => {
   }
 }
 
-/** 打开审批弹窗 */
+/** 打开办理弹窗 */
 const openApproveDialog = async () => {
   // 校验流程表单
   const valid = await validateNormalForm()
@@ -648,23 +648,7 @@ const openApproveDialog = async () => {
       approveReasonForm.reason = opinion // 自动填充
       requireDialogReasonInput.value = false
 
-      // 新增：对于固定不需要选人的表单类型，在意见获取完毕后直接截流放行
-      const defName = (
-        props.processDefinition?.name ||
-        props.processInstance?.name ||
-        ''
-      ).toLowerCase()
-      const customPath = (props.processDefinition?.formCustomViewPath || '').toLowerCase()
-      if (
-        defName.includes('请假') ||
-        defName.includes('外出') ||
-        defName.includes('公出') ||
-        customPath.includes('leave') ||
-        customPath.includes('timeexplain')
-      ) {
-        await handleDirectFinish()
-        return // 彻底截流，不继续向下运行弹出 Dialog 的代码
-      }
+      // （已剥离特定的请假、公出、外出模块的直接放行代码，均一脉相承走下方 Dialog 加载可选节点）
     } else {
       approveReasonForm.reason = ''
       requireDialogReasonInput.value = true
@@ -702,8 +686,23 @@ const loadApprovalNodes = async () => {
         return 0
       })
       for (const node of data) {
+        // 专门修复：如果在流程最后一个节点（办结节点），由于模型定义或后端的兜底原因
+        // 导致名字显示为“请销假”等非结案词汇，且它由于不需要人处理而没有配置任何选人规则，强制将其名称纠正为“办理完成”
+        if (
+          node.taskDefKey === 'end' ||
+          node.taskDefKey?.toLowerCase().includes('endevent') ||
+          (
+            ['请销假', '请假', '公出', '外出', '公出申请', '外出申请', '因公外出'].includes(node.taskName) &&
+            (!node.candidateUsers || node.candidateUsers.length === 0) &&
+            (!node.extensionProperties || !node.extensionProperties.choose_rule)
+          )
+        ) {
+          node.taskName = '办理完成'
+          node.name = '办理完成'
+        }
+
         // 需求：如果是内循环节点，过滤掉本人
-        if (node.taskDefKey.includes('_internal_loop') && node.candidateUsers) {
+        if (node.taskDefKey?.includes('_internal_loop') && node.candidateUsers) {
           node.candidateUsers = filterTreeMySelf(node.candidateUsers, userId)
         }
         node.checked = false
@@ -961,7 +960,7 @@ const handleNodeCheckboxChange = (val: boolean | string | number, node: any) => 
   }
 }
 
-/** 提交审批 */
+/** 提交办理 */
 const handleApproveConfirm = async () => {
   // 校验
   if (!approveFormRef.value) return
@@ -970,7 +969,7 @@ const handleApproveConfirm = async () => {
 
   // 防御：如果是来自内置审批栏，由于 el-form-item v-if 会导致其必填失效，故追加硬校验
   if (!approveReasonForm.reason || approveReasonForm.reason.trim() === '') {
-    message.warning('审批意见不能为空')
+    message.warning('办理意见不能为空')
     return
   }
 
@@ -1011,11 +1010,11 @@ const handleApproveConfirm = async () => {
     // 针对常规节点：发现没有勾选任何人，进行阻断
     if (userIds.length === 0) {
       // 容错补充：防止配置出错该节点天生没配置候选人树，如果是这种没树的节点，理论上可以放它走或者依据业务退回
-      // 既然前面提示过“无需选择审批人(自动分配或无需审批)”，我们就放行它
+      // 既然前面提示过“无需选择办理人(自动分配或无需办理)”，我们就放行它
       if (!node.candidateUsers || node.candidateUsers.length === 0) {
         continue
       }
-      message.warning(`节点【${node.taskName}】请至少选择一名审批人`)
+      message.warning(`节点【${node.taskName}】请至少选择一名办理人`)
       return
     }
 
@@ -1242,7 +1241,7 @@ const loadTodoTask = (task: any) => {
   runningTask.value = task
   approveFormFApi.value = {}
   reasonRequire.value = task?.reasonRequire ?? false
-  nodeTypeName.value = task?.nodeType === NodeType.TRANSACTOR_NODE ? '办理' : '审批'
+  nodeTypeName.value = task?.nodeType === NodeType.TRANSACTOR_NODE ? '办理' : '办理'
   // 处理 approve 表单.
   if (task && task.formId && task.formConf) {
     const tempApproveForm = {}

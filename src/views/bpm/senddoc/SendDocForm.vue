@@ -192,10 +192,10 @@
       <el-form-item label="附件路径" prop="attachFilePath">
         <el-input v-model="formData.attachFilePath" placeholder="请输入附件路径" />
       </el-form-item>
-      <el-form-item label="判断正文草稿，审批搞，套红正文是否存在" prop="filetag">
+      <el-form-item label="判断正文草稿，办理稿，套红正文是否存在" prop="filetag">
         <el-input
           v-model="formData.filetag"
-          placeholder="请输入判断正文草稿，审批搞，套红正文是否存在"
+          placeholder="请输入判断正文草稿，办理稿，套红正文是否存在"
         />
       </el-form-item>
       <el-form-item label="拟稿单位" prop="draftDept">
@@ -294,8 +294,8 @@
           <el-option label="政务" :value="2" />
         </el-select>
       </el-form-item>
-      <el-form-item label="发文审批内容" prop="sendDocNotion">
-        <el-input v-model="formData.sendDocNotion" placeholder="请输入发文审批内容" />
+      <el-form-item label="发文办理内容" prop="sendDocNotion">
+        <el-input v-model="formData.sendDocNotion" placeholder="请输入发文办理内容" />
       </el-form-item>
       <el-form-item label="公文范围" prop="docRange">
         <el-input v-model="formData.docRange" placeholder="请输入公文范围" />
@@ -337,8 +337,8 @@
           placeholder="选择word套红正文上传时间"
         />
       </el-form-item>
-      <el-form-item label="厅/局长审批意见" prop="fugleidea">
-        <el-input v-model="formData.fugleidea" placeholder="请输入厅/局长审批意见" />
+      <el-form-item label="厅/局长办理意见" prop="fugleidea">
+        <el-input v-model="formData.fugleidea" placeholder="请输入厅/局长办理意见" />
       </el-form-item>
       <el-form-item label="厅/局意见人" prop="fuglename">
         <el-input v-model="formData.fuglename" placeholder="请输入厅/局意见人" />

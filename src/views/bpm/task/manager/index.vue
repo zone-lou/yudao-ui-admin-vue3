@@ -75,13 +75,13 @@
         prop="endTime"
         width="180"
       />
-      <el-table-column align="center" label="审批人" prop="assigneeUser.nickname" width="100" />
-      <el-table-column align="center" label="审批状态" prop="status" width="120">
+      <el-table-column align="center" label="办理人" prop="assigneeUser.nickname" width="100" />
+      <el-table-column align="center" label="办理状态" prop="status" width="120">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.BPM_TASK_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="审批建议" prop="reason" min-width="180" />
+      <el-table-column align="center" label="办理建议" prop="reason" min-width="180" />
       <el-table-column align="center" label="耗时" prop="durationInMillis" width="160">
         <template #default="scope">
           {{ formatPast2(scope.row.durationInMillis) }}

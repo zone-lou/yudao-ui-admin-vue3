@@ -281,7 +281,7 @@
                 <td colspan="3" class="signature-row">
                   <div class="sig-container">
                     <span style="width: 40%"
-                      >审批人：<span class="sign-input">{{
+                      >办理人：<span class="sign-input">{{
                         isEditable('法规科交办')
                           ? userStore.getUser.nickname
                           : nibanList.length > 0
@@ -357,7 +357,7 @@
                 <td colspan="3" class="signature-row">
                   <div class="sig-container">
                     <span style="width: 40%"
-                      >审批人：<span class="sign-input">{{
+                      >办理人：<span class="sign-input">{{
                         isEditable('局长') && !isEditable('分管局长')
                           ? userStore.getUser.nickname
                           : juzhangList.length > 0
@@ -751,7 +751,7 @@ const customUpload = async (options: any) => {
       fileextension: extension,
       docType: 'XZFY',
       docId: docId,
-      commentType: props.currentNode?.name || '审批意见附件'
+      commentType: props.currentNode?.name || '办理意见附件'
     } as any)
 
     ElMessage.success('附件上传成功')

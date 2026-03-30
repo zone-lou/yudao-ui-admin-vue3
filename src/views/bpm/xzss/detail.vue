@@ -175,7 +175,7 @@
                 <td colspan="3" class="signature-row">
                   <div class="sig-container">
                     <span style="width: 40%">
-                      审批人：
+                      办理人：
                       <span
                         v-if="isEditable('拟办') || isEditable('法规科交办')"
                         class="sign-input"
@@ -260,7 +260,7 @@
                 <td colspan="3" class="signature-row">
                   <div class="sig-container">
                     <span style="width: 40%">
-                      审批人：
+                      办理人：
                       <span
                         v-if="isEditable('局长') || isEditable('主要领导')"
                         class="sign-input"
@@ -819,7 +819,7 @@ const customUpload = async (options: any) => {
       fileextension: extension,
       docType: 'XZSS', // 确保类型为XZSS
       docId: docId,
-      commentType: props.currentNode?.name || '审批意见附件'
+      commentType: props.currentNode?.name || '办理意见附件'
     } as any)
 
     ElMessage.success('附件上传成功')
@@ -918,7 +918,7 @@ const isEditable = (keyword: string) => {
   if (!props.taskId) return false
   const nodeName = props.currentNode?.name || ''
 
-  // 屏蔽带有“(上诉)”的审批节点，强制它们使用全局原生弹窗处理
+  // 屏蔽带有“(上诉)”的办理节点，强制它们使用全局原生弹窗处理
   if (nodeName.includes('(上诉)')) return false
 
   // 特殊逻辑：排除“分管局长”对“局长”关键词的干扰
@@ -958,7 +958,7 @@ const juzhangList = ref<any[]>([])
 const lingdaoList = ref<any[]>([])
 const keshiList = ref<any[]>([])
 
-/** 解析 Activity Nodes 填充审批表 */
+/** 解析 Activity Nodes 填充办理单 */
 const processActivityNodes = () => {
   if (!props.activityNodes || props.activityNodes.length === 0) return
 
@@ -981,7 +981,7 @@ const processActivityNodes = () => {
           }
           const taskName = task.name || node.name || ''
 
-          // 排除“法规科(结果录入)”，不在审批表中展示
+          // 排除“法规科(结果录入)”，不在办理单中展示
           if (taskName.includes('法规科(结果录入)')) {
             return
           }
@@ -1047,7 +1047,7 @@ onMounted(() => {
   background-color: #f5f7fa;
 }
 
-/* ================= 导入红头审批表专用样式 ================= */
+/* ================= 导入红头办理单专用样式 ================= */
 #printDivTag {
   padding: 20px;
   font-family: SimSun, 'Songti SC', STSong, serif;

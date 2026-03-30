@@ -63,10 +63,10 @@
       <!--          class="!w-240px"-->
       <!--        />-->
       <!--      </el-form-item>-->
-      <el-form-item label="审批状态" prop="spzt">
+      <el-form-item label="办理状态" prop="spzt">
         <el-input
           v-model="queryParams.spzt"
-          placeholder="请输入审批状态"
+          placeholder="请输入办理状态"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
@@ -153,7 +153,7 @@
       </el-table-column>
       <el-table-column label="事假理由" align="center" prop="sjReason" />
       <el-table-column label="共计天数" align="center" prop="totalTs" />
-      <el-table-column label="审批状态" align="center" prop="spzt">
+      <el-table-column label="办理状态" align="center" prop="spzt">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.BPM_TASK_STATUS" :value="scope.row.spzt" />
         </template>

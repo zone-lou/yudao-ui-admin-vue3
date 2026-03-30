@@ -137,32 +137,32 @@
       />
       <el-table-column label="流程状态" prop="status" min-width="200">
         <template #default="scope">
-          <!-- 审批中状态 -->
+          <!-- 办理中状态 -->
           <template
             v-if="
               scope.row.status === BpmProcessInstanceStatus.RUNNING && scope.row.tasks?.length > 0
             "
           >
-            <!-- 单人审批 -->
+            <!-- 单人办理 -->
             <template v-if="scope.row.tasks.length === 1">
               <span>
                 <el-button link type="primary" @click="handleDetail(scope.row)">
                   {{ scope.row.tasks[0].assigneeUser?.nickname }}
                 </el-button>
-                ({{ scope.row.tasks[0].name }}) 审批中
+                ({{ scope.row.tasks[0].name }}) 办理中
               </span>
             </template>
-            <!-- 多人审批 -->
+            <!-- 多人办理 -->
             <template v-else>
               <span>
                 <el-button link type="primary" @click="handleDetail(scope.row)">
                   {{ scope.row.tasks[0].assigneeUser?.nickname }}
                 </el-button>
-                等 {{ scope.row.tasks.length }} 人 ({{ scope.row.tasks[0].name }})审批中
+                等 {{ scope.row.tasks.length }} 人 ({{ scope.row.tasks[0].name }})办理中
               </span>
             </template>
           </template>
-          <!-- 非审批中状态 -->
+          <!-- 非办理中状态 -->
           <template v-else>
             <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="scope.row.status" />
           </template>

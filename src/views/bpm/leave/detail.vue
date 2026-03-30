@@ -335,7 +335,7 @@ const props = defineProps({
 const detailLoading = ref(false) // 表单的加载中
 const detailData = ref<any>({}) // 详情数据
 const queryId = query.id as unknown as number
-const currentOpinion = ref('') // 当前正在填写的审批意见
+const currentOpinion = ref('') // 当前正在填写的办理意见
 
 // 历史审批意见分类
 const deptHeadList = ref<any[]>([]) // 科室(单位)负责人意见
@@ -367,7 +367,7 @@ const ensureMinRows = (list: any[], minRows: number) => {
   return res
 }
 
-/** 分类处理审批节点意见 */
+/** 分类处理办理节点意见 */
 const processActivityNodes = () => {
   if (!props.activityNodes || props.activityNodes.length === 0) return
 

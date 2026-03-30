@@ -360,7 +360,7 @@ const deptHeadList = ref<any[]>([]) // 科室(单位)负责人意见
 const officeList = ref<any[]>([]) // 办公室意见
 const deputyLeaderList = ref<any[]>([]) // 局分管领导意见
 const mainLeaderList = ref<any[]>([]) // 局主要领导意见
-const currentOpinion = ref('') // 当前正在填写的审批意见
+const currentOpinion = ref('') // 当前正在填写的办理意见
 
 /** 判断当前节点是否可编辑 */
 const isEditable = (keyword: string) => {
@@ -424,7 +424,7 @@ const getInfo = async () => {
   }
 }
 
-/** 分类处理审批节点意见 */
+/** 分类处理办理节点意见 */
 const processActivityNodes = () => {
   if (!props.activityNodes || props.activityNodes.length === 0) return
 

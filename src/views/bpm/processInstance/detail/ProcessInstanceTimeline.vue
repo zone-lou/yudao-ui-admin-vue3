@@ -153,7 +153,7 @@
                 "
                 class="text-#a5a5a5 text-13px mt-1 w-full bg-#f8f8fa p2 rounded-md"
               >
-                审批意见：{{ task.reason }}
+                办理意见：{{ task.reason }}
               </div>
               <div
                 v-if="task.signPicUrl && activity.nodeType === NodeType.USER_TASK_NODE"
@@ -261,7 +261,7 @@ const uid = instance?.uid || Math.floor(Math.random() * 10000000)
 
 const props = withDefaults(
   defineProps<{
-    activityNodes: ProcessInstanceApi.ApprovalNodeInfo[] // 审批节点信息
+    activityNodes: ProcessInstanceApi.ApprovalNodeInfo[] // 办理节点信息
     showStatusIcon?: boolean // 是否显示头像右下角状态图标
     enableApproveUserSelect?: boolean // 是否开启审批人自选功能
   }>(),
@@ -293,19 +293,19 @@ const toggleExpand = (key: string) => {
 }
 // === 新增逻辑结束 ===
 
-// 审批节点
+// 办理节点
 const statusIconMap2 = {
   // 跳过
   '-2': { color: '#cccccc', icon: 'ep:arrow-down' },
   // 未开始
   '-1': { color: '#909398', icon: 'ep-clock' },
-  // 待审批
+  // 待办理
   '0': { color: '#00b32a', icon: 'ep:loading' },
-  // 审批中
+  // 办理中
   '1': { color: '#448ef7', icon: 'ep:loading' },
   // 审批通过
   '2': { color: '#00b32a', icon: 'ep:circle-check-filled' },
-  // 审批不通过
+  // 办理不通过
   '3': { color: '#f46b6c', icon: 'fa-solid:times-circle' },
   // 取消
   '4': { color: '#cccccc', icon: 'ep:delete-filled' },
@@ -313,7 +313,7 @@ const statusIconMap2 = {
   '5': { color: '#f46b6c', icon: 'ep:remove-filled' },
   // 委派中
   '6': { color: '#448ef7', icon: 'ep:loading' },
-  // 审批通过中
+  // 办理通过中
   '7': { color: '#00b32a', icon: 'ep:circle-check-filled' }
 }
 
@@ -323,11 +323,11 @@ const statusIconMap = {
   // 审批未开始
   '-1': { color: '#909398', icon: Clock },
   '0': { color: '#00b32a', icon: Clock },
-  // 审批中
+  // 办理中
   '1': { color: '#448ef7', icon: Loading },
   // 审批通过
   '2': { color: '#00b32a', icon: Check },
-  // 审批不通过
+  // 办理不通过
   '3': { color: '#f46b6c', icon: Close },
   // 已取消
   '4': { color: '#cccccc', icon: Delete },
@@ -335,7 +335,7 @@ const statusIconMap = {
   '5': { color: '#f46b6c', icon: Minus },
   // 委派中
   '6': { color: '#448ef7', icon: Loading },
-  // 审批通过中
+  // 办理通过中
   '7': { color: '#00b32a', icon: Check }
 }
 
@@ -398,7 +398,7 @@ const getApprovalNodeTime = (node: ProcessInstanceApi.ApprovalNodeInfo) => {
   }
 }
 
-// 选择自定义审批人
+// 选择自定义办理人
 const userSelectFormRef = ref()
 const handleSelectUser = (activityId, selectedList) => {
   userSelectFormRef.value.open(activityId, selectedList)
@@ -426,12 +426,12 @@ const handleChildProcess = (activity: any) => {
   })
 }
 
-/** 设置自定义审批人 */
+/** 设置自定义办理人 */
 const setCustomApproveUsers = (activityId: string, users: any[]) => {
   customApproveUsers.value[activityId] = users || []
 }
 
-/** 批量设置多个节点的自定义审批人 */
+/** 批量设置多个节点的自定义办理人 */
 const batchSetCustomApproveUsers = (data: Record<string, any[]>) => {
   Object.keys(data).forEach((activityId) => {
     customApproveUsers.value[activityId] = data[activityId] || []

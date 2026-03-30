@@ -1,0 +1,62 @@
+detail.vue:180: <!-- 局长未审批时占位空行 -->
+create.vue:278: const startUserSelectTasks = ref([]) // 发起人需要选择审批人的用户任务列表
+create.vue:279: const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据
+create.vue:280: const tempStartUserSelectAssignees = ref({}) // 历史发起人选择审批人的数据，用于每次表单变更时，临时保存
+create.vue:378: // 恢复之前的选择审批人
+create.vue:461: // 加载最新的审批详情,主要用于节点预测
+create.vue:413: // ---------------- 审批流核心逻辑 ----------------
+create.vue:553: // 1. 精准监听条件变化，触发审批流预览更新
+create.vue:560: console.log('条件变化，刷新审批预览', { new3, new4, newNextNode })
+detail.vue:340: // 历史审批意见分类
+index.vue:206: /** 假期申请审批 列表 */
+index.vue:273: /** 批量删除假期申请审批 */
+index.vue:298: download.excel(data, '假期申请审批.xls')
+leaveForm.vue:70: /** 假期申请审批 表单 */
+ExtraSettings.vue:18: <el-text type="info"> 审批人可撤回正在办理节点的前一节点 </el-text>
+ExtraSettings.vue:75: <el-text> 同一审批人在流程中重复出现时： </el-text>
+ProcessDefinitionDetail.vue:110: const startUserSelectTasks: any = ref([]) // 发起人需要选择审批人或抄送人的任务列表
+ProcessDefinitionDetail.vue:111: const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据
+ProcessDefinitionDetail.vue:112: const tempStartUserSelectAssignees = ref({}) // 历史发起人选择审批人的数据，用于每次表单变更时，临时保存
+ProcessDefinitionDetail.vue:143: // 获取流程审批信息,当再次发起时，流程办理节点要根据原始表单参数预测出来
+ProcessDefinitionDetail.vue:172: // 加载最新的审批详情
+ProcessDefinitionDetail.vue:205: // 恢复之前的选择审批人
+index.vue:224: // 必须先获得审批详情以确保拿到最实时的待办 todoTask 数据
+index.vue:345: // 【核心修复】单人内转加签等导致后续审批仍滞留本节点时，后端的视图计算引擎可能判定其原生任务完成而将其遗漏出 unfinished 名单。
+index.vue:359: // 方案 2：全量扫描审批流记录，提取出所有的正在进行中的节点显示名称（Name）
+index.vue:434: /** 获取业务表单的审批意见 */
+PrintDialog.vue:279: const readerNames = ['主办科室', '协办科室', '办公室转发', '全局阅批', '全局阅审批', '全局传阅']
+PrintDialog.vue:477: /* ========== 核心视觉修正：防止审批途中的输入框及预留空位被打印 ========== */
+ProcessInstanceOperationButton.vue:155: <span class="text-#878c93 text-12px">&nbsp; 取消后，该审批流程将自动结束</span>
+ProcessInstanceOperationButton.vue:971: // 防御：如果是来自内置审批栏，由于 el-form-item v-if 会导致其必填失效，故追加硬校验
+ProcessInstanceOperationButton.vue:993: // 提前设置跳转变量：如果这个节点有流转条件，必须塞给引擎，无论它是否需要人审批
+ProcessInstanceOperationButton.vue:1014: // 既然前面提示过“无需选择审批人(自动分配或无需办理)”，我们就放行它
+ProcessInstanceOperationButton.vue:1018: message.warning(`节点【${node.taskName}】请至少选择一名审批人`)
+ProcessInstanceTimeline.vue:266: enableApproveUserSelect?: boolean // 是否开启审批人自选功能
+ProcessInstanceTimeline.vue:323: // 审批未开始
+ProcessInstanceTimeline.vue:347: // 审批人节点
+create.vue:328: // 检查是否需要自动填充默认审批人
+create.vue:470: // 修改点：仅在未启动流程时，校验审批人
+create.vue:595: console.error('获取默认收文审批人配置失败:', e)
+detail.vue:403: // 审批意见分类
+detail.vue:477: // 处理审批意见
+detail.vue:533: name.includes('全局阅审批') ||
+create.vue:450: // 处理发起人自选审批人
+detail.vue:282: // 审批意见列表（变量名保持不变，但业务含义已更新）
+SendDocForm.vue:195: <el-form-item label="判断正文草稿，审批搞，套红正文是否存在" prop="filetag">
+SendDocForm.vue:198: placeholder="请输入判断正文草稿，审批搞，套红正文是否存在"
+index.vue:4: title="审批转办、委派、抄送"
+index.vue:130: /** 处理审批按钮 */
+index.vue:157: /** 处理审批按钮 */
+index.vue:3: <!--  <doc-alert title="审批加签、减签" url="https://doc.iocoder.cn/bpm/sign/" />-->
+index.vue:5: <!--    title="审批转办、委派、抄送"-->
+index.vue:8: <!--  <doc-alert title="审批加签、减签" url="https://doc.iocoder.cn/bpm/sign/" />-->
+index.vue:425: /** 处理审批按钮 */
+index.vue:179: /** 假期申请审批 列表 */
+index.vue:244: /** 批量删除假期申请审批 */
+index.vue:269: download.excel(data, '假期申请审批.xls')
+VacationrecordForm.vue:163: /** 假期申请审批 表单 */
+create.vue:867: // 自选审批人校验
+create.vue:886: // 2. 处理发起人自选审批人
+detail.vue:913: // ============== 审批意见内联填报设置 =================
+detail.vue:955: // ============== 审批意见节点数据 =================
+detail.vue:988: // 排除所有带有“(上诉)”关键字的特定审批环节，交由弹窗处理

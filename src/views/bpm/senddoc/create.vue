@@ -189,7 +189,7 @@
             <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
           </el-form-item>
 
-          <h3 class="section-title" style="margin-top: 20px">审批与办理</h3>
+          <h3 class="section-title" style="margin-top: 20px">办理</h3>
 
           <el-row>
             <el-col :span="12">
@@ -247,7 +247,7 @@
           <template v-if="!formData.processInstanceId">
             <h3 class="section-title" style="margin-top: 20px">流程处理</h3>
 
-            <el-form-item label="下一审批节点" prop="nextNode" required>
+            <el-form-item label="下一办理节点" prop="nextNode" required>
               <el-select
                 v-model="formData.nextNode"
                 placeholder="请选择下一节点"
@@ -264,10 +264,10 @@
               </el-select>
             </el-form-item>
 
-            <el-form-item label="审批人" prop="tempNextUserSelectAssignees" required>
+            <el-form-item label="办理人" prop="tempNextUserSelectAssignees" required>
               <el-select
                 v-model="formData.tempNextUserSelectAssignees"
-                placeholder="请选择审批人"
+                placeholder="请选择办理人"
                 :multiple="multipleFlag"
               >
                 <el-option
@@ -298,7 +298,7 @@
     </el-col>
 
     <el-col :span="8">
-      <ContentWrap title="审批流程预览" :bodyStyle="{ padding: '0 20px 0' }">
+      <ContentWrap title="办理流程预览" :bodyStyle="{ padding: '0 20px 0' }">
         <ProcessInstanceTimeline
           ref="timelineRef"
           :activity-nodes="activityNodes"
@@ -389,12 +389,12 @@ const formRules = computed(() => ({
   nextNode: [
     {
       required: !formData.value.processInstanceId,
-      message: '下一审批节点不能为空',
+      message: '下一办理节点不能为空',
       trigger: 'change'
     }
   ],
   tempNextUserSelectAssignees: [
-    { required: !formData.value.processInstanceId, message: '审批人不能为空', trigger: 'change' }
+    { required: !formData.value.processInstanceId, message: '办理人不能为空', trigger: 'change' }
   ]
 }))
 
@@ -438,7 +438,7 @@ const submitForm = async () => {
         Array.isArray(startUserSelectAssignees.value[userTask.id]) &&
         startUserSelectAssignees.value[userTask.id].length === 0
       ) {
-        return message.warning(`请选择${userTask.name}的审批人`)
+        return message.warning(`请选择${userTask.name}的办理人`)
       }
     }
   }

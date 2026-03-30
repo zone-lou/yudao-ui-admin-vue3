@@ -106,7 +106,7 @@ const detailForm: any = ref({
   value: {}
 }) // 流程表单详情
 const fApi = ref<ApiAttrs>()
-// 指定审批人
+// 指定办理人
 const startUserSelectTasks: any = ref([]) // 发起人需要选择审批人或抄送人的任务列表
 const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据
 const tempStartUserSelectAssignees = ref({}) // 历史发起人选择审批人的数据，用于每次表单变更时，临时保存
@@ -114,11 +114,11 @@ const bpmnXML: any = ref(null) // BPMN 数据
 const simpleJson = ref<string | undefined>() // Simple 设计器数据 json 格式
 
 const activeTab = ref('form') // 当前的 Tab
-const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([]) // 审批节点信息
+const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([]) // 办理节点信息
 
 /** 设置表单信息、获取流程图数据 **/
 const initProcessInfo = async (row: any, formVariables?: any) => {
-  // 重置指定审批人
+  // 重置指定办理人
   startUserSelectTasks.value = []
   startUserSelectAssignees.value = {}
 
@@ -126,8 +126,8 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
   if (row.formType == BpmModelFormType.NORMAL) {
     // 设置表单
     // 注意：需要从 formVariables 中，移除不在 row.formFields 的值。
-    // 原因是：后端返回的 formVariables 里面，会有一些非表单的信息。例如说，某个流程节点的审批人。
-    //        这样，就可能导致一个流程被审批不通过后，重新发起时，会直接后端报错！！！
+    // 原因是：后端返回的 formVariables 里面，会有一些非表单的信息。例如说，某个流程节点的办理人。
+    //        这样，就可能导致一个流程被办理不通过后，重新发起时，会直接后端报错！！！
     const formApi = formCreate.create(decodeFields(row.formFields))
     const allowedFields = formApi.fields()
     for (const key in formVariables) {
@@ -140,7 +140,7 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
     await nextTick()
     fApi.value?.btn.show(false) // 隐藏提交按钮
 
-    // 获取流程审批信息,当再次发起时，流程审批节点要根据原始表单参数预测出来
+    // 获取流程审批信息,当再次发起时，流程办理节点要根据原始表单参数预测出来
     await getApprovalDetail({
       id: row.id,
       processVariablesStr: JSON.stringify(formVariables)
@@ -166,7 +166,7 @@ watch(
   detailForm.value,
   (newValue) => {
     if (newValue && Object.keys(newValue.value).length > 0) {
-      // 记录之前的节点审批人
+      // 记录之前的节点办理人
       tempStartUserSelectAssignees.value = startUserSelectAssignees.value
       startUserSelectAssignees.value = {}
       // 加载最新的审批详情
@@ -181,10 +181,10 @@ watch(
   }
 )
 
-/** 获取审批详情 */
+/** 获取办理详情 */
 const getApprovalDetail = async (row: any) => {
   try {
-    // TODO 获取审批详情，设置 activityId 为发起人节点（为了获取字段权限。暂时只对 Simple 设计器有效）；@jason：这里可以去掉 activityId 么？
+    // TODO 获取办理详情，设置 activityId 为发起人节点（为了获取字段权限。暂时只对 Simple 设计器有效）；@jason：这里可以去掉 activityId 么？
     const data = await ProcessInstanceApi.getApprovalDetail({
       processDefinitionId: row.id,
       activityId: NodeId.START_USER_NODE_ID,
@@ -192,10 +192,10 @@ const getApprovalDetail = async (row: any) => {
     })
 
     if (!data) {
-      message.error('查询不到审批详情信息！')
+      message.error('查询不到办理详情信息！')
       return
     }
-    // 获取审批节点，显示 Timeline 的数据
+    // 获取办理节点，显示 Timeline 的数据
     activityNodes.value = data.activityNodes
 
     // 获取发起人自选的任务
@@ -277,7 +277,7 @@ const submitForm = async () => {
     console.warn('表单验证失败:', error)
     return
   }
-  // 如果有指定审批人，需要校验
+  // 如果有指定办理人，需要校验
   if (startUserSelectTasks.value?.length > 0) {
     for (const userTask of startUserSelectTasks.value) {
       if (
@@ -308,7 +308,7 @@ const submitForm = async () => {
   }
 }
 
-/** 取消发起审批 */
+/** 取消发起 */
 const handleCancel = () => {
   emit('cancel')
 }

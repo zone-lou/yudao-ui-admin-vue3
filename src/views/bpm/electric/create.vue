@@ -162,7 +162,7 @@
               type="textarea"
             />
           </el-form-item>
-          <el-form-item label="下一审批节点" prop="nextNode" required>
+          <el-form-item label="下一办理节点" prop="nextNode" required>
             <el-select
               v-model="formData.nextNode"
               placeholder="请选择下一节点"
@@ -178,10 +178,10 @@
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="审批人" prop="tempNextUserSelectAssignees" required>
+          <el-form-item label="办理人" prop="tempNextUserSelectAssignees" required>
             <el-select
               v-model="formData.tempNextUserSelectAssignees"
-              placeholder="请选择审批人"
+              placeholder="请选择办理人"
               :multiple="multipleFlag"
             >
               <el-option
@@ -202,7 +202,7 @@
     </el-col>
 
     <el-col :span="8">
-      <ContentWrap title="审批流程预览" :bodyStyle="{ padding: '0 20px 0' }">
+      <ContentWrap title="办理流程预览" :bodyStyle="{ padding: '0 20px 0' }">
         <ProcessInstanceTimeline
           ref="timelineRef"
           :activity-nodes="activityNodes"
@@ -269,8 +269,8 @@ const nextNodeSelectAssignees = ref({})
 const formRules = reactive({
   subject: [{ required: true, message: '标题不能为空', trigger: 'blur' }],
   receiveDocNumber: [{ required: true, message: '收文编号不能为空', trigger: 'blur' }],
-  nextNode: [{ required: true, message: '下一审批节点不能为空', trigger: 'change' }],
-  tempNextUserSelectAssignees: [{ required: true, message: '审批人不能为空', trigger: 'change' }]
+  nextNode: [{ required: true, message: '下一办理节点不能为空', trigger: 'change' }],
+  tempNextUserSelectAssignees: [{ required: true, message: '办理人不能为空', trigger: 'change' }]
 })
 const formRef = ref()
 
@@ -278,7 +278,7 @@ const processDefineKey = 'oa_electric' // 流程定义 Key
 const startUserSelectTasks = ref([]) // 发起人需要选择审批人的用户任务列表
 const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据
 const tempStartUserSelectAssignees = ref({}) // 历史发起人选择审批人的数据，用于每次表单变更时，临时保存
-const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([]) // 审批节点信息
+const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([]) // 办理节点信息
 const processDefinitionId = ref('')
 
 const nodeChange = async (val) => {
@@ -308,14 +308,14 @@ const submitForm = async () => {
   if (!formRef) return
   const valid = await formRef.value.validate()
   if (!valid) return
-  // 1.2 审批相关：校验指定审批人
+  // 1.2 办理相关：校验指定办理人
   if (startUserSelectTasks.value?.length > 0) {
     for (const userTask of startUserSelectTasks.value) {
       if (
         Array.isArray(startUserSelectAssignees.value[userTask.id]) &&
         startUserSelectAssignees.value[userTask.id].length === 0
       ) {
-        return message.warning(`请选择${userTask.name}的审批人`)
+        return message.warning(`请选择${userTask.name}的办理人`)
       }
     }
   }
@@ -328,7 +328,7 @@ const submitForm = async () => {
       data.sendDept = data.sendDept.join(',')
     }
     data.nextNodeAssignees = {}
-    // 审批相关：设置指定审批人
+    // 办理相关：设置指定办理人
     if (startUserSelectTasks.value?.length > 0) {
       data.startUserSelectAssignees = startUserSelectAssignees.value
     }
@@ -354,7 +354,7 @@ const submitForm = async () => {
   }
 }
 
-/** 审批相关：获取审批详情 */
+/** 办理相关：获取办理详情 */
 const getApprovalDetail = async () => {
   if (!processDefinitionId.value) return
   try {
@@ -365,10 +365,10 @@ const getApprovalDetail = async () => {
     })
 
     if (!data) {
-      message.error('查询不到审批详情信息！')
+      message.error('查询不到办理详情信息！')
       return
     }
-    // 获取审批节点，显示 Timeline 的数据
+    // 获取办理节点，显示 Timeline 的数据
     activityNodes.value = data.activityNodes
 
     // 获取发起人自选的任务
@@ -403,7 +403,7 @@ const getNextApprovalNodes = async () => {
   await getSelectUsers(data[0].extensionProperties)
 }
 
-/** 审批相关：选择发起人 */
+/** 办理相关：选择发起人 */
 const selectUserConfirm = (id: string, userList: any[]) => {
   startUserSelectAssignees.value[id] = userList?.map((item: any) => item.id)
 }
@@ -424,7 +424,7 @@ onMounted(async () => {
   processDefinitionId.value = processDefinitionDetail.id
   startUserSelectTasks.value = processDefinitionDetail.startUserSelectTasks
 
-  // 审批相关：加载最新的审批详情，主要用于节点预测
+  // 办理相关：加载最新的办理详情，主要用于节点预测
   // await getApprovalDetail()
   await getNextApprovalNodes()
 
@@ -447,7 +447,7 @@ const formatSendDocNumberLabel = (label: string) => {
   return `${label}[${year}]号`
 }
 
-/** 审批相关：预测流程节点会因为输入的参数值而产生新的预测结果值，所以需重新预测一次, formData.value可改成实际业务中的特定字段 */
+/** 办理相关：预测流程节点会因为输入的参数值而产生新的预测结果值，所以需重新预测一次, formData.value可改成实际业务中的特定字段 */
 watch(
   formData.value,
   (newValue, oldValue) => {
@@ -455,7 +455,7 @@ watch(
       return
     }
     if (newValue && Object.keys(newValue).length > 0) {
-      // 记录之前的节点审批人
+      // 记录之前的节点办理人
       tempStartUserSelectAssignees.value = startUserSelectAssignees.value
       startUserSelectAssignees.value = {}
       // 加载最新的审批详情,主要用于节点预测

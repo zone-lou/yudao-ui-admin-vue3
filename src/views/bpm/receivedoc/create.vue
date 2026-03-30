@@ -145,7 +145,7 @@
           </el-form-item>
 
           <el-form-item
-            label="下一审批节点"
+            label="下一办理节点"
             prop="nextNode"
             required
             v-if="!formData.processInstanceId"
@@ -213,7 +213,7 @@
     </el-col>
 
     <el-col :span="8">
-      <ContentWrap title="审批流程预览" :bodyStyle="{ padding: '0 20px 0' }">
+      <ContentWrap title="办理流程预览" :bodyStyle="{ padding: '0 20px 0' }">
         <ProcessInstanceTimeline
           ref="timelineRef"
           :activity-nodes="activityNodes"
@@ -282,8 +282,8 @@ const formRef = ref()
 const formRules = reactive({
   subject: [{ required: true, message: '标题不能为空', trigger: 'blur' }],
   receiveDocNumber: [{ required: true, message: '收文编号不能为空', trigger: 'blur' }],
-  nextNode: [{ required: true, message: '下一审批节点不能为空', trigger: 'change' }],
-  tempNextUserSelectAssignees: [{ required: true, message: '审批人不能为空', trigger: 'blur' }]
+  nextNode: [{ required: true, message: '下一办理节点不能为空', trigger: 'change' }],
+  tempNextUserSelectAssignees: [{ required: true, message: '办理人不能为空', trigger: 'blur' }]
 })
 
 const processDefineKey = 'receice_doc_v2_copy_copy'
@@ -474,7 +474,7 @@ const handleSubmit = async () => {
         Array.isArray(startUserSelectAssignees.value[userTask.id]) &&
         startUserSelectAssignees.value[userTask.id].length === 0
       ) {
-        return message.warning(`请选择${userTask.name}的审批人`)
+        return message.warning(`请选择${userTask.name}的办理人`)
       }
     }
   }
@@ -527,7 +527,7 @@ const handleSubmit = async () => {
   }
 }
 
-/** 审批相关：获取审批详情 */
+/** 办理相关：获取办理详情 */
 const getApprovalDetail = async () => {
   if (!processDefinitionId.value) return
   // 如果是修改流程中表单，不需要重新计算下一节点
@@ -546,7 +546,7 @@ const getApprovalDetail = async () => {
     })
 
     if (!data) {
-      message.error('查询不到审批详情信息！')
+      message.error('查询不到办理详情信息！')
       return
     }
     activityNodes.value = data.activityNodes

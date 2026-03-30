@@ -123,7 +123,7 @@
           {{ scope.row.durationInMillis > 0 ? formatPast2(scope.row.durationInMillis) : '-' }}
         </template>
       </el-table-column>
-      <el-table-column label="当前审批任务" align="center" prop="tasks" min-width="120px">
+      <el-table-column label="当前办理任务" align="center" prop="tasks" min-width="120px">
         <template #default="scope">
           <el-button type="primary" v-for="task in scope.row.tasks" :key="task.id" link>
             <span>{{ task.name }}</span>

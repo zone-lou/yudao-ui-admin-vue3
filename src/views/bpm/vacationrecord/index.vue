@@ -45,10 +45,10 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="审批状态" prop="spzt">
+      <el-form-item label="办理状态" prop="spzt">
         <el-input
           v-model="queryParams.spzt"
-          placeholder="请输入审批状态"
+          placeholder="请输入办理状态"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"

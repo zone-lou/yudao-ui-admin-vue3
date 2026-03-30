@@ -410,7 +410,7 @@
             </el-form>
           </el-tab-pane>
 
-          <el-tab-pane label="审批表" name="oaForm">
+          <el-tab-pane label="办理单" name="oaForm">
             <div id="printDivTag" class="form-scroll-area">
               <div class="oa-container">
                 <div class="doc-title">义乌市国土资源局行政诉讼审批表</div>
@@ -470,7 +470,7 @@
                     <tr>
                       <td colspan="3" class="signature-row">
                         <div class="sig-container">
-                          <span style="width: 40%">审批人：<span class="sign-input"></span></span>
+                          <span style="width: 40%">办理人：<span class="sign-input"></span></span>
                           <span style="width: 40%">日期：<span class="sign-input"></span></span>
                         </div>
                       </td>
@@ -483,7 +483,7 @@
                     <tr>
                       <td colspan="3" class="signature-row">
                         <div class="sig-container">
-                          <span style="width: 40%">审批人：<span class="sign-input"></span></span>
+                          <span style="width: 40%">办理人：<span class="sign-input"></span></span>
                           <span style="width: 40%">日期：<span class="sign-input"></span></span>
                         </div>
                       </td>
@@ -871,7 +871,7 @@ const submitForm = async () => {
         Array.isArray(startUserSelectAssignees.value[userTask.id]) &&
         startUserSelectAssignees.value[userTask.id].length === 0
       ) {
-        return message.warning(`请选择${userTask.name}的审批人`)
+        return message.warning(`请选择${userTask.name}的办理人`)
       }
     }
   }
@@ -1014,7 +1014,7 @@ watch(
   margin-top: -10px;
 }
 
-/* ================= 导入红头审批表专用样式 ================= */
+/* ================= 导入红头办理单专用样式 ================= */
 #printDivTag {
   padding: 20px;
   font-family: SimSun, 'Songti SC', STSong, serif;

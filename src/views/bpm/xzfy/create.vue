@@ -321,7 +321,7 @@
             </el-form>
           </el-tab-pane>
 
-          <el-tab-pane label="审批单" name="oaForm">
+          <el-tab-pane label="办理单" name="oaForm">
             <div id="printDivTag" class="form-scroll-area">
               <div class="oa-container">
                 <div class="doc-title">义乌市自然资源和规划局行政复议审批表</div>
@@ -382,7 +382,7 @@
                     <tr>
                       <td colspan="3" class="signature-row">
                         <div class="sig-container">
-                          <span style="width: 40%">审批人：<span class="sign-input"></span></span>
+                          <span style="width: 40%">办理人：<span class="sign-input"></span></span>
                           <span style="width: 40%">日期：<span class="sign-input"></span></span>
                         </div>
                       </td>
@@ -396,7 +396,7 @@
                     <tr>
                       <td colspan="3" class="signature-row">
                         <div class="sig-container">
-                          <span style="width: 40%">审批人：<span class="sign-input"></span></span>
+                          <span style="width: 40%">办理人：<span class="sign-input"></span></span>
                           <span style="width: 40%">日期：<span class="sign-input"></span></span>
                         </div>
                       </td>

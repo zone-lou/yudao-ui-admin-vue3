@@ -397,7 +397,7 @@ const detailData = ref({
   issupervise: false
 })
 const fileList = ref<any[]>([])
-const currentOpinion = ref('') // 当前正在填写的审批意见
+const currentOpinion = ref('') // 当前正在填写的办理意见
 const fileViewBaseUrl = ref('')
 
 // 审批意见分类
@@ -410,7 +410,7 @@ const otherOpinionList = ref<any[]>([]) // 其他
 
 /** 判断当前节点是否可编辑 */
 const isEditable = (keyword: string) => {
-  // 如果没有任务ID，说明不在审批中，只读
+  // 如果没有任务ID，说明不在办理中，只读
   if (!props.taskId) return false
   const nodeName = props.currentNode?.name || ''
   return nodeName.indexOf(keyword) !== -1
@@ -481,7 +481,7 @@ const getInfo = async () => {
   }
 }
 
-/** 分类处理审批节点意见 */
+/** 分类处理办理节点意见 */
 const processActivityNodes = () => {
   if (!props.activityNodes || props.activityNodes.length === 0) return
 

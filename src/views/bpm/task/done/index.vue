@@ -189,7 +189,7 @@
         width="180"
       />
 
-      <el-table-column align="center" label="审批状态" prop="status" width="120">
+      <el-table-column align="center" label="办理状态" prop="status" width="120">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.BPM_TASK_STATUS" :value="scope.row.status" />
         </template>

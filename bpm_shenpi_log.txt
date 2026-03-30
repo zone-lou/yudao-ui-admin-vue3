@@ -1,0 +1,237 @@
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\confflow\create.vue:146: <ContentWrap title="审批流程预览" :bodyStyle="{ padding: '0 20px 0' }">
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\confflow\create.vue:210: nextNode: [{ required: true, message: '下一审批节点不能为空', trigger: 'change' }],
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\confflow\create.vue:211: tempNextUserSelectAssignees: [{ required: true, message: '审批人不能为空', trigger: 'change' }]
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\confflow\create.vue:242: // 校验指定审批人
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\confflow\create.vue:249: return message.warning(`请选择${userTask.name}的审批人`)
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\confflow\create.vue:264: // 处理下一节点审批人
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\confflow\create.vue:295: /** 审批相关：获取审批详情 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\confflow\create.vue:318: message.error('查询不到审批详情信息！')
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\confflow\detail.vue:180: <!-- 局长未审批时占位空行 -->
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\confflow\detail.vue:236: const currentOpinion = ref('') // 当前正在填写的审批意见
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\confflow\detail.vue:313: /** 分类处理审批节点意见 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\electric\create.vue:165: <el-form-item label="下一审批节点" prop="nextNode" required>
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\electric\create.vue:181: <el-form-item label="审批人" prop="tempNextUserSelectAssignees" required>
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\electric\create.vue:184: placeholder="请选择审批人"
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\electric\create.vue:205: <ContentWrap title="审批流程预览" :bodyStyle="{ padding: '0 20px 0' }">
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\electric\create.vue:272: nextNode: [{ required: true, message: '下一审批节点不能为空', trigger: 'change' }],
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\electric\create.vue:273: tempNextUserSelectAssignees: [{ required: true, message: '审批人不能为空', trigger: 'change' }]
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\electric\create.vue:278: const startUserSelectTasks = ref([]) // 发起人需要选择审批人的用户任务列表
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\electric\create.vue:279: const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\electric\create.vue:280: const tempStartUserSelectAssignees = ref({}) // 历史发起人选择审批人的数据，用于每次表单变更时，临时保存
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\electric\create.vue:281: const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([]) // 审批节点信息
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\electric\create.vue:311: // 1.2 审批相关：校验指定审批人
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\electric\create.vue:318: return message.warning(`请选择${userTask.name}的审批人`)
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\electric\create.vue:331: // 审批相关：设置指定审批人
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\electric\create.vue:357: /** 审批相关：获取审批详情 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\electric\create.vue:368: message.error('查询不到审批详情信息！')
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\electric\create.vue:371: // 获取审批节点，显示 Timeline 的数据
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\electric\create.vue:378: // 恢复之前的选择审批人
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\electric\create.vue:406: /** 审批相关：选择发起人 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\electric\create.vue:427: // 审批相关：加载最新的审批详情，主要用于节点预测
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\electric\create.vue:450: /** 审批相关：预测流程节点会因为输入的参数值而产生新的预测结果值，所以需重新预测一次, formData.value可改成实际业务中的特定字段 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\electric\create.vue:458: // 记录之前的节点审批人
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\electric\create.vue:461: // 加载最新的审批详情,主要用于节点预测
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\form\index.vue:2: <doc-alert title="审批接入（流程表单）" url="https://doc.iocoder.cn/bpm/use-bpm-form/" />
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\leave\create.vue:134: label="下一审批节点"
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\leave\create.vue:164: placeholder="请选择审批人"
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\leave\create.vue:186: <ContentWrap title="审批流程预览" :bodyStyle="{ padding: '0 20px 0' }">
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\leave\create.vue:250: nextNode: [{ required: true, message: '下一审批节点不能为空', trigger: 'change' }],
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\leave\create.vue:251: tempNextUserSelectAssignees: [{ required: true, message: '审批人不能为空', trigger: 'blur' }]
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\leave\create.vue:413: // ---------------- 审批流核心逻辑 ----------------
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\leave\create.vue:499: return message.warning(`请选择${userTask.name}的审批人`)
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\leave\create.vue:553: // 1. 精准监听条件变化，触发审批流预览更新
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\leave\create.vue:560: console.log('条件变化，刷新审批预览', { new3, new4, newNextNode })
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\leave\create.vue:608: // 5. 【关键】流程ID等节点配置就绪后，再请求审批节点详情
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\leave\detail.vue:3: <div class="doc-title">义乌市自然资源和规划局请假审批单</div>
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\leave\detail.vue:338: const currentOpinion = ref('') // 当前正在填写的审批意见
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\leave\detail.vue:340: // 历史审批意见分类
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\leave\detail.vue:370: /** 分类处理审批节点意见 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\leave\index.vue:66: <el-form-item label="审批状态" prop="spzt">
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\leave\index.vue:69: placeholder="请输入审批状态"
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\leave\index.vue:156: <el-table-column label="审批状态" align="center" prop="spzt">
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\leave\index.vue:206: /** 假期申请审批 列表 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\leave\index.vue:273: /** 批量删除假期申请审批 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\leave\index.vue:298: download.excel(data, '假期申请审批.xls')
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\leave\leaveForm.vue:50: <el-form-item label="审批状态" prop="spzt">
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\leave\leaveForm.vue:51: <el-input v-model="formData.spzt" placeholder="请输入审批状态" />
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\leave\leaveForm.vue:70: /** 假期申请审批 表单 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\model\form\ExtraSettings.vue:8: <el-checkbox v-model="modelData.allowCancelRunningProcess" label="允许撤销审批中的申请" />
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\model\form\ExtraSettings.vue:13: <el-text size="large" tag="b">审批人权限</el-text>
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\model\form\ExtraSettings.vue:16: <el-checkbox v-model="modelData.allowWithdrawTask" label="允许审批人撤回任务" />
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\model\form\ExtraSettings.vue:18: <el-text type="info"> 审批人可撤回正在审批节点的前一节点 </el-text>
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\model\form\ExtraSettings.vue:75: <el-text> 同一审批人在流程中重复出现时： </el-text>
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\model\form\ExtraSettings.vue:80: <el-radio :value="1">仅审批一次，后续重复的审批节点均自动通过</el-radio>
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\model\form\ExtraSettings.vue:81: <el-radio :value="2">仅针对连续审批的节点自动通过</el-radio>
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\create\ProcessDefinitionDetail.vue:109: // 指定审批人
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\create\ProcessDefinitionDetail.vue:110: const startUserSelectTasks: any = ref([]) // 发起人需要选择审批人或抄送人的任务列表
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\create\ProcessDefinitionDetail.vue:111: const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\create\ProcessDefinitionDetail.vue:112: const tempStartUserSelectAssignees = ref({}) // 历史发起人选择审批人的数据，用于每次表单变更时，临时保存
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\create\ProcessDefinitionDetail.vue:117: const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([]) // 审批节点信息
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\create\ProcessDefinitionDetail.vue:121: // 重置指定审批人
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\create\ProcessDefinitionDetail.vue:129: // 原因是：后端返回的 formVariables 里面，会有一些非表单的信息。例如说，某个流程节点的审批人。
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\create\ProcessDefinitionDetail.vue:130: //        这样，就可能导致一个流程被审批不通过后，重新发起时，会直接后端报错！！！
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\create\ProcessDefinitionDetail.vue:143: // 获取流程审批信息,当再次发起时，流程审批节点要根据原始表单参数预测出来
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\create\ProcessDefinitionDetail.vue:169: // 记录之前的节点审批人
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\create\ProcessDefinitionDetail.vue:172: // 加载最新的审批详情
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\create\ProcessDefinitionDetail.vue:184: /** 获取审批详情 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\create\ProcessDefinitionDetail.vue:187: // TODO 获取审批详情，设置 activityId 为发起人节点（为了获取字段权限。暂时只对 Simple 设计器有效）；@jason：这里可以去掉 activityId 么？
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\create\ProcessDefinitionDetail.vue:195: message.error('查询不到审批详情信息！')
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\create\ProcessDefinitionDetail.vue:198: // 获取审批节点，显示 Timeline 的数据
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\create\ProcessDefinitionDetail.vue:205: // 恢复之前的选择审批人
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\create\ProcessDefinitionDetail.vue:280: // 如果有指定审批人，需要校验
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\create\ProcessDefinitionDetail.vue:311: /** 取消发起审批 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\index.vue:5: <!-- 审批状态图标（盖章效果） -->
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\index.vue:65: <el-tab-pane label="审批单" name="form">
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\index.vue:97: <!-- 审批记录时间线 -->
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\index.vue:224: // 必须先获得审批详情以确保拿到最实时的待办 todoTask 数据
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\index.vue:233: /** 获取审批详情 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\index.vue:238: const currentNode = ref<ProcessInstanceApi.ApprovalNodeInfo>() // 审批节点信息
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\index.vue:262: message.error('查询不到审批详情信息！')
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\index.vue:309: // 获取审批节点，显示 Timeline 的数据
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\index.vue:345: // 【核心修复】单人内转加签等导致后续审批仍滞留本节点时，后端的视图计算引擎可能判定其原生任务完成而将其遗漏出 unfinished 名单。
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\index.vue:359: // 方案 2：全量扫描审批流记录，提取出所有的正在进行中的节点显示名称（Name）
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\index.vue:364: const unfinishedStatuses = [0, 1, 6, 7] // 涵盖审批中、委派中、审批通过中等所有未结案状态
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\index.vue:434: /** 获取业务表单的审批意见 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\PrintDialog.vue:198: // ==================== 【审批任务】 统一处理 ====================
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\PrintDialog.vue:279: const readerNames = ['主办科室', '协办科室', '办公室转发', '全局阅批', '全局阅审批', '全局传阅']
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\PrintDialog.vue:477: /* ========== 核心视觉修正：防止审批途中的输入框及预留空位被打印 ========== */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceOperationButton.vue:59: <el-form-item label="审批意见" prop="reason">
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceOperationButton.vue:63: placeholder="请输入审批意见"
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceOperationButton.vue:155: <span class="text-#878c93 text-12px">&nbsp; 取消后，该审批流程将自动结束</span>
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceOperationButton.vue:201: <el-form-item prop="reason" label="审批意见" v-if="requireDialogReasonInput">
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceOperationButton.vue:205: placeholder="请输入审批意见"
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceOperationButton.vue:252: 无需选择审批人<br />(自动分配或无需审批)
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceOperationButton.vue:363: 暂无需要选择的审批节点
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceOperationButton.vue:426: const nodeTypeName = ref('审批') // 节点类型名称
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceOperationButton.vue:427: const approveForm = ref<any>({}) // 审批通过时，额外的补充信息
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceOperationButton.vue:430: const nextAssigneesTimelineRef = ref() // 下一个节点审批人时间线组件的引用
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceOperationButton.vue:443: nextAssignees: [{ required: true, message: '审批人不能为空', trigger: 'blur' }]
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceOperationButton.vue:455: reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }]
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceOperationButton.vue:530: // 清理 Timeline 组件中的自定义审批人数据
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceOperationButton.vue:630: /** 打开审批弹窗 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceOperationButton.vue:964: /** 提交审批 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceOperationButton.vue:971: // 防御：如果是来自内置审批栏，由于 el-form-item v-if 会导致其必填失效，故追加硬校验
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceOperationButton.vue:973: message.warning('审批意见不能为空')
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceOperationButton.vue:993: // 提前设置跳转变量：如果这个节点有流转条件，必须塞给引擎，无论它是否需要人审批
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceOperationButton.vue:1014: // 既然前面提示过“无需选择审批人(自动分配或无需审批)”，我们就放行它
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceOperationButton.vue:1018: message.warning(`节点【${node.taskName}】请至少选择一名审批人`)
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceOperationButton.vue:1234: if (displayName === '通过' || displayName === '审批通过') {
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceOperationButton.vue:1245: nodeTypeName.value = task?.nodeType === NodeType.TRANSACTOR_NODE ? '办理' : '审批'
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceSimpleViewer.vue:84: // 审批节点
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceTimeline.vue:156: 审批意见：{{ task.reason }}
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceTimeline.vue:264: activityNodes: ProcessInstanceApi.ApprovalNodeInfo[] // 审批节点信息
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceTimeline.vue:266: enableApproveUserSelect?: boolean // 是否开启审批人自选功能
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceTimeline.vue:296: // 审批节点
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceTimeline.vue:302: // 待审批
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceTimeline.vue:304: // 审批中
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceTimeline.vue:306: // 审批通过
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceTimeline.vue:308: // 审批不通过
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceTimeline.vue:316: // 审批通过中
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceTimeline.vue:323: // 审批未开始
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceTimeline.vue:326: // 审批中
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceTimeline.vue:328: // 审批通过
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceTimeline.vue:330: // 审批不通过
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceTimeline.vue:338: // 审批通过中
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceTimeline.vue:347: // 审批人节点
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceTimeline.vue:401: // 选择自定义审批人
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceTimeline.vue:429: /** 设置自定义审批人 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\detail\ProcessInstanceTimeline.vue:434: /** 批量设置多个节点的自定义审批人 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\index.vue:140: <!-- 审批中状态 -->
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\index.vue:146: <!-- 单人审批 -->
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\index.vue:152: ({{ scope.row.tasks[0].name }}) 审批中
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\index.vue:155: <!-- 多人审批 -->
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\index.vue:161: 等 {{ scope.row.tasks.length }} 人 ({{ scope.row.tasks[0].name }})审批中
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\index.vue:165: <!-- 非审批中状态 -->
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\processInstance\manager\index.vue:126: <el-table-column label="当前审批任务" align="center" prop="tasks" min-width="120px">
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\receivedoc\create.vue:148: label="下一审批节点"
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\receivedoc\create.vue:216: <ContentWrap title="审批流程预览" :bodyStyle="{ padding: '0 20px 0' }">
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\receivedoc\create.vue:285: nextNode: [{ required: true, message: '下一审批节点不能为空', trigger: 'change' }],
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\receivedoc\create.vue:286: tempNextUserSelectAssignees: [{ required: true, message: '审批人不能为空', trigger: 'blur' }]
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\receivedoc\create.vue:328: // 检查是否需要自动填充默认审批人
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\receivedoc\create.vue:470: // 修改点：仅在未启动流程时，校验审批人
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\receivedoc\create.vue:477: return message.warning(`请选择${userTask.name}的审批人`)
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\receivedoc\create.vue:530: /** 审批相关：获取审批详情 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\receivedoc\create.vue:549: message.error('查询不到审批详情信息！')
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\receivedoc\create.vue:595: console.error('获取默认收文审批人配置失败:', e)
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\receivedoc\detail.vue:400: const currentOpinion = ref('') // 当前正在填写的审批意见
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\receivedoc\detail.vue:403: // 审批意见分类
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\receivedoc\detail.vue:413: // 如果没有任务ID，说明不在审批中，只读
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\receivedoc\detail.vue:477: // 处理审批意见
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\receivedoc\detail.vue:484: /** 分类处理审批节点意见 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\receivedoc\detail.vue:533: name.includes('全局阅审批') ||
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\senddoc\create.vue:192: <h3 class="section-title" style="margin-top: 20px">审批与办理</h3>
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\senddoc\create.vue:250: <el-form-item label="下一审批节点" prop="nextNode" required>
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\senddoc\create.vue:267: <el-form-item label="审批人" prop="tempNextUserSelectAssignees" required>
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\senddoc\create.vue:270: placeholder="请选择审批人"
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\senddoc\create.vue:301: <ContentWrap title="审批流程预览" :bodyStyle="{ padding: '0 20px 0' }">
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\senddoc\create.vue:392: message: '下一审批节点不能为空',
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\senddoc\create.vue:397: { required: !formData.value.processInstanceId, message: '审批人不能为空', trigger: 'change' }
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\senddoc\create.vue:441: return message.warning(`请选择${userTask.name}的审批人`)
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\senddoc\create.vue:450: // 处理发起人自选审批人
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\senddoc\detail.vue:282: // 审批意见列表（变量名保持不变，但业务含义已更新）
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\senddoc\SendDocForm.vue:195: <el-form-item label="判断正文草稿，审批搞，套红正文是否存在" prop="filetag">
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\senddoc\SendDocForm.vue:198: placeholder="请输入判断正文草稿，审批搞，套红正文是否存在"
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\senddoc\SendDocForm.vue:297: <el-form-item label="发文审批内容" prop="sendDocNotion">
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\senddoc\SendDocForm.vue:298: <el-input v-model="formData.sendDocNotion" placeholder="请输入发文审批内容" />
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\senddoc\SendDocForm.vue:340: <el-form-item label="厅/局长审批意见" prop="fugleidea">
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\senddoc\SendDocForm.vue:341: <el-input v-model="formData.fugleidea" placeholder="请输入厅/局长审批意见" />
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\task\copy\index.vue:4: title="审批转办、委派、抄送"
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\task\copy\index.vue:130: /** 处理审批按钮 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\task\done\index.vue:192: <el-table-column align="center" label="审批状态" prop="status" width="120">
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\task\manager\index.vue:78: <el-table-column align="center" label="审批人" prop="assigneeUser.nickname" width="100" />
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\task\manager\index.vue:79: <el-table-column align="center" label="审批状态" prop="status" width="120">
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\task\manager\index.vue:84: <el-table-column align="center" label="审批建议" prop="reason" min-width="180" />
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\task\manager\index.vue:157: /** 处理审批按钮 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\task\todo\index.vue:2: <!--  <doc-alert title="审批通过、不通过、驳回" url="https://doc.iocoder.cn/bpm/task-todo-done/" />-->
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\task\todo\index.vue:3: <!--  <doc-alert title="审批加签、减签" url="https://doc.iocoder.cn/bpm/sign/" />-->
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\task\todo\index.vue:5: <!--    title="审批转办、委派、抄送"-->
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\task\todo\index.vue:8: <!--  <doc-alert title="审批加签、减签" url="https://doc.iocoder.cn/bpm/sign/" />-->
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\task\todo\index.vue:425: /** 处理审批按钮 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\timeexplain\create.vue:135: <ContentWrap title="审批流程预览" :bodyStyle="{ padding: '0 20px 0' }">
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\timeexplain\create.vue:264: return message.warning(`请选择${userTask.name}的审批人`)
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\timeexplain\detail.vue:3: <div class="doc-title">义乌市自然资源和规划局因公外出审批单</div>
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\timeexplain\detail.vue:363: const currentOpinion = ref('') // 当前正在填写的审批意见
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\timeexplain\detail.vue:427: /** 分类处理审批节点意见 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\vacationrecord\index.vue:48: <el-form-item label="审批状态" prop="spzt">
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\vacationrecord\index.vue:51: placeholder="请输入审批状态"
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\vacationrecord\index.vue:179: /** 假期申请审批 列表 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\vacationrecord\index.vue:244: /** 批量删除假期申请审批 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\vacationrecord\index.vue:269: download.excel(data, '假期申请审批.xls')
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\vacationrecord\VacationrecordForm.vue:120: <el-form-item label="审批状态" prop="spzt">
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\vacationrecord\VacationrecordForm.vue:121: <el-input v-model="formData.spzt" placeholder="请输入审批状态" />
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\vacationrecord\VacationrecordForm.vue:140: <el-form-item label="销假审批状态" prop="xjSpzt">
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\vacationrecord\VacationrecordForm.vue:141: <el-input v-model="formData.xjSpzt" placeholder="请输入销假审批状态" />
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\vacationrecord\VacationrecordForm.vue:143: <el-form-item label="销假审批意见" prop="xjOption">
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\vacationrecord\VacationrecordForm.vue:144: <el-input v-model="formData.xjOption" placeholder="请输入销假审批意见" />
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\vacationrecord\VacationrecordForm.vue:163: /** 假期申请审批 表单 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzfy\create.vue:324: <el-tab-pane label="审批单" name="oaForm">
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzfy\create.vue:327: <div class="doc-title">义乌市自然资源和规划局行政复议审批表</div>
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzfy\create.vue:385: <span style="width: 40%">审批人：<span class="sign-input"></span></span>
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzfy\create.vue:399: <span style="width: 40%">审批人：<span class="sign-input"></span></span>
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzfy\create_back.vue:324: <el-tab-pane label="审批单" name="oaForm">
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzfy\create_back.vue:327: <div class="doc-title">义乌市自然资源和规划局行政复议审批表</div>
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzfy\create_back.vue:385: <span style="width: 40%">审批人：<span class="sign-input"></span></span>
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzfy\create_back.vue:399: <span style="width: 40%">审批人：<span class="sign-input"></span></span>
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzfy\detail.vue:132: <div class="doc-title">义乌市自然资源和规划局行政复议审批表</div>
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzfy\detail.vue:284: >审批人：<span class="sign-input">{{
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzfy\detail.vue:360: >审批人：<span class="sign-input">{{
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzfy\detail.vue:754: commentType: props.currentNode?.name || '审批意见附件'
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzss\create.vue:413: <el-tab-pane label="审批表" name="oaForm">
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzss\create.vue:416: <div class="doc-title">义乌市国土资源局行政诉讼审批表</div>
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzss\create.vue:473: <span style="width: 40%">审批人：<span class="sign-input"></span></span>
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzss\create.vue:486: <span style="width: 40%">审批人：<span class="sign-input"></span></span>
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzss\create.vue:867: // 自选审批人校验
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzss\create.vue:874: return message.warning(`请选择${userTask.name}的审批人`)
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzss\create.vue:886: // 2. 处理发起人自选审批人
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzss\create.vue:1017: /* ================= 导入红头审批表专用样式 ================= */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzss\detail.vue:24: <div class="doc-title">义乌市国土资源局行政诉讼审批表</div>
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzss\detail.vue:178: 审批人：
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzss\detail.vue:263: 审批人：
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzss\detail.vue:822: commentType: props.currentNode?.name || '审批意见附件'
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzss\detail.vue:913: // ============== 审批意见内联填报设置 =================
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzss\detail.vue:921: // 屏蔽带有“(上诉)”的审批节点，强制它们使用全局原生弹窗处理
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzss\detail.vue:955: // ============== 审批意见节点数据 =================
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzss\detail.vue:961: /** 解析 Activity Nodes 填充审批表 */
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzss\detail.vue:984: // 排除“法规科(结果录入)”，不在审批表中展示
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzss\detail.vue:988: // 排除所有带有“(上诉)”关键字的特定审批环节，交由弹窗处理
+d:\WORK\GIT\yudao-ui-admin-vue3\src\views\bpm\xzss\detail.vue:1050: /* ================= 导入红头审批表专用样式 ================= */

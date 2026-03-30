@@ -233,7 +233,7 @@ const { query } = useRoute()
 const detailLoading = ref(false)
 const detailData = ref<Partial<Confflow>>({})
 const userStore = useUserStore()
-const currentOpinion = ref('') // 当前正在填写的审批意见
+const currentOpinion = ref('') // 当前正在填写的办理意见
 
 /** 格式化日期 */
 const formatDate = (val: any) => {
@@ -310,7 +310,7 @@ const isEditable = (keyword: string) => {
   return nodeName.indexOf(keyword) !== -1
 }
 
-/** 分类处理审批节点意见 */
+/** 分类处理办理节点意见 */
 const processActivityNodes = () => {
   if (!props.activityNodes || props.activityNodes.length === 0) return
 

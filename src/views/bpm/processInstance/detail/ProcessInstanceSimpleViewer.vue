@@ -81,7 +81,7 @@ const setSimpleModelNodeTaskStatus = (
     }
     return
   }
-  // 审批节点
+  // 办理节点
   if (
     simpleModel.type === NodeType.START_USER_NODE ||
     simpleModel.type === NodeType.USER_TASK_NODE ||

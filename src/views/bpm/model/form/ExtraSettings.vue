@@ -5,17 +5,17 @@
         <el-text size="large" tag="b">提交人权限</el-text>
       </template>
       <div class="flex flex-col">
-        <el-checkbox v-model="modelData.allowCancelRunningProcess" label="允许撤销审批中的申请" />
+        <el-checkbox v-model="modelData.allowCancelRunningProcess" label="允许撤销办理中的申请" />
       </div>
     </el-form-item>
     <el-form-item class="mb-20px">
       <template #label>
-        <el-text size="large" tag="b">审批人权限</el-text>
+        <el-text size="large" tag="b">办理人权限</el-text>
       </template>
       <div class="flex flex-col">
-        <el-checkbox v-model="modelData.allowWithdrawTask" label="允许审批人撤回任务" />
+        <el-checkbox v-model="modelData.allowWithdrawTask" label="允许办理人撤回任务" />
         <div class="ml-22px">
-          <el-text type="info"> 审批人可撤回正在审批节点的前一节点 </el-text>
+          <el-text type="info"> 办理人可撤回正在办理节点的前一节点 </el-text>
         </div>
       </div>
     </el-form-item>
@@ -72,13 +72,13 @@
       </template>
       <div class="flex flex-col">
         <div>
-          <el-text> 同一审批人在流程中重复出现时： </el-text>
+          <el-text> 同一办理人在流程中重复出现时： </el-text>
         </div>
         <el-radio-group v-model="modelData.autoApprovalType">
           <div class="flex flex-col">
             <el-radio :value="0">不自动通过</el-radio>
-            <el-radio :value="1">仅审批一次，后续重复的审批节点均自动通过</el-radio>
-            <el-radio :value="2">仅针对连续审批的节点自动通过</el-radio>
+            <el-radio :value="1">仅办理一次，后续重复的办理节点均自动通过</el-radio>
+            <el-radio :value="2">仅针对连续办理的节点自动通过</el-radio>
           </div>
         </el-radio-group>
       </div>

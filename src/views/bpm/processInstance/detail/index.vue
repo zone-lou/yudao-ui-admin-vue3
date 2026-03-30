@@ -2,7 +2,7 @@
   <ContentWrap :bodyStyle="{ padding: '10px 20px 0' }" class="position-relative !mb-0px">
     <div class="processInstance-wrap-main">
       <el-scrollbar>
-        <!-- 审批状态图标（盖章效果） -->
+        <!-- 办理状态图标（盖章效果） -->
         <img
           class="position-absolute right-20px z-3"
           width="120"
@@ -62,7 +62,7 @@
         </div> -->
 
         <el-tabs v-model="activeTab">
-          <el-tab-pane label="审批单" name="form">
+          <el-tab-pane label="办理单" name="form">
             <div class="form-scroll-area">
               <el-scrollbar>
                 <el-row>
@@ -94,7 +94,7 @@
                     </div>
                   </el-col>
                   <el-col :span="7" v-if="!isFullWidth">
-                    <!-- 审批记录时间线 -->
+                    <!-- 办理记录时间线 -->
                     <ProcessInstanceTimeline :activity-nodes="activityNodes" />
                   </el-col>
                 </el-row>
@@ -230,12 +230,12 @@ const getDetail = async () => {
 /** 加载流程实例 */
 const BusinessFormComponent = shallowRef<any>(null) // 异步组件（使用 shallowRef 避免过重深层响应）
 const businessFormComponentRef = ref<any>(null) // 业务表单组件实例
-/** 获取审批详情 */
+/** 获取办理详情 */
 const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])
 
 const nextNodes = ref<ProcessInstanceApi.NextNode[]>([])
 
-const currentNode = ref<ProcessInstanceApi.ApprovalNodeInfo>() // 审批节点信息
+const currentNode = ref<ProcessInstanceApi.ApprovalNodeInfo>() // 办理节点信息
 
 const getNextApprovalNodes = async () => {
   const data = await ProcessInstanceApi.getNextSelectNodes({
@@ -259,7 +259,7 @@ const getApprovalDetail = async () => {
     }
     const data = await ProcessInstanceApi.getApprovalDetail(param)
     if (!data) {
-      message.error('查询不到审批详情信息！')
+      message.error('查询不到办理详情信息！')
       return
     }
     if (!data.processDefinition || !data.processInstance) {
@@ -306,7 +306,7 @@ const getApprovalDetail = async () => {
       BusinessFormComponent.value = registerComponent(data.processDefinition.formCustomViewPath)
     }
 
-    // 获取审批节点，显示 Timeline 的数据
+    // 获取办理节点，显示 Timeline 的数据
     activityNodes.value = data.activityNodes
 
     // 获取待办任务显示操作按钮
@@ -361,7 +361,7 @@ const getProcessModelView = async () => {
       data.unfinishedNodeNames = []
     }
 
-    const unfinishedStatuses = [0, 1, 6, 7] // 涵盖审批中、委派中、审批通过中等所有未结案状态
+    const unfinishedStatuses = [0, 1, 6, 7] // 涵盖办理中、委派中、办理通过中等所有未结案状态
 
     // 2.1 从时间线树形节点 `activityNodes` 扫描补缺
     if (activityNodes.value && activityNodes.value.length > 0) {

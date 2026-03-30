@@ -47,8 +47,8 @@
       <el-form-item label="共计天数" prop="totalTs">
         <el-input v-model="formData.totalTs" placeholder="请输入共计天数" />
       </el-form-item>
-      <el-form-item label="审批状态" prop="spzt">
-        <el-input v-model="formData.spzt" placeholder="请输入审批状态" />
+      <el-form-item label="办理状态" prop="spzt">
+        <el-input v-model="formData.spzt" placeholder="请输入办理状态" />
       </el-form-item>
       <el-form-item label="申请用户" prop="userid">
         <el-input v-model="formData.userid" placeholder="请输入申请用户" />

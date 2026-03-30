@@ -130,6 +130,107 @@
             <UploadFile v-model="formData.filepath" />
           </el-form-item>
 
+          <el-form-item
+            label="下一办理节点"
+            prop="nextNode"
+            required
+            v-if="!formData.processInstanceId"
+          >
+            <el-select
+              v-model="formData.nextNode"
+              placeholder="请选择"
+              @change="nodeChange"
+              value-key="conditionExpression"
+              :empty-values="[null, undefined]"
+              des
+            >
+              <el-option
+                v-for="dict in nextNodeOptions"
+                :key="dict.conditionExpression"
+                :label="dict.taskName"
+                :value="dict"
+              />
+            </el-select>
+          </el-form-item>
+
+          <el-form-item
+            label="选择办理人"
+            prop="tempNextUserSelectAssignees"
+            required
+            v-if="!formData.processInstanceId"
+          >
+            <el-select
+              v-model="formData.tempNextUserSelectAssignees"
+              placeholder="请选择办理人"
+              :multiple="multipleFlag"
+              filterable
+              popper-class="custom-user-select-popper"
+            >
+              <!-- 自定义多选时 Tag 的渲染（蓝色部门括号） -->
+              <template #tag="{ value, label }">
+                <el-tag
+                  closable
+                  @close="
+                    Array.isArray(formData.tempNextUserSelectAssignees)
+                      ? (formData.tempNextUserSelectAssignees = formData.tempNextUserSelectAssignees.filter(
+                          (id) => id !== value
+                        ))
+                      : null
+                  "
+                >
+                  {{ label.split(' (')[0] }}
+                  <span v-if="label.includes(' (')" class="text-blue-500"> ({{ label.split(' (')[1] }}</span>
+                </el-tag>
+              </template>
+              
+              <!-- 单选时的输入框回显渲染（蓝色部门括号） -->
+              <template #label="{ label }">
+                <template v-if="label">
+                  {{ label.split(' (')[0] }}
+                  <span v-if="label.includes(' (')" class="text-blue-500"> ({{ label.split(' (')[1] }}</span>
+                </template>
+              </template>
+
+              <template v-for="item in selectUserOptions">
+                <!-- 放弃顽固的原生 group，使用自制高亮标题 -->
+                <template v-if="item.children && item.children.length > 0">
+                  <!-- 强黑强粗不可点击的部门标题 -->
+                  <el-option
+                    :key="`group-${item.id}`"
+                    :value="`group-${item.id}`"
+                    :label="item.name"
+                    disabled
+                  >
+                    <span style="font-size: 14px; font-weight: 600; color: #303133 !important; cursor: default;">
+                      {{ item.name }}
+                    </span>
+                  </el-option>
+                  
+                  <!-- 隶属该部门的人员列表（带缩进） -->
+                  <el-option
+                    v-for="user in item.children"
+                    :key="user.id"
+                    :label="`${user.nickname} (${item.name})`"
+                    :value="user.id"
+                  >
+                    <!-- 下拉项只显示人员 -->
+                    <span style="padding-left: 18px;">{{ user.nickname }}</span>
+                  </el-option>
+                </template>
+                
+                <!-- 直属单人情况（非嵌套结构） -->
+                <el-option
+                  v-else-if="!item.children"
+                  :key="`user-${item.id}`"
+                  :label="item.deptName ? `${item.nickname} (${item.deptName})` : item.nickname"
+                  :value="item.id"
+                >
+                  <span style="font-weight: normal">{{ item.nickname }}</span>
+                </el-option>
+              </template>
+            </el-select>
+          </el-form-item>
+
           <el-form-item>
             <el-button :disabled="formLoading" type="primary" @click="submitForm">
               提交申请
@@ -140,7 +241,7 @@
     </el-col>
 
     <el-col :span="8">
-      <ContentWrap title="审批流程预览" :bodyStyle="{ padding: '0 20px 0' }">
+      <ContentWrap title="办理流程预览" :bodyStyle="{ padding: '0 20px 0' }">
         <ProcessInstanceTimeline
           ref="timelineRef"
           :activity-nodes="activityNodes"
@@ -159,7 +260,7 @@ import ProcessInstanceTimeline from '@/views/bpm/processInstance/detail/ProcessI
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { CandidateStrategy, NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { ApprovalNodeInfo } from '@/api/bpm/processInstance'
-import { leaveApi, leave } from '@/api/bpm/leave'
+import { leaveApi } from '@/api/bpm/leave'
 import { HolidayApi } from '@/api/system/holiday'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import dayjs from 'dayjs'
@@ -180,8 +281,9 @@ const route = useRoute()
 const formLoading = ref(false)
 
 // 表单数据
-const formData = ref({
+const formData = ref<any>({
   id: undefined,
+  processInstanceId: undefined,
   applyDate: undefined,
   qxjType: undefined,
   qxjStartDate: undefined,
@@ -192,7 +294,9 @@ const formData = ref({
   spzt: undefined,
   userid: undefined,
   startPeriod: 1,
-  endPeriod: 2
+  endPeriod: 2,
+  nextNode: '',
+  tempNextUserSelectAssignees: undefined as any
 })
 
 const formRules = reactive({
@@ -200,14 +304,20 @@ const formRules = reactive({
   qxjStartDate: [{ required: true, message: '开始时间不能为空', trigger: 'blur' }],
   qxjEndDate: [{ required: true, message: '结束时间不能为空', trigger: 'blur' }],
   sjReason: [{ required: true, message: '请假事由不能为空', trigger: 'blur' }],
-  applyDate: [{ required: true, message: '申请日期不能为空', trigger: 'blur' }]
+  applyDate: [{ required: true, message: '申请日期不能为空', trigger: 'blur' }],
+  nextNode: [{ required: true, message: '下一办理节点不能为空', trigger: 'change' }],
+  tempNextUserSelectAssignees: [{ required: true, message: '办理人不能为空', trigger: 'blur' }]
 })
 const formRef = ref()
 
+const nextNodeOptions = ref<any[]>([])
+const selectUserOptions = ref<any[]>([])
+const multipleFlag = ref(false)
+
 // 流程配置
 const processDefineKey = 'oa_leave'
-const startUserSelectTasks = ref([])
-const startUserSelectAssignees = ref({})
+const startUserSelectTasks = ref<any[]>([]) // 发起人需要选择审批人的用户任务列表
+const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据
 const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])
 const processDefinitionId = ref('')
 
@@ -359,19 +469,57 @@ const calculateDuration = async () => {
 }
 
 // ---------------- 审批流核心逻辑 ----------------
+const nodeChange = async (val: any) => {
+  const extension = val.extensionProperties || {}
+  multipleFlag.value = extension.multiple_flag === '1'
+  selectUserOptions.value = val.candidateUsers || []
+
+  const isCurrentlyEmpty = multipleFlag.value
+    ? !formData.value.tempNextUserSelectAssignees ||
+      formData.value.tempNextUserSelectAssignees.length === 0
+    : !formData.value.tempNextUserSelectAssignees
+
+  if (isCurrentlyEmpty) {
+    formData.value.tempNextUserSelectAssignees = multipleFlag.value ? [] : undefined
+  }
+}
+
+const getNextApprovalNodes = async () => {
+  const data = await ProcessInstanceApi.getNextSelectNodes({
+    processDefinitionId: processDefinitionId.value,
+    activityId: NodeId.START_USER_NODE_ID,
+    processVariablesStr: JSON.stringify({
+      role_condition: maxPermissionRole.value,
+      days_condition4: days_condition4.value,
+      days_condition3: days_condition3.value
+    })
+  })
+  nextNodeOptions.value = data || []
+  if (data && data.length > 0) {
+    formData.value.nextNode = data[0]
+    await nodeChange(data[0])
+  }
+}
+
 const getApprovalDetail = async () => {
   // 如果没有流程ID，无法获取详情
   if (!processDefinitionId.value) return
+
+  const condition = (formData.value.nextNode as any)?.conditionExpression
+  const vars: Record<string, any> = {
+    role_condition: maxPermissionRole.value,
+    days_condition4: days_condition4.value, // 使用计算属性
+    days_condition3: days_condition3.value // 使用计算属性
+  }
+  if (condition?.key) {
+    vars[condition.key] = condition.value
+  }
 
   try {
     const data = await ProcessInstanceApi.getApprovalDetail({
       processDefinitionId: processDefinitionId.value,
       activityId: NodeId.START_USER_NODE_ID,
-      processVariablesStr: JSON.stringify({
-        role_condition: maxPermissionRole.value,
-        days_condition4: days_condition4.value, // 使用计算属性
-        days_condition3: days_condition3.value // 使用计算属性
-      })
+      processVariablesStr: JSON.stringify(vars)
     })
     if (!data) return
     activityNodes.value = data.activityNodes
@@ -399,20 +547,43 @@ const submitForm = async () => {
         Array.isArray(startUserSelectAssignees.value[userTask.id]) &&
         startUserSelectAssignees.value[userTask.id].length === 0
       ) {
-        return message.warning(`请选择${userTask.name}的审批人`)
+        return message.warning(`请选择${userTask.name}的办理人`)
       }
     }
   }
 
   formLoading.value = true
   try {
-    const data = { ...formData.value } as unknown as leave
+    const data = { ...formData.value } as any
     if (Array.isArray(data.filepath)) {
       data.filepath = data.filepath.join(',')
     }
-    if (startUserSelectTasks.value?.length > 0) {
-      // @ts-ignore
-      data.startUserSelectAssignees = startUserSelectAssignees.value
+
+    // 对接动态分支节点和承办人
+    if (!formData.value.processInstanceId) {
+      data.nextNodeAssignees = {}
+      if (startUserSelectTasks.value?.length > 0) {
+        data.startUserSelectAssignees = startUserSelectAssignees.value
+      }
+      if (formData.value.tempNextUserSelectAssignees?.length > 0) {
+        data.nextNodeAssignees[(formData.value.nextNode as any).taskDefKey] =
+          formData.value.tempNextUserSelectAssignees
+      } else if (formData.value.tempNextUserSelectAssignees) {
+        data.nextNodeAssignees[(formData.value.nextNode as any).taskDefKey] = [
+          formData.value.tempNextUserSelectAssignees
+        ]
+      }
+
+      const condition = (formData.value.nextNode as any)?.conditionExpression
+      const vars: Record<string, any> = {
+        role_condition: maxPermissionRole.value,
+        days_condition4: days_condition4.value,
+        days_condition3: days_condition3.value
+      }
+      if (condition?.key) {
+        vars[condition.key] = condition.value
+      }
+      data.processVariablesStr = JSON.stringify(vars)
     }
 
     await leaveApi.createleave(data)
@@ -430,14 +601,14 @@ const submitForm = async () => {
 
 // ---------------- 监听器 (核心修改点) ----------------
 
-// 1. 精准监听条件变化，触发审批流预览更新
+// 1. 精准监听条件变化，触发办理流预览更新
 // 替代了原来的 watch(formData, ...)
 watch(
-  () => [days_condition3.value, days_condition4.value],
-  async ([new3, new4], [old3, old4]) => {
+  () => [days_condition3.value, days_condition4.value, formData.value.nextNode],
+  async ([new3, new4, newNextNode]) => {
     // 只有当流程定义已经加载完成，才去获取详情
     if (processDefinitionId.value) {
-      console.log('条件变化，刷新审批预览', { new3, new4 })
+      console.log('条件变化，刷新审批预览', { new3, new4, newNextNode })
       // 条件改变，重置选人状态，因为节点可能变了
       startUserSelectAssignees.value = {}
       await getApprovalDetail()
@@ -482,7 +653,10 @@ onMounted(async () => {
   processDefinitionId.value = processDefinitionDetail.id
   startUserSelectTasks.value = processDefinitionDetail.startUserSelectTasks
 
-  // 4. 【关键】流程ID就绪后，再请求审批节点详情
+  // 4. 【新加】请求下一项可选节点参数
+  await getNextApprovalNodes()
+
+  // 5. 【关键】流程ID等节点配置就绪后，再请求办理节点详情
   await getApprovalDetail()
 })
 </script>
