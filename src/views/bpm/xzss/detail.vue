@@ -1066,7 +1066,7 @@ onMounted(() => {
 
 #printDivTag .doc-title {
   margin-bottom: 25px;
-  font-size: 30px;
+  font-size: 24px;
   font-weight: bold;
   letter-spacing: 2px;
   color: #d71920;
@@ -1105,7 +1105,7 @@ onMounted(() => {
 
 #printDivTag .oa-table td {
   padding: 6px 8px;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.5;
   color: #000;
   word-wrap: break-word;

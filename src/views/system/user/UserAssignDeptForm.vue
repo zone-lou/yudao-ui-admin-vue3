@@ -1,6 +1,6 @@
 <template>
   <Dialog title="关联分管部门" v-model="dialogVisible" width="800px">
-    <el-form ref="formRef" :model="formData" v-loading="formLoading" label-width="80px">
+    <el-form ref="formRef" :model="formData" v-loading="formLoading" label-width="100px">
       <el-form-item label="用户名称">
         <el-input v-model="formData.username" disabled />
       </el-form-item>

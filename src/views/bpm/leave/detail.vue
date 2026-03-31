@@ -47,10 +47,20 @@
           <td class="label-cell">附件列表</td>
           <td class="input-cell" colspan="3">
             <div v-if="fileList.length > 0">
-              <div v-for="(file, index) in fileList" :key="index" style="margin-bottom: 2px">
-                <el-link type="primary" @click="previewFile(file)" :underline="false">
-                  {{ file.name }}
-                </el-link>
+              <div v-for="(file, index) in fileList" :key="index" style="margin-bottom: 5px">
+                <span>{{ file.name }}</span>
+                <el-button
+                  link
+                  type="primary"
+                  size="small"
+                  @click="previewFile(file)"
+                  class="ml-2"
+                >
+                  预览
+                </el-button>
+                <el-button link type="primary" size="small" @click="handleDownload(file)">
+                  下载
+                </el-button>
               </div>
             </div>
             <span v-else>无</span>
@@ -496,6 +506,17 @@ const previewFile = (file: any) => {
   window.open(previewUrl, '_blank')
 }
 
+/** 处理下载 */
+const handleDownload = (file: any) => {
+  const link = document.createElement('a')
+  link.style.display = 'none'
+  link.href = file.path
+  link.setAttribute('download', file.name)
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
+
 const externalPrefix = ref('') // 外网地址前缀
 const internalPrefix = ref('') // 内网地址前缀
 
@@ -560,7 +581,7 @@ defineExpose({
 
 .doc-title {
   margin-bottom: 25px;
-  font-size: 26px;
+  font-size: 24px;
   font-weight: bold;
   letter-spacing: 1px;
   color: #b1351e;

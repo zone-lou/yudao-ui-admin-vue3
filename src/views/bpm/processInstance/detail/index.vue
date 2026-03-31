@@ -152,6 +152,7 @@
             :normal-form-api="fApi"
             :writable-fields="writableFields"
             :get-business-form-reason="getBusinessFormReason"
+            :get-business-form-values="getBusinessFormValues"
             @success="refresh"
           />
         </div>
@@ -435,6 +436,14 @@ const activeTab = ref('form')
 const getBusinessFormReason = computed(() => {
   if (businessFormComponentRef.value?.getOpinion) {
     return async () => businessFormComponentRef.value.getOpinion()
+  }
+  return undefined
+})
+
+/** 获取业务表单的额外数据 */
+const getBusinessFormValues = computed(() => {
+  if (businessFormComponentRef.value?.getFormValues) {
+    return async () => businessFormComponentRef.value.getFormValues()
   }
   return undefined
 })

@@ -661,7 +661,7 @@ onMounted(() => {
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .doc-title {
   margin-bottom: 15px;
-  font-size: 22px;
+  font-size: 24px;
   font-weight: bold;
   letter-spacing: 2px;
   color: #d71920;
@@ -684,7 +684,7 @@ onMounted(() => {
   min-width: 80px;
   padding: 0 5px;
   font-family: SimSun, 'Songti SC', STSong, serif;
-  font-size: 12px !important;
+  font-size: 14px !important;
   color: #000;
   text-align: left;
   text-decoration: none !important;
@@ -694,7 +694,7 @@ onMounted(() => {
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .data-text {
   font-family: SimSun, 'Songti SC', STSong, serif;
-  font-size: 12px !important;
+  font-size: 14px !important;
   color: #000;
   word-break: break-all;
   border-bottom: none !important;
@@ -711,7 +711,7 @@ onMounted(() => {
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .oa-table td {
   padding: 4px 6px;
-  font-size: 13.5px;
+  font-size: 14px;
   line-height: 1.4;
   color: #000;
   vertical-align: middle;
@@ -797,7 +797,7 @@ onMounted(() => {
 #printDivTag .signature-row {
   height: 30px;
   padding-top: 2px;
-  font-size: 12px;
+  font-size: 14px;
   color: #333;
   vertical-align: bottom;
 }

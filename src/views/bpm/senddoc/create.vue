@@ -20,22 +20,46 @@
           </el-row>
 
           <el-row>
-            <el-col :span="12">
-              <el-form-item label="发文字号" prop="sendDocNumber">
-                <el-select
-                  v-model="formData.sendDocNumber"
-                  placeholder="请选择发文字号"
-                  style="width: 100%"
-                >
-                  <el-option
-                    v-for="dict in getStrDictOptions(DICT_TYPE.BPM_SENDDOC_SIGN)"
-                    :key="dict.value"
-                    :label="dict.label"
-                    :value="dict.label"
-                  />
-                </el-select>
+            <el-col :span="24">
+              <el-form-item label="发文字号" required>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <el-form-item prop="sendDocNumber" style="margin-bottom: 0; width: 200px;">
+                    <el-select
+                      v-model="formData.sendDocNumber"
+                      placeholder="代字"
+                      style="width: 100%"
+                    >
+                      <el-option
+                        v-for="dict in getStrDictOptions(DICT_TYPE.BPM_SENDDOC_SIGN)"
+                        :key="dict.value"
+                        :label="dict.label"
+                        :value="dict.label"
+                      />
+                    </el-select>
+                  </el-form-item>
+                  <span style="color: #666;">〔</span>
+                  <el-form-item prop="year" style="margin-bottom: 0; width: 120px;">
+                    <el-date-picker
+                      v-model="formData.year"
+                      type="year"
+                      value-format="YYYY"
+                      placeholder="年份"
+                      style="width: 100%"
+                      :clearable="false"
+                    />
+                  </el-form-item>
+                  <span style="color: #666;">〕</span>
+                  <el-form-item prop="docSequence" style="margin-bottom: 0; width: 150px;">
+                    <el-input v-model="formData.docSequence" placeholder="序号">
+                      <template #append>号</template>
+                    </el-input>
+                  </el-form-item>
+                </div>
               </el-form-item>
             </el-col>
+          </el-row>
+
+          <el-row>
             <el-col :span="12">
               <el-form-item label="发文日期" prop="sendTime">
                 <el-date-picker
@@ -47,40 +71,6 @@
                 />
               </el-form-item>
             </el-col>
-          </el-row>
-
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="文件类型" prop="docType">
-                <el-select
-                  v-model="formData.docType"
-                  placeholder="请选择文件类型"
-                  style="width: 100%"
-                >
-                  <el-option label="党务" :value="1" />
-                  <el-option label="政务" :value="2" />
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="紧急程度" prop="urgencyDegree">
-                <el-select
-                  v-model="formData.urgencyDegree"
-                  placeholder="请选择紧急程度"
-                  style="width: 100%"
-                >
-                  <el-option
-                    v-for="dict in getStrDictOptions(DICT_TYPE.BPM_EMERGENCY_DEGREE)"
-                    :key="dict.value"
-                    :label="dict.label"
-                    :value="dict.value"
-                  />
-                </el-select>
-              </el-form-item>
-            </el-col>
-          </el-row>
-
-          <el-row>
             <el-col :span="12">
               <el-form-item label="机密程度" prop="secretDegree">
                 <el-select
@@ -98,19 +88,33 @@
                 </el-select>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
-              <el-form-item label="公文性质" prop="docProperty">
-                <el-input v-model="formData.docProperty" placeholder="请输入公文性质" />
-              </el-form-item>
-            </el-col>
           </el-row>
 
           <el-row>
+            <el-col :span="12">
+              <el-form-item label="紧急程度" prop="urgencyDegree">
+                <el-select
+                  v-model="formData.urgencyDegree"
+                  placeholder="请选择紧急程度"
+                  style="width: 100%"
+                >
+                  <el-option
+                    v-for="dict in getStrDictOptions(DICT_TYPE.BPM_EMERGENCY_DEGREE)"
+                    :key="dict.value"
+                    :label="dict.label"
+                    :value="dict.value"
+                  />
+                </el-select>
+              </el-form-item>
+            </el-col>
             <el-col :span="12">
               <el-form-item label="拟稿人" prop="draftPerson">
                 <el-input v-model="formData.draftPerson" placeholder="请输入拟稿人" />
               </el-form-item>
             </el-col>
+          </el-row>
+
+          <el-row>
             <el-col :span="12">
               <el-form-item label="拟稿时间" prop="draftDate">
                 <el-date-picker
@@ -122,16 +126,8 @@
                 />
               </el-form-item>
             </el-col>
-          </el-row>
-
-          <el-row>
             <el-col :span="12">
-              <el-form-item label="联系电话" prop="contactPhone">
-                <el-input v-model="formData.contactPhone" placeholder="请输入拟稿人联系电话" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="发文单位" prop="sendDept">
+              <el-form-item label="发文单位 / 部门" prop="sendDept">
                 <el-input v-model="formData.sendDept" placeholder="请输入发文单位" />
               </el-form-item>
             </el-col>
@@ -157,19 +153,6 @@
             />
           </el-form-item>
 
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="抄报机关" prop="reportSendDept">
-                <el-input v-model="formData.reportSendDept" placeholder="请输入抄报机关" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="联合发文单位" prop="uniondepts">
-                <el-input v-model="formData.uniondepts" placeholder="请输入联合发文单位" />
-              </el-form-item>
-            </el-col>
-          </el-row>
-
           <h3 class="section-title" style="margin-top: 20px">内容与附件</h3>
 
           <el-form-item label="发文草稿内容" prop="sendDocDraft">
@@ -177,7 +160,7 @@
               v-model="formData.sendDocDraft"
               type="textarea"
               :rows="3"
-              placeholder="请输入发文草稿内容"
+              placeholder="请输入发文草稿内容标题或简述"
             />
           </el-form-item>
 
@@ -185,64 +168,36 @@
             <UploadFile v-model="formData.attachFilePath" />
           </el-form-item>
 
-          <el-form-item label="备注" prop="remark">
-            <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
-          </el-form-item>
-
-          <h3 class="section-title" style="margin-top: 20px">办理</h3>
+          <h3 class="section-title" style="margin-top: 20px">属性设置</h3>
 
           <el-row>
             <el-col :span="12">
-              <el-form-item label="签发人" prop="issuedName">
-                <el-input v-model="formData.issuedName" placeholder="请输入签发人" />
+              <el-form-item label="公开方式" prop="inforelease">
+                <el-radio-group v-model="formData.inforelease">
+                  <el-radio label="1">主动公开</el-radio>
+                  <el-radio label="2">依申请公开</el-radio>
+                  <el-radio label="3">不公开</el-radio>
+                </el-radio-group>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="校对人" prop="proofreader">
-                <el-input v-model="formData.proofreader" placeholder="请输入校对人" />
+              <el-form-item label="不公开理由" prop="noreleasecause" v-if="formData.inforelease === '3'">
+                <el-input v-model="formData.noreleasecause" placeholder="请输入不公开理由" />
               </el-form-item>
             </el-col>
           </el-row>
 
           <el-row>
-            <el-col :span="12">
-              <el-form-item label="签印份数" prop="signPrintCount">
-                <el-input v-model="formData.signPrintCount" placeholder="请输入签印份数" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="保管期限" prop="keepTerm">
-                <el-input v-model="formData.keepTerm" placeholder="请输入保管期限" />
-              </el-form-item>
-            </el-col>
-          </el-row>
-
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="是否规范性文件" prop="isNormativeDocument">
+            <el-col :span="24">
+              <el-form-item label="是否属于规范性文件" prop="isNormativeDocument">
                 <el-radio-group v-model="formData.isNormativeDocument">
                   <el-radio :label="1">是</el-radio>
                   <el-radio :label="2">否</el-radio>
                 </el-radio-group>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
-              <el-form-item label="是否重要" prop="ifimportant">
-                <el-radio-group v-model="formData.ifimportant">
-                  <el-radio :label="1">是</el-radio>
-                  <el-radio :label="0">否</el-radio>
-                </el-radio-group>
-              </el-form-item>
-            </el-col>
           </el-row>
 
-          <el-form-item label="发送状态" prop="sendStatus">
-            <el-radio-group v-model="formData.sendStatus">
-              <el-radio :label="0">拟发</el-radio>
-              <el-radio :label="1">已发</el-radio>
-              <el-radio :label="2">退回</el-radio>
-            </el-radio-group>
-          </el-form-item>
 
           <template v-if="!formData.processInstanceId">
             <h3 class="section-title" style="margin-top: 20px">流程处理</h3>
@@ -317,8 +272,8 @@ import ProcessInstanceTimeline from '@/views/bpm/processInstance/detail/ProcessI
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { CandidateStrategy, NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { ApprovalNodeInfo } from '@/api/bpm/processInstance'
-import { SendDocApi, SendDoc } from '@/api/bpm/senddoc'
-import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
+import { SendDocApi } from '@/api/bpm/senddoc'
+import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
 import { useUserStore } from '@/store/modules/user'
 import { useRoute } from 'vue-router'
 
@@ -344,38 +299,29 @@ const nextNodeOptions = ref([])
 const selectUserOptions = ref([])
 const multipleFlag = ref(false)
 
-// 表单数据
+// 表单数据 (基于严格对接后端表及详情页字段清理)
 const formData = ref({
   id: undefined,
   subject: undefined, // 主题/标题
   sendDocNumber: undefined, // 发文字号
+  year: new Date().getFullYear().toString(), // 默认当前年份
+  docSequence: undefined, // 序号
   sendTime: undefined, // 发文日期
-  docType: undefined, // 文件类型
   urgencyDegree: undefined, // 紧急程度
   secretDegree: undefined, // 机密程度
-  docProperty: undefined, // 公文性质
   draftPerson: undefined, // 拟稿人
   draftDate: undefined, // 拟稿时间
-  contactPhone: undefined, // 联系电话
   sendDept: undefined, // 发文单位
   primarySendDept: undefined, // 主送
   copySendDept: undefined, // 抄送
-  reportSendDept: undefined, // 抄报
-  uniondepts: undefined, // 联合发文单位
-  sendDocDraft: undefined, // 草稿内容
+  sendDocDraft: undefined, // 发文草稿内容
   attachFilePath: undefined, // 附件
-  remark: undefined, // 备注
-  issuedName: undefined, // 签发人
-  proofreader: undefined, // 校对人
+  isNormativeDocument: 2, // 是否属于规范性文件 (1是 2否)
+  inforelease: '1', // 公开方式
+  noreleasecause: undefined, // 不公开理由
   signPrintCount: undefined, // 签印份数
-  keepTerm: undefined, // 保管期限
-  isNormativeDocument: 2, // 默认否
-  ifimportant: 0, // 默认否
-  sendStatus: 0, // 默认拟发
-
-  // 其他字段保持 undefined，提交时会包含
-  docClass: undefined,
-  docSecondClass: undefined,
+  typist: undefined, // 打字员
+  proofreader: undefined, // 校对人
 
   // 流程流转字段
   nextNode: undefined,
@@ -384,8 +330,9 @@ const formData = ref({
 
 const formRules = computed(() => ({
   subject: [{ required: true, message: '公文标题不能为空', trigger: 'blur' }],
-  docType: [{ required: true, message: '文件类型不能为空', trigger: 'change' }],
-  sendDocNumber: [{ required: true, message: '发文字号不能为空', trigger: 'change' }],
+  sendDocNumber: [{ required: true, message: '发文字号代字不能为空', trigger: 'change' }],
+  year: [{ required: true, message: '年份不能为空', trigger: 'change' }],
+  docSequence: [{ required: true, message: '序号不能为空', trigger: 'blur' }],
   nextNode: [
     {
       required: !formData.value.processInstanceId,
@@ -447,6 +394,16 @@ const submitForm = async () => {
   try {
     const data = { ...formData.value } as any
 
+    // 格式化处理公开理由：如果非不公开，则清空不公开理由
+    if (data.inforelease !== '3') {
+      data.noreleasecause = undefined
+    }
+    
+    // 对发送后端的富文本草稿进行 Base64 编码，因为后端接收类型为 byte[]
+    if (data.sendDocDraft) {
+      data.sendDocDraft = window.btoa(unescape(encodeURIComponent(data.sendDocDraft)))
+    }
+
     // 处理发起人自选审批人
     if (startUserSelectTasks.value?.length > 0) {
       data.startUserSelectAssignees = startUserSelectAssignees.value
@@ -468,8 +425,10 @@ const submitForm = async () => {
       message.success('发文更新成功')
     }
 
-    delView(unref(currentRoute))
-    await push({ name: 'BpmProcessInstanceMy' })
+    setTimeout(() => {
+      delView(unref(currentRoute))
+      push('/bpm/unified')
+    }, 200)
   } finally {
     formLoading.value = false
   }
@@ -502,6 +461,12 @@ onMounted(async () => {
   if (userStore.user.nickname) {
     formData.value.draftPerson = userStore.user.nickname
   }
+  const anyUser = userStore.user as any
+  if (anyUser.dept?.name) {
+    formData.value.sendDept = anyUser.dept.name
+  } else if (anyUser.deptName) {
+    formData.value.sendDept = anyUser.deptName
+  }
   formData.value.draftDate = Date.now() // 默认当前时间
 
   const processDefinitionDetail = await DefinitionApi.getProcessDefinition(
@@ -525,13 +490,19 @@ onMounted(async () => {
       const detail = await SendDocApi.getSendDoc(Number(queryId))
       Object.assign(formData.value, detail)
 
-      // 修复：如果 sendDocNumber 是数字（历史旧数据），自动转换为字典标签
       if (formData.value.sendDocNumber && /^\d+$/.test(String(formData.value.sendDocNumber))) {
         const dicts = getStrDictOptions(DICT_TYPE.BPM_SENDDOC_SIGN)
         const dict = dicts.find((d) => String(d.value) === String(formData.value.sendDocNumber))
         if (dict) {
           formData.value.sendDocNumber = dict.label
         }
+      }
+      
+      // 进行 Base64 解码，因为后端存储的是 byte[] 返回给前端是 Base64
+      if (formData.value.sendDocDraft) {
+        try {
+          formData.value.sendDocDraft = decodeURIComponent(escape(window.atob(formData.value.sendDocDraft)))
+        } catch (e) {}
       }
     } finally {
       formLoading.value = false

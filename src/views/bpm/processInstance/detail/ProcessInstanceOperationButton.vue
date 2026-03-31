@@ -407,6 +407,7 @@ const props = defineProps<{
   currentNode: any
   nextNodes: any
   getBusinessFormReason?: () => Promise<string | undefined>
+  getBusinessFormValues?: () => Promise<any>
 }>()
 
 const formLoading = ref(false) // 表单加载中
@@ -597,6 +598,15 @@ const handleDirectFinish = async () => {
 
   // 3. 构建请求级多表单变量
   let variables = getUpdatedProcessInstanceVariables()
+  
+  // 注入来自业务表单的额外数据（如打字、校对反馈）
+  if (props.getBusinessFormValues) {
+    const extraValues = await props.getBusinessFormValues()
+    if (extraValues && Object.keys(extraValues).length > 0) {
+      variables = { ...variables, ...extraValues }
+    }
+  }
+
   const formCreateApi = approveFormFApi.value
   if (Object.keys(formCreateApi)?.length > 0) {
     await formCreateApi.validate()
@@ -1049,10 +1059,20 @@ const handleApproveConfirm = async () => {
   // ===============================================
 
   // 构造提交数据
+  let variablesData = { ...getUpdatedProcessInstanceVariables(), ...variables }
+
+  // 注入来自业务表单的额外数据（如打字、校对反馈）
+  if (props.getBusinessFormValues) {
+    const extraValues = await props.getBusinessFormValues()
+    if (extraValues && Object.keys(extraValues).length > 0) {
+      variablesData = { ...variablesData, ...extraValues }
+    }
+  }
+
   const data = {
     id: runningTask.value.id,
     reason: approveReasonForm.reason,
-    variables: { ...getUpdatedProcessInstanceVariables(), ...variables }, // 合并变量
+    variables: variablesData, // 合并变量
     nextNodeAssignees,
     addSignUserIds: addSignUserIds.length > 0 ? addSignUserIds : undefined
   } as any
