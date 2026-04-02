@@ -9,13 +9,19 @@
 
 <script lang="ts" setup>
 import { onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { ssoExchangeApi } from '@/api/login' // 引入刚才定义的API
+import { useRoute, useRouter } from 'vue-router'
+import * as LoginApi from '@/api/login'
 import * as authUtil from '@/utils/auth'
 
 const router = useRouter()
 const route = useRoute()
 // const userStore = useUserStore()
+
+//获取租户ID
+const getTenantId = async () => {
+  const res = await LoginApi.getTenantIdByName('芋道源码')
+  authUtil.setTenantId(res)
+}
 
 onMounted(async () => {
   // 1. 获取 URL 中的 ticket 参数
@@ -28,16 +34,16 @@ onMounted(async () => {
   }
 
   try {
+    await getTenantId()
     // 2. 调用后端接口，用 Ticket 换取 Token
-    const res = await ssoExchangeApi(ticket)
 
     // 假设 res 已经被响应拦截器处理过，直接返回了 data 部分
     // 如果没有，可能需要 res.data
-    const data = res
+    const res = await LoginApi.ssoExchangeApi(ticket)
 
-    console.log('SSO 换票成功', data)
+    console.log('SSO 换票成功', res)
 
-    authUtil.setToken(data)
+    authUtil.setToken(res)
 
     // 4. (可选) 获取用户信息，确保 Store 状态同步
     // await userStore.getInfo()
@@ -47,7 +53,7 @@ onMounted(async () => {
   } catch (error) {
     console.error('SSO 登录失败', error)
     // 失败跳回登录页，并显示错误
-    router.push('/sso-error?code=exchange_failed')
+    router.push('/sso-error?error=exchange_failed')
   }
 })
 </script>

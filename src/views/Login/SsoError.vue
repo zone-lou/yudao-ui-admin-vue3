@@ -22,21 +22,29 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
 
-// 定义错误码字典：后端传来的 code -> 前端展示的中文
+// 完整的异常字典对照表
 const errorMap: Record<string, string> = {
+  // 原始系统前端错误
   user_not_found: '未匹配到系统用户，请联系管理员开通权限',
   user_disabled: '您的账号已被禁用，无法登录',
-  sso_error: '单点登录服务发生异常',
-  token_invalid: '第三方Token无效或解析失败',
   no_ticket: '登录票据缺失，请重新从门户发起登录',
   exchange_failed: '票据兑换超时或失效，请重试',
   tenant_error: '租户信息匹配失败',
+
+  // 后端 SSO 抛出的精准错误
+  token_is_empty: '授权回调失败：缺少必要 Token',
+  token_format_error: '授权回调失败：Token 格式非法',
+  token_decode_error: '授权回调失败：Token 解析异常',
+  phone_number_not_found: '登录失败：未能从授权信息中获取您的手机号，请联系系统管理员',
+  user_create_failed: '登录失败：系统为您创建账号失败，请联系管理员',
+  sso_exception: '单点登录服务发生未知异常，请稍后重试',
+
   default: '未知登录错误'
 }
 
