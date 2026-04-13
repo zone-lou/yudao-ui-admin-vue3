@@ -66,5 +66,9 @@ export const leaveApi = {
 
   getLeaveDetailList: async (params: LeaveSummaryVO) => {
     return await request.get({ url: '/bpm/leave/detail-list', params })
+  },
+
+  getLeaveHistoryPage: async (params: any) => {
+    return await request.get({ url: `/bpm/leave/history`, params })
   }
 }

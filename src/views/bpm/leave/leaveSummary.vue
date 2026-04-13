@@ -93,33 +93,33 @@
         :key="dict.value"
         :label="dict.label"
         align="center"
-        min-width="100"
+        min-width="120"
       >
         <template #default="scope">
           <div
-            v-if="scope.row['type_' + dict.value] > 0"
-            class="cursor-pointer font-bold"
-            style="color: var(--el-color-primary); text-decoration: underline"
+            v-if="scope.row['type_' + dict.value] > 0 || scope.row['running_' + dict.value] > 0"
+            class="cursor-pointer flex items-center justify-center gap-1"
             @click="openDetail(scope.row, dict.value)"
           >
-            {{ scope.row['type_' + dict.value] }}
+            <span
+              :class="scope.row['type_' + dict.value] > 0 ? 'font-bold' : ''"
+              :style="
+                scope.row['type_' + dict.value] > 0
+                  ? 'color: var(--el-color-primary); text-decoration: underline;'
+                  : 'color: #909399;'
+              "
+            >
+              {{ scope.row['type_' + dict.value] || 0 }}
+            </span>
+
+            <span
+              v-if="scope.row['running_' + dict.value] > 0"
+              style="color: #e6a23c; font-size: 0.85em; text-decoration: none"
+            >
+              ({{ scope.row['running_' + dict.value] }})
+            </span>
           </div>
           <span v-else class="text-gray-400">-</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column
-        label="总计天数"
-        align="center"
-        fixed="right"
-        min-width="100"
-        prop="totalAll"
-      >
-        <template #default="scope">
-          <el-tag type="danger" v-if="scope.row.totalAll > 0">
-            {{ scope.row.totalAll }}
-          </el-tag>
-          <span v-else>-</span>
         </template>
       </el-table-column>
     </el-table>
@@ -128,21 +128,21 @@
   <el-dialog
     v-model="detailVisible"
     :title="detailNickname ? `${detailNickname}的请假详情` : '请假详情记录'"
-    width="1200px"
+    width="1500px"
     append-to-body
   >
-    <el-table v-loading="detailLoading" :data="pagedDetailList" border >
+    <el-table v-loading="detailLoading" :data="pagedDetailList" border>
       <el-table-column label="申请人员" align="center" width="100">
         <template #default>
           {{ detailNickname }}
         </template>
       </el-table-column>
 
-<!--      <el-table-column label="申请时间" align="center" prop="applyDate" width="160">-->
-<!--        <template #default="scope">-->
-<!--          {{ formatDate(scope.row.applyDate) }}-->
-<!--        </template>-->
-<!--      </el-table-column>-->
+      <!--      <el-table-column label="申请时间" align="center" prop="applyDate" width="160">-->
+      <!--        <template #default="scope">-->
+      <!--          {{ formatDate(scope.row.applyDate) }}-->
+      <!--        </template>-->
+      <!--      </el-table-column>-->
       <el-table-column label="开始时间" align="center" prop="qxjStartDate" width="160">
         <template #default="scope">
           {{ formatDateWithAmPm(scope.row.qxjStartDate) }}
@@ -155,6 +155,13 @@
       </el-table-column>
       <el-table-column label="天数" align="center" prop="totalTs" width="80" />
       <el-table-column label="请假原因" align="center" prop="sjReason" show-overflow-tooltip />
+      <el-table-column
+        label="当前环节"
+        align="center"
+        prop="currentNodeName"
+        show-overflow-tooltip
+      />
+      <el-table-column label="当前办理人" align="center" prop="currentAssigneeNames" />
     </el-table>
 
     <template #footer>
@@ -176,7 +183,6 @@ import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import { getSimpleDeptList } from '@/api/system/dept'
 import * as LeaveApi from '@/api/bpm/leave'
 import { defaultProps, handleTree } from '@/utils/tree'
-import { formatDate } from '@/utils/formatTime'
 
 defineOptions({ name: 'BpmLeaveSummary' })
 
@@ -233,17 +239,24 @@ const pivotTableData = computed(() => {
         userId: userId,
         nickname: item.nickname,
         deptName: item.deptName,
-        totalAll: 0
+        totalAll: 0,
+        runningAll: 0 // 新增：记录总共审批中的天数
       })
     }
     const row = userMap.get(userId)
+
+    // 动态生成键名，例如 type_1 存已完成天数，running_1 存审批中天数
     const typeKey = `type_${item.qxjType}`
-    row[typeKey] = item.totalDays
-    row.totalAll += Number(item.totalDays)
+    const runningKey = `running_${item.qxjType}`
+
+    row[typeKey] = item.totalDays || 0
+    row[runningKey] = item.runningDays || 0 // 新增接收审批中天数
+
+    row.totalAll += Number(item.totalDays || 0)
+    row.runningAll += Number(item.runningDays || 0) // 累加审批中天数
   })
   return Array.from(userMap.values())
 })
-
 // === 方法 ===
 
 const openDetail = async (row: any, typeValue: number) => {

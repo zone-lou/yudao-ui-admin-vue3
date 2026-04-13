@@ -1,7 +1,7 @@
 <template>
   <el-row :gutter="20">
-    <el-col :span="16">
-      <ContentWrap title="申请信息">
+    <el-col :span="24">
+      <ContentWrap title="会议报告单申请信息">
         <el-form
           ref="formRef"
           :model="formData"
@@ -11,158 +11,71 @@
         >
           <el-row>
             <el-col :span="12">
-              <el-form-item label="收文编号" prop="receiveDocNumber">
-                <el-input v-model="formData.receiveDocNumber" placeholder="请输入收文编号" />
+              <el-form-item label="会议名称" prop="title">
+                <el-input v-model="formData.title" placeholder="请输入会议名称" />
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="收文日期" prop="receiveTime">
+              <el-form-item label="会议时间" prop="startDate">
                 <el-date-picker
-                  v-model="formData.receiveTime"
+                  v-model="formData.startDate"
                   type="date"
                   value-format="x"
-                  placeholder="请选择收文日期"
+                  placeholder="选择会议时间"
                   style="width: 100%"
                 />
               </el-form-item>
             </el-col>
           </el-row>
+
           <el-row>
             <el-col :span="12">
-              <el-form-item label="来文字号" prop="sendDocNumber">
-                <el-select v-model="formData.sendDocNumber" placeholder="请输入来文字号">
-                  <el-option
-                    v-for="dict in getIntDictOptions(DICT_TYPE.BPM_DOC_NUM_TYPE)"
-                    :key="dict.value"
-                    :label="formatSendDocNumberLabel(dict.label)"
-                    :value="dict.value"
-                  />
-                </el-select>
+              <el-form-item label="会议地点" prop="venue">
+                <el-input v-model="formData.venue" placeholder="请输入会议地点" />
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="单位类别" prop="docSecondClass">
-                <el-select v-model="formData.docSecondClass" placeholder="请选择单位类别">
-                  <el-option
-                    v-for="dict in getIntDictOptions(DICT_TYPE.BPM_RECEICE_CLASS)"
-                    :key="dict.value"
-                    :label="dict.label"
-                    :value="dict.value"
-                  />
-                </el-select>
+              <el-form-item label="召集单位及召集人" prop="joinUnit">
+                <el-input v-model="formData.joinUnit" placeholder="请输入召集单位及召集人" />
               </el-form-item>
             </el-col>
           </el-row>
+
           <el-row>
             <el-col :span="12">
-              <el-form-item label="文件类别" prop="docClass">
-                <el-select v-model="formData.docClass" placeholder="请选择文件类别">
-                  <el-option
-                    v-for="dict in getIntDictOptions(DICT_TYPE.BPM_DOC_CLASS)"
-                    :key="dict.value"
-                    :label="dict.label"
-                    :value="dict.value"
-                  />
-                </el-select>
+              <el-form-item label="我局参会科室" prop="offerUnit">
+                <el-input v-model="formData.offerUnit" placeholder="请输入我局参会科室" />
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="紧急程度" prop="urgencyDegree">
-                <el-select v-model="formData.urgencyDegree" placeholder="请选择紧急程度">
-                  <el-option
-                    v-for="dict in getIntDictOptions(DICT_TYPE.BPM_EMERGENCY_DEGREE)"
-                    :key="dict.value"
-                    :label="dict.label"
-                    :value="dict.value"
-                  />
-                </el-select>
+              <el-form-item label="我局参会人员" prop="offerPerson">
+                <el-input v-model="formData.offerPerson" placeholder="请输入我局参会人员" />
               </el-form-item>
             </el-col>
           </el-row>
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="来文单位" prop="sendDept">
-                <el-select v-model="formData.sendDept" placeholder="请选择来文单位" multiple>
-                  <el-option
-                    v-for="dict in getIntDictOptions(DICT_TYPE.BPM_RECEICE_DOC_UNIT)"
-                    :key="dict.value"
-                    :label="dict.label"
-                    :value="dict.value"
-                  />
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <!--            <el-col :span="12">-->
-            <!--              <el-form-item label="监督监管">-->
-            <!--                <el-row>-->
-            <!--                  <el-col :span="12">-->
-            <!--                    <el-form-item label="主办单位办结时间" prop="zhubandate">-->
-            <!--                      <el-date-picker-->
-            <!--                        v-model="formData.zhubandate"-->
-            <!--                        type="date"-->
-            <!--                        value-format="x"-->
-            <!--                        placeholder="选择办结时间"-->
-            <!--                        style="width: 100%"-->
-            <!--                      />-->
-            <!--                    </el-form-item>-->
-            <!--                  </el-col>-->
-            <!--                  <el-col :span="12">-->
-            <!--                    <el-form-item label="协办单位办结时间" prop="xiebandate">-->
-            <!--                      <el-date-picker-->
-            <!--                        v-model="formData.xiebandate"-->
-            <!--                        type="date"-->
-            <!--                        value-format="x"-->
-            <!--                        placeholder="选择办结时间"-->
-            <!--                        style="width: 100%"-->
-            <!--                      />-->
-            <!--                    </el-form-item>-->
-            <!--                  </el-col>-->
-            <!--                </el-row>-->
-            <!--              </el-form-item>-->
-            <!--            </el-col>-->
-          </el-row>
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="主办单位办结时间" prop="zhubandate">
-                <el-date-picker
-                  v-model="formData.zhubandate"
-                  type="date"
-                  value-format="x"
-                  placeholder="选择办结时间"
-                  style="width: 100%"
-                />
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="协办单位办结时间" prop="xiebandate">
-                <el-date-picker
-                  v-model="formData.xiebandate"
-                  type="date"
-                  value-format="x"
-                  placeholder="选择办结时间"
-                  style="width: 100%"
-                />
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-form-item label="文件标题" prop="subject">
-            <el-input v-model="formData.subject" placeholder="请输入标题" />
-          </el-form-item>
-          <el-form-item label="收文文件" prop="filepath">
-            <UploadFile
-              v-model="formData.attachFilePath"
-              @update:first-file-name="handleFirstFileNameUpdate"
-            />
-          </el-form-item>
-          <el-form-item label="备注" prop="remark">
+
+          <el-form-item label="会议主要内容及我局承办事项" prop="content">
             <el-input
-              v-model="formData.remark"
-              placeholder="请输入备注"
-              :autosize="{ minRows: 2, maxRows: 4 }"
+              v-model="formData.content"
               type="textarea"
+              :autosize="{ minRows: 4, maxRows: 8 }"
+              placeholder="会议主要内容及我局承办事项"
             />
           </el-form-item>
-          <el-form-item label="下一办理节点" prop="nextNode" required>
+          <el-form-item label="参会人员会议表态情况及建议意见" prop="situation">
+            <el-input
+              v-model="formData.situation"
+              type="textarea"
+              :autosize="{ minRows: 4, maxRows: 8 }"
+              placeholder="参会人员会议表态情况及建议意见"
+            />
+          </el-form-item>
+
+          <el-form-item label="附件" prop="attachFilePath">
+            <UploadFile v-model="formData.attachFilePath" />
+          </el-form-item>
+
+          <el-form-item label="登记转出" prop="nextNode" required>
             <el-select
               v-model="formData.nextNode"
               placeholder="请选择下一节点"
@@ -178,10 +91,11 @@
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="办理人" prop="tempNextUserSelectAssignees" required>
+
+          <el-form-item label="科室负责人" prop="tempNextUserSelectAssignees" required>
             <el-select
               v-model="formData.tempNextUserSelectAssignees"
-              placeholder="请选择办理人"
+              placeholder="请选择科室负责人"
               :multiple="multipleFlag"
             >
               <el-option
@@ -192,71 +106,52 @@
               />
             </el-select>
           </el-form-item>
+
           <el-form-item>
             <el-button :disabled="formLoading" type="primary" @click="submitForm">
-              确 定
+              提 交
             </el-button>
           </el-form-item>
         </el-form>
-      </ContentWrap>
-    </el-col>
-
-    <el-col :span="8">
-      <ContentWrap title="办理流程预览" :bodyStyle="{ padding: '0 20px 0' }">
-        <ProcessInstanceTimeline
-          ref="timelineRef"
-          :activity-nodes="activityNodes"
-          :show-status-icon="false"
-          @select-user-confirm="selectUserConfirm"
-        />
       </ContentWrap>
     </el-col>
   </el-row>
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as DefinitionApi from '@/api/bpm/definition'
-import ProcessInstanceTimeline from '@/views/bpm/processInstance/detail/ProcessInstanceTimeline.vue'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { CandidateStrategy, NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
-import {
-  ApprovalNodeInfo,
-  getNextSelectNode,
-  getSelectUserOptions
-} from '@/api/bpm/processInstance'
-import { ReceiveDoc, ReceiveDocApi } from '@/api/bpm/receivedoc'
+import { ApprovalNodeInfo } from '@/api/bpm/processInstance'
+import { Confflow, ConfflowApi } from '@/api/bpm/confflow'
 import { useUserStore } from '@/store/modules/user'
-import { getUserProfile } from '@/api/system/user/profile'
 import { dateUtil } from '@/utils/dateUtil'
-defineOptions({ name: 'BpmReceiveDocCreate' })
+
+defineOptions({ name: 'BpmConfflowCreate' })
 
 const userStore = useUserStore()
-const deptName = ref('')
-
-const message = useMessage() // 消息弹窗
-const { delView } = useTagsViewStore() // 视图操作
-const { push, currentRoute } = useRouter() // 路由
+const message = useMessage()
+const { delView } = useTagsViewStore()
+const { push } = useRouter()
+const route = useRoute()
 
 const formLoading = ref(false)
 const multipleFlag = ref(false)
 
+// 表单数据初始化
 const formData = ref({
   id: undefined,
-  docClass: undefined,
-  docRange: 'dzgg', //电子公告流程特有标识
-  sendDept: [],
-  sendDocNumber: undefined,
-  receiveDocNumber: undefined,
-  receiveTime: undefined,
-  subject: undefined,
-  urgencyDegree: undefined,
-  remark: undefined,
-  docSecondClass: undefined,
+  title: undefined,
+  applyDate: undefined,
+  startDate: undefined,
+  venue: undefined,
+  joinUnit: undefined,
+  offerUnit: undefined,
+  offerPerson: undefined,
+  situation: undefined,
+  content: '',
   attachFilePath: '',
-  zhubandate: undefined,
-  xiebandate: undefined,
   nextNode: '',
   nextUserSelectAssignees: {},
   tempNextUserSelectAssignees: undefined
@@ -264,38 +159,31 @@ const formData = ref({
 
 const nextNodeOptions = ref([])
 const selectUserOptions = ref([])
-const nextNodeSelectAssignees = ref({})
 
+// 表单校验规则
 const formRules = reactive({
-  subject: [{ required: true, message: '标题不能为空', trigger: 'blur' }],
-  receiveDocNumber: [{ required: true, message: '收文编号不能为空', trigger: 'blur' }],
+  title: [{ required: true, message: '会议名称不能为空', trigger: 'blur' }],
+  startDate: [{ required: true, message: '会议时间不能为空', trigger: 'blur' }],
+  venue: [{ required: true, message: '会议地点不能为空', trigger: 'blur' }],
   nextNode: [{ required: true, message: '下一办理节点不能为空', trigger: 'change' }],
   tempNextUserSelectAssignees: [{ required: true, message: '办理人不能为空', trigger: 'change' }]
 })
 const formRef = ref()
 
-const processDefineKey = 'oa_electric' // 流程定义 Key
-const startUserSelectTasks = ref([]) // 发起人需要选择审批人的用户任务列表
-const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据
-const tempStartUserSelectAssignees = ref({}) // 历史发起人选择审批人的数据，用于每次表单变更时，临时保存
-const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([]) // 办理节点信息
+// 流程定义 Key
+const processDefineKey = 'conference_report'
+const startUserSelectTasks = ref([])
+const startUserSelectAssignees = ref({})
+const tempStartUserSelectAssignees = ref({})
+const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])
 const processDefinitionId = ref('')
 
 const nodeChange = async (val) => {
   await getSelectUsers(val.extensionProperties)
 }
 
-// 监听并接收首位有效文件名称回填
-const handleFirstFileNameUpdate = (fileName: string, forceUpdate: boolean = false) => {
-  const data = formData.value as any
-  if (fileName && (forceUpdate || !data.subject || data.subject.toString().trim() === '')) {
-    data.subject = fileName
-  }
-}
-
 const getSelectUsers = async (item) => {
   const data = await ProcessInstanceApi.getSelectUserOptions({
-    // TODO 小北：可以支持 processDefinitionKey 查询
     chooseRule: item.choose_rule,
     ruleValue: item.rule_value
   })
@@ -303,12 +191,13 @@ const getSelectUsers = async (item) => {
   selectUserOptions.value = data
 }
 
+/** 提交表单 */
 const submitForm = async () => {
-  // 1.1 校验表单
   if (!formRef) return
   const valid = await formRef.value.validate()
   if (!valid) return
-  // 1.2 办理相关：校验指定办理人
+
+  // 校验指定办理人
   if (startUserSelectTasks.value?.length > 0) {
     for (const userTask of startUserSelectTasks.value) {
       if (
@@ -319,20 +208,18 @@ const submitForm = async () => {
       }
     }
   }
-  // 2. 提交请求
+
   formLoading.value = true
   try {
-    const data = { ...formData.value } as unknown as ReceiveDoc
-    // 将来文单位数组转换为逗号分隔的字符串
-    if (Array.isArray(data.sendDept)) {
-      data.sendDept = data.sendDept.join(',')
-    }
+    const data = { ...formData.value } as unknown as Confflow
+
+    // BPM 参数组装
     data.nextNodeAssignees = {}
-    // 办理相关：设置指定办理人
     if (startUserSelectTasks.value?.length > 0) {
       data.startUserSelectAssignees = startUserSelectAssignees.value
     }
-    // 有长度说明是多选
+
+    // 处理下一节点办理人
     if (formData.value.tempNextUserSelectAssignees?.length > 0) {
       data.nextNodeAssignees[formData.value.nextNode.taskDefKey] =
         formData.value.tempNextUserSelectAssignees
@@ -341,41 +228,58 @@ const submitForm = async () => {
         formData.value.tempNextUserSelectAssignees
       ]
     }
-    // data.selectNode = formData.value.nextNode.conditionExpression.value
 
-    console.log(data, '请求数据')
-    await ReceiveDocApi.createReceiveDoc(data)
+    if (formData.value.nextNode.conditionExpression) {
+      data.processVariablesStr = JSON.stringify({
+        [formData.value.nextNode.conditionExpression.key]:
+        formData.value.nextNode.conditionExpression.value
+      })
+    }
+
+    // 调用新增接口
+    await ConfflowApi.createConfflow(data)
     message.success('发起成功')
-    // 关闭当前 Tab
-    delView(unref(currentRoute))
-    await push({ name: 'BpmProcessInstanceMy' })
+
+    setTimeout(() => {
+      delView(route)
+      push('/bpm/unified')
+    }, 200)
   } finally {
     formLoading.value = false
   }
 }
 
-/** 办理相关：获取办理详情 */
+/** 办理相关：获取办理详情 (恢复了核心流程逻辑) */
 const getApprovalDetail = async () => {
   if (!processDefinitionId.value) return
   try {
-    const data = await ProcessInstanceApi.getApprovalDetail({
-      processDefinitionId: processDefinitionId.value,
-      // TODO 小北：可以支持 processDefinitionKey 查询
-      activityId: NodeId.START_USER_NODE_ID
-    })
+    let data
+    if (!formData.value.nextNode.conditionExpression) {
+      data = await ProcessInstanceApi.getApprovalDetail({
+        processDefinitionId: processDefinitionId.value,
+        activityId: NodeId.START_USER_NODE_ID
+      })
+    } else {
+      data = await ProcessInstanceApi.getApprovalDetail({
+        processDefinitionId: processDefinitionId.value,
+        activityId: NodeId.START_USER_NODE_ID,
+        processVariablesStr: JSON.stringify({
+          [formData.value.nextNode.conditionExpression.key]:
+          formData.value.nextNode.conditionExpression.value
+        })
+      })
+    }
 
     if (!data) {
       message.error('查询不到办理详情信息！')
       return
     }
-    // 获取办理节点，显示 Timeline 的数据
     activityNodes.value = data.activityNodes
-
-    // 获取发起人自选的任务
     startUserSelectTasks.value = data.activityNodes?.filter(
       (node: ApprovalNodeInfo) => CandidateStrategy.START_USER_SELECT === node.candidateStrategy
     )
-    // 恢复之前的选择审批人
+
+    // 恢复历史选择
     if (startUserSelectTasks.value?.length > 0) {
       for (const node of startUserSelectTasks.value) {
         if (
@@ -395,101 +299,56 @@ const getApprovalDetail = async () => {
 const getNextApprovalNodes = async () => {
   const data = await ProcessInstanceApi.getNextSelectNodes({
     processDefinitionId: processDefinitionId.value,
-    // TODO 小北：可以支持 processDefinitionKey 查询
-    activityId: NodeId.START_USER_NODE_ID // 解决 GET 无法传递对象的问题，后端 String 再转 JSON
+    activityId: NodeId.START_USER_NODE_ID
   })
   nextNodeOptions.value = data
-  formData.value.nextNode = data[0]
-  await getSelectUsers(data[0].extensionProperties)
+  if (data.length > 0) {
+    formData.value.nextNode = data[0]
+    await getSelectUsers(data[0].extensionProperties)
+  }
 }
 
-/** 办理相关：选择发起人 */
 const selectUserConfirm = (id: string, userList: any[]) => {
   startUserSelectAssignees.value[id] = userList?.map((item: any) => item.id)
 }
 
 /** 初始化 */
 onMounted(async () => {
-  formData.value.receiveTime = Date.now()
-  // TODO @小北：这里可以简化，统一通过 getApprovalDetail 处理么？
+  // 1. 获取当前登录人信息并设置默认值
+  const currentUser = userStore.getUser || {}
+  formData.value.offerPerson = currentUser.nickname // 加载当前人姓名
+  formData.value.offerUnit = currentUser.dept?.name || currentUser.deptName // 加载当前人部门 (适配不同版本的 userStore 结构)
+
+  formData.value.applyDate = dateUtil().valueOf()
+
+  // 2. 获取流程定义
   const processDefinitionDetail = await DefinitionApi.getProcessDefinition(
     undefined,
     processDefineKey
   )
 
   if (!processDefinitionDetail) {
-    message.error('OA 收文的流程模型未配置，请检查！')
+    message.error(`会议报告单流程(${processDefineKey})未配置，请检查！`)
     return
   }
   processDefinitionId.value = processDefinitionDetail.id
   startUserSelectTasks.value = processDefinitionDetail.startUserSelectTasks
 
-  // 办理相关：加载最新的办理详情，主要用于节点预测
-  // await getApprovalDetail()
   await getNextApprovalNodes()
-
-  // await getNextApprovalNodes()
-
-  const res = await getUserProfile()
-  if (res.dept) {
-    deptName.value = res.dept.name
-  } else if (res.users && res.users.dept) {
-    deptName.value = res.users.dept.name
-  }
 })
 
-/**
- * 格式化来文字号显示文本
- * 显示格式为: 标签[当前年份]号
- */
-const formatSendDocNumberLabel = (label: string) => {
-  const year = new Date().getFullYear()
-  return `${label}[${year}]号`
-}
-
-/** 办理相关：预测流程节点会因为输入的参数值而产生新的预测结果值，所以需重新预测一次, formData.value可改成实际业务中的特定字段 */
+// 监听表单变化重新预测节点 (恢复监听，确保网关走向不报错)
 watch(
   formData.value,
   (newValue, oldValue) => {
-    if (!oldValue) {
-      return
-    }
+    if (!oldValue) return
     if (newValue && Object.keys(newValue).length > 0) {
-      // 记录之前的节点办理人
       tempStartUserSelectAssignees.value = startUserSelectAssignees.value
       startUserSelectAssignees.value = {}
-      // 加载最新的审批详情,主要用于节点预测
       getApprovalDetail()
     }
   },
-  {
-    immediate: true
-  }
-)
-
-/**
- * 自动生成收文编号
- * 编号格式: 当前年份-文件类别选项键值-随机四位数
- */
-const generateReceiveDocNumber = () => {
-  const year = new Date().getFullYear()
-  // 如果没有选择单位类别，则使用默认值
-  const category =
-    formData.value.docSecondClass !== undefined
-      ? formData.value.docSecondClass.toString()
-      : 'DEFAULT'
-  // 生成4位随机数
-  const randomNumber = Math.floor(1000 + Math.random() * 9000)
-  formData.value.receiveDocNumber = `${year}-${category}-${randomNumber}`
-}
-
-// 监听单位类别(docSecondClass)变化，自动更新收文编号
-watch(
-  () => formData.value.docSecondClass,
-  (newVal) => {
-    // 当单位类别发生变化时，自动生成新的收文编号
-    generateReceiveDocNumber()
-  }
+  { immediate: true }
 )
 </script>
 

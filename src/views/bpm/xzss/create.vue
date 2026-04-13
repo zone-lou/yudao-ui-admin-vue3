@@ -144,7 +144,7 @@
                 </el-col>
                 <el-col :span="8">
                   <el-form-item label="后一审案号" prop="ssAh">
-                    <el-input v-model="formData.ssAh" placeholder="自动获取后一审案号" />
+                    <el-input  placeholder="自动获取后一审案号" />
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -418,14 +418,14 @@
                 <div class="meta-info">
                   <div class="meta-left">
                     <span
-                      >收文日期：<span class="meta-input">{{
+                    >收文日期：<span class="meta-input">{{
                         formatDate(formData.swRq)
                       }}</span></span
                     >
                   </div>
                   <div class="meta-right">
                     <span
-                      >来文号：<span class="meta-input">{{ formData.swWh }}</span></span
+                    >来文号：<span class="meta-input">{{ formData.swWh }}</span></span
                     >
                   </div>
                 </div>
@@ -438,80 +438,80 @@
                     <col style="width: 150px" />
                   </colgroup>
                   <tbody>
-                    <tr>
-                      <td class="label-cell">监督监管</td>
-                      <td class="data-text">
-                        <div
-                          class="check-item w-full h-full cursor-pointer select-none"
-                          @click="formData.issupervise = formData.issupervise === 1 ? 0 : 1"
-                        >
+                  <tr>
+                    <td class="label-cell">监督监管</td>
+                    <td class="data-text">
+                      <div
+                        class="check-item w-full h-full cursor-pointer select-none"
+                        @click="formData.issupervise = formData.issupervise === 1 ? 0 : 1"
+                      >
                           <span class="checkbox-mock">
                             <span v-if="formData.issupervise === 1">✔</span>
                           </span>
-                          进行监督监管
-                        </div>
-                      </td>
-                      <td class="label-cell">科室办理办结日期</td>
-                      <td class="data-text center-text" style="padding: 0">
-                        <el-date-picker
-                          v-model="formData.zhubandate"
-                          type="date"
-                          value-format="x"
-                          placeholder="选择日期"
-                          style="width: 100%; border: none"
-                        />
-                      </td>
-                    </tr>
+                        进行监督监管
+                      </div>
+                    </td>
+                    <td class="label-cell">科室办理办结日期</td>
+                    <td class="data-text center-text" style="padding: 0">
+                      <el-date-picker
+                        v-model="formData.zhubandate"
+                        type="date"
+                        value-format="x"
+                        placeholder="选择日期"
+                        style="width: 100%; border: none"
+                      />
+                    </td>
+                  </tr>
 
-                    <tr>
-                      <td class="label-cell" rowspan="2">拟办意见</td>
-                      <td colspan="3" class="h-80 data-text text-left"> </td>
-                    </tr>
-                    <tr>
-                      <td colspan="3" class="signature-row">
-                        <div class="sig-container">
-                          <span style="width: 40%">办理人：<span class="sign-input"></span></span>
-                          <span style="width: 40%">日期：<span class="sign-input"></span></span>
-                        </div>
-                      </td>
-                    </tr>
+                  <tr>
+                    <td class="label-cell" rowspan="2">拟办意见</td>
+                    <td colspan="3" class="h-80 data-text text-left"> </td>
+                  </tr>
+                  <tr>
+                    <td colspan="3" class="signature-row">
+                      <div class="sig-container">
+                        <span style="width: 40%">办理人：<span class="sign-input"></span></span>
+                        <span style="width: 40%">日期：<span class="sign-input"></span></span>
+                      </div>
+                    </td>
+                  </tr>
 
-                    <tr>
-                      <td class="label-cell" rowspan="2">局长意见</td>
-                      <td colspan="3" class="h-80 data-text text-left"> </td>
-                    </tr>
-                    <tr>
-                      <td colspan="3" class="signature-row">
-                        <div class="sig-container">
-                          <span style="width: 40%">办理人：<span class="sign-input"></span></span>
-                          <span style="width: 40%">日期：<span class="sign-input"></span></span>
-                        </div>
-                      </td>
-                    </tr>
+                  <tr>
+                    <td class="label-cell" rowspan="2">局长意见</td>
+                    <td colspan="3" class="h-80 data-text text-left"> </td>
+                  </tr>
+                  <tr>
+                    <td colspan="3" class="signature-row">
+                      <div class="sig-container">
+                        <span style="width: 40%">办理人：<span class="sign-input"></span></span>
+                        <span style="width: 40%">日期：<span class="sign-input"></span></span>
+                      </div>
+                    </td>
+                  </tr>
 
-                    <tr>
-                      <td class="label-cell" rowspan="2">局领导<br />意见</td>
-                      <td class="sub-header">办理意见</td>
-                      <td class="sub-header">办理人员</td>
-                      <td class="sub-header">办理日期</td>
-                    </tr>
-                    <tr>
-                      <td class="h-35 data-text"></td>
-                      <td class="h-35 data-text center-text"></td>
-                      <td class="h-35 data-text center-text"></td>
-                    </tr>
+                  <tr>
+                    <td class="label-cell" rowspan="2">局领导<br />意见</td>
+                    <td class="sub-header">办理意见</td>
+                    <td class="sub-header">办理人员</td>
+                    <td class="sub-header">办理日期</td>
+                  </tr>
+                  <tr>
+                    <td class="h-35 data-text"></td>
+                    <td class="h-35 data-text center-text"></td>
+                    <td class="h-35 data-text center-text"></td>
+                  </tr>
 
-                    <tr>
-                      <td class="label-cell" rowspan="2">科室单位<br />办理意见</td>
-                      <td class="sub-header">办理意见</td>
-                      <td class="sub-header">办理人员</td>
-                      <td class="sub-header">办理日期</td>
-                    </tr>
-                    <tr>
-                      <td class="h-35 data-text"></td>
-                      <td class="h-35 data-text center-text"></td>
-                      <td class="h-35 data-text center-text"></td>
-                    </tr>
+                  <tr>
+                    <td class="label-cell" rowspan="2">科室单位<br />办理意见</td>
+                    <td class="sub-header">办理意见</td>
+                    <td class="sub-header">办理人员</td>
+                    <td class="sub-header">办理日期</td>
+                  </tr>
+                  <tr>
+                    <td class="h-35 data-text"></td>
+                    <td class="h-35 data-text center-text"></td>
+                    <td class="h-35 data-text center-text"></td>
+                  </tr>
                   </tbody>
                 </table>
               </div>
@@ -571,7 +571,21 @@
   </el-dialog>
 
   <el-dialog v-model="fySelectVisible" title="选择复议案件" width="70%" append-to-body>
-    <el-table v-loading="listLoading" :data="xzfyList" border>
+    <el-form :inline="true" :model="queryParamsFy" class="-mb-15px">
+      <el-form-item label="案号">
+        <el-input
+          v-model="queryParamsFy.swWh"
+          placeholder="请输入案号模糊搜索"
+          clearable
+          @keyup.enter="getFyList"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button @click="getFyList"><Icon icon="ep:search" class="mr-5px" />查询</el-button>
+        <el-button @click="resetQueryFy"><Icon icon="ep:refresh" class="mr-5px" />重置</el-button>
+      </el-form-item>
+    </el-form>
+    <el-table v-loading="listLoading" :data="xzfyList" border style="margin-top: 15px">
       <el-table-column label="诉讼文号" prop="swWh" />
       <el-table-column label="来文机关" prop="swJg" />
       <el-table-column label="收文日期" align="center">
@@ -586,10 +600,32 @@
         </template>
       </el-table-column>
     </el-table>
+    <div class="pagination-wrapper">
+      <Pagination
+        :total="totalFy"
+        v-model:page="queryParamsFy.pageNo"
+        v-model:limit="queryParamsFy.pageSize"
+        @pagination="getFyList"
+      />
+    </div>
   </el-dialog>
 
   <el-dialog v-model="ssSelectVisible" title="选择上一审案件" width="70%" append-to-body>
-    <el-table v-loading="listLoading" :data="historyXzssList" border>
+    <el-form :inline="true" :model="queryParamsSs" class="-mb-15px">
+      <el-form-item label="案号">
+        <el-input
+          v-model="queryParamsSs.swWh"
+          placeholder="请输入案号模糊搜索"
+          clearable
+          @keyup.enter="getSsList"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button @click="getSsList"><Icon icon="ep:search" class="mr-5px" />查询</el-button>
+        <el-button @click="resetQuerySs"><Icon icon="ep:refresh" class="mr-5px" />重置</el-button>
+      </el-form-item>
+    </el-form>
+    <el-table v-loading="listLoading" :data="historyXzssList" border style="margin-top: 15px">
       <el-table-column label="诉讼文号" prop="swWh" />
       <el-table-column label="来文机关" prop="swJg" />
       <el-table-column label="收文日期" align="center">
@@ -604,6 +640,14 @@
         </template>
       </el-table-column>
     </el-table>
+    <div class="pagination-wrapper">
+      <Pagination
+        :total="totalSs"
+        v-model:page="queryParamsSs.pageNo"
+        v-model:limit="queryParamsSs.pageSize"
+        @pagination="getSsList"
+      />
+    </div>
   </el-dialog>
 </template>
 
@@ -644,6 +688,22 @@ const uploadFileRef = ref()
 // 弹窗相关
 const dialogVisible = ref(false)
 const dialogFormRef = ref()
+
+// === 复议案件选择逻辑 ===
+const queryParamsFy = reactive({
+  pageNo: 1,
+  pageSize: 10,
+  swWh: undefined // 对应案号模糊搜索
+})
+const totalFy = ref(0)
+
+// === 上一审案件选择逻辑 ===
+const queryParamsSs = reactive({
+  pageNo: 1,
+  pageSize: 10,
+  swWh: undefined
+})
+const totalSs = ref(0)
 
 // 流程相关
 const processDefineKey = 'oa_lawsuit' // 流程 Key
@@ -760,13 +820,20 @@ const listLoading = ref(false)
 
 const openFySelect = async () => {
   fySelectVisible.value = true
+  // 重置页码
+  queryParamsFy.pageNo = 1
+  // 直接调用统一的获取数据方法
+  await getFyList()
+}
+
+const getFyList = async () => {
   listLoading.value = true
   try {
-    // 调用 getXzfyPageUnlinked 获取未关联行政诉讼的行政复议
-    // @ts-ignore
-    const res = await XzfyApi.getXzfyPageUnlinked({ pageNo: 1, pageSize: 10 })
-    if (res && res.list) {
+    // 确保调用接口并赋值 total
+    const res = await XzfyApi.getXzfyPageUnlinked(queryParamsFy)
+    if (res) {
       xzfyList.value = res.list
+      totalFy.value = res.total // 必须赋值，否则分页组件不显示
     }
   } catch (e) {
     console.error(e)
@@ -774,24 +841,6 @@ const openFySelect = async () => {
     listLoading.value = false
   }
 }
-
-const openSsSelect = async () => {
-  ssSelectVisible.value = true
-  listLoading.value = true
-  try {
-    // 调用 getXzssPage 获取行政诉讼列表
-    // @ts-ignore
-    const res = await XzssApi.getXzssPage({ pageNo: 1, pageSize: 10 })
-    if (res && res.list) {
-      historyXzssList.value = res.list
-    }
-  } catch (e) {
-    console.error(e)
-  } finally {
-    listLoading.value = false
-  }
-}
-
 const selectFy = (row: any) => {
   formData.value.fyAh = row.swWh // 备注：复议列表的 swWh 对应 复议案号
   formData.value.fyGuid = row.xmGuid // 关联ID
@@ -971,6 +1020,39 @@ const getApprovalDetail = async () => {
   }
 }
 
+const resetQueryFy = () => {
+  queryParamsFy.pageNo = 1
+  queryParamsFy.swWh = undefined
+  getFyList()
+}
+
+const openSsSelect = () => {
+  ssSelectVisible.value = true
+  resetQuerySs()
+}
+
+const getSsList = async () => {
+  listLoading.value = true
+  try {
+    // @ts-ignore
+    const res = await XzssApi.getXzssPage(queryParamsSs)
+    if (res) {
+      historyXzssList.value = res.list
+      totalSs.value = res.total
+    }
+  } catch (e) {
+    console.error(e)
+  } finally {
+    listLoading.value = false
+  }
+}
+
+const resetQuerySs = () => {
+  queryParamsSs.pageNo = 1
+  queryParamsSs.swWh = undefined
+  getSsList()
+}
+
 const selectUserConfirm = (id: string, userList: any[]) => {
   startUserSelectAssignees.value[id] = userList?.map((item: any) => item.id)
 }
@@ -1148,5 +1230,10 @@ watch(
   border: 1px solid #000;
   align-items: center;
   justify-content: center;
+}
+.pagination-wrapper {
+  overflow: hidden; /* 核心：强制包含内部的 float-right 元素 */
+  width: 100%;
+  padding-top: 10px;
 }
 </style>
