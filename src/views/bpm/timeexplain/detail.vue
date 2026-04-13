@@ -520,21 +520,39 @@ const processFileList = (pathStr: string | undefined) => {
     .filter(Boolean)
 }
 
+const DIRECT_RENDER_EXTENSIONS = [
+  'pdf',
+  'jpg', 'jpeg', 'png', 'gif', 'bmp', 'ico', 'webp', 'svg', 'tif', 'tiff',
+  'mp4', 'webm', 'mkv', 'avi', 'flv', 'mov', 'wmv', 
+  'mp3', 'wav', 'flac', 'ogg', 'aac',
+  'txt', 'json', 'xml', 'md', 'java', 'js', 'css', 'html', 'sql'
+]
+
 /** 预览文件 */
 const handlePreview = (file: any) => {
   if (!file || !file.url) return
 
   // 1. 基础配置
   const kkBaseUrl = fileViewBaseUrl.value || 'http://192.168.50.239:8012'
-  let fullUrl = file.url
+  let fullUrl = file.url.trim()
 
   if (fullUrl.startsWith('/')) {
     fullUrl = window.location.origin + fullUrl
   }
 
-  // 内外网预览地址转换
-  if (externalPrefix.value && internalPrefix.value && fullUrl.includes(externalPrefix.value)) {
-    fullUrl = fullUrl.replace(externalPrefix.value, internalPrefix.value)
+  const fileName = file.name || fullUrl
+  const ext = fileName.split('.').pop().toLowerCase()
+
+  if (DIRECT_RENDER_EXTENSIONS.includes(ext)) {
+    // 规定格式：走外网地址
+    if (internalPrefix.value && externalPrefix.value && fullUrl.includes(internalPrefix.value)) {
+      fullUrl = fullUrl.replace(internalPrefix.value, externalPrefix.value)
+    }
+  } else {
+    // 规定格式外：交给后端去下载转换，走内网地址
+    if (externalPrefix.value && internalPrefix.value && fullUrl.includes(externalPrefix.value)) {
+      fullUrl = fullUrl.replace(externalPrefix.value, internalPrefix.value)
+    }
   }
 
   // 2. Base64 编码

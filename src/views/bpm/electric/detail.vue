@@ -158,6 +158,14 @@ const formatCommaData = (val: any) => {
   return val
 }
 
+const DIRECT_RENDER_EXTENSIONS = [
+  'pdf',
+  'jpg', 'jpeg', 'png', 'gif', 'bmp', 'ico', 'webp', 'svg', 'tif', 'tiff',
+  'mp4', 'webm', 'mkv', 'avi', 'flv', 'mov', 'wmv', 
+  'mp3', 'wav', 'flac', 'ogg', 'aac',
+  'txt', 'json', 'xml', 'md', 'java', 'js', 'css', 'html', 'sql'
+]
+
 /**
  * 处理预览 (修改版)
  * 逻辑：使用 Base64 编码文件地址，拼接预览服务地址，打开新窗口
@@ -168,20 +176,26 @@ const handlePreview = (file: any) => {
   }
 
   // 1. 准备基础数据
-  // const kkBaseUrl = fileViewBaseUrl.value || 'http://192.168.50.239:8012'
-  const kkBaseUrl = fileViewBaseUrl.value
-  let fullUrl = file.url
+  const kkBaseUrl = fileViewBaseUrl.value || 'http://192.168.50.239:8012/onlinePreview?url='
+  let fullUrl = file.url.trim()
 
-  // 【注意】如果 file.url 是相对路径 (如 /admin-api/file/...)，
-  // 你可能需要在这里补全当前系统的域名，否则预览服务可能访问不到文件。
-  // 例如：
-  // if (fullUrl.startsWith('/')) {
-  //    fullUrl = window.location.origin + fullUrl
-  // }
+  if (fullUrl.startsWith('/')) {
+     fullUrl = window.location.origin + fullUrl
+  }
 
-  // 内外网预览地址转换
-  if (externalPrefix.value && internalPrefix.value && fullUrl.includes(externalPrefix.value)) {
-    fullUrl = fullUrl.replace(externalPrefix.value, internalPrefix.value)
+  const fileName = file.name || fullUrl
+  const ext = fileName.split('.').pop().toLowerCase()
+
+  if (DIRECT_RENDER_EXTENSIONS.includes(ext)) {
+    // 规定格式：走外网地址
+    if (internalPrefix.value && externalPrefix.value && fullUrl.includes(internalPrefix.value)) {
+      fullUrl = fullUrl.replace(internalPrefix.value, externalPrefix.value)
+    }
+  } else {
+    // 规定格式外：交给后端去下载转换，走内网地址
+    if (externalPrefix.value && internalPrefix.value && fullUrl.includes(externalPrefix.value)) {
+      fullUrl = fullUrl.replace(externalPrefix.value, internalPrefix.value)
+    }
   }
 
   // 2. 将文件链接进行 Base64 编码 (使用 js-base64 库处理，支持中文更友好)
