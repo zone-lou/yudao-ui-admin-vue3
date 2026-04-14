@@ -1,6 +1,6 @@
 <template>
   <el-row :gutter="20">
-    <el-col :span="16">
+    <el-col :span="24">
       <ContentWrap title="发文申请信息">
         <el-form
           ref="formRef"
@@ -251,27 +251,14 @@
         </el-form>
       </ContentWrap>
     </el-col>
-
-    <el-col :span="8">
-      <ContentWrap title="办理流程预览" :bodyStyle="{ padding: '0 20px 0' }">
-        <ProcessInstanceTimeline
-          ref="timelineRef"
-          :activity-nodes="activityNodes"
-          :show-status-icon="false"
-          @select-user-confirm="selectUserConfirm"
-        />
-      </ContentWrap>
-    </el-col>
   </el-row>
 </template>
 
 <script setup lang="ts">
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as DefinitionApi from '@/api/bpm/definition'
-import ProcessInstanceTimeline from '@/views/bpm/processInstance/detail/ProcessInstanceTimeline.vue'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
-import { CandidateStrategy, NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
-import { ApprovalNodeInfo } from '@/api/bpm/processInstance'
+import { NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { SendDocApi } from '@/api/bpm/senddoc'
 import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
 import { useUserStore } from '@/store/modules/user'
@@ -292,7 +279,6 @@ const formRef = ref()
 const processDefineKey = 'send_doc' // 发文流程 Key
 const startUserSelectTasks = ref([])
 const startUserSelectAssignees = ref({})
-const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])
 const processDefinitionId = ref('')
 
 const nextNodeOptions = ref([])
@@ -435,26 +421,6 @@ const submitForm = async () => {
 }
 
 // === 初始化 ===
-const getApprovalDetail = async () => {
-  try {
-    const data = await ProcessInstanceApi.getApprovalDetail({
-      processDefinitionId: processDefinitionId.value,
-      activityId: NodeId.START_USER_NODE_ID,
-      processVariablesStr: JSON.stringify({})
-    })
-    if (!data) return
-    activityNodes.value = data.activityNodes
-    startUserSelectTasks.value = data.activityNodes?.filter(
-      (node: ApprovalNodeInfo) => CandidateStrategy.START_USER_SELECT === node.candidateStrategy
-    )
-  } catch (e) {
-    console.error(e)
-  }
-}
-
-const selectUserConfirm = (id: string, userList: any[]) => {
-  startUserSelectAssignees.value[id] = userList?.map((item: any) => item.id)
-}
 
 onMounted(async () => {
   // 预填当前用户为拟稿人
@@ -481,7 +447,6 @@ onMounted(async () => {
   startUserSelectTasks.value = processDefinitionDetail.startUserSelectTasks
 
   await getNextApprovalNodes()
-  await getApprovalDetail()
 
   const queryId = route.query.id
   if (queryId) {
@@ -510,12 +475,6 @@ onMounted(async () => {
   }
 })
 
-watch(
-  () => formData.value.nextNode,
-  () => {
-    getApprovalDetail()
-  }
-)
 </script>
 
 <style scoped>

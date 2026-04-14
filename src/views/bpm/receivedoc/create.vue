@@ -1,6 +1,6 @@
 <template>
   <el-row :gutter="20">
-    <el-col :span="16">
+    <el-col :span="24">
       <ContentWrap title="申请信息">
         <el-form
           ref="formRef"
@@ -211,17 +211,6 @@
         </el-form>
       </ContentWrap>
     </el-col>
-
-    <el-col :span="8">
-      <ContentWrap title="办理流程预览" :bodyStyle="{ padding: '0 20px 0' }">
-        <ProcessInstanceTimeline
-          ref="timelineRef"
-          :activity-nodes="activityNodes"
-          :show-status-icon="false"
-          @select-user-confirm="selectUserConfirm"
-        />
-      </ContentWrap>
-    </el-col>
   </el-row>
 </template>
 
@@ -229,10 +218,8 @@
 import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as DefinitionApi from '@/api/bpm/definition'
-import ProcessInstanceTimeline from '@/views/bpm/processInstance/detail/ProcessInstanceTimeline.vue'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
-import { CandidateStrategy, NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
-import { ApprovalNodeInfo } from '@/api/bpm/processInstance'
+import { NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { ReceiveDocApi } from '@/api/bpm/receivedoc'
 import { useUserStore } from '@/store/modules/user'
 import { getUserProfile } from '@/api/system/user/profile'
@@ -290,7 +277,6 @@ const processDefineKey = 'receice_doc_v2_copy_copy'
 const startUserSelectTasks = ref([])
 const startUserSelectAssignees = ref({})
 const tempStartUserSelectAssignees = ref({})
-const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])
 const processDefinitionId = ref('')
 const defaultReceiveUserId = ref<number | string>('')
 
@@ -527,49 +513,6 @@ const handleSubmit = async () => {
   }
 }
 
-/** 办理相关：获取办理详情 */
-const getApprovalDetail = async () => {
-  if (!processDefinitionId.value) return
-  // 如果是修改流程中表单，不需要重新计算下一节点
-  if (formData.value.processInstanceId) return
-
-  const condition = formData.value.nextNode?.conditionExpression
-  const processVariablesStr = condition?.key
-    ? JSON.stringify({ [condition.key]: condition.value })
-    : '{}'
-
-  try {
-    const data = await ProcessInstanceApi.getApprovalDetail({
-      processDefinitionId: processDefinitionId.value,
-      activityId: NodeId.START_USER_NODE_ID,
-      processVariablesStr
-    })
-
-    if (!data) {
-      message.error('查询不到办理详情信息！')
-      return
-    }
-    activityNodes.value = data.activityNodes
-
-    startUserSelectTasks.value = data.activityNodes?.filter(
-      (node: ApprovalNodeInfo) => CandidateStrategy.START_USER_SELECT === node.candidateStrategy
-    )
-    if (startUserSelectTasks.value?.length > 0) {
-      for (const node of startUserSelectTasks.value) {
-        if (
-          tempStartUserSelectAssignees.value[node.id] &&
-          tempStartUserSelectAssignees.value[node.id].length > 0
-        ) {
-          startUserSelectAssignees.value[node.id] = tempStartUserSelectAssignees.value[node.id]
-        } else {
-          startUserSelectAssignees.value[node.id] = []
-        }
-      }
-    }
-  } finally {
-  }
-}
-
 const getNextApprovalNodes = async () => {
   const data = await ProcessInstanceApi.getNextSelectNodes({
     processDefinitionId: processDefinitionId.value,
@@ -578,10 +521,6 @@ const getNextApprovalNodes = async () => {
   nextNodeOptions.value = data
   formData.value.nextNode = data[0]
   await getSelectUsers(data[0].extensionProperties)
-}
-
-const selectUserConfirm = (id: string, userList: any[]) => {
-  startUserSelectAssignees.value[id] = userList?.map((item: any) => item.id)
 }
 
 /** 初始化 */
@@ -657,18 +596,7 @@ const formatSendDocNumberLabel = (label: string) => {
   return `${label}[${year}]号`
 }
 
-watch(
-  formData.value,
-  (newValue, oldValue) => {
-    if (!oldValue) return
-    if (newValue && Object.keys(newValue).length > 0) {
-      tempStartUserSelectAssignees.value = startUserSelectAssignees.value
-      startUserSelectAssignees.value = {}
-      getApprovalDetail()
-    }
-  },
-  { deep: true }
-)
+ 
 
 const generateReceiveDocNumber = async () => {
   if (!formData.value.docClass || !formData.value.receiveTime) {

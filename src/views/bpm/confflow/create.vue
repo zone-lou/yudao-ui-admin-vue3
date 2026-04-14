@@ -1,6 +1,6 @@
 <template>
   <el-row :gutter="20">
-    <el-col :span="16">
+    <el-col :span="24">
       <ContentWrap title="会议报告单申请信息">
         <el-form
           ref="formRef"
@@ -141,26 +141,14 @@
         </el-form>
       </ContentWrap>
     </el-col>
-
-    <el-col :span="8">
-      <ContentWrap title="办理流程预览" :bodyStyle="{ padding: '0 20px 0' }">
-        <ProcessInstanceTimeline
-          ref="timelineRef"
-          :activity-nodes="activityNodes"
-          :show-status-icon="false"
-          @select-user-confirm="selectUserConfirm"
-        />
-      </ContentWrap>
-    </el-col>
   </el-row>
 </template>
 
 <script setup lang="ts">
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as DefinitionApi from '@/api/bpm/definition'
-import ProcessInstanceTimeline from '@/views/bpm/processInstance/detail/ProcessInstanceTimeline.vue'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
-import { CandidateStrategy, NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
+import { NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { ApprovalNodeInfo, getSelectUserOptions } from '@/api/bpm/processInstance'
 import { Confflow, ConfflowApi } from '@/api/bpm/confflow' // 引入会议报告单API
 import { useUserStore } from '@/store/modules/user'
@@ -217,7 +205,6 @@ const processDefineKey = 'conference_report'
 const startUserSelectTasks = ref([])
 const startUserSelectAssignees = ref({})
 const tempStartUserSelectAssignees = ref({})
-const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])
 const processDefinitionId = ref('')
 
 const nodeChange = async (val) => {
@@ -292,54 +279,6 @@ const submitForm = async () => {
   }
 }
 
-/** 办理相关：获取办理详情 */
-const getApprovalDetail = async () => {
-  if (!processDefinitionId.value) return
-  try {
-    let data
-    if (!formData.value.nextNode.conditionExpression) {
-      data = await ProcessInstanceApi.getApprovalDetail({
-        processDefinitionId: processDefinitionId.value,
-        activityId: NodeId.START_USER_NODE_ID
-      })
-    } else {
-      data = await ProcessInstanceApi.getApprovalDetail({
-        processDefinitionId: processDefinitionId.value,
-        activityId: NodeId.START_USER_NODE_ID,
-
-        processVariablesStr: JSON.stringify({
-          [formData.value.nextNode.conditionExpression.key]:
-            formData.value.nextNode.conditionExpression.value
-        })
-      })
-    }
-
-    if (!data) {
-      message.error('查询不到办理详情信息！')
-      return
-    }
-    activityNodes.value = data.activityNodes
-    startUserSelectTasks.value = data.activityNodes?.filter(
-      (node: ApprovalNodeInfo) => CandidateStrategy.START_USER_SELECT === node.candidateStrategy
-    )
-
-    // 恢复历史选择
-    if (startUserSelectTasks.value?.length > 0) {
-      for (const node of startUserSelectTasks.value) {
-        if (
-          tempStartUserSelectAssignees.value[node.id] &&
-          tempStartUserSelectAssignees.value[node.id].length > 0
-        ) {
-          startUserSelectAssignees.value[node.id] = tempStartUserSelectAssignees.value[node.id]
-        } else {
-          startUserSelectAssignees.value[node.id] = []
-        }
-      }
-    }
-  } finally {
-  }
-}
-
 const getNextApprovalNodes = async () => {
   const data = await ProcessInstanceApi.getNextSelectNodes({
     processDefinitionId: processDefinitionId.value,
@@ -350,10 +289,6 @@ const getNextApprovalNodes = async () => {
     formData.value.nextNode = data[0]
     await getSelectUsers(data[0].extensionProperties)
   }
-}
-
-const selectUserConfirm = (id: string, userList: any[]) => {
-  startUserSelectAssignees.value[id] = userList?.map((item: any) => item.id)
 }
 
 /** 初始化 */
@@ -378,19 +313,7 @@ onMounted(async () => {
   await getNextApprovalNodes()
 })
 
-// 监听表单变化重新预测节点（如果流程中有根据表单字段判断走向的网关）
-watch(
-  formData.value,
-  (newValue, oldValue) => {
-    if (!oldValue) return
-    if (newValue && Object.keys(newValue).length > 0) {
-      tempStartUserSelectAssignees.value = startUserSelectAssignees.value
-      startUserSelectAssignees.value = {}
-      getApprovalDetail()
-    }
-  },
-  { immediate: true }
-)
+ 
 </script>
 
 <style scoped lang="scss"></style>
