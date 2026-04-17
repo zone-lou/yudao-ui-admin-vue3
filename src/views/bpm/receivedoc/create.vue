@@ -2,6 +2,28 @@
   <el-row :gutter="20">
     <el-col :span="24">
       <ContentWrap title="申请信息">
+        <template #header>
+          <el-button
+            v-if="!formData.processInstanceId"
+            type="primary"
+            @click="handleOpenDialog"
+            :loading="formLoading"
+          >
+            <Icon icon="ep:promotion" class="mr-5px" /> 发送
+          </el-button>
+          <el-button
+            v-if="!formData.processInstanceId"
+            type="success"
+            @click="handleSave"
+            :loading="formLoading"
+          >
+            <Icon icon="ep:document-checked" class="mr-5px" /> 保存草稿
+          </el-button>
+          <el-button v-else type="primary" @click="handleSave" :loading="formLoading">
+            <Icon icon="ep:document-checked" class="mr-5px" /> 保存修改
+          </el-button>
+        </template>
+
         <el-form
           ref="formRef"
           :model="formData"
@@ -143,89 +165,37 @@
               type="textarea"
             />
           </el-form-item>
-
-          <el-form-item
-            label="下一办理节点"
-            prop="nextNode"
-            required
-            v-if="!formData.processInstanceId"
-          >
-            <el-select
-              v-model="formData.nextNode"
-              placeholder="请选择办公室主任"
-              @change="nodeChange"
-              value-key="conditionExpression"
-              :empty-values="[null, undefined]"
-              des
-            >
-              <el-option
-                v-for="dict in nextNodeOptions"
-                :key="dict.conditionExpression"
-                :label="dict.taskName"
-                :value="dict"
-              />
-            </el-select>
-          </el-form-item>
-
-          <el-form-item
-            label="转给办公室主任"
-            prop="tempNextUserSelectAssignees"
-            required
-            v-if="!formData.processInstanceId"
-          >
-            <el-select
-              v-model="formData.tempNextUserSelectAssignees"
-              placeholder="请选择办公室主任"
-              :multiple="multipleFlag"
-            >
-              <el-option
-                v-for="dict in selectUserOptions"
-                :key="dict.id"
-                :label="dict.nickname"
-                :value="dict.id"
-              />
-            </el-select>
-          </el-form-item>
-
-          <el-form-item>
-            <el-button
-              v-if="!formData.processInstanceId"
-              :disabled="formLoading"
-              type="primary"
-              @click="handleSubmit"
-            >
-              发起流程
-            </el-button>
-            <el-button v-else :disabled="formLoading" type="primary" @click="handleSave">
-              保存修改
-            </el-button>
-            <el-button
-              v-if="!formData.processInstanceId"
-              :disabled="formLoading"
-              type="success"
-              @click="handleSave"
-            >
-              保存草稿
-            </el-button>
-          </el-form-item>
         </el-form>
       </ContentWrap>
     </el-col>
   </el-row>
+
+  <ProcessSendDialog
+    ref="sendDialogRef"
+    title="发送收文记录"
+    :show-reason="false"
+    :process-definition-id="processDefinitionId"
+    :activity-id="startUserNodeId"
+    @submit="submitProcess"
+  />
 </template>
 
 <script setup lang="ts">
+import { ref, reactive, watch, nextTick, onMounted, unref } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import { useTagsViewStore } from '@/store/modules/tagsView'
+import { useMessage } from '@/hooks/web/useMessage'
 import * as DefinitionApi from '@/api/bpm/definition'
-import * as ProcessInstanceApi from '@/api/bpm/processInstance'
-import { NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { ReceiveDocApi } from '@/api/bpm/receivedoc'
 import { useUserStore } from '@/store/modules/user'
 import { getUserProfile } from '@/api/system/user/profile'
 import { dateUtil } from '@/utils/dateUtil'
 import { uploadReturnInfo } from '@/api/infra/file'
-import * as ConfigApi from '@/api/infra/config'
+
+// 引入弹窗组件及常量
+import ProcessSendDialog from '@/components/ProcessSendDialog/index.vue'
+import { NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
 
 defineOptions({ name: 'BpmReceiveDocCreate' })
 
@@ -236,9 +206,17 @@ const { delView } = useTagsViewStore()
 const { push, currentRoute } = useRouter()
 const route = useRoute()
 
-const formLoading = ref(false)
-const multipleFlag = ref(false)
+// ===== 弹窗控制 =====
+const sendDialogRef = ref()
+const startUserNodeId = NodeId.START_USER_NODE_ID
+const processDefinitionId = ref('')
+const processDefineKey = 'receice_doc_v2_copy_copy' // 流程 Key
 
+const formLoading = ref(false)
+const uploadFileRef = ref()
+const formRef = ref()
+
+// 去除了写死的节点变量
 const formData = ref({
   id: undefined,
   processInstanceId: undefined,
@@ -254,76 +232,20 @@ const formData = ref({
   attachFilePath: '',
   zhubandate: undefined,
   xiebandate: undefined,
-  nextNode: '',
-  nextUserSelectAssignees: {},
-  tempNextUserSelectAssignees: undefined,
   fileList: []
 })
 
-const nextNodeOptions = ref([])
-const selectUserOptions = ref([])
-const nextNodeSelectAssignees = ref({})
-const uploadFileRef = ref()
-const formRef = ref()
-
+// 去除了办理人的必填校验
 const formRules = reactive({
   subject: [{ required: true, message: '标题不能为空', trigger: 'blur' }],
-  receiveDocNumber: [{ required: true, message: '收文编号不能为空', trigger: 'blur' }],
-  nextNode: [{ required: true, message: '下一办理节点不能为空', trigger: 'change' }],
-  tempNextUserSelectAssignees: [{ required: true, message: '办理人不能为空', trigger: 'blur' }]
+  receiveDocNumber: [{ required: true, message: '收文编号不能为空', trigger: 'blur' }]
 })
-
-const processDefineKey = 'receice_doc_v2_copy_copy'
-const startUserSelectTasks = ref([])
-const startUserSelectAssignees = ref({})
-const tempStartUserSelectAssignees = ref({})
-const processDefinitionId = ref('')
-const defaultReceiveUserId = ref<number | string>('')
-
-const nodeChange = async (val) => {
-  await getSelectUsers(val.extensionProperties)
-}
 
 // 监听并接收首位有效文件名称回填
 const handleFirstFileNameUpdate = (fileName: string, forceUpdate: boolean = false) => {
   const data = formData.value as any
-  console.log(
-    '[DEBUG] 接收到排在第一位的文件名:',
-    fileName,
-    '当前标题:',
-    data.subject,
-    '强制?',
-    forceUpdate
-  )
-
-  // 如果取到了文件名，且 (强制覆盖 或者 当前表单标题为空) 才进行覆盖填补
   if (fileName && (forceUpdate || !data.subject || data.subject.toString().trim() === '')) {
     data.subject = fileName
-    console.log('[DEBUG] 标题已填入:', fileName)
-  }
-}
-
-const getSelectUsers = async (item) => {
-  const data = await ProcessInstanceApi.getSelectUserOptions({
-    chooseRule: item.choose_rule,
-    ruleValue: item.rule_value
-  })
-  multipleFlag.value = item.multiple_flag === '1'
-  selectUserOptions.value = data
-
-  // 检查是否需要自动填充默认审批人
-  const isCurrentlyEmpty = multipleFlag.value
-    ? !formData.value.tempNextUserSelectAssignees ||
-      formData.value.tempNextUserSelectAssignees.length === 0
-    : !formData.value.tempNextUserSelectAssignees
-
-  if (isCurrentlyEmpty && defaultReceiveUserId.value) {
-    const matchedUser = data.find((u: any) => String(u.id) === String(defaultReceiveUserId.value))
-    if (matchedUser) {
-      formData.value.tempNextUserSelectAssignees = multipleFlag.value
-        ? [matchedUser.id]
-        : matchedUser.id
-    }
   }
 }
 
@@ -337,7 +259,6 @@ const buildRequestData = () => {
   const rawFileList = uploadFileRef.value?.fileList || []
 
   data.fileList = rawFileList
-    // 过滤掉还在上传中、或者上传失败的临时文件占位，只保留成功的或已存在的回显文件
     .filter((item: any) => item.status === 'success' || item.id)
     .map((item: any, index: number) => {
       let fileId = undefined
@@ -352,30 +273,88 @@ const buildRequestData = () => {
       } else if (item.id) {
         fileId = item.id
         fileName = item.name
-      } else {
-        console.warn('文件ID解析失败:', item.name)
       }
 
       return {
         receiveDocId: data.id,
         attachFileId: fileId,
         attachFileName: fileName,
-        attachOrder: index, // 这里的 index 就是用户界面上看到的正确顺序
+        attachOrder: index,
         showType: 0
       }
     })
-    .filter((item: any) => item.attachFileId) // 二次保险，确保 ID 存在
+    .filter((item: any) => item.attachFileId)
 
   return data
 }
-/** 保存操作 */
+
+/** 点击发送，校验表单后唤起弹窗 */
+const handleOpenDialog = async () => {
+  const rawFileList = uploadFileRef.value?.fileList || []
+  const isUploading = rawFileList.some(
+    (file: any) => file.status === 'ready' || file.status === 'uploading'
+  )
+  if (isUploading) {
+    message.warning('还有文件正在上传中，请稍后发送')
+    return
+  }
+
+  if (!formRef.value) return
+  const valid = await formRef.value.validate()
+  if (!valid) return
+
+  // 打开选人弹窗
+  sendDialogRef.value.open({})
+}
+
+/** 接收弹窗返回的下一步办理人和变量，并提交流程 */
+const submitProcess = async (submitData: { nextNodeAssignees: any; variables: any }) => {
+  formLoading.value = true
+  try {
+    const data = buildRequestData()
+
+    // 绑定下一节点办理人和变量参数
+    data.nextNodeAssignees = submitData.nextNodeAssignees
+    if (submitData.variables && Object.keys(submitData.variables).length > 0) {
+      data.processVariablesStr = JSON.stringify(submitData.variables)
+    }
+
+    if (!data.id) {
+      // 纯新增发起
+      await ReceiveDocApi.createReceiveDoc(data)
+    } else {
+      // 已有草稿发起
+      await ReceiveDocApi.submitReceiveDoc(data)
+    }
+
+    message.success('发送成功')
+
+    if (sendDialogRef.value) {
+      sendDialogRef.value.close()
+    }
+
+    setTimeout(() => {
+      delView(unref(currentRoute))
+      push('/bpm/unified')
+    }, 200)
+  } catch (error) {
+    console.error(error)
+    if (sendDialogRef.value) {
+      sendDialogRef.value.submitLoading = false
+    }
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 保存草稿/修改操作 (不启动流程) */
 const handleSave = async () => {
   const rawFileList = uploadFileRef.value?.fileList || []
   const isUploading = rawFileList.some(
     (file: any) => file.status === 'ready' || file.status === 'uploading'
   )
   if (isUploading) {
-    message.warning('还有文件正在上传中，请稍后提交')
+    message.warning('还有文件正在上传中，请稍后保存')
     return
   }
   try {
@@ -403,9 +382,7 @@ const handleSave = async () => {
 
 const querySendDeptSuggestions = (queryString: string, cb: any) => {
   const dictOptions = getStrDictOptions(DICT_TYPE.BPM_AGENCY_NAME) || []
-  const suggestions = dictOptions.map((dict) => ({
-    value: dict.label
-  }))
+  const suggestions = dictOptions.map((dict) => ({ value: dict.label }))
   const results = queryString
     ? suggestions.filter((item) => item.value.includes(queryString))
     : suggestions
@@ -414,9 +391,7 @@ const querySendDeptSuggestions = (queryString: string, cb: any) => {
 
 const queryDocSecondClassSuggestions = (queryString: string, cb: any) => {
   const dictOptions = getIntDictOptions(DICT_TYPE.BPM_DOC_CLASS) || []
-  const suggestions = dictOptions.map((dict) => ({
-    value: dict.label
-  }))
+  const suggestions = dictOptions.map((dict) => ({ value: dict.label }))
   const results = queryString
     ? suggestions.filter((item) => item.value.includes(queryString))
     : suggestions
@@ -424,116 +399,42 @@ const queryDocSecondClassSuggestions = (queryString: string, cb: any) => {
 }
 
 const queryDocNumberSuggestions = (queryString: string, cb: any) => {
-  // 1. 获取并格式化字典中的参考模板
   const dictOptions = getStrDictOptions(DICT_TYPE.BPM_DOC_NUM_TYPE) || []
   const suggestions = dictOptions.map((dict) => ({
-    value: formatSendDocNumberLabel(dict.label) // el-autocomplete 需要对象中包含 value 属性
+    value: formatSendDocNumberLabel(dict.label)
   }))
-
-  // 2. 如果用户已经输入了内容，根据输入内容过滤建议；如果没输入，直接展示所有模板供参考
   const results = queryString
     ? suggestions.filter((item) => item.value.includes(queryString))
     : suggestions
-
-  // 3. 返回给组件显示
   cb(results)
 }
 
-/** 提交操作 */
-const handleSubmit = async () => {
-  const rawFileList = uploadFileRef.value?.fileList || []
-  const isUploading = rawFileList.some(
-    (file: any) => file.status === 'ready' || file.status === 'uploading'
-  )
-  if (isUploading) {
-    message.warning('还有文件正在上传中，请稍后提交')
-    return
-  }
-  if (!formRef) return
-  const valid = await formRef.value.validate()
-  if (!valid) return
-
-  // 修改点：仅在未启动流程时，校验审批人
-  if (!formData.value.processInstanceId && startUserSelectTasks.value?.length > 0) {
-    for (const userTask of startUserSelectTasks.value) {
-      if (
-        Array.isArray(startUserSelectAssignees.value[userTask.id]) &&
-        startUserSelectAssignees.value[userTask.id].length === 0
-      ) {
-        return message.warning(`请选择${userTask.name}的办理人`)
-      }
-    }
-  }
-
-  formLoading.value = true
-  try {
-    const data = buildRequestData()
-
-    // 修改点：仅在未启动流程时，构建流程相关参数
-    if (!formData.value.processInstanceId) {
-      data.nextNodeAssignees = {}
-      if (startUserSelectTasks.value?.length > 0) {
-        data.startUserSelectAssignees = startUserSelectAssignees.value
-      }
-      if (formData.value.tempNextUserSelectAssignees?.length > 0) {
-        data.nextNodeAssignees[formData.value.nextNode.taskDefKey] =
-          formData.value.tempNextUserSelectAssignees
-      } else if (formData.value.tempNextUserSelectAssignees) {
-        data.nextNodeAssignees[formData.value.nextNode.taskDefKey] = [
-          formData.value.tempNextUserSelectAssignees
-        ]
-      }
-      const condition = formData.value.nextNode?.conditionExpression
-      data.processVariablesStr = condition?.key
-        ? JSON.stringify({ [condition.key]: condition.value })
-        : '{}'
-    }
-
-    console.log(data, '提交请求数据')
-
-    if (!data.id) {
-      // 1. 纯新增提交
-      await ReceiveDocApi.createReceiveDoc(data)
-    } else {
-      if (data.processInstanceId) {
-        // 2. 有流程实例ID -> 流程已启动 -> 走 update 接口
-        await ReceiveDocApi.updateReceiveDoc(data)
-      } else {
-        // 3. 无流程实例ID -> 草稿提交 -> 走 submit 接口
-        await ReceiveDocApi.submitReceiveDoc(data)
-      }
-    }
-    message.success('提交成功')
-    setTimeout(() => {
-      delView(route)
-      push('/bpm/unified')
-    }, 200)
-  } finally {
-    formLoading.value = false
-  }
+const formatSendDocNumberLabel = (label: string) => {
+  const year = new Date().getFullYear()
+  return `${label}[${year}]号`
 }
 
-const getNextApprovalNodes = async () => {
-  const data = await ProcessInstanceApi.getNextSelectNodes({
-    processDefinitionId: processDefinitionId.value,
-    activityId: NodeId.START_USER_NODE_ID
-  })
-  nextNodeOptions.value = data
-  formData.value.nextNode = data[0]
-  await getSelectUsers(data[0].extensionProperties)
+const generateReceiveDocNumber = async () => {
+  if (!formData.value.docClass || !formData.value.receiveTime) {
+    return
+  }
+  const year = dateUtil(formData.value.receiveTime).format('YYYY')
+  try {
+    const res = await ReceiveDocApi.getReceiveDocSign({
+      docClass: formData.value.docClass.toString(),
+      year: year
+    })
+    if (res) {
+      formData.value.receiveDocNumber = res
+    }
+  } catch (error) {
+    console.error('生成收文编号失败:', error)
+  }
 }
 
 /** 初始化 */
 onMounted(async () => {
-  try {
-    const defaultId = await ConfigApi.getConfigKey('value.receive.userId')
-    if (defaultId) {
-      defaultReceiveUserId.value = defaultId
-    }
-  } catch (e) {
-    console.error('获取默认收文审批人配置失败:', e)
-  }
-
+  // 获取流程定义 ID (供弹窗组件使用)
   const processDefinitionDetail = await DefinitionApi.getProcessDefinition(
     undefined,
     processDefineKey
@@ -543,8 +444,6 @@ onMounted(async () => {
     return
   }
   processDefinitionId.value = processDefinitionDetail.id
-  startUserSelectTasks.value = processDefinitionDetail.startUserSelectTasks
-  await getNextApprovalNodes()
 
   const res = await getUserProfile()
   if (res.dept) {
@@ -560,7 +459,6 @@ onMounted(async () => {
       const detail = await ReceiveDocApi.getReceiveDoc(queryId)
       Object.assign(formData.value, detail)
 
-      // 修复：如果 sendDocNumber 是数字（历史旧数据或之前的错误），自动转换为格式化字符串
       if (formData.value.sendDocNumber && /^\d+$/.test(String(formData.value.sendDocNumber))) {
         const dicts = getStrDictOptions(DICT_TYPE.BPM_DOC_NUM_TYPE)
         const dict = dicts.find((d) => String(d.value) === String(formData.value.sendDocNumber))
@@ -591,31 +489,6 @@ onMounted(async () => {
   }
 })
 
-const formatSendDocNumberLabel = (label: string) => {
-  const year = new Date().getFullYear()
-  return `${label}[${year}]号`
-}
-
- 
-
-const generateReceiveDocNumber = async () => {
-  if (!formData.value.docClass || !formData.value.receiveTime) {
-    return
-  }
-  const year = dateUtil(formData.value.receiveTime).format('YYYY')
-  try {
-    const res = await ReceiveDocApi.getReceiveDocSign({
-      docClass: formData.value.docClass.toString(),
-      year: year
-    })
-    if (res) {
-      formData.value.receiveDocNumber = res
-    }
-  } catch (error) {
-    console.error('生成收文编号失败:', error)
-  }
-}
-
 watch(
   () => formData.value.docClass,
   (newVal) => {
@@ -640,15 +513,11 @@ watch(
 watch(
   () => formData.value.attachFilePath,
   (newVal) => {
-    // 当存在上传文件，且当前的“文件标题”为空时才自动填充（避免覆盖用户手动输入的值）
     if (newVal && !formData.value.subject && uploadFileRef.value?.fileList?.length > 0) {
       const firstFileName = uploadFileRef.value.fileList[0].name
-
       if (firstFileName) {
-        // 提取文件名并去掉后缀 (例如: "会议记录.pdf" -> "会议记录")
         const lastDotIndex = firstFileName.lastIndexOf('.')
         const title = lastDotIndex > -1 ? firstFileName.substring(0, lastDotIndex) : firstFileName
-
         formData.value.subject = title
       }
     }
