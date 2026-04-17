@@ -29,18 +29,13 @@
         <div class="flex items-center">
           <span :title="row.file.name">{{ row.file.name }}</span>
           <div class="ml-10px flex-shrink-0">
-            <el-link
-              :href="row.file.url"
-              :underline="false"
-              download
-              target="_blank"
-              type="primary"
-            >
-              下载
-            </el-link>
+            <el-button link type="primary" size="small" @click="handleDownload(row.file)">下载</el-button>
           </div>
           <div class="ml-10px flex-shrink-0">
-            <el-button link type="danger" @click="handleRemove(row.file)"> 删除</el-button>
+            <el-button link type="primary" size="small" @click="handlePreview(row.file)">预览</el-button>
+          </div>
+          <div class="ml-10px flex-shrink-0">
+            <el-button link type="danger" size="small" @click="handleRemove(row.file)">删除</el-button>
           </div>
         </div>
       </template>
@@ -51,9 +46,10 @@
     <div v-for="(file, index) in fileList" :key="index" class="flex items-center file-list-item">
       <span :title="file.name">{{ file.name }}</span>
       <div class="ml-10px flex-shrink-0">
-        <el-link :href="file.url" :underline="false" download target="_blank" type="primary">
-          下载
-        </el-link>
+        <el-button link type="primary" size="small" @click="handleDownload(file)">下载</el-button>
+      </div>
+      <div class="ml-10px flex-shrink-0">
+        <el-button link type="primary" size="small" @click="handlePreview(file)">预览</el-button>
       </div>
     </div>
   </div>
@@ -72,6 +68,7 @@ import type {
 import { isString } from '@/utils/is'
 import { useUpload } from '@/components/UploadFile/src/useUpload'
 import Sortable from 'sortablejs' // 引入排序拖拽核心
+import * as ConfigApi from '@/api/infra/config'
 
 defineOptions({ name: 'UploadFile' })
 
@@ -194,8 +191,63 @@ const handleRemove = (file: UploadFile) => {
   }
 }
 
-const handlePreview: UploadProps['onPreview'] = (uploadFile) => {
-  console.log(uploadFile)
+const fileViewBaseUrl = ref('')
+const externalPrefix = ref('')
+const internalPrefix = ref('')
+
+const DIRECT_RENDER_EXTENSIONS = [
+  'pdf', 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'ico', 'webp', 'svg', 'tif', 'tiff',
+  'mp4', 'webm', 'mkv', 'avi', 'flv', 'mov', 'wmv', 
+  'mp3', 'wav', 'flac', 'ogg', 'aac',
+  'txt', 'json', 'xml', 'md', 'java', 'js', 'css', 'html', 'sql'
+]
+
+const handlePreview = (uploadFile: any) => {
+  let fullUrl = uploadFile.url || uploadFile.path;
+  if (!fullUrl) {
+    message.error('文件路径为空，无法预览')
+    return
+  }
+
+  if (fullUrl.startsWith('/')) {
+    fullUrl = window.location.origin + fullUrl
+  }
+
+  const fileName = uploadFile.name || fullUrl
+  const ext = fileName.split('.').pop().toLowerCase()
+
+  if (DIRECT_RENDER_EXTENSIONS.includes(ext)) {
+    // 规定格式：走外网地址
+    if (internalPrefix.value && externalPrefix.value && fullUrl.includes(internalPrefix.value)) {
+      fullUrl = fullUrl.replace(internalPrefix.value, externalPrefix.value)
+    }
+  } else {
+    // 规定格式外：交给后端去下载转换，走内网地址
+    if (externalPrefix.value && internalPrefix.value && fullUrl.includes(externalPrefix.value)) {
+      fullUrl = fullUrl.replace(externalPrefix.value, internalPrefix.value)
+    }
+  }
+
+  const kkBaseUrl = fileViewBaseUrl.value || 'http://192.168.50.239:8012/onlinePreview?url='
+  const encodedUrl = btoa(encodeURIComponent(fullUrl))
+  const previewUrl = `${kkBaseUrl}${encodeURIComponent(encodedUrl)}`
+
+  window.open(previewUrl, '_blank')
+}
+
+const handleDownload = (file: any) => {
+  let fullUrl = file.url || file.path;
+  if (!fullUrl) {
+    message.error('文件路径为空，无法下载')
+    return
+  }
+  const link = document.createElement('a')
+  link.style.display = 'none'
+  link.href = fullUrl
+  link.setAttribute('download', file.name || fullUrl)
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
 }
 
 // 监听模型绑定值变动
@@ -301,10 +353,17 @@ const initSortable = () => {
   })
 }
 
-onMounted(() => {
+onMounted(async () => {
   nextTick(() => {
     initSortable()
   })
+  try {
+    fileViewBaseUrl.value = await ConfigApi.getConfigKey('url.fileview.address')
+    externalPrefix.value = await ConfigApi.getConfigKey('url.external.prefix')
+    internalPrefix.value = await ConfigApi.getConfigKey('url.internal.prefix')
+  } catch (e) {
+    console.error('获取预览配置失败', e)
+  }
 })
 
 /** 暴露 fileList 给父组件，以便 create.vue 获取文件ID */

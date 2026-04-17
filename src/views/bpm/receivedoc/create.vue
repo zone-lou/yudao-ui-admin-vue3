@@ -28,143 +28,240 @@
           ref="formRef"
           :model="formData"
           :rules="formRules"
-          label-width="150px"
+          label-width="0"
           v-loading="formLoading"
         >
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="收文编号" prop="receiveDocNumber">
-                <el-input
-                  v-model="formData.receiveDocNumber"
-                  placeholder="请输入收文编号，或选择单位类别自动生成"
-                />
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="收文日期" prop="receiveTime">
-                <el-date-picker
-                  v-model="formData.receiveTime"
-                  type="date"
-                  value-format="x"
-                  placeholder="请选择收文日期"
-                  style="width: 100%"
-                />
-              </el-form-item>
-            </el-col>
-          </el-row>
+          <div id="printDivTag">
+            <div class="oa-container">
+              <div class="doc-title">义乌市自然资源和规划局收文阅办单</div>
 
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="来文字号" prop="sendDocNumber">
-                <el-autocomplete
-                  v-model="formData.sendDocNumber"
-                  :fetch-suggestions="queryDocNumberSuggestions"
-                  placeholder="请输入或选择来文字号"
-                  clearable
-                  style="width: 100%"
-                />
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="单位类别" prop="docClass">
-                <el-select v-model="formData.docClass" placeholder="请选择单位类别">
-                  <el-option
-                    v-for="dict in getStrDictOptions(DICT_TYPE.BPM_RECEICE_CLASS)"
-                    :key="dict.value"
-                    :label="dict.label"
-                    :value="dict.value"
-                  />
-                </el-select>
-              </el-form-item>
-            </el-col>
-          </el-row>
+              <div class="meta-info" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; height: 35px;">
+                  <div style="display: flex; align-items: center; height: 100%;">
+                    <div style="display: flex; align-items: center; margin-right: 4px;">
+                      <span style="color: #f56c6c; margin-right: 2px; font-family: SimSun, serif;">*</span>
+                      <span style="font-size: 14px; color: #333; font-family: SimHei, sans-serif; white-space: nowrap;">收文号：</span>
+                    </div>
+                    <div style="width: 160px; display: flex; align-items: center;">
+                      <el-form-item prop="receiveDocNumber" style="margin-bottom: 0; width: 100%;">
+                        <el-input v-model="formData.receiveDocNumber" placeholder="根据类别生成" />
+                      </el-form-item>
+                    </div>
+                  </div>
 
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="文件类别" prop="docSecondClass">
-                <el-autocomplete
-                  v-model="formData.docSecondClass"
-                  :fetch-suggestions="queryDocSecondClassSuggestions"
-                  placeholder="请输入或选择文件类别"
-                  clearable
-                  style="width: 100%"
-                />
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="紧急程度" prop="urgencyDegree">
-                <el-select v-model="formData.urgencyDegree" placeholder="请选择紧急程度">
-                  <el-option
-                    v-for="dict in getStrDictOptions(DICT_TYPE.BPM_EMERGENCY_DEGREE)"
-                    :key="dict.value"
-                    :label="dict.label"
-                    :value="dict.value"
-                  />
-                </el-select>
-              </el-form-item>
-            </el-col>
-          </el-row>
+                  <div style="display: flex; align-items: center; height: 100%;">
+                    <div style="display: flex; align-items: center; margin-right: 4px;">
+                      <span style="font-size: 14px; color: #333; font-family: SimHei, sans-serif; white-space: nowrap;">收文日期：</span>
+                    </div>
+                    <div style="width: 140px; display: flex; align-items: center;">
+                      <el-form-item prop="receiveTime" style="margin-bottom: 0; width: 100%;">
+                        <el-date-picker v-model="formData.receiveTime" type="date" value-format="x" placeholder="日期" style="width: 100%" />
+                      </el-form-item>
+                    </div>
+                  </div>
 
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="来文单位" prop="sendDept">
-                <el-autocomplete
-                  v-model="formData.sendDept"
-                  :fetch-suggestions="querySendDeptSuggestions"
-                  placeholder="请输入或选择来文单位"
-                  clearable
-                  style="width: 100%"
-                />
-              </el-form-item>
-            </el-col>
-          </el-row>
+                  <div style="display: flex; align-items: center; height: 100%;">
+                    <div style="display: flex; align-items: center; margin-right: 4px;">
+                      <span style="font-size: 14px; color: #333; font-family: SimHei, sans-serif; white-space: nowrap;">紧急程度：</span>
+                    </div>
+                    <div style="width: 120px; display: flex; align-items: center;">
+                      <el-form-item prop="urgencyDegree" style="margin-bottom: 0; width: 100%;">
+                        <el-select v-model="formData.urgencyDegree" placeholder="紧急程度" style="width: 100%">
+                          <el-option v-for="dict in getStrDictOptions(DICT_TYPE.BPM_EMERGENCY_DEGREE)" :key="dict.value" :label="dict.label" :value="dict.value" />
+                        </el-select>
+                      </el-form-item>
+                    </div>
+                  </div>
+              </div>
 
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="主办单位办结时间" prop="zhubandate">
-                <el-date-picker
-                  v-model="formData.zhubandate"
-                  type="date"
-                  value-format="x"
-                  placeholder="选择办结时间"
-                  style="width: 100%"
-                />
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="协办单位办结时间" prop="xiebandate">
-                <el-date-picker
-                  v-model="formData.xiebandate"
-                  type="date"
-                  value-format="x"
-                  placeholder="选择办结时间"
-                  style="width: 100%"
-                />
-              </el-form-item>
-            </el-col>
-          </el-row>
+              <table class="oa-table">
+                  <colgroup>
+                      <col style="width: 110px;" />
+                      <col style="width: 35%;" />
+                      <col style="width: 110px;" />
+                      <col />
+                  </colgroup>
+                  <tr>
+                      <td class="label-cell">来文机关</td>
+                      <td class="data-text input-cell">
+                        <el-form-item prop="sendDept" class="mb-0 w-full h-full">
+                          <el-autocomplete
+                            v-model="formData.sendDept"
+                            :fetch-suggestions="querySendDeptSuggestions"
+                            placeholder="请输入或选择来文单位"
+                            clearable
+                            style="width: 100%"
+                          />
+                        </el-form-item>
+                      </td>
+                      <td class="label-cell">来文号</td> 
+                      <td class="data-text input-cell">
+                         <el-form-item prop="sendDocNumber" class="mb-0 w-full h-full">
+                           <el-autocomplete
+                              v-model="formData.sendDocNumber"
+                              :fetch-suggestions="queryDocNumberSuggestions"
+                              placeholder="请输入或选择来文字号"
+                              clearable
+                              style="width: 100%"
+                            />
+                         </el-form-item>
+                      </td>
+                  </tr>
 
-          <el-form-item label="文件标题" prop="subject">
-            <el-input v-model="formData.subject" placeholder="请输入标题" />
-          </el-form-item>
+                  <tr>
+                      <td class="label-cell">单位类别</td>
+                      <td class="data-text input-cell">
+                        <el-form-item prop="docClass" class="mb-0 w-full h-full">
+                            <el-select v-model="formData.docClass" placeholder="请选择单位类别" style="width: 100%">
+                              <el-option
+                                v-for="dict in getStrDictOptions(DICT_TYPE.BPM_RECEICE_CLASS)"
+                                :key="dict.value"
+                                :label="dict.label"
+                                :value="dict.value"
+                              />
+                            </el-select>
+                        </el-form-item>
+                      </td>
+                      <td class="label-cell">文件类别</td>
+                      <td class="data-text input-cell">
+                          <el-form-item prop="docSecondClass" class="mb-0 w-full h-full">
+                            <el-autocomplete
+                              v-model="formData.docSecondClass"
+                              :fetch-suggestions="queryDocSecondClassSuggestions"
+                              placeholder="请输入或选择文件类别"
+                              clearable
+                              style="width: 100%"
+                            />
+                          </el-form-item>
+                      </td>
+                  </tr>
 
-          <el-form-item label="收文文件" prop="attachFilePath">
-            <UploadFile
-              v-model="formData.attachFilePath"
-              ref="uploadFileRef"
-              :upload-api="uploadReturnInfo"
-              @update:first-file-name="handleFirstFileNameUpdate"
-            />
-          </el-form-item>
+                  <tr>
+                      <td class="label-cell"><span class="text-red-500 mr-5px">*</span>标 题</td>
+                      <td colspan="3" class="data-text input-cell" style="font-weight: bold;">
+                        <el-form-item prop="subject" class="mb-0 w-full h-full">
+                          <el-input v-model="formData.subject" placeholder="请输入标题" />
+                        </el-form-item>
+                      </td>
+                  </tr>
 
-          <el-form-item label="备注" prop="remark">
-            <el-input
-              v-model="formData.remark"
-              placeholder="请输入备注"
-              :autosize="{ minRows: 2, maxRows: 4 }"
-              type="textarea"
-            />
-          </el-form-item>
+                  <tr class="print-hide-row">
+                      <td class="label-cell">收文文件</td>
+                      <td colspan="3" class="data-text input-cell" style="padding: 10px !important;">
+                        <el-form-item prop="attachFilePath" class="mb-0">
+                          <UploadFile
+                            v-model="formData.attachFilePath"
+                            ref="uploadFileRef"
+                            :upload-api="uploadReturnInfo"
+                            @update:first-file-name="handleFirstFileNameUpdate"
+                          />
+                        </el-form-item>
+                      </td>
+                  </tr>
+
+                  <tr>
+                      <td class="label-cell" rowspan="2">拟办意见</td>
+                      <td colspan="3" class="h-80 data-text"></td>
+                  </tr>
+                  <tr>
+                      <td colspan="3" class="signature-row">
+                          <span style="margin-right: 5px;">办理人：</span>
+                          <span class="data-text" style="display:inline-block; min-width: 60px;"></span>
+                          <span style="margin-left: 15px;">办理日期：</span>
+                          <span class="data-text" style="display:inline-block; min-width: 80px;"></span>
+                      </td>
+                  </tr>
+
+                  <tr>
+                      <td class="label-cell" rowspan="2">局长批示</td>
+                      <td colspan="3" class="h-80"></td>
+                  </tr>
+                  <tr>
+                      <td colspan="3" class="signature-row">
+                          <span style="margin-right: 5px;">办理人：</span>
+                          <span style="display:inline-block; min-width: 60px;"></span>
+                          <span style="margin-left: 15px;">办理日期：</span>
+                          <span style="display:inline-block; min-width: 80px;"></span>
+                      </td>
+                  </tr>
+
+                  <tr>
+                      <td class="label-cell">监督监管</td>
+                      <td colspan="3" class="input-cell" style="padding: 10px;"> 
+                          <div class="compact-row">
+                              <div class="check-item mr-10px">
+                                  <span class="checkbox-mock"></span>
+                                  <span>进行监督监管</span>
+                              </div>
+                              
+                              <div class="check-item mr-10px flex items-center">
+                                  <span class="mr-2 mb-0">主办科室办结日期：</span>
+                                  <el-form-item prop="zhubandate" class="mb-0 w-130px inline-form-item">
+                                    <el-date-picker
+                                      v-model="formData.zhubandate"
+                                      type="date"
+                                      size="small"
+                                      value-format="x"
+                                      placeholder="选择日期"
+                                      style="width: 100%"
+                                    />
+                                  </el-form-item>
+                              </div>
+
+                              <div class="check-item flex items-center">
+                                  <span class="mr-2 mb-0">协办科室办结日期：</span>
+                                  <el-form-item prop="xiebandate" class="mb-0 w-130px inline-form-item">
+                                    <el-date-picker
+                                      v-model="formData.xiebandate"
+                                      type="date"
+                                      size="small"
+                                      value-format="x"
+                                      placeholder="选择日期"
+                                      style="width: 100%"
+                                    />
+                                  </el-form-item>
+                              </div>
+                          </div>
+                      </td>
+                  </tr>
+
+                  <tr>
+                      <td class="label-cell">办件办理情况</td>
+                      <td colspan="3" class="h-40"></td>
+                  </tr>
+
+                  <!-- 领导意见 -->
+                  <tr>
+                    <td class="label-cell">领导意见</td>
+                    <td colspan="2" class="center-text label-cell" style="background: none">意 见</td>
+                    <td class="center-text label-cell" style="background: none; width: 140px;">日 期</td>
+                  </tr>
+                  <tr><td class="center-text data-text" style="height: 35px"></td><td colspan="2"></td><td></td></tr>
+                  <tr><td class="center-text data-text" style="height: 35px"></td><td colspan="2"></td><td></td></tr>
+                  <tr><td class="center-text data-text" style="height: 35px"></td><td colspan="2"></td><td></td></tr>
+                  
+                  <!-- 分管领导批示 -->
+                  <tr>
+                    <td class="label-cell">分管领导批示</td>
+                    <td colspan="2" class="center-text label-cell" style="background: none">意 见</td>
+                    <td class="center-text label-cell" style="background: none;">日 期</td>
+                  </tr>
+                  <tr><td class="center-text data-text" style="height: 35px"></td><td colspan="2"></td><td></td></tr>
+                  <tr><td class="center-text data-text" style="height: 35px"></td><td colspan="2"></td><td></td></tr>
+                  <tr><td class="center-text data-text" style="height: 35px"></td><td colspan="2"></td><td></td></tr>
+
+                  <!-- 阅办者 -->
+                  <tr>
+                    <td class="label-cell">阅办者</td>
+                    <td colspan="2" class="center-text label-cell" style="background: none">意 见</td>
+                    <td class="center-text label-cell" style="background: none;">日 期</td>
+                  </tr>
+                  <tr><td class="center-text data-text" style="height: 35px"></td><td colspan="2"></td><td></td></tr>
+                  <tr><td class="center-text data-text" style="height: 35px"></td><td colspan="2"></td><td></td></tr>
+                  <tr><td class="center-text data-text" style="height: 35px"></td><td colspan="2"></td><td></td></tr>
+
+              </table>
+            </div>
+          </div>
         </el-form>
       </ContentWrap>
     </el-col>
@@ -525,4 +622,234 @@ watch(
 )
 </script>
 
-<style scoped lang="scss"></style>
+<style lang="scss" scoped>
+#printDivTag {
+  .oa-container {
+    width: 100%;
+    margin: 0 auto;
+    font-family: SimSun, 'Songti SC', STSong, serif;
+    background-color: #fff;
+    padding: 30px 40px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 900px;
+  }
+
+  .doc-title {
+    margin-bottom: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: #d71920;
+    text-align: center;
+  }
+
+  .meta-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #333;
+  }
+
+  .meta-input {
+    display: inline-block;
+    min-width: 80px;
+    padding: 0 5px;
+    font-family: SimHei, sans-serif;
+    font-size: 14px !important;
+    color: #000;
+    text-align: left;
+    text-decoration: none !important;
+    border-bottom: none !important;
+  }
+
+  .data-text {
+    font-family: SimHei, sans-serif;
+    font-size: 14px !important;
+    color: #000;
+    border-bottom: none !important;
+  }
+
+  .oa-table {
+    width: 100%;
+    table-layout: fixed;
+    border: 2px solid #d71920;
+    border-collapse: collapse;
+  }
+
+  .oa-table td {
+    padding: 4px 6px;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #000;
+    vertical-align: middle;
+    border: 1px solid #d71920;
+  }
+
+  .label-cell {
+    width: 110px;
+    font-weight: bold;
+    color: #d71920;
+    text-align: center;
+    white-space: nowrap;
+    background-color: #fffbfc;
+  }
+
+  .compact-row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 15px;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .check-item {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+  }
+
+  .checkbox-mock {
+    position: relative;
+    top: -1px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    margin-right: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1;
+    vertical-align: middle;
+    border: 1px solid #000;
+  }
+
+  .date-text {
+    display: inline-block;
+    min-width: 60px;
+    padding: 0 2px;
+    text-align: center;
+    text-decoration: none !important;
+    border-bottom: none !important;
+  }
+
+  .h-80 {
+    height: 80px;
+    vertical-align: top;
+  }
+  
+  .h-40 {
+    height: 40px;
+  }
+
+  .h-35 {
+    height: 35px;
+  }
+
+  .center-text {
+    text-align: center;
+  }
+
+  .signature-row {
+    padding-top: 2px;
+    font-size: 13px;
+    color: #333;
+  }
+  
+  .input-cell {
+    padding: 4px 8px !important;
+    overflow: visible; /* 防止 el-form-item__error 被截断 */
+  }
+}
+
+/* ================== Element Plus 覆写 ================== */
+:deep(.inline-form-item) {
+  display: flex;
+  align-items: center;
+  .el-form-item__content {
+    line-height: normal !important;
+  }
+  .el-input__wrapper {
+    box-shadow: 0 0 0 1px #dcdfe6 inset !important;
+    padding: 0 8px;
+    background-color: #fff;
+    border-radius: 4px;
+    height: 28px;
+  }
+}
+
+:deep(.oa-table) {
+  .el-input__wrapper,
+  .el-textarea__inner {
+    padding: 0;
+    background-color: transparent;
+    border-radius: 0;
+    box-shadow: none !important;
+  }
+
+  .el-input__inner {
+    font-family: inherit;
+    font-size: 14px;
+    color: #000;
+    text-align: left;
+  }
+
+  .el-textarea__inner {
+    font-family: inherit;
+    font-size: 14px;
+    color: #000;
+    resize: none;
+  }
+
+  .el-form-item {
+    margin-bottom: 0 !important;
+  }
+}
+
+/* 浮动气泡样式的必填报错提醒 */
+:deep(.el-form-item__error) {
+  position: absolute;
+  top: -20px;
+  left: 0;
+  z-index: 1000;
+  padding: 2px 6px;
+  font-family: sans-serif;
+  font-size: 11px;
+  line-height: 1;
+  color: #fff;
+  white-space: nowrap;
+  background-color: #f56c6c;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+}
+
+:deep(.el-form-item__error::after) {
+  position: absolute;
+  bottom: -4px;
+  left: 10px;
+  display: block;
+  width: 0;
+  height: 0;
+  content: '';
+  border-color: #f56c6c transparent transparent transparent;
+  border-style: solid;
+  border-width: 4px 4px 0 4px;
+}
+
+/* 隐藏输入框获取焦点时的边框 */
+:deep(.oa-table) {
+  .el-input.is-focus .el-input__wrapper,
+  .el-textarea__inner:focus {
+    outline: none;
+    box-shadow: none !important;
+  }
+}
+
+@media print {
+  .print-hide-row {
+    display: none !important;
+  }
+}
+</style>
