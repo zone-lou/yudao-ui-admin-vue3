@@ -12,6 +12,8 @@ export interface TimeExplain {
   days: number // 请假天数
   filepath: string // 文件路径
   processInstanceId: string // 流程实例的编号
+
+
 }
 
 // 外出请假补假 API
@@ -41,13 +43,13 @@ export const TimeExplainApi = {
   },
 
   // 删除外出请假补假
-  deleteTimeExplain: async (id: number) => {
-    return await request.delete({ url: `/bpm/time-explain/delete?id=` + id })
+  deleteTimeExplain: async (data: { id: number; reason: string }) => {
+    return await request.delete({ url: '/bpm/time-explain/delete', params: data })
   },
 
   /** 批量删除外出请假补假 */
-  deleteTimeExplainList: async (ids: number[]) => {
-    return await request.delete({ url: `/bpm/time-explain/delete-list?ids=${ids.join(',')}` })
+  deleteTimeExplainList: async (data: { ids: number[]; reason: string }) => {
+    return await request.delete({ url: '/bpm/time-explain/delete-list', params: data })
   },
 
   // 导出外出请假补假 Excel

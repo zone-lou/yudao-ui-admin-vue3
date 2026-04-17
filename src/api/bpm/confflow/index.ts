@@ -44,13 +44,13 @@ export const ConfflowApi = {
   },
 
   // 删除会议报告单
-  deleteConfflow: async (id: number) => {
-    return await request.delete({ url: `/bpm/confflow/delete?id=` + id })
+  deleteConfflow: async (data: { id: number; reason: string }) => {
+    return await request.delete({ url: `/bpm/confflow/delete`, params: data })
   },
 
   /** 批量删除会议报告单 */
-  deleteConfflowList: async (ids: number[]) => {
-    return await request.delete({ url: `/bpm/confflow/delete-list?ids=${ids.join(',')}` })
+  deleteConfflowList: async (data: { ids: number[]; reason: string }) => {
+    return await request.delete({ url: `/bpm/confflow/delete-list`, params: data })
   },
 
   // 导出会议报告单 Excel

@@ -8,24 +8,6 @@
       :inline="true"
       label-width="auto"
     >
-      <!-- <el-form-item label="流程内码ID" prop="actinstId">
-        <el-input
-          v-model="queryParams.actinstId"
-          placeholder="请输入流程内码ID"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item> -->
-      <!-- <el-form-item label="人员编号" prop="userId">
-        <el-input
-          v-model="queryParams.userId"
-          placeholder="请输入人员编号"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item> -->
       <el-form-item label="人员姓名" prop="userName">
         <el-input
           v-model="queryParams.userName"
@@ -33,17 +15,6 @@
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="登记时间" prop="checkDate">
-        <el-date-picker
-          v-model="queryParams.checkDate"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-220px"
         />
       </el-form-item>
       <el-form-item label="开始时间" prop="checkBegin">
@@ -66,61 +37,32 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="审核状态" prop="status">
+      <el-form-item label="办理状态" prop="status">
         <el-select
           v-model="queryParams.status"
-          placeholder="请选择审核状态"
+          placeholder="请选择办理状态"
           clearable
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_TASK_STATUS)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
           />
         </el-select>
       </el-form-item>
-      <!-- <el-form-item label="请假天数" prop="days">
-        <el-input
-          v-model="queryParams.days"
-          placeholder="请输入请假天数"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item> -->
-      <el-form-item label="年份" prop="year">
-        <el-input
-          v-model="queryParams.year"
-          placeholder="请输入年份"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <!-- <el-form-item label="创建时间" prop="createTime">
-        <el-date-picker
-          v-model="queryParams.createTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-220px"
-        />
-      </el-form-item> -->
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button
-          type="primary"
-          plain
-          @click="openForm('create')"
-          v-hasPermi="['bpm:time-explain:create']"
-        >
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
-        </el-button>
+<!--        <el-button-->
+<!--          type="primary"-->
+<!--          plain-->
+<!--          @click="openForm('create')"-->
+<!--          v-hasPermi="['bpm:time-explain:create']"-->
+<!--        >-->
+<!--          <Icon icon="ep:plus" class="mr-5px" /> 新增-->
+<!--        </el-button>-->
         <el-button
           type="success"
           plain
@@ -129,15 +71,6 @@
           v-hasPermi="['bpm:time-explain:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
-        </el-button>
-        <el-button
-          type="danger"
-          plain
-          :disabled="isEmpty(checkedIds)"
-          @click="handleDeleteBatch"
-          v-hasPermi="['bpm:time-explain:delete']"
-        >
-          <Icon icon="ep:delete" class="mr-5px" /> 批量删除
         </el-button>
       </el-form-item>
     </el-form>
@@ -156,7 +89,7 @@
       <el-table-column type="selection" width="55" />
       <!-- <el-table-column label="主键" align="center" prop="id" /> -->
       <!-- <el-table-column label="人员编号" align="center" prop="userId" /> -->
-      <el-table-column label="人员姓名" align="center" prop="userName" />
+      <el-table-column label="人员姓名" align="center" prop="nickName" />
       <el-table-column
         label="登记时间"
         align="center"
@@ -178,9 +111,9 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="审核状态" align="center" prop="status">
+      <el-table-column label="办理状态" align="center" prop="status">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_TASK_STATUS" :value="scope.row.status" />
+          <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column label="请假天数" align="center" prop="days" />
@@ -206,9 +139,10 @@
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
+            v-if="!['4', '5', 4, 5].includes(scope.row.status)"
             v-hasPermi="['bpm:time-explain:delete']"
           >
-            删除
+            作废
           </el-button>
         </template>
       </el-table-column>
@@ -234,6 +168,7 @@ import download from '@/utils/download'
 import { TimeExplainApi, TimeExplain } from '@/api/bpm/timeexplain'
 import TimeExplainForm from './TimeExplainForm.vue'
 import { useRouter } from 'vue-router'
+import { useBpmInvalidate } from '@/hooks/bpm/useBpmInvalidate'
 
 /** 外出请假补假 列表 */
 defineOptions({ name: 'TimeExplain' })
@@ -295,17 +230,11 @@ const openForm = (type: string, id?: number) => {
 }
 
 /** 删除按钮操作 */
-const handleDelete = async (id: number) => {
-  try {
-    // 删除的二次确认
-    await message.delConfirm()
-    // 发起删除
-    await TimeExplainApi.deleteTimeExplain(id)
-    message.success(t('common.delSuccess'))
-    // 刷新列表
-    await getList()
-  } catch {}
-}
+/** 删除(作废)按钮操作 */
+const { handleInvalidate: handleDelete } = useBpmInvalidate(
+  TimeExplainApi.deleteTimeExplain,
+  getList
+)
 
 /** 批量删除外出请假补假 */
 const handleDeleteBatch = async () => {

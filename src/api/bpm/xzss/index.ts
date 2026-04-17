@@ -84,13 +84,13 @@ export const XzssApi = {
   },
 
   // 删除行政诉讼
-  deleteXzss: async (id: number) => {
-    return await request.delete({ url: `/bpm/xzss/delete?id=` + id })
+  deleteXzss: async (data: { id: number; reason: string }) => {
+    return await request.delete({ url: `/bpm/xzss/delete` , params: data })
   },
 
   /** 批量删除行政诉讼 */
-  deleteXzssList: async (ids: number[]) => {
-    return await request.delete({ url: `/bpm/xzss/delete-list?ids=${ids.join(',')}` })
+  deleteXzssList: async (data: { ids: number[]; reason: string }) => {
+    return await request.delete({ url: `/bpm/xzss/delete-list`, params: data })
   },
 
   // 导出行政诉讼 Excel

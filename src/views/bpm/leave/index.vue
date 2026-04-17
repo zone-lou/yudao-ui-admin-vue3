@@ -6,7 +6,7 @@
       :model="queryParams"
       ref="queryFormRef"
       :inline="true"
-      label-width="120px"
+      label-width="auto"
     >
       <el-form-item label="开始时间" prop="qxjStartDate">
         <el-date-picker
@@ -16,7 +16,7 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-220px"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="结束时间" prop="qxjEndDate">
@@ -27,7 +27,7 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-220px"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="请（休）假种类" prop="qxjType">
@@ -45,32 +45,20 @@
           />
         </el-select>
       </el-form-item>
-      <!--      <el-form-item label="事假理由" prop="sjReason">-->
-      <!--        <el-input-->
-      <!--          v-model="queryParams.sjReason"-->
-      <!--          placeholder="请输入事假理由"-->
-      <!--          clearable-->
-      <!--          @keyup.enter="handleQuery"-->
-      <!--          class="!w-240px"-->
-      <!--        />-->
-      <!--      </el-form-item>-->
-      <!--      <el-form-item label="共计天数" prop="totalTs">-->
-      <!--        <el-input-->
-      <!--          v-model="queryParams.totalTs"-->
-      <!--          placeholder="请输入共计天数"-->
-      <!--          clearable-->
-      <!--          @keyup.enter="handleQuery"-->
-      <!--          class="!w-240px"-->
-      <!--        />-->
-      <!--      </el-form-item>-->
       <el-form-item label="办理状态" prop="spzt">
-        <el-input
+        <el-select
           v-model="queryParams.spzt"
-          placeholder="请输入办理状态"
+          placeholder="请选择办理状态"
           clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
-        />
+        >
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="申请用户" prop="userid">
         <el-input
@@ -101,15 +89,15 @@
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
-        <el-button
-          type="danger"
-          plain
-          :disabled="isEmpty(checkedIds)"
-          @click="handleDeleteBatch"
-          v-hasPermi="['bpm:leave:delete']"
-        >
-          <Icon icon="ep:delete" class="mr-5px" /> 批量删除
-        </el-button>
+        <!--        <el-button-->
+        <!--          type="danger"-->
+        <!--          plain-->
+        <!--          :disabled="isEmpty(checkedIds)"-->
+        <!--          @click="handleDeleteBatch"-->
+        <!--          v-hasPermi="['bpm:leave:delete']"-->
+        <!--        >-->
+        <!--          <Icon icon="ep:delete" class="mr-5px" /> 批量作废-->
+        <!--        </el-button>-->
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -155,7 +143,7 @@
       <el-table-column label="共计天数" align="center" prop="totalTs" />
       <el-table-column label="办理状态" align="center" prop="spzt">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_TASK_STATUS" :value="scope.row.spzt" />
+          <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="scope.row.spzt" />
         </template>
       </el-table-column>
       <el-table-column label="申请用户" align="center" prop="nickName" />
@@ -174,9 +162,10 @@
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
+            v-if="!['4', '5', 4, 5].includes(scope.row.spzt)"
             v-hasPermi="['bpm:leave:delete']"
           >
-            删除
+            作废
           </el-button>
         </template>
       </el-table-column>
@@ -196,12 +185,12 @@
 
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
-import { isEmpty } from '@/utils/is'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { leaveApi, leave } from '@/api/bpm/leave'
 import leaveForm from './leaveForm.vue'
 import { useRouter } from 'vue-router'
+import { useBpmInvalidate } from '@/hooks/bpm/useBpmInvalidate'
 
 /** 假期申请审批 列表 */
 defineOptions({ name: 'Leave' })
@@ -238,7 +227,7 @@ const getList = async () => {
     loading.value = false
   }
 }
-
+const { handleInvalidate: handleDelete } = useBpmInvalidate(leaveApi.deleteleave, getList)
 /** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
@@ -255,31 +244,6 @@ const resetQuery = () => {
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
-}
-
-/** 删除按钮操作 */
-const handleDelete = async (id: number) => {
-  try {
-    // 删除的二次确认
-    await message.delConfirm()
-    // 发起删除
-    await leaveApi.deleteleave(id)
-    message.success(t('common.delSuccess'))
-    // 刷新列表
-    await getList()
-  } catch {}
-}
-
-/** 批量删除假期申请审批 */
-const handleDeleteBatch = async () => {
-  try {
-    // 删除的二次确认
-    await message.delConfirm()
-    await leaveApi.deleteleaveList(checkedIds.value)
-    checkedIds.value = []
-    message.success(t('common.delSuccess'))
-    await getList()
-  } catch {}
 }
 
 const checkedIds = ref<number[]>([])

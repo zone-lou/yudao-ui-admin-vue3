@@ -16,6 +16,8 @@ export interface ReceiveDoc {
   attachFilePath: string // 附件路径
   zhubandate: string | Dayjs // 主办办结时间
   xiebandate: string | Dayjs // 协办办结时间
+  status: number
+  cancelReason: string
 }
 export interface ReceiveDocSign {
   docClass: string // 单位类别
@@ -53,13 +55,13 @@ export const ReceiveDocApi = {
   },
 
   // 删除收文
-  deleteReceiveDoc: async (id: number) => {
-    return await request.delete({ url: `/bpm/receive-doc/delete?id=` + id })
+  deleteReceiveDoc: async (data: { id: number; reason: string }) => {
+    return await request.delete({ url: `/bpm/receive-doc/delete`, params: data })
   },
 
   /** 批量删除收文 */
-  deleteReceiveDocList: async (ids: number[]) => {
-    return await request.delete({ url: `/bpm/receive-doc/delete-list?ids=${ids.join(',')}` })
+  deleteReceiveDocList: async (data: { ids: number[]; reason: string }) => {
+    return await request.delete({ url: `/bpm/receive-doc/delete-list`, params: data })
   },
 
   // 导出收文 Excel

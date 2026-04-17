@@ -8,103 +8,104 @@
       :inline="true"
       label-width="auto"
     >
-      <el-form-item label="来文号" prop="swWh">
-        <el-input
-          v-model="queryParams.swWh"
-          placeholder="请输入来文号"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="来文机关" prop="swJg">
-        <el-input
-          v-model="queryParams.swJg"
-          placeholder="请输入来文机关"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="来文日期" prop="swRq">
-        <el-date-picker
-          v-model="queryParams.swRq"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-220px"
-        />
-      </el-form-item>
-      <el-form-item label="申请人" prop="sqr">
-        <el-input
-          v-model="queryParams.sqr"
-          placeholder="请输入申请人"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-
-      <!-- <el-form-item label="类别一" prop="lb1">
-        <el-input
-          v-model="queryParams.lb1"
-          placeholder="请输入类别一"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="类别二" prop="lb2">
-        <el-input
-          v-model="queryParams.lb2"
-          placeholder="请输入类别二"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="类别三" prop="lb3">
-        <el-input
-          v-model="queryParams.lb3"
-          placeholder="请输入类别三"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item> -->
-      <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button
-          type="primary"
-          plain
-          @click="openForm('create')"
-          v-hasPermi="['bpm:xzfy:create']"
-        >
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
-        </el-button>
-        <el-button
-          type="success"
-          plain
-          @click="handleExport"
-          :loading="exportLoading"
-          v-hasPermi="['bpm:xzfy:export']"
-        >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
-        </el-button>
-        <el-button
-          type="danger"
-          plain
-          :disabled="isEmpty(checkedIds)"
-          @click="handleDeleteBatch"
-          v-hasPermi="['bpm:xzfy:delete']"
-        >
-          <Icon icon="ep:delete" class="mr-5px" /> 批量删除
-        </el-button>
-      </el-form-item>
+      <el-row :gutter="20">
+        <el-col :span="6">
+          <el-form-item label="来文号" prop="swWh">
+            <el-input
+              v-model="queryParams.swWh"
+              placeholder="请输入来文号"
+              clearable
+              @keyup.enter="handleQuery"
+              class="!w-240px"
+            /> </el-form-item
+        ></el-col>
+        <el-col :span="6">
+          <el-form-item label="来文机关" prop="swJg">
+            <el-input
+              v-model="queryParams.swJg"
+              placeholder="请输入来文机关"
+              clearable
+              @keyup.enter="handleQuery"
+              class="!w-240px"
+            /> </el-form-item
+        ></el-col>
+        <el-col :span="12">
+          <el-form-item label="来文日期" prop="swRq">
+            <el-date-picker
+              v-model="queryParams.swRq"
+              value-format="YYYY-MM-DD HH:mm:ss"
+              type="daterange"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+            /> </el-form-item
+        ></el-col>
+        <el-col :span="6">
+          <el-form-item label="申请人" prop="sqr">
+            <el-input
+              v-model="queryParams.sqr"
+              placeholder="请输入申请人"
+              clearable
+              @keyup.enter="handleQuery"
+              class="!w-240px"
+            /> </el-form-item
+        ></el-col>
+        <el-col :span="6">
+          <el-form-item label="案件分类" prop="lb1">
+            <el-select
+              v-model="queryParams.lb1"
+              placeholder="请选择案件分类"
+              clearable
+              class="!w-240px"
+            >
+              <el-option
+                v-for="dict in getIntDictOptions(DICT_TYPE.BPM_XZFY_CLASS1)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select> </el-form-item
+        ></el-col>
+        <el-col :span="6"
+          ><el-form-item label="涉及事项" prop="lb2">
+            <el-select
+              v-model="queryParams.lb2"
+              placeholder="请选择涉及事项"
+              clearable
+              class="!w-240px"
+            >
+              <el-option
+                v-for="dict in getIntDictOptions(DICT_TYPE.BPM_XZFY_CLASS2)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
+          <el-form-item label="案件类型" prop="lb3">
+            <el-select
+              v-model="queryParams.lb3"
+              placeholder="请选择案件类型"
+              clearable
+              class="!w-240px"
+            >
+              <el-option
+                v-for="dict in getIntDictOptions(DICT_TYPE.BPM_XZFY_CLASS3)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form>
+    <el-col :span="24" class="text-right" style="margin-top: 10px">
+      <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" />查询</el-button>
+      <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" />重置</el-button>
+    </el-col>
   </ContentWrap>
 
   <!-- 列表 -->
@@ -161,40 +162,51 @@
           <dict-tag :type="DICT_TYPE.BPM_XZFY_CLASS3" :value="scope.row.lb3" />
         </template>
       </el-table-column>
-<!--      <el-table-column label="承办人" align="center" prop="cbr" />-->
-<!--      <el-table-column-->
-<!--        label="承办日期"-->
-<!--        align="center"-->
-<!--        prop="cbRq"-->
-<!--        :formatter="dateFormatter"-->
-<!--        width="180px"-->
-<!--      />-->
-<!--      <el-table-column-->
-<!--        label="送复议机关日期"-->
-<!--        align="center"-->
-<!--        prop="sfyjgRq"-->
-<!--        :formatter="dateFormatter"-->
-<!--        width="180px"-->
-<!--      />-->
-<!--      <el-table-column label="行政区（街道、村）" align="center" prop="xzq" />-->
-<!--      <el-table-column label="监督监管" align="center" prop="issupervise">-->
-<!--        <template #default="scope">-->
-<!--          {{ formatBoolean(scope.row.issupervise) }}-->
-<!--        </template>-->
-<!--      </el-table-column>-->
-<!--      <el-table-column-->
-<!--        label="办理时限"-->
-<!--        align="center"-->
-<!--        prop="zhubandate"-->
-<!--        :formatter="dateFormatter"-->
-<!--        width="180px"-->
-<!--      />-->
-<!--      <el-table-column label="是否已寄件提醒" align="center" prop="mailTip">-->
-<!--        <template #default="scope">-->
-<!--          {{ formatBoolean(scope.row.mailTip) }}-->
-<!--        </template>-->
-<!--      </el-table-column>-->
-<!--      <el-table-column label="流程实例的编号" align="center" prop="processInstanceId" />-->
+      <el-table-column label="办理状态" align="center" prop="status">
+        <template #default="scope">
+          <div class="flex items-center justify-center">
+            <dict-tag
+              class="ml-2"
+              :type="DICT_TYPE.BPM_TASK_STATUS"
+              :value="scope.row.status !== null ? scope.row.status : 0"
+            />
+          </div>
+        </template>
+      </el-table-column>
+      <!--      <el-table-column label="承办人" align="center" prop="cbr" />-->
+      <!--      <el-table-column-->
+      <!--        label="承办日期"-->
+      <!--        align="center"-->
+      <!--        prop="cbRq"-->
+      <!--        :formatter="dateFormatter"-->
+      <!--        width="180px"-->
+      <!--      />-->
+      <!--      <el-table-column-->
+      <!--        label="送复议机关日期"-->
+      <!--        align="center"-->
+      <!--        prop="sfyjgRq"-->
+      <!--        :formatter="dateFormatter"-->
+      <!--        width="180px"-->
+      <!--      />-->
+      <!--      <el-table-column label="行政区（街道、村）" align="center" prop="xzq" />-->
+      <!--      <el-table-column label="监督监管" align="center" prop="issupervise">-->
+      <!--        <template #default="scope">-->
+      <!--          {{ formatBoolean(scope.row.issupervise) }}-->
+      <!--        </template>-->
+      <!--      </el-table-column>-->
+      <!--      <el-table-column-->
+      <!--        label="办理时限"-->
+      <!--        align="center"-->
+      <!--        prop="zhubandate"-->
+      <!--        :formatter="dateFormatter"-->
+      <!--        width="180px"-->
+      <!--      />-->
+      <!--      <el-table-column label="是否已寄件提醒" align="center" prop="mailTip">-->
+      <!--        <template #default="scope">-->
+      <!--          {{ formatBoolean(scope.row.mailTip) }}-->
+      <!--        </template>-->
+      <!--      </el-table-column>-->
+      <!--      <el-table-column label="流程实例的编号" align="center" prop="processInstanceId" />-->
       <el-table-column label="操作" align="center" min-width="120px">
         <template #default="scope">
           <el-button
@@ -209,9 +221,10 @@
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
+            v-if="!['4', '5', 4, 5].includes(scope.row.status)"
             v-hasPermi="['bpm:xzfy:delete']"
           >
-            删除
+            作废
           </el-button>
         </template>
       </el-table-column>
@@ -237,6 +250,7 @@ import download from '@/utils/download'
 import { XzfyApi, Xzfy } from '@/api/bpm/xzfy'
 import XzfyForm from './XzfyForm.vue'
 import XzfyKzList from './components/XzfyKzList.vue'
+import { useBpmInvalidate } from '@/hooks/bpm/useBpmInvalidate'
 
 /** 行政复议 列表 */
 defineOptions({ name: 'Xzfy' })
@@ -274,6 +288,8 @@ const getList = async () => {
   }
 }
 
+const { handleInvalidate: handleDelete } = useBpmInvalidate(XzfyApi.deleteXzfy, getList)
+
 /** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
@@ -292,50 +308,12 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-/** 删除按钮操作 */
-const handleDelete = async (id: number) => {
-  try {
-    // 删除的二次确认
-    await message.delConfirm()
-    // 发起删除
-    await XzfyApi.deleteXzfy(id)
-    message.success(t('common.delSuccess'))
-    // 刷新列表
-    await getList()
-  } catch {}
-}
-
-/** 批量删除行政复议 */
-const handleDeleteBatch = async () => {
-  try {
-    // 删除的二次确认
-    await message.delConfirm()
-    await XzfyApi.deleteXzfyList(checkedIds.value)
-    checkedIds.value = []
-    message.success(t('common.delSuccess'))
-    await getList()
-  } catch {}
-}
-
 const checkedIds = ref<number[]>([])
 const handleRowCheckboxChange = (records: Xzfy[]) => {
   checkedIds.value = records.map((item) => item.id!)
 }
 
 /** 导出按钮操作 */
-const handleExport = async () => {
-  try {
-    // 导出的二次确认
-    await message.exportConfirm()
-    // 发起导出
-    exportLoading.value = true
-    const data = await XzfyApi.exportXzfy(queryParams)
-    download.excel(data, '行政复议.xls')
-  } catch {
-  } finally {
-    exportLoading.value = false
-  }
-}
 
 const formatDictOrStr = (val: any, dictType: string) => {
   if (val === undefined || val === null || val === '') return val

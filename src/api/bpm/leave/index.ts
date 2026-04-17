@@ -14,6 +14,7 @@ export interface leave {
   userid: number // 申请用户
   filepath: string // 文件地址
   processInstanceId: string // 流程实例的编号
+  reason: string
 }
 export interface LeaveSummaryVO {
   year?: number
@@ -46,13 +47,14 @@ export const leaveApi = {
   },
 
   // 删除假期申请审批
-  deleteleave: async (id: number) => {
-    return await request.delete({ url: `/bpm/leave/delete?id=` + id })
+  deleteleave: async (data: { id: number; reason: string }) => {
+    return await request.delete({ url: '/bpm/leave/delete', params: data })
   },
 
   /** 批量删除假期申请审批 */
-  deleteleaveList: async (ids: number[]) => {
-    return await request.delete({ url: `/bpm/leave/delete-list?ids=${ids.join(',')}` })
+  deleteleaveList: async (data: { ids: number[]; reason: string }) => {
+    // 注意：如果是数组，通常通过 params 传递时需要配置参数序列化，或者直接改为 data (Body) 传递
+    return await request.delete({ url: '/bpm/leave/delete-list', params: data })
   },
 
   // 导出假期申请审批 Excel

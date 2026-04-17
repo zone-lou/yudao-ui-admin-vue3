@@ -63,15 +63,34 @@
             </el-select>
           </el-form-item>
         </el-col>
+
         <el-col :span="6">
-          <el-form-item label="办件状态" prop="status" class="w-full">
+          <el-form-item label="运行状态" prop="status" class="w-full">
             <el-select v-model="queryParams.status" placeholder="全部" clearable class="w-full">
               <el-option label="办理中" :value="1" />
-              <el-option label="已办结" :value="2" />
+              <el-option label="正常办结" :value="2" />
+              <el-option label="异常终止" :value="3" />
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="12">
+
+        <el-col :span="6">
+          <el-form-item label="业务结果" prop="processResult" class="w-full">
+            <el-select
+              v-model="queryParams.processResult"
+              placeholder="全部"
+              clearable
+              class="w-full"
+            >
+              <el-option label="处理中" :value="1" />
+              <el-option label="审批通过" :value="2" />
+              <el-option label="审批不通过" :value="3" />
+              <el-option label="已撤销" :value="4" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+
+        <el-col :span="6">
           <el-form-item label="受理日期" prop="createTime" class="w-full">
             <el-date-picker
               v-model="queryParams.createTime"
@@ -119,15 +138,6 @@
       </el-table-column>
 
       <el-table-column label="办件类型" align="center" prop="category" width="120" />
-
-      <!-- <el-table-column
-        label="办件编号"
-        align="center"
-        prop="id"
-        min-width="200"
-        show-overflow-tooltip
-      /> -->
-
       <el-table-column
         label="来文单位"
         align="center"
@@ -135,11 +145,8 @@
         width="150"
         show-overflow-tooltip
       >
-        <template #default="scope">
-          {{ scope.row.sourceUnit || '-' }}
-        </template>
+        <template #default="scope"> {{ scope.row.sourceUnit || '-' }} </template>
       </el-table-column>
-
       <el-table-column label="紧急程度" align="center" prop="urgencyDegree" width="100">
         <template #default="scope">
           <dict-tag
@@ -149,30 +156,61 @@
           />
         </template>
       </el-table-column>
-
       <el-table-column label="开始日期" align="center" prop="createTime" width="160">
-        <template #default="scope">
-          <span>{{ parseTime(scope.row.createTime, 'YYYY-MM-DD HH:mm') }}</span>
-        </template>
+        <template #default="scope"
+          ><span>{{ parseTime(scope.row.createTime, 'YYYY-MM-DD HH:mm') }}</span></template
+        >
       </el-table-column>
-
       <el-table-column label="办结时限" align="center" prop="deadlineDate" width="160">
-        <template #default="scope">
-          <span>{{ parseTime(scope.row.deadlineDate, 'YYYY-MM-DD HH:mm') || '-' }}</span>
-        </template>
+        <template #default="scope"
+          ><span>{{ parseTime(scope.row.deadlineDate, 'YYYY-MM-DD HH:mm') || '-' }}</span></template
+        >
       </el-table-column>
 
-      <el-table-column label="办件状态" align="center" width="100">
+      <el-table-column label="办件状态" align="center" width="120">
         <template #default="scope">
-          <el-tag v-if="scope.row.status === 2" type="success" effect="dark">已办结</el-tag>
-          <el-tag v-else type="primary" effect="plain">办理中</el-tag>
+          <el-tooltip
+            :content="scope.row.processReason || '无详细原因'"
+            placement="top"
+            :disabled="!scope.row.processReason"
+          >
+            <div style="display: inline-block">
+              <template v-if="scope.row.processStatus">
+                <el-tag v-if="scope.row.processStatus == 1" type="primary" effect="plain"
+                  >办理中</el-tag
+                >
+
+                <el-tag
+                  v-else-if="scope.row.processResult == 2 && scope.row.status == 3"
+                  type="warning"
+                  >强制归档</el-tag
+                >
+
+                <el-tag v-else-if="scope.row.processStatus == 2" type="success" effect="dark"
+                  >办理完成</el-tag
+                >
+                <el-tag v-else-if="scope.row.processStatus == 3" type="danger">审批被驳回</el-tag>
+
+                <el-tag v-else-if="scope.row.processStatus == 4" type="info">已撤销</el-tag>
+
+                <el-tag v-else type="info">未知结果</el-tag>
+              </template>
+
+              <template v-else>
+                <el-tag v-if="scope.row.status === 1" type="primary" effect="plain">办理中</el-tag>
+                <el-tag v-else-if="scope.row.status === 2" type="success">已办结</el-tag>
+                <el-tag v-else-if="scope.row.processStatus == 3" type="info">已取消</el-tag>
+                <el-tag v-else type="danger">作废/异常</el-tag>
+              </template>
+            </div>
+          </el-tooltip>
         </template>
       </el-table-column>
 
       <el-table-column label="状态" width="50" align="center">
-        <template #header>
-          <el-icon><Clock /></el-icon>
-        </template>
+        <template #header
+          ><el-icon><Clock /></el-icon
+        ></template>
         <template #default="scope">
           <el-tooltip :content="getTimeoutStatus(scope.row).label" placement="top">
             <div
@@ -184,9 +222,7 @@
                 cursor: 'pointer'
               }"
             >
-              <el-icon size="16">
-                <Clock />
-              </el-icon>
+              <el-icon size="16"><Clock /></el-icon>
             </div>
           </el-tooltip>
         </template>
@@ -206,7 +242,6 @@
           <span v-else>-</span>
         </template>
       </el-table-column>
-
       <el-table-column
         label="在办人员"
         align="center"
@@ -232,7 +267,6 @@
 </template>
 
 <script setup lang="ts">
-// ... script 部分代码保持不变，不需要修改 ...
 import { ref, reactive, onMounted, onActivated } from 'vue'
 import { useRouter } from 'vue-router'
 import dayjs from 'dayjs'
@@ -257,6 +291,7 @@ const queryParams = reactive({
   startDeptName: '',
   overdueDays: undefined,
   status: null,
+  processResult: null,
   createTime: []
 })
 
@@ -266,8 +301,8 @@ const parseTime = (time: any, pattern = 'YYYY-MM-DD HH:mm:ss') => {
 }
 
 const getTimeoutStatus = (row: any) => {
-  if (row.status === 2) {
-    return { label: '已办结', color: '#67C23A' }
+  if (row.status !== 1) {
+    return { label: '已结束', color: '#67C23A' }
   }
   if (!row.deadlineDate) {
     return { label: '正常', color: '#909399' }
@@ -306,15 +341,13 @@ const resetQuery = () => {
   queryParams.startDeptName = ''
   queryParams.overdueDays = undefined
   queryParams.status = null
+  queryParams.processResult = null
   queryParams.createTime = []
   handleQuery()
 }
 
 const handleDetail = (row: any) => {
-  router.push({
-    path: '/bpm/process-instance/detail',
-    query: { id: row.id }
-  })
+  router.push({ path: '/bpm/process-instance/detail', query: { id: row.id } })
 }
 
 onMounted(async () => {
@@ -332,21 +365,17 @@ onActivated(async () => {
   padding: 10px;
   background-color: #f5f7fa;
 }
-
 .w-full {
   width: 100%;
 }
-
 .link-type {
   color: #337ab7;
   text-decoration: underline;
   cursor: pointer;
 }
-
 .link-type:hover {
   color: #20a0ff;
 }
-
 .text-right {
   text-align: right;
 }

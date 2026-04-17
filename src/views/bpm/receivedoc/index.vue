@@ -7,117 +7,106 @@
       :inline="true"
       label-width="auto"
     >
-      <el-form-item label="单位类别" prop="docClass">
-        <el-select
-          v-model="queryParams.docClass"
-          placeholder="请选择单位类别"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.BPM_RECEICE_CLASS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="来文单位" prop="sendDept">
-        <el-select
-          v-model="queryParams.sendDept"
-          placeholder="请选择来文单位"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.BPM_AGENCY_NAME)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="来文字号" prop="sendDocNumber">
-        <el-input
-          v-model="queryParams.sendDocNumber"
-          placeholder="请输入来文字号"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="收文日期" prop="receiveTime">
-        <el-date-picker
-          v-model="queryParams.receiveTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-220px"
-        />
-      </el-form-item>
-      <el-form-item label="紧急程度" prop="urgencyDegree">
-        <el-select
-          v-model="queryParams.urgencyDegree"
-          placeholder="请选择紧急程度"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.BPM_EMERGENCY_DEGREE)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="文件类别" prop="docSecondClass">
-        <el-select
-          v-model="queryParams.docSecondClass"
-          placeholder="请选择文件类别"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_DOC_CLASS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button
-          type="primary"
-          plain
-          @click="handleCreate"
-          v-hasPermi="['bpm:receive-doc:create']"
-        >
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
-        </el-button>
-        <el-button
-          type="success"
-          plain
-          @click="handleExport"
-          :loading="exportLoading"
-          v-hasPermi="['bpm:receive-doc:export']"
-        >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
-        </el-button>
-        <el-button
-          type="danger"
-          plain
-          :disabled="isEmpty(checkedIds)"
-          @click="handleDeleteBatch"
-          v-hasPermi="['bpm:receive-doc:delete']"
-        >
-          <Icon icon="ep:delete" class="mr-5px" /> 批量删除
-        </el-button>
-      </el-form-item>
+      <el-row :gutter="20">
+        <el-col :span="6">
+          <el-form-item label="单位类别" prop="docClass">
+            <el-select
+              v-model="queryParams.docClass"
+              placeholder="请选择单位类别"
+              clearable
+              class="!w-240px"
+            >
+              <el-option
+                v-for="dict in getStrDictOptions(DICT_TYPE.BPM_RECEICE_CLASS)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
+          <el-form-item label="来文单位" prop="sendDept">
+            <el-select
+              v-model="queryParams.sendDept"
+              placeholder="请选择来文单位"
+              clearable
+              class="!w-240px"
+            >
+              <el-option
+                v-for="dict in getStrDictOptions(DICT_TYPE.BPM_AGENCY_NAME)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select> </el-form-item
+        ></el-col>
+        <el-col :span="6">
+          <el-form-item label="来文字号" prop="sendDocNumber">
+            <el-input
+              v-model="queryParams.sendDocNumber"
+              placeholder="请输入来文字号"
+              clearable
+              @keyup.enter="handleQuery"
+              class="!w-240px"
+            /> </el-form-item
+        ></el-col>
+
+        <el-col :span="6"
+          ><el-form-item label="紧急程度" prop="urgencyDegree">
+            <el-select
+              v-model="queryParams.urgencyDegree"
+              placeholder="请选择紧急程度"
+              clearable
+              class="!w-240px"
+            >
+              <el-option
+                v-for="dict in getStrDictOptions(DICT_TYPE.BPM_EMERGENCY_DEGREE)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="6">
+          <el-form-item label="文件类别" prop="docSecondClass">
+            <el-select
+              v-model="queryParams.docSecondClass"
+              placeholder="请选择文件类别"
+              clearable
+              class="!w-240px"
+            >
+              <el-option
+                v-for="dict in getIntDictOptions(DICT_TYPE.BPM_DOC_CLASS)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select> </el-form-item
+        ></el-col>
+        <el-col :span="12">
+          <el-form-item label="收文日期" prop="receiveTime">
+            <el-date-picker
+              v-model="queryParams.receiveTime"
+              value-format="YYYY-MM-DD HH:mm:ss"
+              type="daterange"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form>
+
+    <el-col :span="24" class="text-right">
+      <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" />查询</el-button>
+      <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" />重置</el-button>
+<!--      <el-button type="primary" @click="handleCreate" v-hasPermi="['bpm:receive-doc:create']">-->
+<!--        <Icon icon="ep:plus" class="mr-5px" /> 新增-->
+<!--      </el-button>-->
+    </el-col>
   </ContentWrap>
 
   <ContentWrap>
@@ -140,16 +129,11 @@
         <template #default="scope">
           <div class="flex items-center justify-center">
             <span>{{ scope.row.receiveDocNumber }}</span>
-            <el-tag
-              v-if="!scope.row.processInstanceId"
-              type="warning"
-              size="small"
-              effect="plain"
+            <dict-tag
               class="ml-2"
-            >
-              草稿
-            </el-tag>
-            <el-tag v-else type="success" size="small" effect="plain" class="ml-2"> 流程中 </el-tag>
+              :type="DICT_TYPE.BPM_TASK_STATUS"
+              :value="scope.row.status !== null ? scope.row.status : 0"
+            />
           </div>
         </template>
       </el-table-column>
@@ -206,9 +190,10 @@
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
+            v-if="!['4', '5', 4, 5].includes(scope.row.status)"
             v-hasPermi="['bpm:receive-doc:delete']"
           >
-            删除
+            作废
           </el-button>
         </template>
       </el-table-column>
@@ -230,6 +215,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { ReceiveDocApi, ReceiveDoc } from '@/api/bpm/receivedoc'
 import { useRouter } from 'vue-router'
+import { useBpmInvalidate } from '@/hooks/bpm/useBpmInvalidate'
 
 /** 收文 列表 */
 defineOptions({ name: 'ReceiveDoc' })
@@ -268,6 +254,8 @@ const getList = async () => {
   }
 }
 
+const { handleInvalidate: handleDelete } = useBpmInvalidate(ReceiveDocApi.deleteReceiveDoc, getList)
+
 /** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
@@ -301,31 +289,6 @@ const handleDetail = (row: any) => {
     name: 'BpmProcessInstanceDetail',
     query: { id: row.processInstanceId }
   })
-}
-
-/** 删除按钮操作 */
-const handleDelete = async (id: number) => {
-  try {
-    // 删除的二次确认
-    await message.delConfirm()
-    // 发起删除
-    await ReceiveDocApi.deleteReceiveDoc(id)
-    message.success(t('common.delSuccess'))
-    // 刷新列表
-    await getList()
-  } catch {}
-}
-
-/** 批量删除收文 */
-const handleDeleteBatch = async () => {
-  try {
-    // 删除的二次确认
-    await message.delConfirm()
-    await ReceiveDocApi.deleteReceiveDocList(checkedIds.value)
-    checkedIds.value = []
-    message.success(t('common.delSuccess'))
-    await getList()
-  } catch {}
 }
 
 const checkedIds = ref<number[]>([])

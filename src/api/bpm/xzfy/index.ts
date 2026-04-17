@@ -78,13 +78,13 @@ export const XzfyApi = {
   },
 
   // 删除行政复议
-  deleteXzfy: async (id: number) => {
-    return await request.delete({ url: `/bpm/xzfy/delete?id=` + id })
+  deleteXzfy: async (data: { id: number; reason: string }) => {
+    return await request.delete({ url: `/bpm/xzfy/delete`, params: data })
   },
 
   /** 批量删除行政复议 */
-  deleteXzfyList: async (ids: number[]) => {
-    return await request.delete({ url: `/bpm/xzfy/delete-list?ids=${ids.join(',')}` })
+  deleteXzfyList: async (data: { ids: number[]; reason: string }) => {
+    return await request.delete({ url: `/bpm/xzfy/delete-list`, params: data })
   },
 
   // 导出行政复议 Excel

@@ -49,13 +49,7 @@
             <div v-if="fileList.length > 0">
               <div v-for="(file, index) in fileList" :key="index" style="margin-bottom: 5px">
                 <span>{{ file.name }}</span>
-                <el-button
-                  link
-                  type="primary"
-                  size="small"
-                  @click="previewFile(file)"
-                  class="ml-2"
-                >
+                <el-button link type="primary" size="small" @click="previewFile(file)" class="ml-2">
                   预览
                 </el-button>
                 <el-button link type="primary" size="small" @click="handleDownload(file)">
@@ -491,7 +485,6 @@ const previewFile = (file: any) => {
     ElMessage.error('无效的文件')
     return
   }
-
   let fullUrl = file.path.trim()
   if (!fullUrl) {
     ElMessage.error('文件路径为空，无法预览')
@@ -516,10 +509,8 @@ const previewFile = (file: any) => {
       fullUrl = fullUrl.replace(externalPrefix.value, internalPrefix.value)
     }
   }
-
   const kkBaseUrl = fileViewBaseUrl.value || 'http://192.168.50.239:8012/onlinePreview?url='
   const encodedUrl = btoa(encodeURIComponent(fullUrl))
-  const previewUrl = `${kkBaseUrl}${encodeURIComponent(encodedUrl)}`
 
   window.open(previewUrl, '_blank')
 }

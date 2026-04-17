@@ -138,13 +138,13 @@ export const SendDocApi = {
   },
 
   // 删除发文
-  deleteSendDoc: async (id: number) => {
-    return await request.delete({ url: `/bpm/send-doc/delete?id=` + id })
+  deleteSendDoc: async (data: { id: number; reason: string }) => {
+    return await request.delete({ url: `/bpm/send-doc/delete`, params: data })
   },
 
   /** 批量删除发文 */
-  deleteSendDocList: async (ids: number[]) => {
-    return await request.delete({ url: `/bpm/send-doc/delete-list?ids=${ids.join(',')}` })
+  deleteSendDocList: async (data: { ids: number[]; reason: string }) => {
+    return await request.delete({ url: `/bpm/send-doc/delete-list`, params: data })
   },
 
   // 导出发文 Excel

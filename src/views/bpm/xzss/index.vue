@@ -8,6 +8,9 @@
       :inline="true"
       label-width="auto"
     >
+      <!--      <el-row :gutter="20">-->
+
+      <!--      </el-row>-->
       <el-form-item label="来文号" prop="swWh">
         <el-input
           v-model="queryParams.swWh"
@@ -188,32 +191,6 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button
-          type="primary"
-          plain
-          @click="openForm('create')"
-          v-hasPermi="['bpm:xzss:create']"
-        >
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
-        </el-button>
-        <el-button
-          type="success"
-          plain
-          @click="handleExport"
-          :loading="exportLoading"
-          v-hasPermi="['bpm:xzss:export']"
-        >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
-        </el-button>
-        <el-button
-          type="danger"
-          plain
-          :disabled="isEmpty(checkedIds)"
-          @click="handleDeleteBatch"
-          v-hasPermi="['bpm:xzss:delete']"
-        >
-          <Icon icon="ep:delete" class="mr-5px" /> 批量删除
-        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -325,14 +302,17 @@
           {{ formatBoolean(scope.row.mailTip) }}
         </template>
       </el-table-column>
-      <el-table-column label="流程实例的编号" align="center" prop="processInstanceId" />
-      <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
-        :formatter="dateFormatter"
-        width="180px"
-      />
+      <el-table-column label="办理状态" align="center" prop="status">
+        <template #default="scope">
+          <div class="flex items-center justify-center">
+            <dict-tag
+              class="ml-2"
+              :type="DICT_TYPE.BPM_TASK_STATUS"
+              :value="scope.row.status !== null ? scope.row.status : 0"
+            />
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" min-width="120px">
         <template #default="scope">
           <el-button
@@ -347,9 +327,10 @@
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
+            v-if="!['4', '5', 4, 5].includes(scope.row.status)"
             v-hasPermi="['bpm:xzss:delete']"
           >
-            删除
+            作废
           </el-button>
         </template>
       </el-table-column>
@@ -371,10 +352,10 @@
 import { getIntDictOptions, getStrDictOptions, getDictOptions, DICT_TYPE } from '@/utils/dict'
 import { isEmpty } from '@/utils/is'
 import { dateFormatter } from '@/utils/formatTime'
-import download from '@/utils/download'
 import { XzssApi, Xzss } from '@/api/bpm/xzss'
 import XzssForm from './XzssForm.vue'
 import XzssKzList from './components/XzssKzList.vue'
+import { useBpmInvalidate } from '@/hooks/bpm/useBpmInvalidate'
 
 /** 行政诉讼 列表 */
 defineOptions({ name: 'Xzss' })
@@ -425,6 +406,8 @@ const getList = async () => {
   }
 }
 
+const { handleInvalidate: handleDelete } = useBpmInvalidate(XzssApi.deleteXzss, getList)
+
 /** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
@@ -443,49 +426,9 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-/** 删除按钮操作 */
-const handleDelete = async (id: number) => {
-  try {
-    // 删除的二次确认
-    await message.delConfirm()
-    // 发起删除
-    await XzssApi.deleteXzss(id)
-    message.success(t('common.delSuccess'))
-    // 刷新列表
-    await getList()
-  } catch {}
-}
-
-/** 批量删除行政诉讼 */
-const handleDeleteBatch = async () => {
-  try {
-    // 删除的二次确认
-    await message.delConfirm()
-    await XzssApi.deleteXzssList(checkedIds.value)
-    checkedIds.value = []
-    message.success(t('common.delSuccess'))
-    await getList()
-  } catch {}
-}
-
 const checkedIds = ref<number[]>([])
 const handleRowCheckboxChange = (records: Xzss[]) => {
   checkedIds.value = records.map((item) => item.id!)
-}
-
-/** 导出按钮操作 */
-const handleExport = async () => {
-  try {
-    // 导出的二次确认
-    await message.exportConfirm()
-    // 发起导出
-    exportLoading.value = true
-    const data = await XzssApi.exportXzss(queryParams)
-    download.excel(data, '行政诉讼.xls')
-  } catch {
-  } finally {
-    exportLoading.value = false
-  }
 }
 
 const formatDictOrStr = (val: any, dictType: string) => {
