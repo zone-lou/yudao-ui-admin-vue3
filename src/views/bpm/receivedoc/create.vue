@@ -38,7 +38,7 @@
               <div class="meta-info" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; height: 35px;">
                   <div style="display: flex; align-items: center; height: 100%;">
                     <div style="display: flex; align-items: center; margin-right: 4px;">
-                      <span style="color: #f56c6c; margin-right: 2px; font-family: SimSun, serif;">*</span>
+                      <span style="color: #f56c6c; margin-right: 2px;">*</span>
                       <span style="font-size: 14px; color: #333; font-family: SimHei, sans-serif; white-space: nowrap;">收文号：</span>
                     </div>
                     <div style="width: 160px; display: flex; align-items: center;">
@@ -50,6 +50,7 @@
 
                   <div style="display: flex; align-items: center; height: 100%;">
                     <div style="display: flex; align-items: center; margin-right: 4px;">
+                      <span style="color: #f56c6c; margin-right: 2px;">*</span>
                       <span style="font-size: 14px; color: #333; font-family: SimHei, sans-serif; white-space: nowrap;">收文日期：</span>
                     </div>
                     <div style="width: 140px; display: flex; align-items: center;">
@@ -61,6 +62,7 @@
 
                   <div style="display: flex; align-items: center; height: 100%;">
                     <div style="display: flex; align-items: center; margin-right: 4px;">
+                      <span style="color: #f56c6c; margin-right: 2px;">*</span>
                       <span style="font-size: 14px; color: #333; font-family: SimHei, sans-serif; white-space: nowrap;">紧急程度：</span>
                     </div>
                     <div style="width: 120px; display: flex; align-items: center;">
@@ -80,6 +82,7 @@
                       <col style="width: 110px;" />
                       <col />
                   </colgroup>
+                  <tbody>
                   <tr>
                       <td class="label-cell">来文机关</td>
                       <td class="data-text input-cell">
@@ -137,7 +140,7 @@
 
                   <tr>
                       <td class="label-cell"><span class="text-red-500 mr-5px">*</span>标 题</td>
-                      <td colspan="3" class="data-text input-cell" style="font-weight: bold;">
+                      <td colspan="3" class="data-text input-cell">
                         <el-form-item prop="subject" class="mb-0 w-full h-full">
                           <el-input v-model="formData.subject" placeholder="请输入标题" />
                         </el-form-item>
@@ -259,6 +262,7 @@
                   <tr><td class="center-text data-text" style="height: 35px"></td><td colspan="2"></td><td></td></tr>
                   <tr><td class="center-text data-text" style="height: 35px"></td><td colspan="2"></td><td></td></tr>
 
+                  </tbody>
               </table>
             </div>
           </div>
@@ -531,58 +535,63 @@ const generateReceiveDocNumber = async () => {
 
 /** 初始化 */
 onMounted(async () => {
-  // 获取流程定义 ID (供弹窗组件使用)
-  const processDefinitionDetail = await DefinitionApi.getProcessDefinition(
-    undefined,
-    processDefineKey
-  )
-  if (!processDefinitionDetail) {
-    message.error('OA 收文的流程模型未配置，请检查！')
-    return
-  }
-  processDefinitionId.value = processDefinitionDetail.id
+  try {
+    // 获取流程定义 ID (供弹窗组件使用)
+    const processDefinitionDetail = await DefinitionApi.getProcessDefinition(
+      undefined,
+      processDefineKey
+    )
+    if (!processDefinitionDetail) {
+      message.error('OA 收文的流程模型未配置，请检查！')
+      return
+    }
+    processDefinitionId.value = processDefinitionDetail.id
 
-  const res = await getUserProfile()
-  if (res.dept) {
-    deptName.value = res.dept.name
-  } else if (res.users && res.users.dept) {
-    deptName.value = res.users.dept.name
-  }
+    const res = await getUserProfile()
+    if (res.dept) {
+      deptName.value = res.dept.name
+    } else if (res.users && res.users.dept) {
+      deptName.value = res.users.dept.name
+    }
 
-  const queryId = route.query.id
-  if (queryId) {
-    formLoading.value = true
-    try {
-      const detail = await ReceiveDocApi.getReceiveDoc(queryId)
-      Object.assign(formData.value, detail)
+    const queryId = route.query.id
+    if (queryId) {
+      formLoading.value = true
+      const detail = await ReceiveDocApi.getReceiveDoc(Number(queryId))
+      if (detail) {
+        Object.assign(formData.value, detail)
 
-      if (formData.value.sendDocNumber && /^\d+$/.test(String(formData.value.sendDocNumber))) {
-        const dicts = getStrDictOptions(DICT_TYPE.BPM_DOC_NUM_TYPE)
-        const dict = dicts.find((d) => String(d.value) === String(formData.value.sendDocNumber))
-        if (dict) {
-          formData.value.sendDocNumber = formatSendDocNumberLabel(dict.label)
+        if (formData.value.sendDocNumber && /^\d+$/.test(String(formData.value.sendDocNumber))) {
+          const dicts = getStrDictOptions(DICT_TYPE.BPM_DOC_NUM_TYPE)
+          const dict = dicts?.find((d) => String(d.value) === String(formData.value.sendDocNumber))
+          if (dict) {
+            formData.value.sendDocNumber = formatSendDocNumberLabel(dict.label)
+          }
+        }
+
+        const attachList = await ReceiveDocApi.getReceiveDocXmGuid(Number(queryId))
+        if (attachList && attachList.length > 0) {
+          const files = attachList.map((item) => ({
+            name: item.attachFileName,
+            url: item.fileUrl,
+            id: item.attachFileId,
+            response: { data: { id: item.attachFileId, name: item.attachFileName } }
+          }))
+          nextTick(() => {
+            if (uploadFileRef.value) {
+              uploadFileRef.value.fileList = files
+            }
+          })
         }
       }
-
-      const attachList = await ReceiveDocApi.getReceiveDocXmGuid(queryId)
-      if (attachList && attachList.length > 0) {
-        const files = attachList.map((item) => ({
-          name: item.attachFileName,
-          url: item.fileUrl,
-          id: item.attachFileId,
-          response: { data: { id: item.attachFileId, name: item.attachFileName } }
-        }))
-        nextTick(() => {
-          if (uploadFileRef.value) {
-            uploadFileRef.value.fileList = files
-          }
-        })
-      }
-    } finally {
-      formLoading.value = false
+    } else {
+      formData.value.receiveTime = Date.now()
     }
-  } else {
-    formData.value.receiveTime = Date.now()
+  } catch (error) {
+    console.error('收文发起页初始化失败:', error)
+    // message.error('页面数据加载失败')
+  } finally {
+    formLoading.value = false
   }
 })
 
@@ -626,17 +635,15 @@ watch(
 #printDivTag {
   .oa-container {
     width: 100%;
+    padding: 10px 20px;
     margin: 0 auto;
     font-family: SimSun, 'Songti SC', STSong, serif;
     background-color: #fff;
-    padding: 30px 40px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    max-width: 900px;
   }
 
   .doc-title {
     margin-bottom: 20px;
-    font-size: 28px;
+    font-size: 26px;
     font-weight: bold;
     letter-spacing: 2px;
     color: #d71920;
@@ -810,32 +817,32 @@ watch(
 
 /* 浮动气泡样式的必填报错提醒 */
 :deep(.el-form-item__error) {
-  position: absolute;
-  top: -20px;
-  left: 0;
-  z-index: 1000;
-  padding: 2px 6px;
-  font-family: sans-serif;
-  font-size: 11px;
-  line-height: 1;
-  color: #fff;
-  white-space: nowrap;
-  background-color: #f56c6c;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+  position: absolute !important;
+  top: -20px !important;
+  left: 0 !important;
+  z-index: 1000 !important;
+  padding: 2px 8px !important;
+  font-family: Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif !important;
+  font-size: 11px !important;
+  font-weight: normal !important;
+  line-height: 1.2 !important;
+  color: #fff !important;
+  white-space: nowrap !important;
+  pointer-events: none;
+  background: #f56c6c !important;
+  border-radius: 4px !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 :deep(.el-form-item__error::after) {
+  content: '';
   position: absolute;
-  bottom: -4px;
+  top: 100%;
   left: 10px;
   display: block;
-  width: 0;
-  height: 0;
-  content: '';
-  border-color: #f56c6c transparent transparent transparent;
-  border-style: solid;
   border-width: 4px 4px 0 4px;
+  border-style: solid;
+  border-color: #f56c6c transparent transparent transparent;
 }
 
 /* 隐藏输入框获取焦点时的边框 */

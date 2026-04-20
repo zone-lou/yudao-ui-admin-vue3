@@ -96,6 +96,46 @@
             </td>
           </tr>
 
+          <!-- 审查环节预留展示位 -->
+          <!-- 合法性审查 -->
+          <tr style="height: 35px;">
+            <td class="label-cell" rowspan="2">合法性审查</td>
+            <td class="label-cell" style="text-align: center; background-color: transparent;">姓名</td>
+            <td class="label-cell" style="text-align: center; background-color: transparent;" colspan="2">日期</td>
+            <td class="label-cell" style="text-align: center; background-color: transparent;" colspan="2">意见</td>
+          </tr>
+          <tr style="height: 35px;">
+            <td class="data-text"></td>
+            <td class="data-text" colspan="2"></td>
+            <td class="data-text" colspan="2"></td>
+          </tr>
+          
+          <!-- 文字格式审查 -->
+          <tr style="height: 35px;">
+            <td class="label-cell" rowspan="2">文字格式审查</td>
+            <td class="label-cell" style="text-align: center; background-color: transparent;">姓名</td>
+            <td class="label-cell" style="text-align: center; background-color: transparent;" colspan="2">日期</td>
+            <td class="label-cell" style="text-align: center; background-color: transparent;" colspan="2">意见</td>
+          </tr>
+          <tr style="height: 35px;">
+            <td class="data-text"></td>
+            <td class="data-text" colspan="2"></td>
+            <td class="data-text" colspan="2"></td>
+          </tr>
+
+          <!-- 分管领导审阅 -->
+          <tr style="height: 35px;">
+            <td class="label-cell" rowspan="2">分管领导审阅</td>
+            <td class="label-cell" style="text-align: center; background-color: transparent;">姓名</td>
+            <td class="label-cell" style="text-align: center; background-color: transparent;" colspan="2">日期</td>
+            <td class="label-cell" style="text-align: center; background-color: transparent;" colspan="2">意见</td>
+          </tr>
+          <tr style="height: 35px;">
+            <td class="data-text"></td>
+            <td class="data-text" colspan="2"></td>
+            <td class="data-text" colspan="2"></td>
+          </tr>
+
           <template v-for="(block, idx) in nodeBlocks" :key="idx">
             <tr>
               <td class="label-cell" :rowspan="(isEditable(block.keywords) ? (block.list.length + 1) : Math.max(1, block.list.length)) + 1">{{ block.title }}</td>
@@ -132,66 +172,7 @@
           </template>
 
 
-          <!-- 局长签发 -->
-          <tr>
-            <td class="label-cell">局长签发</td>
-            <td
-              colspan="5"
-              class="data-text"
-              style="position: relative; height: 120px; padding-bottom: 30px; vertical-align: top;"
-            >
-              <div class="w-full h-full" style="padding: 5px;">
-                <div v-if="isEditable(['局长签发', '局长', '签发'])">
-                  <el-input
-                    v-model="currentOpinion"
-                    type="textarea"
-                    :rows="3"
-                    placeholder="请输入局长签发意见"
-                    class="w-full h-full"
-                  />
-                </div>
-                <div v-else>
-                  <div v-for="(info, index) in signerList" :key="index" class="mb-1">
-                    {{ info.comment }}
-                  </div>
-                </div>
-              </div>
-              <div
-                class="flex items-center justify-around"
-                style="position: absolute; bottom: 8px; width: 100%; font-size: 14px;"
-              >
-                <div v-if="isEditable(['局长签发', '局长', '签发'])" style="margin-right: 5px;">
-                  <span style="margin-right: 5px">办理人：</span>
-                  <span class="data-text signature-line">{{ userStore.getUser.nickname }}</span>
-                </div>
-                <div v-else-if="signerList.length > 0">
-                  <span style="margin-right: 5px">办理人：</span>
-                  <span class="data-text signature-line">
-                    {{ signerList[signerList.length - 1].assigneeUser?.nickname }}
-                  </span>
-                </div>
-                <div v-else>
-                  <span style="margin-right: 5px">办理人：</span>
-                  <span class="data-text signature-line"></span>
-                </div>
 
-                <div v-if="isEditable(['局长签发', '局长', '签发'])">
-                  <span style="margin-left: 15px">办理日期：</span>
-                  <span class="data-text signature-line">{{ formatDateExact(new Date().getTime()) }}</span>
-                </div>
-                <div v-else-if="signerList.length > 0">
-                  <span style="margin-left: 15px">办理日期：</span>
-                  <span class="data-text signature-line">
-                    {{ formatDateExact(signerList[signerList.length - 1].endTime) }}
-                  </span>
-                </div>
-                <div v-else>
-                  <span style="margin-left: 15px">办理日期：</span>
-                  <span class="data-text signature-line"></span>
-                </div>
-              </div>
-            </td>
-          </tr>
 
           <!-- 机关信息 -->
           <tr>
@@ -419,6 +400,11 @@ const getInfo = async (id?: number) => {
     externalPrefix.value = await ConfigApi.getConfigKey('url.external.prefix')
     internalPrefix.value = await ConfigApi.getConfigKey('url.internal.prefix')
     const res = await SendDocApi.getSendDoc(queryId)
+    if (!res) {
+      ElMessage.error('未找到相关发文详情')
+      detailLoading.value = false
+      return
+    }
     // 防止接口不存在导致 radio 无默认值
     if (!res.inforelease) res.inforelease = '1'
     if (res.sendDocDraft) {
@@ -426,7 +412,7 @@ const getInfo = async (id?: number) => {
         res.sendDocDraft = decodeURIComponent(escape(window.atob(res.sendDocDraft)))
       } catch (e) {}
     }
-    detailData.value = res || { inforelease: '1' }
+    detailData.value = res
     
     // 如果是打字或校对环节，且字段为空，则自动预填当前登录人名
     if (isEditable('打字') && !detailData.value.typist) {
@@ -577,8 +563,8 @@ defineExpose({
 
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .doc-title {
-  margin-bottom: 15px;
-  font-size: 24px;
+  margin-bottom: 20px;
+  font-size: 26px;
   font-weight: bold;
   letter-spacing: 2px;
   color: #d71920;

@@ -76,52 +76,82 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="类别一" prop="lb1">
-        <el-input
+      <el-form-item label="案件类别" prop="lb1">
+        <el-select
           v-model="queryParams.lb1"
-          placeholder="请输入类别一"
+          placeholder="请选择案件类别"
           clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
-        />
+        >
+          <el-option
+            v-for="dict in getDictOptions(DICT_TYPE.BPM_XZSS_CLASS1)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
-      <el-form-item label="类别二" prop="lb2">
-        <el-input
+      <el-form-item label="案件分类" prop="lb2">
+        <el-select
           v-model="queryParams.lb2"
-          placeholder="请输入类别二"
+          placeholder="请选择案件分类"
           clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
-        />
+        >
+          <el-option
+            v-for="dict in getDictOptions(DICT_TYPE.BPM_XZSS_CLASS2)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
-      <el-form-item label="类别三" prop="lb3">
-        <el-input
+      <el-form-item label="涉及事项" prop="lb3">
+        <el-select
           v-model="queryParams.lb3"
-          placeholder="请输入类别三"
+          placeholder="请选择涉及事项"
           clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
-        />
+        >
+          <el-option
+            v-for="dict in getDictOptions(DICT_TYPE.BPM_XZSS_CLASS3)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
-      <el-form-item label="类别四" prop="lb4">
-        <el-input
+      <el-form-item label="案件类型" prop="lb4">
+        <el-select
           v-model="queryParams.lb4"
-          placeholder="请输入类别四"
+          placeholder="请选择案件类型"
           clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
-        />
+        >
+          <el-option
+            v-for="dict in getDictOptions(DICT_TYPE.BPM_XZSS_CLASS4)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
-      <el-form-item label="类别五" prop="lb5">
-        <el-input
+      <el-form-item label="诉讼类别" prop="lb5">
+        <el-select
           v-model="queryParams.lb5"
-          placeholder="请输入类别五"
+          placeholder="请选择诉讼类别"
           clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
-        />
+        >
+          <el-option
+            v-for="dict in getDictOptions(DICT_TYPE.BPM_XZSS_CLASS5)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
-      <el-form-item label="复议请求" prop="ssNr">
+      <!-- <el-form-item label="复议请求" prop="ssNr">
         <el-input
           v-model="queryParams.ssNr"
           placeholder="请输入复议请求"
@@ -129,8 +159,8 @@
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
-      </el-form-item>
-      <el-form-item label="承办人" prop="cbr">
+      </el-form-item> -->
+      <!-- <el-form-item label="承办人" prop="cbr">
         <el-input
           v-model="queryParams.cbr"
           placeholder="请输入承办人"
@@ -148,8 +178,8 @@
           clearable
           class="!w-240px"
         />
-      </el-form-item>
-      <el-form-item label="送法院日期" prop="sfyjgRq">
+      </el-form-item> -->
+      <!-- <el-form-item label="送法院日期" prop="sfyjgRq">
         <el-date-picker
           v-model="queryParams.sfyjgRq"
           value-format="YYYY-MM-DD"
@@ -158,8 +188,8 @@
           clearable
           class="!w-240px"
         />
-      </el-form-item>
-      <el-form-item label="监督监管" prop="issupervise">
+      </el-form-item> -->
+      <!-- <el-form-item label="监督监管" prop="issupervise">
         <el-input
           v-model="queryParams.issupervise"
           placeholder="请输入监督监管"
@@ -167,8 +197,8 @@
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
-      </el-form-item>
-      <el-form-item label="是否已寄件提醒" prop="mailTip">
+      </el-form-item> -->
+      <!--       <el-form-item label="是否已寄件提醒" prop="mailTip">
         <el-input
           v-model="queryParams.mailTip"
           placeholder="请输入是否已寄件提醒"
@@ -176,7 +206,7 @@
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
           v-model="queryParams.createTime"
@@ -227,8 +257,8 @@
         label="收文日期"
         align="center"
         prop="swRq"
-        :formatter="dateFormatter"
-        width="180px"
+        :formatter="dateFormatter2"
+        width="120px"
       />
       <el-table-column label="原告" align="center" prop="sqr" width="100px" />
       <el-table-column label="被告" align="center" prop="bsqr" width="100px" />
@@ -270,15 +300,15 @@
         label="承办日期"
         align="center"
         prop="cbRq"
-        :formatter="dateFormatter"
-        width="180px"
+        :formatter="dateFormatter2"
+        width="120px"
       />
       <el-table-column
         label="送法院日期"
         align="center"
         prop="sfyjgRq"
-        :formatter="dateFormatter"
-        width="180px"
+        :formatter="dateFormatter2"
+        width="120px"
       />
       <el-table-column label="上诉人" align="center" prop="ssr" />
       <el-table-column label="被上诉人" align="center" prop="bssr" />
@@ -293,8 +323,8 @@
         label="办理时限"
         align="center"
         prop="zhubandate"
-        :formatter="dateFormatter"
-        width="180px"
+        :formatter="dateFormatter2"
+        width="120px"
       />
       <el-table-column label="诉讼内容" align="center" prop="ssnr" />
       <el-table-column label="是否已寄件提醒" align="center" prop="mailTip">
@@ -313,7 +343,7 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" min-width="120px">
+      <el-table-column label="操作" align="center" fixed="right" width="120px">
         <template #default="scope">
           <el-button
             link
@@ -351,7 +381,7 @@
 <script setup lang="ts">
 import { getIntDictOptions, getStrDictOptions, getDictOptions, DICT_TYPE } from '@/utils/dict'
 import { isEmpty } from '@/utils/is'
-import { dateFormatter } from '@/utils/formatTime'
+import { dateFormatter, dateFormatter2 } from '@/utils/formatTime'
 import { XzssApi, Xzss } from '@/api/bpm/xzss'
 import XzssForm from './XzssForm.vue'
 import XzssKzList from './components/XzssKzList.vue'

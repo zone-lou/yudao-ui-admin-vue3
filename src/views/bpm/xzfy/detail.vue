@@ -977,8 +977,8 @@ onMounted(() => {
 }
 
 #printDivTag .doc-title {
-  margin-bottom: 25px;
-  font-size: 24px;
+  margin-bottom: 20px;
+  font-size: 26px;
   font-weight: bold;
   letter-spacing: 2px;
   color: #d71920;

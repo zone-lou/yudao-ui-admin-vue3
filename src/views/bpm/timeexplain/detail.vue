@@ -426,9 +426,16 @@ const getInfo = async () => {
     externalPrefix.value = await ConfigApi.getConfigKey('url.external.prefix')
     internalPrefix.value = await ConfigApi.getConfigKey('url.internal.prefix')
     const res = await TimeExplainApi.getTimeExplain(Number(queryId))
+    if (!res) {
+      ElMessage.error('未找到相关公出详情')
+      detailLoading.value = false
+      return
+    }
     detailData.value = res || {}
     processFileList(res.filepath)
     processActivityNodes()
+  } catch (error) {
+    console.error('获取公出详情失败:', error)
   } finally {
     detailLoading.value = false
   }
@@ -601,8 +608,8 @@ onMounted(() => {
 }
 
 .doc-title {
-  margin-bottom: 25px;
-  font-size: 24px;
+  margin-bottom: 20px;
+  font-size: 26px;
   font-weight: bold;
   letter-spacing: 1px;
   color: #b1351e;

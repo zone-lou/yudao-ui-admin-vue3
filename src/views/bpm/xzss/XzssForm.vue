@@ -1,5 +1,5 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="1200px">
     <el-form
       ref="formRef"
       :model="formData"
@@ -7,119 +7,305 @@
       label-width="100px"
       v-loading="formLoading"
     >
-      <el-form-item label="备用主键" prop="xmGuid">
-        <el-input v-model="formData.xmGuid" placeholder="请输入备用主键" />
-      </el-form-item>
-      <el-form-item label="来文号" prop="swWh">
-        <el-input v-model="formData.swWh" placeholder="请输入来文号" />
-      </el-form-item>
-      <el-form-item label="来文机关" prop="swJg">
-        <el-input v-model="formData.swJg" placeholder="请输入来文机关" />
-      </el-form-item>
-      <el-form-item label="收文日期" prop="swRq">
-        <el-date-picker
-          v-model="formData.swRq"
-          type="date"
-          value-format="x"
-          placeholder="选择收文日期"
-        />
-      </el-form-item>
-      <el-form-item label="原告" prop="sqr">
-        <el-input v-model="formData.sqr" placeholder="请输入原告" />
-      </el-form-item>
-      <el-form-item label="被告" prop="bsqr">
-        <el-input v-model="formData.bsqr" placeholder="请输入被告" />
-      </el-form-item>
-      <el-form-item label="第三人" prop="dsr">
-        <el-input v-model="formData.dsr" placeholder="请输入第三人" />
-      </el-form-item>
+      <el-row>
+        <!-- <el-col :span="12">
+          <el-form-item label="备用主键" prop="xmGuid">
+            <el-input v-model="formData.xmGuid" placeholder="请输入备用主键" />
+          </el-form-item>
+        </el-col> -->
+        <el-col :span="12">
+          <el-form-item label="来文号" prop="swWh">
+            <el-input v-model="formData.swWh" placeholder="请输入来文号" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="来文机关" prop="swJg">
+            <el-input v-model="formData.swJg" placeholder="请输入来文机关" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="收文日期" prop="swRq">
+            <el-date-picker
+              v-model="formData.swRq"
+              type="date"
+              value-format="x"
+              placeholder="选择收文日期"
+              style="width: 100%"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="原告" prop="sqr">
+            <el-input v-model="formData.sqr" placeholder="请输入原告" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="被告" prop="bsqr">
+            <el-input v-model="formData.bsqr" placeholder="请输入被告" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="第三人" prop="dsr">
+            <el-input v-model="formData.dsr" placeholder="请输入第三人" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="诉讼类型" prop="ssLx">
+            <el-input v-model="formData.ssLx" placeholder="请输入诉讼类型" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
       <el-form-item label="土地坐落" prop="tdZl">
-        <el-input v-model="formData.tdZl" placeholder="请输入土地坐落" />
+        <div class="flex w-full gap-2">
+          <el-select
+            v-model="tdZlPart1"
+            placeholder="镇街"
+            style="width: 200px"
+            filterable
+            allow-create
+            clearable
+            @change="handleTdZlChange"
+          >
+            <el-option
+              v-for="dict in getDictOptions(DICT_TYPE.BPM_LOCATION_STREET)"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.label"
+            />
+          </el-select>
+          <el-input
+            v-model="tdZlPart2"
+            placeholder="请输入具体坐落详情"
+            @input="handleTdZlChange"
+          />
+        </div>
       </el-form-item>
-      <el-form-item label="诉讼类型" prop="ssLx">
-        <el-input v-model="formData.ssLx" placeholder="请输入诉讼类型" />
-      </el-form-item>
-      <el-form-item label="复议项目主键" prop="fyGuid">
-        <el-input v-model="formData.fyGuid" placeholder="请输入复议项目主键" />
-      </el-form-item>
-      <el-form-item label="复议案号" prop="fyAh">
-        <el-input v-model="formData.fyAh" placeholder="请输入复议案号" />
-      </el-form-item>
-      <el-form-item label="上一审项目主键" prop="ssGuid">
-        <el-input v-model="formData.ssGuid" placeholder="请输入上一审项目主键" />
-      </el-form-item>
-      <el-form-item label="上一审案号" prop="ssAh">
-        <el-input v-model="formData.ssAh" placeholder="请输入上一审案号" />
-      </el-form-item>
-      <el-form-item label="类别一" prop="lb1">
-        <el-input v-model="formData.lb1" placeholder="请输入类别一" />
-      </el-form-item>
-      <el-form-item label="类别二" prop="lb2">
-        <el-input v-model="formData.lb2" placeholder="请输入类别二" />
-      </el-form-item>
-      <el-form-item label="类别三" prop="lb3">
-        <el-input v-model="formData.lb3" placeholder="请输入类别三" />
-      </el-form-item>
-      <el-form-item label="类别四" prop="lb4">
-        <el-input v-model="formData.lb4" placeholder="请输入类别四" />
-      </el-form-item>
-      <el-form-item label="类别五" prop="lb5">
-        <el-input v-model="formData.lb5" placeholder="请输入类别五" />
-      </el-form-item>
+
+      <el-row>
+        <!-- <el-col :span="12">
+          <el-form-item label="复议项目主键" prop="fyGuid">
+            <el-input v-model="formData.fyGuid" placeholder="请输入复议项目主键" />
+          </el-form-item>
+        </el-col> -->
+        <el-col :span="12">
+          <el-form-item label="复议案号" prop="fyAh">
+            <el-input v-model="formData.fyAh" placeholder="请输入复议案号" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <el-row>
+        <!-- <el-col :span="12">
+          <el-form-item label="上一审项目主键" prop="ssGuid">
+            <el-input v-model="formData.ssGuid" placeholder="请输入上一审项目主键" />
+          </el-form-item>
+        </el-col> -->
+        <el-col :span="12">
+          <el-form-item label="上一审案号" prop="ssAh">
+            <el-input v-model="formData.ssAh" placeholder="请输入上一审案号" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="案件类别" prop="lb1">
+            <el-select
+              v-model="formData.lb1"
+              placeholder="请选择案件类别"
+              clearable
+              style="width: 100%"
+            >
+              <el-option
+                v-for="dict in getDictOptions(DICT_TYPE.BPM_XZSS_CLASS1)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="案件分类" prop="lb2">
+            <el-select
+              v-model="formData.lb2"
+              placeholder="请选择案件分类"
+              clearable
+              style="width: 100%"
+            >
+              <el-option
+                v-for="dict in getDictOptions(DICT_TYPE.BPM_XZSS_CLASS2)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="涉及事项" prop="lb3">
+            <el-select
+              v-model="formData.lb3"
+              placeholder="请选择涉及事项"
+              clearable
+              style="width: 100%"
+            >
+              <el-option
+                v-for="dict in getDictOptions(DICT_TYPE.BPM_XZSS_CLASS3)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="案件类型" prop="lb4">
+            <el-select
+              v-model="formData.lb4"
+              placeholder="请选择案件类型"
+              clearable
+              style="width: 100%"
+            >
+              <el-option
+                v-for="dict in getDictOptions(DICT_TYPE.BPM_XZSS_CLASS4)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="诉讼类别" prop="lb5">
+            <el-select
+              v-model="formData.lb5"
+              placeholder="请选择诉讼类别"
+              clearable
+              style="width: 100%"
+            >
+              <el-option
+                v-for="dict in getDictOptions(DICT_TYPE.BPM_XZSS_CLASS5)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="承办人" prop="cbr">
+            <el-input v-model="formData.cbr" placeholder="请输入承办人" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
       <el-form-item label="复议请求" prop="ssNr">
-        <el-input v-model="formData.ssNr" placeholder="请输入复议请求" />
+        <el-input v-model="formData.ssNr" type="textarea" :rows="2" placeholder="请输入复议请求" />
       </el-form-item>
-      <el-form-item label="承办人" prop="cbr">
-        <el-input v-model="formData.cbr" placeholder="请输入承办人" />
-      </el-form-item>
-      <el-form-item label="承办日期" prop="cbRq">
-        <el-date-picker
-          v-model="formData.cbRq"
-          type="date"
-          value-format="x"
-          placeholder="选择承办日期"
-        />
-      </el-form-item>
-      <el-form-item label="送法院日期" prop="sfyjgRq">
-        <el-date-picker
-          v-model="formData.sfyjgRq"
-          type="date"
-          value-format="x"
-          placeholder="选择送法院日期"
-        />
-      </el-form-item>
-      <el-form-item label="上诉人" prop="ssr">
-        <el-input v-model="formData.ssr" placeholder="请输入上诉人" />
-      </el-form-item>
-      <el-form-item label="被上诉人" prop="bssr">
-        <el-input v-model="formData.bssr" placeholder="请输入被上诉人" />
-      </el-form-item>
-      <el-form-item label="再审申请人" prop="zssqr">
-        <el-input v-model="formData.zssqr" placeholder="请输入再审申请人" />
-      </el-form-item>
-      <el-form-item label="再审被申请人" prop="zsbsqr">
-        <el-input v-model="formData.zsbsqr" placeholder="请输入再审被申请人" />
-      </el-form-item>
-      <el-form-item label="监督监管" prop="issupervise">
-        <el-input v-model="formData.issupervise" placeholder="请输入监督监管" />
-      </el-form-item>
-      <el-form-item label="办理时限" prop="zhubandate">
-        <el-date-picker
-          v-model="formData.zhubandate"
-          type="date"
-          value-format="x"
-          placeholder="选择办理时限"
-        />
-      </el-form-item>
+
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="承办日期" prop="cbRq">
+            <el-date-picker
+              v-model="formData.cbRq"
+              type="date"
+              value-format="x"
+              placeholder="选择承办日期"
+              style="width: 100%"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="送法院日期" prop="sfyjgRq">
+            <el-date-picker
+              v-model="formData.sfyjgRq"
+              type="date"
+              value-format="x"
+              placeholder="选择送法院日期"
+              style="width: 100%"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="上诉人" prop="ssr">
+            <el-input v-model="formData.ssr" placeholder="请输入上诉人" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="被上诉人" prop="bssr">
+            <el-input v-model="formData.bssr" placeholder="请输入被上诉人" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="再审申请人" prop="zssqr">
+            <el-input v-model="formData.zssqr" placeholder="请输入再审申请人" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="再审被申请人" prop="zsbsqr">
+            <el-input v-model="formData.zsbsqr" placeholder="请输入再审被申请人" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="监督监管" prop="issupervise">
+            <el-input v-model="formData.issupervise" placeholder="请输入监督监管" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="办理时限" prop="zhubandate">
+            <el-date-picker
+              v-model="formData.zhubandate"
+              type="date"
+              value-format="x"
+              placeholder="选择办理时限"
+              style="width: 100%"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
       <el-form-item label="诉讼内容" prop="ssnr">
-        <el-input v-model="formData.ssnr" placeholder="请输入诉讼内容" />
+        <el-input v-model="formData.ssnr" type="textarea" :rows="2" placeholder="请输入诉讼内容" />
       </el-form-item>
-      <el-form-item label="是否已寄件提醒" prop="mailTip">
-        <el-input v-model="formData.mailTip" placeholder="请输入是否已寄件提醒" />
-      </el-form-item>
-      <el-form-item label="流程实例的编号" prop="processInstanceId">
-        <el-input v-model="formData.processInstanceId" placeholder="请输入流程实例的编号" />
-      </el-form-item>
+
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="是否已寄件提醒" prop="mailTip">
+            <el-input v-model="formData.mailTip" placeholder="请输入是否已寄件提醒" />
+          </el-form-item>
+        </el-col>
+        <!-- <el-col :span="12">
+          <el-form-item label="流程实例的编号" prop="processInstanceId">
+            <el-input v-model="formData.processInstanceId" placeholder="请输入流程实例的编号" />
+          </el-form-item>
+        </el-col> -->
+      </el-row>
     </el-form>
     <!-- 子表的表单 -->
     <el-tabs v-model="subTabsName">
@@ -139,6 +325,30 @@ import XzssKzForm from './components/XzssKzForm.vue'
 
 /** 行政诉讼 表单 */
 defineOptions({ name: 'XzssForm' })
+import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+
+const tdZlPart1 = ref('')
+const tdZlPart2 = ref('')
+
+const handleTdZlChange = () => {
+  formData.value.tdZl = (tdZlPart1.value || '') + (tdZlPart2.value || '')
+  if (!tdZlPart1.value && !tdZlPart2.value) {
+    formData.value.tdZl = undefined
+  }
+}
+
+const parseTdZl = (fullPath: string) => {
+  if (!fullPath) return
+  const options = getDictOptions(DICT_TYPE.BPM_LOCATION_STREET)
+  const match = options.find((opt) => fullPath.startsWith(opt.label))
+  if (match) {
+    tdZlPart1.value = match.label
+    tdZlPart2.value = fullPath.substring(match.label.length)
+  } else {
+    tdZlPart1.value = ''
+    tdZlPart2.value = fullPath
+  }
+}
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -181,9 +391,9 @@ const formData = ref({
   mailTip: undefined,
   processInstanceId: undefined
 })
-const formRules = reactive({
-  xmGuid: [{ required: true, message: '备用主键不能为空', trigger: 'blur' }]
-})
+// const formRules = reactive({
+//   xmGuid: [{ required: true, message: '备用主键不能为空', trigger: 'blur' }]
+// })
 const formRef = ref() // 表单 Ref
 
 /** 子表的表单 */
@@ -201,6 +411,7 @@ const open = async (type: string, id?: number) => {
     formLoading.value = true
     try {
       formData.value = await XzssApi.getXzss(id)
+      parseTdZl(formData.value.tdZl)
     } finally {
       formLoading.value = false
     }
@@ -277,6 +488,8 @@ const resetForm = () => {
     mailTip: undefined,
     processInstanceId: undefined
   }
+  tdZlPart1.value = ''
+  tdZlPart2.value = ''
   formRef.value?.resetFields()
 }
 </script>

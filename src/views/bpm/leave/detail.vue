@@ -509,9 +509,10 @@ const previewFile = (file: any) => {
       fullUrl = fullUrl.replace(externalPrefix.value, internalPrefix.value)
     }
   }
+
   const kkBaseUrl = fileViewBaseUrl.value || 'http://192.168.50.239:8012/onlinePreview?url='
   const encodedUrl = btoa(encodeURIComponent(fullUrl))
-
+  const previewUrl = `${kkBaseUrl}${encodeURIComponent(encodedUrl)}`
   window.open(previewUrl, '_blank')
 }
 
@@ -536,8 +537,15 @@ const getInfo = async () => {
     fileViewBaseUrl.value = await ConfigApi.getConfigKey('url.fileview.address')
     externalPrefix.value = await ConfigApi.getConfigKey('url.external.prefix')
     internalPrefix.value = await ConfigApi.getConfigKey('url.internal.prefix')
-    detailData.value = await LeaveApi.leaveApi.getleave(Number(props.id || queryId))
-    // 获取数据后不必立刻掉 processActivityNodes，因为顶端已经配置了 immediate 的 watch 来响应
+    const res = await LeaveApi.leaveApi.getleave(Number(props.id || queryId))
+    if (!res) {
+      ElMessage.error('未找到相关请假详情')
+      detailLoading.value = false
+      return
+    }
+    detailData.value = res
+  } catch (error) {
+    console.error('获取请假详情失败:', error)
   } finally {
     detailLoading.value = false
   }
@@ -589,8 +597,8 @@ defineExpose({
 }
 
 .doc-title {
-  margin-bottom: 25px;
-  font-size: 24px;
+  margin-bottom: 20px;
+  font-size: 26px;
   font-weight: bold;
   letter-spacing: 1px;
   color: #b1351e;

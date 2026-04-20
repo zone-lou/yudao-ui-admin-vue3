@@ -18,10 +18,10 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="复议结果：0撤销，1维持" prop="fyJg">
+      <el-form-item label="复议结果" prop="fyJg">
         <el-input
           v-model="queryParams.fyJg"
-          placeholder="请输入复议结果：0撤销，1维持"
+          placeholder="请输入复议结果"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
@@ -74,10 +74,10 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="是否装订：0否，1是" prop="sfZd">
+      <el-form-item label="是否装订" prop="sfZd">
         <el-input
           v-model="queryParams.sfZd"
-          placeholder="请输入是否装订：0否，1是"
+          placeholder="请输入是否装订"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
@@ -102,10 +102,10 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="是否移交：0否，1是" prop="sfYj">
+      <el-form-item label="是否移交" prop="sfYj">
         <el-input
           v-model="queryParams.sfYj"
-          placeholder="请输入是否移交：0否，1是"
+          placeholder="请输入是否移交"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
@@ -158,7 +158,7 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="流程实例的编号" prop="processInstanceId">
+      <!-- <el-form-item label="流程实例的编号" prop="processInstanceId">
         <el-input
           v-model="queryParams.processInstanceId"
           placeholder="请输入流程实例的编号"
@@ -166,7 +166,7 @@
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
           v-model="queryParams.createTime"
@@ -199,11 +199,11 @@
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
         <el-button
-            type="danger"
-            plain
-            :disabled="isEmpty(checkedIds)"
-            @click="handleDeleteBatch"
-            v-hasPermi="['bpm:xzfy-kz:delete']"
+          type="danger"
+          plain
+          :disabled="isEmpty(checkedIds)"
+          @click="handleDeleteBatch"
+          v-hasPermi="['bpm:xzfy-kz:delete']"
         >
           <Icon icon="ep:delete" class="mr-5px" /> 批量删除
         </el-button>
@@ -214,15 +214,15 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table
-        row-key="id"
-        v-loading="loading"
-        :data="list"
-        :stripe="true"
-        :show-overflow-tooltip="true"
-        @selection-change="handleRowCheckboxChange"
+      row-key="id"
+      v-loading="loading"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
+      @selection-change="handleRowCheckboxChange"
     >
-    <el-table-column type="selection" width="55" />
-      <el-table-column label="主键" align="center" prop="id" />
+      <el-table-column type="selection" width="55" />
+      <!-- <el-table-column label="主键" align="center" prop="id" /> -->
       <el-table-column
         label="复议决定日期"
         align="center"
@@ -412,16 +412,16 @@ const handleDeleteBatch = async () => {
   try {
     // 删除的二次确认
     await message.delConfirm()
-    await XzfyKzApi.deleteXzfyKzList(checkedIds.value);
-    checkedIds.value = [];
+    await XzfyKzApi.deleteXzfyKzList(checkedIds.value)
+    checkedIds.value = []
     message.success(t('common.delSuccess'))
-    await getList();
+    await getList()
   } catch {}
 }
 
 const checkedIds = ref<number[]>([])
 const handleRowCheckboxChange = (records: XzfyKz[]) => {
-  checkedIds.value = records.map((item) => item.id!);
+  checkedIds.value = records.map((item) => item.id!)
 }
 
 /** 导出按钮操作 */

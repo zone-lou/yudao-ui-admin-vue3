@@ -6,11 +6,7 @@
         :bodyStyle="{ background: '#ffffff', minHeight: 'calc(100vh - 120px)' }"
       >
         <template #header>
-          <el-button
-            type="primary"
-            @click="handleSendClick"
-            :loading="formLoading"
-          >
+          <el-button type="primary" @click="handleSendClick" :loading="formLoading">
             <Icon icon="ep:promotion" class="mr-5px" /> 发送
           </el-button>
         </template>
@@ -29,7 +25,7 @@
               >
                 <table class="oa-table">
                   <colgroup>
-                    <col width="130px" />
+                    <col width="140px" />
                     <col width="35%" />
                     <col width="130px" />
                     <col />
@@ -600,23 +596,27 @@ onMounted(async () => {
 :deep(.el-form-item) {
   margin-bottom: 0 !important;
 }
+
 :deep(.el-input__wrapper),
 :deep(.el-textarea__inner),
 :deep(.el-select__wrapper) {
-  box-shadow: none !important;
+  padding: 0 !important;
   background-color: transparent !important;
   border: none !important;
-  padding: 0 !important;
+  box-shadow: none !important;
 }
+
 :deep(.el-input__inner),
 :deep(.el-textarea__inner) {
   padding: 0 !important;
 }
+
 :deep(.el-input-group__append) {
   background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;
 }
+
 :deep(.el-form-item.is-error .el-input__wrapper),
 :deep(.el-form-item.is-error .el-textarea__inner),
 :deep(.el-form-item.is-error .el-select__wrapper) {
@@ -625,44 +625,48 @@ onMounted(async () => {
 
 .oa-container {
   width: 100%;
-  max-width: 900px;
-  padding: 20px;
+  padding: 10px 20px;
   margin: 0 auto;
   font-family: SimSun, 'Songti SC', serif;
   background-color: #fff;
 }
+
 :deep(.el-form-item__error) {
   position: absolute !important;
   top: -20px !important;
-  right: 10px !important;
+  left: 0 !important;
   z-index: 1000 !important;
   padding: 2px 8px !important;
+  font-family: Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif !important;
   font-size: 11px !important;
+  font-weight: normal !important;
   line-height: 1.2 !important;
   color: #fff !important;
   white-space: nowrap !important;
   pointer-events: none;
   background: #f56c6c !important;
   border-radius: 4px !important;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 10px rgb(0 0 0 / 20%);
 }
+
 :deep(.el-form-item__error)::after {
-  content: '';
   position: absolute;
   top: 100%;
-  right: 10px;
-  border-width: 5px;
+  left: 10px;
+  display: block;
+  border-color: #f56c6c transparent transparent;
   border-style: solid;
-  border-color: #f56c6c transparent transparent transparent;
+  border-width: 4px 4px 0;
+  content: '';
 }
 
 .doc-title {
-  margin-bottom: 25px;
-  color: #b1351e;
+  margin-bottom: 20px;
   font-size: 26px;
   font-weight: bold;
-  text-align: center;
   letter-spacing: 1px;
+  color: #b1351e;
+  text-align: center;
 }
 
 .oa-table {
@@ -670,6 +674,7 @@ onMounted(async () => {
   font-size: 14px;
   border: 1px solid #8cb4e0;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .oa-table td {
@@ -684,7 +689,6 @@ onMounted(async () => {
   font-weight: bold;
   color: #333;
   text-align: center;
-  white-space: nowrap;
   background-color: #dbe9f8;
 }
 

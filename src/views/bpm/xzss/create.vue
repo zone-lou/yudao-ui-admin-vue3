@@ -118,7 +118,29 @@
                 </el-col>
                 <el-col :span="16">
                   <el-form-item label="土地坐落" prop="tdZl">
-                    <el-input v-model="formData.tdZl" placeholder="请输入土地坐落" />
+                    <div class="flex w-full gap-2">
+                      <el-select
+                        v-model="tdZlPart1"
+                        placeholder="镇街"
+                        style="width: 200px"
+                        filterable
+                        allow-create
+                        clearable
+                        @change="handleTdZlChange"
+                      >
+                        <el-option
+                          v-for="dict in getDictOptions(DICT_TYPE.BPM_LOCATION_STREET)"
+                          :key="dict.value"
+                          :label="dict.label"
+                          :value="dict.label"
+                        />
+                      </el-select>
+                      <el-input
+                        v-model="tdZlPart2"
+                        placeholder="请输入具体坐落详情"
+                        @input="handleTdZlChange"
+                      />
+                    </div>
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -681,6 +703,13 @@ const formatDate = (val: any) => {
   return dateUtil(val).format('YYYY-MM-DD')
 }
 
+const handleTdZlChange = () => {
+  formData.value.tdZl = (tdZlPart1.value || '') + (tdZlPart2.value || '')
+  if (!tdZlPart1.value && !tdZlPart2.value) {
+    formData.value.tdZl = undefined
+  }
+}
+
 const formLoading = ref(false)
 const formRef = ref()
 const uploadFileRef = ref()
@@ -715,6 +744,9 @@ const processDefinitionId = ref('')
 const nextNodeOptions = ref([])
 const selectUserOptions = ref([])
 const multipleFlag = ref(false)
+
+const tdZlPart1 = ref('')
+const tdZlPart2 = ref('')
 
 // 表单数据
 const formData = ref({
@@ -1104,17 +1136,16 @@ watch(
 }
 
 #printDivTag .oa-container {
-  width: 1100px;
-  max-width: 100%;
-  padding: 40px;
+  width: 100%;
+  padding: 10px 20px;
   margin: 0 auto;
   background-color: #fff;
   box-shadow: none;
 }
 
 #printDivTag .doc-title {
-  margin-bottom: 25px;
-  font-size: 30px;
+  margin-bottom: 20px;
+  font-size: 26px;
   font-weight: bold;
   letter-spacing: 2px;
   color: #d71920;

@@ -28,201 +28,369 @@
           ref="formRef"
           :model="formData"
           :rules="formRules"
-          label-width="150px"
+          label-width="0"
           v-loading="formLoading"
         >
-          <h3 class="section-title">基础信息</h3>
+          <div class="oa-container" id="printDivTag">
+            <div class="doc-title">义乌市自然资源和规划局发文拟稿单</div>
 
-          <el-row>
-            <el-col :span="24">
-              <el-form-item label="公文标题" prop="subject">
-                <el-input v-model="formData.subject" placeholder="请输入公文标题/主题" />
-              </el-form-item>
-            </el-col>
-          </el-row>
-
-          <el-row>
-            <el-col :span="24">
-              <el-form-item label="发文字号" required>
-                <div style="display: flex; align-items: center; gap: 8px">
-                  <el-form-item prop="sendDocNumber" style="margin-bottom: 0; width: 200px">
-                    <el-select
-                      v-model="formData.sendDocNumber"
-                      placeholder="代字"
-                      style="width: 100%"
-                    >
-                      <el-option
-                        v-for="dict in getStrDictOptions(DICT_TYPE.BPM_SENDDOC_SIGN)"
-                        :key="dict.value"
-                        :label="dict.label"
-                        :value="dict.label"
+            <table class="oa-table">
+              <colgroup>
+                <col style="width: 15%" />
+                <col style="width: 20%" />
+                <col style="width: 15%" />
+                <col style="width: 20%" />
+                <col style="width: 15%" />
+                <col style="width: 15%" />
+              </colgroup>
+              <tbody>
+                <!-- 标题 -->
+                <tr>
+                  <td class="label-cell"><span class="text-red-500 mr-5px">*</span>标 题</td>
+                  <td colspan="5" class="input-cell">
+                    <el-form-item prop="subject" class="mb-0 w-full h-full">
+                      <el-input
+                        v-model="formData.subject"
+                        placeholder="请输入公文标题"
+                        style="text-align: center"
                       />
-                    </el-select>
-                  </el-form-item>
-                  <span style="color: #666">〔</span>
-                  <el-form-item prop="year" style="margin-bottom: 0; width: 120px">
-                    <el-date-picker
-                      v-model="formData.year"
-                      type="year"
-                      value-format="YYYY"
-                      placeholder="年份"
-                      style="width: 100%"
-                      :clearable="false"
-                    />
-                  </el-form-item>
-                  <span style="color: #666">〕</span>
-                  <el-form-item prop="docSequence" style="margin-bottom: 0; width: 150px">
-                    <el-input v-model="formData.docSequence" placeholder="序号">
-                      <template #append>号</template>
-                    </el-input>
-                  </el-form-item>
-                </div>
-              </el-form-item>
-            </el-col>
-          </el-row>
+                    </el-form-item>
+                  </td>
+                </tr>
 
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="发文日期" prop="sendTime">
-                <el-date-picker
-                  v-model="formData.sendTime"
-                  type="date"
-                  value-format="x"
-                  placeholder="选择发文日期"
-                  style="width: 100%"
-                />
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="机密程度" prop="secretDegree">
-                <el-select
-                  v-model="formData.secretDegree"
-                  placeholder="请选择机密程度"
-                  style="width: 100%"
-                >
-                  <el-option label="无" value="" />
-                  <el-option
-                    v-for="dict in getStrDictOptions(DICT_TYPE.BPM_DEGREE_OF_SECRECY)"
-                    :key="dict.value"
-                    :label="dict.label"
-                    :value="dict.value"
-                  />
-                </el-select>
-              </el-form-item>
-            </el-col>
-          </el-row>
+                <!-- 发文字号、秘密/紧急 -->
+                <tr>
+                  <td class="label-cell" rowspan="2"
+                    ><span class="text-red-500 mr-5px">*</span>发文字号</td
+                  >
+                  <td class="input-cell" rowspan="2" colspan="2">
+                    <div
+                      style="display: flex; align-items: center; justify-content: center; gap: 4px"
+                    >
+                      <el-form-item prop="sendDocNumber" style="width: 130px">
+                        <el-select v-model="formData.sendDocNumber" placeholder="">
+                          <el-option
+                            v-for="dict in getStrDictOptions(DICT_TYPE.BPM_SENDDOC_SIGN)"
+                            :key="dict.value"
+                            :label="dict.label"
+                            :value="dict.label"
+                          />
+                        </el-select>
+                      </el-form-item>
+                      <span>〔</span>
+                      <el-form-item prop="year" style="width: 80px">
+                        <el-date-picker
+                          v-model="formData.year"
+                          type="year"
+                          value-format="YYYY"
+                          placeholder=""
+                          :clearable="false"
+                        />
+                      </el-form-item>
+                      <span>〕</span>
+                      <el-form-item prop="docSequence" style="width: 80px">
+                        <el-input v-model="formData.docSequence" placeholder="" />
+                      </el-form-item>
+                      <span>号</span>
+                    </div>
+                  </td>
+                  <td class="label-cell">秘密等级</td>
+                  <td class="input-cell" colspan="2">
+                    <el-form-item prop="secretDegree" class="mb-0">
+                      <el-select
+                        v-model="formData.secretDegree"
+                        placeholder="请选择"
+                        style="width: 100%"
+                      >
+                        <el-option label="无" value="" />
+                        <el-option
+                          v-for="dict in getStrDictOptions(DICT_TYPE.BPM_DEGREE_OF_SECRECY)"
+                          :key="dict.value"
+                          :label="dict.label"
+                          :value="dict.value"
+                        />
+                      </el-select>
+                    </el-form-item>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="label-cell">紧急程度</td>
+                  <td class="input-cell" colspan="2">
+                    <el-form-item prop="urgencyDegree" class="mb-0">
+                      <el-select
+                        v-model="formData.urgencyDegree"
+                        placeholder="请选择"
+                        style="width: 100%"
+                      >
+                        <el-option
+                          v-for="dict in getStrDictOptions(DICT_TYPE.BPM_EMERGENCY_DEGREE)"
+                          :key="dict.value"
+                          :label="dict.label"
+                          :value="dict.value"
+                        />
+                      </el-select>
+                    </el-form-item>
+                  </td>
+                </tr>
 
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="紧急程度" prop="urgencyDegree">
-                <el-select
-                  v-model="formData.urgencyDegree"
-                  placeholder="请选择紧急程度"
-                  style="width: 100%"
-                >
-                  <el-option
-                    v-for="dict in getStrDictOptions(DICT_TYPE.BPM_EMERGENCY_DEGREE)"
-                    :key="dict.value"
-                    :label="dict.label"
-                    :value="dict.value"
-                  />
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="拟稿人" prop="draftPerson">
-                <el-input v-model="formData.draftPerson" placeholder="请输入拟稿人" />
-              </el-form-item>
-            </el-col>
-          </el-row>
+                <!-- 附件区域 -->
+                <tr class="print-hide-row">
+                  <td class="label-cell">附 件</td>
+                  <td colspan="5" class="input-cell">
+                    <el-form-item prop="attachFilePath" class="mb-0">
+                      <UploadFile v-model="formData.attachFilePath" />
+                    </el-form-item>
+                  </td>
+                </tr>
 
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="拟稿时间" prop="draftDate">
-                <el-date-picker
-                  v-model="formData.draftDate"
-                  type="date"
-                  value-format="x"
-                  placeholder="选择拟稿时间"
-                  style="width: 100%"
-                />
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="发文单位 / 部门" prop="sendDept">
-                <el-input v-model="formData.sendDept" placeholder="请输入发文单位" />
-              </el-form-item>
-            </el-col>
-          </el-row>
+                <!-- 拟稿区域 -->
+                <tr>
+                  <td class="label-cell">拟 稿</td>
+                  <td
+                    colspan="5"
+                    class="input-cell"
+                    style="
+                      position: relative;
+                      height: 100px;
+                      padding-bottom: 40px !important;
+                      vertical-align: top;
+                    "
+                  >
+                    <el-form-item prop="sendDocDraft" class="mb-2">
+                      <el-input
+                        v-model="formData.sendDocDraft"
+                        type="textarea"
+                        :rows="3"
+                        placeholder="请输入内容"
+                      />
+                    </el-form-item>
 
-          <h3 class="section-title" style="margin-top: 20px">机关单位</h3>
+                    <div
+                      class="flex justify-between items-center px-2"
+                      style="
+                        position: absolute;
+                        right: 8px;
+                        bottom: 8px;
+                        left: 8px;
+                        font-size: 13px;
+                        color: #666;
+                      "
+                    >
+                      <div class="flex items-center gap-1">
+                        <span>拟稿人：</span>
+                        <el-form-item prop="draftPerson" style="width: 100px">
+                          <el-input
+                            v-model="formData.draftPerson"
+                            placeholder="拟稿人"
+                            size="small"
+                          />
+                        </el-form-item>
+                      </div>
+                      <div class="flex items-center gap-1">
+                        <span>拟稿单位：</span>
+                        <el-form-item prop="sendDept" style="width: 150px">
+                          <el-input v-model="formData.sendDept" placeholder="部门" size="small" />
+                        </el-form-item>
+                      </div>
+                      <div class="flex items-center gap-1">
+                        <span>拟稿时间：</span>
+                        <el-form-item prop="draftDate" style="width: 130px">
+                          <el-date-picker
+                            v-model="formData.draftDate"
+                            type="date"
+                            value-format="x"
+                            placeholder="时间"
+                            size="small"
+                            style="width: 100%"
+                          />
+                        </el-form-item>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
 
-          <el-form-item label="主送机关" prop="primarySendDept">
-            <el-input
-              v-model="formData.primarySendDept"
-              type="textarea"
-              :rows="2"
-              placeholder="请输入主送机关"
-            />
-          </el-form-item>
+                <!-- 合法性审查 -->
+                <tr style="height: 35px">
+                  <td class="label-cell" rowspan="2">合法性审查</td>
+                  <td class="label-cell" style="text-align: center; background-color: transparent"
+                    >姓名</td
+                  >
+                  <td
+                    class="label-cell"
+                    style="text-align: center; background-color: transparent"
+                    colspan="2"
+                    >日期</td
+                  >
+                  <td
+                    class="label-cell"
+                    style="text-align: center; background-color: transparent"
+                    colspan="2"
+                    >意见</td
+                  >
+                </tr>
+                <tr style="height: 35px">
+                  <td class="data-text"></td>
+                  <td class="data-text" colspan="2"></td>
+                  <td class="data-text" colspan="2"></td>
+                </tr>
 
-          <el-form-item label="抄送机关" prop="copySendDept">
-            <el-input
-              v-model="formData.copySendDept"
-              type="textarea"
-              :rows="2"
-              placeholder="请输入抄送机关"
-            />
-          </el-form-item>
+                <!-- 文字格式审查 -->
+                <tr style="height: 35px">
+                  <td class="label-cell" rowspan="2">文字格式审查</td>
+                  <td class="label-cell" style="text-align: center; background-color: transparent"
+                    >姓名</td
+                  >
+                  <td
+                    class="label-cell"
+                    style="text-align: center; background-color: transparent"
+                    colspan="2"
+                    >日期</td
+                  >
+                  <td
+                    class="label-cell"
+                    style="text-align: center; background-color: transparent"
+                    colspan="2"
+                    >意见</td
+                  >
+                </tr>
+                <tr style="height: 35px">
+                  <td class="data-text"></td>
+                  <td class="data-text" colspan="2"></td>
+                  <td class="data-text" colspan="2"></td>
+                </tr>
 
-          <h3 class="section-title" style="margin-top: 20px">内容与附件</h3>
+                <!-- 分管领导审阅 -->
+                <tr style="height: 35px">
+                  <td class="label-cell" rowspan="2">分管领导审阅</td>
+                  <td class="label-cell" style="text-align: center; background-color: transparent"
+                    >姓名</td
+                  >
+                  <td
+                    class="label-cell"
+                    style="text-align: center; background-color: transparent"
+                    colspan="2"
+                    >日期</td
+                  >
+                  <td
+                    class="label-cell"
+                    style="text-align: center; background-color: transparent"
+                    colspan="2"
+                    >意见</td
+                  >
+                </tr>
+                <tr style="height: 35px">
+                  <td class="data-text"></td>
+                  <td class="data-text" colspan="2"></td>
+                  <td class="data-text" colspan="2"></td>
+                </tr>
 
-          <el-form-item label="发文草稿内容" prop="sendDocDraft">
-            <el-input
-              v-model="formData.sendDocDraft"
-              type="textarea"
-              :rows="3"
-              placeholder="请输入发文草稿内容标题或简述"
-            />
-          </el-form-item>
+                <!-- 机关信息 -->
+                <tr>
+                  <td class="label-cell">主送机关</td>
+                  <td colspan="5" class="input-cell">
+                    <el-form-item prop="primarySendDept" class="mb-0">
+                      <el-input
+                        v-model="formData.primarySendDept"
+                        type="textarea"
+                        :rows="2"
+                        placeholder="请输入主送机关"
+                      />
+                    </el-form-item>
+                  </td>
+                </tr>
 
-          <el-form-item label="附件" prop="attachFilePath">
-            <UploadFile v-model="formData.attachFilePath" />
-          </el-form-item>
+                <tr>
+                  <td class="label-cell">抄送机关</td>
+                  <td colspan="5" class="input-cell">
+                    <el-form-item prop="copySendDept" class="mb-0">
+                      <el-input
+                        v-model="formData.copySendDept"
+                        type="textarea"
+                        :rows="2"
+                        placeholder="请输入抄送机关"
+                      />
+                    </el-form-item>
+                  </td>
+                </tr>
 
-          <h3 class="section-title" style="margin-top: 20px">属性设置</h3>
+                <!-- 属性 -->
+                <tr>
+                  <td class="label-cell">公开方式</td>
+                  <td class="input-cell" colspan="2">
+                    <el-form-item prop="inforelease" class="mb-0">
+                      <el-radio-group v-model="formData.inforelease">
+                        <el-radio label="1">主动公开</el-radio>
+                        <el-radio label="2">依申请</el-radio>
+                        <el-radio label="3">不公开</el-radio>
+                      </el-radio-group>
+                    </el-form-item>
+                  </td>
+                  <td class="label-cell">不公开理由</td>
+                  <td class="input-cell" colspan="2">
+                    <el-form-item prop="noreleasecause" class="mb-0">
+                      <el-input
+                        v-model="formData.noreleasecause"
+                        placeholder="理由 (仅限不公开)"
+                        :disabled="formData.inforelease !== '3'"
+                      />
+                    </el-form-item>
+                  </td>
+                </tr>
 
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="公开方式" prop="inforelease">
-                <el-radio-group v-model="formData.inforelease">
-                  <el-radio label="1">主动公开</el-radio>
-                  <el-radio label="2">依申请公开</el-radio>
-                  <el-radio label="3">不公开</el-radio>
-                </el-radio-group>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item
-                label="不公开理由"
-                prop="noreleasecause"
-                v-if="formData.inforelease === '3'"
-              >
-                <el-input v-model="formData.noreleasecause" placeholder="请输入不公开理由" />
-              </el-form-item>
-            </el-col>
-          </el-row>
+                <tr>
+                  <td class="label-cell">规范性文件</td>
+                  <td class="input-cell" colspan="5">
+                    <el-form-item prop="isNormativeDocument" class="mb-0">
+                      <el-radio-group v-model="formData.isNormativeDocument">
+                        <el-radio :label="1">是</el-radio>
+                        <el-radio :label="2">否</el-radio>
+                      </el-radio-group>
+                    </el-form-item>
+                  </td>
+                </tr>
 
-          <el-row>
-            <el-col :span="24">
-              <el-form-item label="是否属于规范性文件" prop="isNormativeDocument">
-                <el-radio-group v-model="formData.isNormativeDocument">
-                  <el-radio :label="1">是</el-radio>
-                  <el-radio :label="2">否</el-radio>
-                </el-radio-group>
-              </el-form-item>
-            </el-col>
-          </el-row>
+                <tr>
+                  <td class="label-cell">发文日期</td>
+                  <td class="input-cell" colspan="2">
+                    <el-form-item prop="sendTime" class="mb-0">
+                      <el-date-picker
+                        v-model="formData.sendTime"
+                        type="date"
+                        value-format="x"
+                        placeholder="发文日期"
+                        style="width: 100%"
+                      />
+                    </el-form-item>
+                  </td>
+                  <td class="label-cell">份 数</td>
+                  <td class="input-cell" colspan="2">
+                    <el-form-item prop="signPrintCount" class="mb-0">
+                      <el-input
+                        v-model.number="formData.signPrintCount"
+                        type="number"
+                        placeholder=""
+                      />
+                    </el-form-item>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="label-cell">打 字</td>
+                  <td class="input-cell" colspan="2">
+                    <el-form-item prop="typist" class="mb-0">
+                      <el-input v-model="formData.typist" placeholder="" />
+                    </el-form-item>
+                  </td>
+                  <td class="label-cell">校 对</td>
+                  <td class="input-cell" colspan="2">
+                    <el-form-item prop="proofreader" class="mb-0">
+                      <el-input v-model="formData.proofreader" placeholder="" />
+                    </el-form-item>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </el-form>
       </ContentWrap>
     </el-col>
@@ -273,26 +441,26 @@ const formRef = ref()
 const formData = ref({
   id: undefined,
   processInstanceId: undefined, // 流程实例ID (如果存在则代表流程已发起)
-  subject: undefined,
-  sendDocNumber: undefined,
+  subject: '',
+  sendDocNumber: '',
   year: new Date().getFullYear().toString(),
-  docSequence: undefined,
-  sendTime: undefined,
-  urgencyDegree: undefined,
-  secretDegree: undefined,
-  draftPerson: undefined,
-  draftDate: undefined,
-  sendDept: undefined,
-  primarySendDept: undefined,
-  copySendDept: undefined,
-  sendDocDraft: undefined,
-  attachFilePath: undefined,
+  docSequence: '',
+  sendTime: undefined as number | undefined,
+  urgencyDegree: '',
+  secretDegree: '',
+  draftPerson: '',
+  draftDate: undefined as number | undefined,
+  sendDept: '',
+  primarySendDept: '',
+  copySendDept: '',
+  sendDocDraft: '',
+  attachFilePath: [] as string[],
   isNormativeDocument: 2,
   inforelease: '1',
-  noreleasecause: undefined,
-  signPrintCount: undefined,
-  typist: undefined,
-  proofreader: undefined
+  noreleasecause: '',
+  signPrintCount: undefined as number | undefined,
+  typist: '',
+  proofreader: ''
 })
 
 const formRules = computed(() => ({
@@ -321,12 +489,19 @@ const buildRequestData = () => {
 
 /** 唤起发送弹窗 */
 const handleOpenDialog = async () => {
-  if (!formRef.value) return
-  const valid = await formRef.value.validate()
-  if (!valid) return
-
-  // 校验通过，唤起选人弹窗
-  sendDialogRef.value.open({})
+  try {
+    if (!formRef.value) return
+    const valid = await formRef.value.validate()
+    if (!valid) return
+    if (!processDefinitionId.value) {
+      message.error('流程代号加载中，请稍后重试')
+      return
+    }
+    // 校验通过，唤起选人弹窗
+    sendDialogRef.value.open({})
+  } catch (err) {
+    console.error('流程跳转校验失败:', err)
+  }
 }
 
 /** 弹窗确认发送流程 */
@@ -399,16 +574,20 @@ const handleSave = async () => {
 
 /** 初始化 */
 onMounted(async () => {
-  // 获取流程定义 ID (供弹窗组件使用)
-  const processDefinitionDetail = await DefinitionApi.getProcessDefinition(
-    undefined,
-    processDefineKey
-  )
-  if (!processDefinitionDetail) {
-    message.error(`发文流程(${processDefineKey})未配置，请检查！`)
-    return
+  try {
+    // 获取流程定义 ID (供弹窗组件使用)
+    const processDefinitionDetail = await DefinitionApi.getProcessDefinition(
+      undefined,
+      processDefineKey
+    )
+    if (!processDefinitionDetail) {
+      message.error(`发文流程(${processDefineKey})未配置，请检查！`)
+      return
+    }
+    processDefinitionId.value = processDefinitionDetail.id
+  } catch (error) {
+    console.error('初始化流程定义失败:', error)
   }
-  processDefinitionId.value = processDefinitionDetail.id
 
   // 预填当前用户为拟稿人
   if (userStore.user.nickname) {
@@ -454,12 +633,130 @@ onMounted(async () => {
 })
 </script>
 
-<style scoped>
-.section-title {
-  padding-left: 10px;
-  margin-bottom: 15px;
-  font-size: 16px;
+<style lang="scss" scoped>
+@media print {
+  .print-hide-row {
+    display: none !important;
+  }
+}
+
+.oa-container {
+  width: 100%;
+  padding: 10px 20px;
+  margin: 0 auto;
+  font-family: SimSun, 'Songti SC', STSong, serif;
+  background-color: #fff;
+}
+
+.doc-title {
+  margin-bottom: 20px;
+  font-size: 26px;
   font-weight: bold;
-  border-left: 4px solid #409eff;
+  letter-spacing: 2px;
+  color: #d71920;
+  text-align: center;
+}
+
+.oa-table {
+  width: 100%;
+  border: 2px solid #d71920;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.oa-table td {
+  padding: 4px 6px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #000;
+  vertical-align: middle;
+  border: 1px solid #d71920;
+}
+
+.label-cell {
+  width: 120px;
+  font-weight: bold;
+  color: #d71920;
+  text-align: center;
+  white-space: nowrap;
+  background-color: #fffbfc;
+}
+
+.center-text {
+  text-align: center;
+}
+
+.min-h-cell {
+  height: 35px;
+}
+
+.input-cell {
+  padding: 4px 8px !important;
+  overflow: visible; /* 防止 el-form-item__error 被截断 */
+}
+
+/* ================== Element Plus 覆写 ================== */
+:deep(.el-input__wrapper),
+:deep(.el-textarea__inner) {
+  padding: 0;
+  background-color: transparent;
+  border-radius: 0;
+  box-shadow: none !important;
+}
+
+:deep(.el-input__inner) {
+  font-family: inherit;
+  font-size: 14px;
+  color: #000;
+  text-align: left;
+}
+
+:deep(.el-textarea__inner) {
+  font-family: inherit;
+  font-size: 14px;
+  color: #000;
+  resize: none;
+}
+
+:deep(.el-form-item) {
+  margin-bottom: 0 !important;
+}
+
+/* 浮动气泡样式的必填报错提醒 */
+:deep(.el-form-item__error) {
+  position: absolute !important;
+  top: -20px !important;
+  left: 0 !important;
+  z-index: 1000 !important;
+  padding: 2px 8px !important;
+  font-family: Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif !important;
+  font-size: 11px !important;
+  font-weight: normal !important;
+  line-height: 1.2 !important;
+  color: #fff !important;
+  white-space: nowrap !important;
+  pointer-events: none;
+  background: #f56c6c !important;
+  border-radius: 4px !important;
+  box-shadow: 0 2px 10px rgb(0 0 0 / 20%);
+}
+
+:deep(.el-form-item__error::after) {
+  position: absolute;
+  top: 100%;
+  left: 10px;
+  display: block;
+  border-color: #f56c6c transparent transparent;
+  border-style: solid;
+  border-width: 4px 4px 0;
+  content: '';
+}
+
+:deep(.oa-table) {
+  .el-input.is-focus .el-input__wrapper,
+  .el-textarea__inner:focus {
+    outline: none;
+    box-shadow: none !important;
+  }
 }
 </style>

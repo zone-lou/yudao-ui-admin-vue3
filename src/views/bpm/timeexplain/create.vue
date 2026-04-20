@@ -20,7 +20,7 @@
           >
             <table class="oa-table">
               <colgroup>
-                <col width="130px" />
+                <col width="140px" />
                 <col width="35%" />
                 <col width="130px" />
                 <col />
@@ -391,8 +391,7 @@ onMounted(async () => {
 
 .oa-container {
   width: 100%;
-  max-width: 900px;
-  padding: 20px;
+  padding: 10px 20px;
   margin: 0 auto;
   font-family: SimSun, "Songti SC", serif;
   background-color: #fff;
@@ -401,10 +400,12 @@ onMounted(async () => {
 :deep(.el-form-item__error) {
   position: absolute !important;
   top: -20px !important;
-  right: 10px !important;
+  left: 0 !important;
   z-index: 1000 !important;
   padding: 2px 8px !important;
+  font-family: Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif !important;
   font-size: 11px !important;
+  font-weight: normal !important;
   line-height: 1.2 !important;
   color: #fff !important;
   white-space: nowrap !important;
@@ -418,15 +419,15 @@ onMounted(async () => {
   content: "";
   position: absolute;
   top: 100%;
-  right: 10px;
+  left: 10px;
   display: block;
-  border-color: #f56c6c transparent transparent;
+  border-width: 4px 4px 0 4px;
   border-style: solid;
-  border-width: 5px;
+  border-color: #f56c6c transparent transparent transparent;
 }
 
 .doc-title {
-  margin-bottom: 25px;
+  margin-bottom: 20px;
   font-size: 26px;
   font-weight: bold;
   color: #b1351e;
@@ -439,6 +440,7 @@ onMounted(async () => {
   font-size: 14px;
   border: 1px solid #8cb4e0;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 .oa-table td {
   padding: 6px 10px;
@@ -451,7 +453,6 @@ onMounted(async () => {
   font-weight: bold;
   color: #333;
   text-align: center;
-  white-space: nowrap;
   background-color: #dbe9f8;
 }
 .input-cell {

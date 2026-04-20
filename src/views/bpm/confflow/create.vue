@@ -19,9 +19,9 @@
             <div class="doc-title">义乌市自然资源和规划局会议报告单</div>
             <table class="oa-table">
               <colgroup>
-                <col style="width: 140px;" />
-                <col style="width: 35%;" />
-                <col style="width: 140px;" />
+                <col style="width: 140px" />
+                <col style="width: 35%" />
+                <col style="width: 140px" />
                 <col />
               </colgroup>
               <tbody>
@@ -78,7 +78,7 @@
 
                 <tr>
                   <td class="label-cell">会议主要内容<br />及我局承办事项</td>
-                  <td colspan="3" class="input-cell h-large" style="padding: 10px;">
+                  <td colspan="3" class="input-cell h-large" style="padding: 10px">
                     <el-form-item prop="content" class="mb-0 h-full w-full">
                       <el-input
                         v-model="formData.content"
@@ -93,12 +93,12 @@
 
                 <tr>
                   <td class="label-cell">参会人员<br />会议表态情况<br />及建议意见</td>
-                  <td colspan="3" class="input-cell h-medium" style="padding: 10px;">
+                  <td colspan="3" class="input-cell h-medium" style="padding: 10px">
                     <el-form-item prop="situation" class="mb-0 h-full w-full">
                       <el-input
                         v-model="formData.situation"
                         type="textarea"
-                        :autosize="{ minRows: 3, maxRows: 5 }"
+                        :autosize="{ minRows: 5, maxRows: 6 }"
                         placeholder="请输入表态情况及意见"
                         class="h-full w-full"
                       />
@@ -118,49 +118,61 @@
 
                 <!-- 留空的签名区，保持样式一致 -->
                 <tr>
-                    <td class="label-cell" rowspan="2">科室负责人审核</td>
-                    <td colspan="3" style="height: 50px; padding: 10px;"></td>
+                  <td class="label-cell" rowspan="2">科室负责人审核</td>
+                  <td colspan="3" style="height: 50px; padding: 10px"></td>
                 </tr>
                 <tr>
-                    <td colspan="3" class="footer-row">
-                        <div class="footer-content border-none" style="display: flex; justify-content: flex-start; padding-left: 20px; gap: 20px;">
-                            <span>办理人员：<span class="sign-input"></span></span>
-                            <span>办理日期：<span class="sign-input"></span></span>
-                        </div>
-                    </td>
+                  <td colspan="3" class="footer-row">
+                    <div
+                      class="footer-content border-none"
+                      style="
+                        display: flex;
+                        justify-content: flex-start;
+                        padding-left: 20px;
+                        gap: 20px;
+                      "
+                    >
+                      <span>办理人员：<span class="sign-input"></span></span>
+                      <span>办理日期：<span class="sign-input"></span></span>
+                    </div>
+                  </td>
                 </tr>
 
                 <tr>
-                    <td class="label-cell">分管领导阅签</td>
-                    <td colspan="3" class="nested-table-container">
-                        <table class="nested-table">
-                            <tr>
-                                <td class="sub-header" style="width: 60%;">办理意见</td>
-                                <td class="sub-header" style="width: 20%;">办理人员</td>
-                                <td class="sub-header" style="width: 20%;">办理日期</td>
-                            </tr>
-                            <tr>
-                                <td class="sub-content"></td>
-                                <td class="sub-content" style="text-align: center;"></td>
-                                <td class="sub-content" style="text-align: center;"></td>
-                            </tr>
-                        </table>
-                    </td>
+                  <td class="label-cell">分管领导阅签</td>
+                  <td colspan="3" class="nested-table-container">
+                    <table class="nested-table">
+                      <tbody>
+                        <tr>
+                          <td class="sub-header" style="width: 60%">办理意见</td>
+                          <td class="sub-header" style="width: 20%">办理人员</td>
+                          <td class="sub-header" style="width: 20%">办理日期</td>
+                        </tr>
+                        <tr>
+                          <td class="sub-content"></td>
+                          <td class="sub-content" style="text-align: center"></td>
+                          <td class="sub-content" style="text-align: center"></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
                 </tr>
 
                 <tr>
-                    <td class="label-cell" rowspan="2">局长阅签</td>
-                    <td colspan="3" style="height: 50px; padding: 10px;"></td>
+                  <td class="label-cell" rowspan="2">局长阅签</td>
+                  <td colspan="3" style="height: 50px; padding: 10px"></td>
                 </tr>
                 <tr>
-                    <td colspan="3" class="footer-row">
-                        <div class="footer-content" style="display: flex; justify-content: center; gap: 50px;">
-                            <span>办理人员：<span class="sign-input"></span></span>
-                            <span>日期：<span class="sign-input"></span></span>
-                        </div>
-                    </td>
+                  <td colspan="3" class="footer-row">
+                    <div
+                      class="footer-content"
+                      style="display: flex; justify-content: center; gap: 50px"
+                    >
+                      <span>办理人员：<span class="sign-input"></span></span>
+                      <span>日期：<span class="sign-input"></span></span>
+                    </div>
+                  </td>
                 </tr>
-
               </tbody>
             </table>
           </div>
@@ -186,10 +198,9 @@ import { useTagsViewStore } from '@/store/modules/tagsView'
 import { useUserStore } from '@/store/modules/user'
 import { useMessage } from '@/hooks/web/useMessage'
 import * as DefinitionApi from '@/api/bpm/definition'
-import { Confflow, ConfflowApi } from '@/api/bpm/confflow' // 引入会议报告单API
+import { Confflow, ConfflowApi } from '@/api/bpm/confflow'
 import { dateUtil } from '@/utils/dateUtil'
 
-// 引入弹窗相关组件和常量
 import ProcessSendDialog from '@/components/ProcessSendDialog/index.vue'
 import { NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
 
@@ -205,7 +216,7 @@ const route = useRoute()
 const sendDialogRef = ref()
 const startUserNodeId = NodeId.START_USER_NODE_ID
 const processDefinitionId = ref('')
-const processDefineKey = 'conference_report' // 流程定义 Key
+const processDefineKey = 'conference_report'
 
 const formLoading = ref(false)
 const formRef = ref()
@@ -235,12 +246,19 @@ const formRules = reactive({
 
 /** 点击发送打开弹窗 */
 const handleOpenDialog = async () => {
-  if (!formRef.value) return
-  const valid = await formRef.value.validate()
-  if (!valid) return
-
-  // 打开选人弹窗
-  sendDialogRef.value.open({})
+  try {
+    if (!formRef.value) return
+    const valid = await formRef.value.validate()
+    if (!valid) return
+    if (!processDefinitionId.value) {
+      message.error('流程配置加载中，请稍后刷新重试')
+      return
+    }
+    // 打开选人弹窗
+    sendDialogRef.value.open({})
+  } catch (error) {
+    console.error('打开选人弹窗失败:', error)
+  }
 }
 
 /** 接收弹窗返回的 assignees 和 variables 并正式提交业务表单 */
@@ -248,16 +266,11 @@ const submitProcess = async (submitData: { nextNodeAssignees: any; variables: an
   formLoading.value = true
   try {
     const data = { ...formData.value } as unknown as Confflow
-
-    // 绑定下一节点办理人参数
     data.nextNodeAssignees = submitData.nextNodeAssignees
-
-    // 如果流程中有网关需要变量，在此序列化传入
     if (submitData.variables && Object.keys(submitData.variables).length > 0) {
       data.processVariablesStr = JSON.stringify(submitData.variables)
     }
 
-    // 调用新增接口
     await ConfflowApi.createConfflow(data)
     message.success('会议报告单发起成功')
 
@@ -265,7 +278,6 @@ const submitProcess = async (submitData: { nextNodeAssignees: any; variables: an
       sendDialogRef.value.close()
     }
 
-    // 延迟关闭当前 Tab 并跳转到统一办件列表
     setTimeout(() => {
       delView(route)
       push('/bpm/unified')
@@ -282,51 +294,51 @@ const submitProcess = async (submitData: { nextNodeAssignees: any; variables: an
 
 /** 初始化 */
 onMounted(async () => {
-  // 默认日期填充
-  formData.value.applyDate = dateUtil().valueOf() // 时间戳
-
-  // 默认填充发起人信息（我局参会科室，我局参会人员）
-  const currentUser = userStore.user as any
-  if (currentUser) {
-    if (currentUser.nickname) {
-      formData.value.offerPerson = currentUser.nickname
+  formLoading.value = true
+  try {
+    formData.value.applyDate = dateUtil().valueOf()
+    const currentUser = userStore.user as any
+    if (currentUser) {
+      formData.value.offerPerson = currentUser.nickname || ''
+      formData.value.offerUnit = currentUser.dept?.name || currentUser.deptName || ''
     }
-    if (currentUser.dept?.name) {
-      formData.value.offerUnit = currentUser.dept.name
-    } else if (currentUser.deptName) {
-      formData.value.offerUnit = currentUser.deptName
+
+    const processDefinitionDetail = await DefinitionApi.getProcessDefinition(
+      undefined,
+      processDefineKey
+    )
+
+    if (processDefinitionDetail) {
+      processDefinitionId.value = processDefinitionDetail.id
+    } else {
+      message.error(`流程(${processDefineKey})未配置`)
     }
+  } catch (error) {
+    console.error('初始化失败:', error)
+  } finally {
+    formLoading.value = false
   }
-
-  // 获取流程定义 ID (用于弹窗加载节点配置)
-  const processDefinitionDetail = await DefinitionApi.getProcessDefinition(
-    undefined,
-    processDefineKey
-  )
-
-  if (!processDefinitionDetail) {
-    message.error(`会议报告单流程(${processDefineKey})未配置，请检查！`)
-    return
-  }
-  processDefinitionId.value = processDefinitionDetail.id
 })
 </script>
 
-<style scoped lang="scss"></style>
 <style lang="scss" scoped>
+@media print {
+  .print-hide-row {
+    display: none !important;
+  }
+}
+
 .oa-container {
-  font-family: SimSun, 'Songti SC', STSong, serif;
   width: 100%;
-  max-width: 900px;
-  padding: 30px 40px;
+  padding: 10px 20px;
   margin: 0 auto;
+  font-family: SimSun, 'Songti SC', STSong, serif;
   background-color: #fff;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .doc-title {
   margin-bottom: 20px;
-  font-size: 28px;
+  font-size: 26px;
   font-weight: bold;
   letter-spacing: 2px;
   color: #d71920;
@@ -335,9 +347,9 @@ onMounted(async () => {
 
 .oa-table {
   width: 100%;
-  table-layout: fixed;
   border: 1px solid #d71920;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .oa-table td {
@@ -360,7 +372,7 @@ onMounted(async () => {
 
 .input-cell {
   padding: 4px 8px !important;
-  overflow: visible; /* 必须使 el-form-item__error 不被截断 */
+  overflow: visible;
 }
 
 .h-row {
@@ -392,12 +404,9 @@ onMounted(async () => {
   display: inline-block;
   min-width: 80px;
   text-align: center;
-  border-bottom: none;
 }
 
-/* === 嵌套表格样式 === */
 .nested-table-container {
-  height: 100%;
   padding: 0 !important;
 }
 
@@ -409,9 +418,7 @@ onMounted(async () => {
   border-collapse: collapse;
 }
 
-.nested-table td,
-.sub-header,
-.sub-content {
+.nested-table td {
   padding: 5px;
   vertical-align: middle;
   border: none;
@@ -419,14 +426,11 @@ onMounted(async () => {
   border-bottom: 1px solid #d71920 !important;
 }
 
-.nested-table tr:last-child td,
-.nested-table tr:last-child .sub-content {
+.nested-table tr:last-child td {
   border-bottom: none !important;
 }
 
-.nested-table tr td:last-child,
-.nested-table tr .sub-header:last-child,
-.nested-table tr .sub-content:last-child {
+.nested-table tr td:last-child {
   border-right: none !important;
 }
 
@@ -435,7 +439,6 @@ onMounted(async () => {
   font-weight: bold;
   color: #d71920;
   text-align: center;
-  background-color: #fffbfc;
 }
 
 .sub-content {
@@ -472,44 +475,37 @@ onMounted(async () => {
 
 /* 浮动气泡样式的必填报错提醒 */
 :deep(.el-form-item__error) {
-  position: absolute;
-  top: -20px;
-  left: 0;
-  z-index: 1000;
-  padding: 2px 6px;
-  font-family: sans-serif;
-  font-size: 11px;
-  line-height: 1;
-  color: #fff;
-  white-space: nowrap;
-  background-color: #f56c6c;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+  position: absolute !important;
+  top: -20px !important;
+  left: 0 !important;
+  z-index: 1000 !important;
+  padding: 2px 8px !important;
+  font-family: Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif !important;
+  font-size: 11px !important;
+  font-weight: normal !important;
+  line-height: 1.2 !important;
+  color: #fff !important;
+  white-space: nowrap !important;
+  pointer-events: none;
+  background: #f56c6c !important;
+  border-radius: 4px !important;
+  box-shadow: 0 2px 10px rgb(0 0 0 / 20%);
 }
 
 :deep(.el-form-item__error::after) {
   position: absolute;
-  bottom: -4px;
+  top: 100%;
   left: 10px;
   display: block;
-  width: 0;
-  height: 0;
-  content: '';
-  border-color: #f56c6c transparent transparent transparent;
+  border-color: #f56c6c transparent transparent;
   border-style: solid;
-  border-width: 4px 4px 0 4px;
+  border-width: 4px 4px 0;
+  content: '';
 }
 
-/* 隐藏输入框获取焦点时的边框 */
 :deep(.el-input.is-focus .el-input__wrapper),
 :deep(.el-textarea__inner:focus) {
   outline: none;
   box-shadow: none !important;
-}
-
-@media print {
-  .print-hide-row {
-    display: none !important;
-  }
 }
 </style>

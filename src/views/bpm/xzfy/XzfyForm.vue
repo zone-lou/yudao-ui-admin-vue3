@@ -7,9 +7,9 @@
       label-width="100px"
       v-loading="formLoading"
     >
-      <el-form-item label="备用主键" prop="xmGuid">
+      <!-- <el-form-item label="备用主键" prop="xmGuid">
         <el-input v-model="formData.xmGuid" placeholder="请输入备用主键" />
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="来文号" prop="swWh">
         <el-input v-model="formData.swWh" placeholder="请输入来文号" />
       </el-form-item>
@@ -34,7 +34,29 @@
         <el-input v-model="formData.dsr" placeholder="请输入第三人" />
       </el-form-item>
       <el-form-item label="土地坐落" prop="tdZl">
-        <el-input v-model="formData.tdZl" placeholder="请输入土地坐落" />
+        <div class="flex w-full gap-2">
+          <el-select
+            v-model="tdZlPart1"
+            placeholder="镇街"
+            style="width: 200px"
+            filterable
+            allow-create
+            clearable
+            @change="handleTdZlChange"
+          >
+            <el-option
+              v-for="dict in getDictOptions(DICT_TYPE.BPM_LOCATION_STREET)"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.label"
+            />
+          </el-select>
+          <el-input
+            v-model="tdZlPart2"
+            placeholder="请输入具体坐落详情"
+            @input="handleTdZlChange"
+          />
+        </div>
       </el-form-item>
       <el-form-item label="类别一" prop="lb1">
         <el-input v-model="formData.lb1" placeholder="请输入类别一" />
@@ -106,6 +128,30 @@ import XzfyKzForm from './components/XzfyKzForm.vue'
 
 /** 行政复议 表单 */
 defineOptions({ name: 'XzfyForm' })
+import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+
+const tdZlPart1 = ref('')
+const tdZlPart2 = ref('')
+
+const handleTdZlChange = () => {
+  formData.value.tdZl = (tdZlPart1.value || '') + (tdZlPart2.value || '')
+  if (!tdZlPart1.value && !tdZlPart2.value) {
+    formData.value.tdZl = undefined
+  }
+}
+
+const parseTdZl = (fullPath: string) => {
+  if (!fullPath) return
+  const options = getDictOptions(DICT_TYPE.BPM_LOCATION_STREET)
+  const match = options.find((opt) => fullPath.startsWith(opt.label))
+  if (match) {
+    tdZlPart1.value = match.label
+    tdZlPart2.value = fullPath.substring(match.label.length)
+  } else {
+    tdZlPart1.value = ''
+    tdZlPart2.value = fullPath
+  }
+}
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -157,6 +203,7 @@ const open = async (type: string, id?: number) => {
     formLoading.value = true
     try {
       formData.value = await XzfyApi.getXzfy(id)
+      parseTdZl(formData.value.tdZl)
     } finally {
       formLoading.value = false
     }
@@ -222,6 +269,8 @@ const resetForm = () => {
     mailTip: undefined,
     processInstanceId: undefined
   }
+  tdZlPart1.value = ''
+  tdZlPart2.value = ''
   formRef.value?.resetFields()
 }
 </script>

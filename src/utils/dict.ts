@@ -175,6 +175,7 @@ export enum DICT_TYPE {
   BPM_INCOMING_AUTHORITY_XZSS = 'incoming_authority_xzss', //来文机关(行政诉讼)
   BPM_APPLIED_RESPONDENT = 'applied_respondent', //被申请人
   BPM_ADMINISTRATIVE_LITIGATION_STAGE = 'administrative_litigation_stage', //行政诉讼阶段
+  BPM_LOCATION_STREET = 'location_street', //土地坐落镇街
   // ========== PAY 模块 ==========
   PAY_CHANNEL_CODE = 'pay_channel_code', // 支付渠道编码类型
   PAY_ORDER_STATUS = 'pay_order_status', // 商户支付订单状态

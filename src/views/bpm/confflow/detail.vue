@@ -229,6 +229,7 @@ import { ConfflowApi, Confflow } from '@/api/bpm/confflow' // 引入API
 import { propTypes } from '@/utils/propTypes'
 import { Base64 } from 'js-base64'
 import * as ConfigApi from '@/api/infra/config'
+import { ElMessage } from 'element-plus'
 
 defineOptions({ name: 'BpmConfflowDetail' })
 
@@ -292,6 +293,11 @@ const getInfo = async () => {
     externalPrefix.value = await ConfigApi.getConfigKey('url.external.prefix')
     internalPrefix.value = await ConfigApi.getConfigKey('url.internal.prefix')
     const res = await ConfflowApi.getConfflow(queryId)
+    if (!res) {
+      ElMessage.error('未找到相关会议报告单详情')
+      detailLoading.value = false
+      return
+    }
     detailData.value = res || {}
     processFileList(res.attachFilePath)
     processActivityNodes()
@@ -482,7 +488,7 @@ onMounted(() => {
 /* 标题样式 */
 .doc-title {
   margin-bottom: 20px;
-  font-size: 24px;
+  font-size: 26px;
   font-weight: bold;
   letter-spacing: 2px;
   color: #d71920;

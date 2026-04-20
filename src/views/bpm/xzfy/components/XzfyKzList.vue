@@ -2,13 +2,13 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table
-        row-key="id"
-        v-loading="loading"
-        :data="list"
-        :stripe="true"
-        :show-overflow-tooltip="true"
+      row-key="id"
+      v-loading="loading"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
     >
-      <el-table-column label="主键" align="center" prop="id" />
+      <!-- <el-table-column label="主键" align="center" prop="id" /> -->
       <el-table-column
         label="复议决定日期"
         align="center"
@@ -16,7 +16,7 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="复议结果：0撤销，1维持" align="center" prop="fyJg" />
+      <el-table-column label="复议结果" align="center" prop="fyJg" />
       <el-table-column
         label="转业务科室日期"
         align="center"
@@ -34,7 +34,7 @@
       />
       <el-table-column label="行政赔偿，单位：元" align="center" prop="xzPc" />
       <el-table-column label="执行情况" align="center" prop="zxQk" />
-      <el-table-column label="是否装订：0否，1是" align="center" prop="sfZd" />
+      <el-table-column label="是否装订" align="center" prop="sfZd" />
       <el-table-column label="装订人" align="center" prop="zdr" />
       <el-table-column
         label="装订日期"
@@ -43,7 +43,7 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="是否移交：0否，1是" align="center" prop="sfYj" />
+      <el-table-column label="是否移交" align="center" prop="sfYj" />
       <el-table-column label="移交人" align="center" prop="yjr" />
       <el-table-column
         label="移交日期"
@@ -96,7 +96,6 @@ const getList = async () => {
     loading.value = false
   }
 }
-
 
 /** 初始化 **/
 onMounted(() => {

@@ -6,7 +6,7 @@
     label-width="100px"
     v-loading="formLoading"
   >
-     <el-form-item label="复议决定日期" prop="fyjdRq">
+    <el-form-item label="复议决定日期" prop="fyjdRq">
       <el-date-picker
         v-model="formData.fyjdRq"
         type="date"
@@ -14,8 +14,8 @@
         placeholder="选择复议决定日期"
       />
     </el-form-item>
-    <el-form-item label="复议结果：0撤销，1维持" prop="fyJg">
-      <el-input v-model="formData.fyJg" placeholder="请输入复议结果：0撤销，1维持" />
+    <el-form-item label="复议结果" prop="fyJg">
+      <el-input v-model="formData.fyJg" placeholder="请输入复议结果" />
     </el-form-item>
     <el-form-item label="转业务科室日期" prop="zksRq">
       <el-date-picker
@@ -42,8 +42,8 @@
     <el-form-item label="执行情况" prop="zxQk">
       <el-input v-model="formData.zxQk" placeholder="请输入执行情况" />
     </el-form-item>
-    <el-form-item label="是否装订：0否，1是" prop="sfZd">
-      <el-input v-model="formData.sfZd" placeholder="请输入是否装订：0否，1是" />
+    <el-form-item label="是否装订" prop="sfZd">
+      <el-input v-model="formData.sfZd" placeholder="请输入是否装订" />
     </el-form-item>
     <el-form-item label="装订人" prop="zdr">
       <el-input v-model="formData.zdr" placeholder="请输入装订人" />
@@ -56,8 +56,8 @@
         placeholder="选择装订日期"
       />
     </el-form-item>
-    <el-form-item label="是否移交：0否，1是" prop="sfYj">
-      <el-input v-model="formData.sfYj" placeholder="请输入是否移交：0否，1是" />
+    <el-form-item label="是否移交" prop="sfYj">
+      <el-input v-model="formData.sfYj" placeholder="请输入是否移交" />
     </el-form-item>
     <el-form-item label="移交人" prop="yjr">
       <el-input v-model="formData.yjr" placeholder="请输入移交人" />
@@ -84,9 +84,9 @@
         placeholder="选择听证日期"
       />
     </el-form-item>
-    <el-form-item label="流程实例的编号" prop="processInstanceId">
+    <!-- <el-form-item label="流程实例的编号" prop="processInstanceId">
       <el-input v-model="formData.processInstanceId" placeholder="请输入流程实例的编号" />
-    </el-form-item>
+    </el-form-item> -->
   </el-form>
 </template>
 <script setup lang="ts">
@@ -126,11 +126,11 @@ watch(
       bz: undefined,
       yjsNr: undefined,
       tzRq: undefined,
-      processInstanceId: undefined,
+      processInstanceId: undefined
     }
     // 2. val 非空，则加载数据
     if (!val) {
-      return;
+      return
     }
     try {
       formLoading.value = true

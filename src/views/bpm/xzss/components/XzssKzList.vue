@@ -2,13 +2,13 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table
-        row-key="id"
-        v-loading="loading"
-        :data="list"
-        :stripe="true"
-        :show-overflow-tooltip="true"
+      row-key="id"
+      v-loading="loading"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
     >
-      <el-table-column label="主键" align="center" prop="id" />
+      <!-- <el-table-column label="主键" align="center" prop="id" /> -->
       <el-table-column
         label="裁定判决日期"
         align="center"
@@ -94,7 +94,6 @@ const getList = async () => {
     loading.value = false
   }
 }
-
 
 /** 初始化 **/
 onMounted(() => {

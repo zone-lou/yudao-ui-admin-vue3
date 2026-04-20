@@ -90,9 +90,28 @@
               <el-row>
                 <el-col :span="16">
                   <el-form-item label="土地坐落" prop="tdZl">
-                    <div style="display: flex; gap: 10px; width: 100%">
-                      <el-input v-model="tdZlPart1" @input="handleTdZlChange" />
-                      <el-input v-model="tdZlPart2" @input="handleTdZlChange" />
+                    <div class="flex w-full gap-2">
+                      <el-select
+                        v-model="tdZlPart1"
+                        placeholder="镇街"
+                        style="width: 200px"
+                        filterable
+                        allow-create
+                        clearable
+                        @change="handleTdZlChange"
+                      >
+                        <el-option
+                          v-for="dict in getDictOptions(DICT_TYPE.BPM_LOCATION_STREET)"
+                          :key="dict.value"
+                          :label="dict.label"
+                          :value="dict.label"
+                        />
+                      </el-select>
+                      <el-input
+                        v-model="tdZlPart2"
+                        placeholder="请输入具体坐落详情"
+                        @input="handleTdZlChange"
+                      />
                     </div>
                   </el-form-item>
                 </el-col>
@@ -537,14 +556,9 @@ const formData = ref({
 })
 
 const handleTdZlChange = () => {
-  const part1 = tdZlPart1.value || ''
-  const part2 = tdZlPart2.value || ''
+  formData.value.tdZl = (tdZlPart1.value || '') + (tdZlPart2.value || '')
 
-  // 拼合结果给到表单实际提交的字段
-  formData.value.tdZl = part1 + part2
-
-  // 如果两个框都清空了，把 tdZl 置为 undefined，以便触发空值校验标红
-  if (!part1 && !part2) {
+  if (!tdZlPart1.value && !tdZlPart2.value) {
     formData.value.tdZl = undefined
   }
 }
@@ -747,8 +761,8 @@ onMounted(async () => {
 }
 
 #printDivTag .doc-title {
-  margin-bottom: 25px;
-  font-size: 30px;
+  margin-bottom: 20px;
+  font-size: 26px;
   font-weight: bold;
   letter-spacing: 2px;
   color: #d71920;

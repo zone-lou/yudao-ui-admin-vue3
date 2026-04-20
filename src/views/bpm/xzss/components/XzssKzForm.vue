@@ -6,7 +6,7 @@
     label-width="100px"
     v-loading="formLoading"
   >
-     <el-form-item label="裁定判决日期" prop="cdpjRq">
+    <el-form-item label="裁定判决日期" prop="cdpjRq">
       <el-date-picker
         v-model="formData.cdpjRq"
         type="date"
@@ -84,9 +84,9 @@
         placeholder="选择开庭日期"
       />
     </el-form-item>
-    <el-form-item label="流程实例的编号" prop="processInstanceId">
+    <!-- <el-form-item label="流程实例的编号" prop="processInstanceId">
       <el-input v-model="formData.processInstanceId" placeholder="请输入流程实例的编号" />
-    </el-form-item>
+    </el-form-item> -->
   </el-form>
 </template>
 <script setup lang="ts">
@@ -97,9 +97,9 @@ const props = defineProps<{
 }>()
 const formLoading = ref(false) // 表单的加载中
 const formData = ref<any>({})
-const formRules = reactive({
-  xmGuid: [{ required: true, message: '备用主键不能为空', trigger: 'blur' }]
-})
+// const formRules = reactive({
+//   xmGuid: [{ required: true, message: '备用主键不能为空', trigger: 'blur' }]
+// })
 const formRef = ref() // 表单 Ref
 
 /** 监听主表的关联字段的变化，加载对应的子表数据 */
@@ -126,11 +126,11 @@ watch(
       yjQk: undefined,
       bz: undefined,
       ktRq: undefined,
-      processInstanceId: undefined,
+      processInstanceId: undefined
     }
     // 2. val 非空，则加载数据
     if (!val) {
-      return;
+      return
     }
     try {
       formLoading.value = true

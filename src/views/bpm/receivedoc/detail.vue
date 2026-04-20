@@ -448,6 +448,11 @@ const getInfo = async () => {
     externalPrefix.value = await ConfigApi.getConfigKey('url.external.prefix')
     internalPrefix.value = await ConfigApi.getConfigKey('url.internal.prefix')
     const data = await ReceiveDocApi.ReceiveDocApi.getReceiveDoc(queryId)
+    if (!data) {
+      message.error('未找到相关收文详情')
+      detailLoading.value = false
+      return
+    }
     detailData.value = data
 
     // 附件处理增强
@@ -682,8 +687,8 @@ onMounted(() => {
 
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .doc-title {
-  margin-bottom: 15px;
-  font-size: 24px;
+  margin-bottom: 20px;
+  font-size: 26px;
   font-weight: bold;
   letter-spacing: 2px;
   color: #d71920;
