@@ -152,12 +152,12 @@
       <el-table-column type="selection" width="55" />
       <el-table-column label="单位类别" align="center" prop="docClass">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.RECEIVE_CLASS" :value="scope.row.docClass" />
+          <dict-tag v-if="scope.row.docClass != null" :type="DICT_TYPE.RECEIVE_CLASS" :value="scope.row.docClass" />
         </template>
       </el-table-column>
       <el-table-column label="来文单位" align="center" prop="sendDept">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.AGENCY_NAME" :value="scope.row.sendDept" />
+          <dict-tag v-if="scope.row.sendDept != null" :type="DICT_TYPE.AGENCY_NAME" :value="scope.row.sendDept" />
         </template>
       </el-table-column>
       <el-table-column label="来文字号" align="center" prop="sendDocNumber" />
@@ -172,13 +172,13 @@
       <el-table-column label="主题" align="center" prop="subject" />
       <el-table-column label="紧急程度" align="center" prop="urgencyDegree">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.EMERGENCY_DEGREE" :value="scope.row.urgencyDegree" />
+          <dict-tag v-if="scope.row.urgencyDegree != null" :type="DICT_TYPE.EMERGENCY_DEGREE" :value="scope.row.urgencyDegree" />
         </template>
       </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="文件类别" align="center" prop="docSecondClass">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.DOC_CLASS" :value="scope.row.docSecondClass" />
+          <dict-tag v-if="scope.row.docSecondClass != null" :type="DICT_TYPE.DOC_CLASS" :value="scope.row.docSecondClass" />
         </template>
       </el-table-column>
       <el-table-column

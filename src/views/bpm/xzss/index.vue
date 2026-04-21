@@ -266,32 +266,32 @@
       <el-table-column label="土地坐落" align="center" prop="tdZl" width="100px" />
       <el-table-column label="诉讼类型" align="center" prop="ssLx" width="100px">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_ADMINISTRATIVE_LITIGATION_STAGE" :value="scope.row.ssLx" />
+          <dict-tag v-if="scope.row.ssLx != null" :type="DICT_TYPE.BPM_ADMINISTRATIVE_LITIGATION_STAGE" :value="scope.row.ssLx" />
         </template>
       </el-table-column>
       <el-table-column label="案件类别" align="center" prop="lb1" width="100px">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_XZSS_CLASS1" :value="scope.row.lb1" />
+          <dict-tag v-if="scope.row.lb1 != null" :type="DICT_TYPE.BPM_XZSS_CLASS1" :value="scope.row.lb1" />
         </template>
       </el-table-column>
       <el-table-column label="案件分类" align="center" prop="lb2" width="100px">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_XZSS_CLASS2" :value="scope.row.lb2" />
+          <dict-tag v-if="scope.row.lb2 != null" :type="DICT_TYPE.BPM_XZSS_CLASS2" :value="scope.row.lb2" />
         </template>
       </el-table-column>
       <el-table-column label="涉及事项" align="center" prop="lb3" width="100px">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_XZSS_CLASS3" :value="scope.row.lb3" />
+          <dict-tag v-if="scope.row.lb3 != null" :type="DICT_TYPE.BPM_XZSS_CLASS3" :value="scope.row.lb3" />
         </template>
       </el-table-column>
       <el-table-column label="案件类型" align="center" prop="lb4" width="100px">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_XZSS_CLASS4" :value="scope.row.lb4" />
+          <dict-tag v-if="scope.row.lb4 != null" :type="DICT_TYPE.BPM_XZSS_CLASS4" :value="scope.row.lb4" />
         </template>
       </el-table-column>
       <el-table-column label="诉讼类别" align="center" prop="lb5" width="100px">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_XZSS_CLASS5" :value="scope.row.lb5" />
+          <dict-tag v-if="scope.row.lb5 != null" :type="DICT_TYPE.BPM_XZSS_CLASS5" :value="scope.row.lb5" />
         </template>
       </el-table-column>
       <el-table-column label="复议请求" align="center" prop="ssNr" />

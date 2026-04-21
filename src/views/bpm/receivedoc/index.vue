@@ -121,7 +121,7 @@
       <el-table-column type="selection" width="55" />
       <el-table-column label="单位类别" align="center" prop="docClass" width="120">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_RECEICE_CLASS" :value="scope.row.docClass" />
+          <dict-tag v-if="scope.row.docClass != null" :type="DICT_TYPE.BPM_RECEICE_CLASS" :value="scope.row.docClass" />
         </template>
       </el-table-column>
 
@@ -140,7 +140,7 @@
 
       <el-table-column label="来文单位" align="center" prop="sendDept">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_AGENCY_NAME" :value="scope.row.sendDept" />
+          <dict-tag v-if="scope.row.sendDept != null" :type="DICT_TYPE.BPM_AGENCY_NAME" :value="scope.row.sendDept" />
         </template>
       </el-table-column>
       <el-table-column label="来文字号" align="center" prop="sendDocNumber">
@@ -158,7 +158,7 @@
       <el-table-column label="主题" align="center" prop="subject" show-overflow-tooltip />
       <el-table-column label="紧急程度" align="center" prop="urgencyDegree" width="100">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_EMERGENCY_DEGREE" :value="scope.row.urgencyDegree" />
+          <dict-tag v-if="scope.row.urgencyDegree != null" :type="DICT_TYPE.BPM_EMERGENCY_DEGREE" :value="scope.row.urgencyDegree" />
         </template>
       </el-table-column>
 

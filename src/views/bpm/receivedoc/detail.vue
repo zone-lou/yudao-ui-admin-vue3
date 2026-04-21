@@ -14,7 +14,7 @@
           紧急程度：
           <span class="meta-input">
             <dict-tag
-              v-if="detailData.urgencyDegree !== undefined"
+              v-if="detailData.urgencyDegree != null"
               :type="DICT_TYPE.BPM_EMERGENCY_DEGREE"
               :value="detailData.urgencyDegree"
             />

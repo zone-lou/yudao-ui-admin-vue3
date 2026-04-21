@@ -238,7 +238,7 @@ const formData = ref<any>({
   checkEnd: undefined,
   reason: undefined,
   days: 0,
-  filepath: undefined,
+  filepath: '',
   status: 0,
   startPeriod: 1,
   endPeriod: 2,

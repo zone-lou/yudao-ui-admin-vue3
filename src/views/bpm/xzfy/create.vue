@@ -505,6 +505,7 @@ const processDefinitionId = ref('')
 const nextNodeOptions = ref([])
 const selectUserOptions = ref([])
 const multipleFlag = ref(false)
+const startUserNodeId = NodeId.START_USER_NODE_ID
 
 const tdZlPart1 = ref('')
 const tdZlPart2 = ref('')

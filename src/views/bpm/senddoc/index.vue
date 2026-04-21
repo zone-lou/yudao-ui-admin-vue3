@@ -134,7 +134,7 @@
       <el-table-column label="拟稿人" align="center" prop="draftPerson" />
       <el-table-column label="紧急程度" align="center" prop="urgencyDegree" width="100">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_EMERGENCY_DEGREE" :value="scope.row.urgencyDegree" />
+          <dict-tag v-if="scope.row.urgencyDegree != null" :type="DICT_TYPE.BPM_EMERGENCY_DEGREE" :value="scope.row.urgencyDegree" />
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="180px" fixed="right">

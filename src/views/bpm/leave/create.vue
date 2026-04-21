@@ -317,7 +317,7 @@ const formData = ref<any>({
   qxjEndDate: undefined,
   sjReason: undefined,
   totalTs: 0,
-  filepath: undefined,
+  filepath: '',
   spzt: undefined,
   userid: undefined,
   startPeriod: 1,

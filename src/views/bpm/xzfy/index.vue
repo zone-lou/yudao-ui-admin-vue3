@@ -149,17 +149,17 @@
       <el-table-column label="土地坐落" align="center" prop="tdZl" />
       <el-table-column label="案件分类" align="center" prop="lb1" width="100px">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_XZFY_CLASS1" :value="scope.row.lb1" />
+          <dict-tag v-if="scope.row.lb1 != null" :type="DICT_TYPE.BPM_XZFY_CLASS1" :value="scope.row.lb1" />
         </template>
       </el-table-column>
       <el-table-column label="涉及事项" align="center" prop="lb2" width="100px">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_XZFY_CLASS2" :value="scope.row.lb2" />
+          <dict-tag v-if="scope.row.lb2 != null" :type="DICT_TYPE.BPM_XZFY_CLASS2" :value="scope.row.lb2" />
         </template>
       </el-table-column>
       <el-table-column label="案件类型" align="center" prop="lb3" width="100px">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_XZFY_CLASS3" :value="scope.row.lb3" />
+          <dict-tag v-if="scope.row.lb3 != null" :type="DICT_TYPE.BPM_XZFY_CLASS3" :value="scope.row.lb3" />
         </template>
       </el-table-column>
       <el-table-column label="办理状态" align="center" prop="status">

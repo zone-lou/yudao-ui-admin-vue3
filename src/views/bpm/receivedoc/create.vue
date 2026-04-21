@@ -401,7 +401,7 @@ const handleOpenDialog = async () => {
   }
 
   if (!formRef.value) return
-  const valid = await formRef.value.validate()
+  const valid = await formRef.value.validate().catch(() => false)
   if (!valid) return
 
   // 打开选人弹窗

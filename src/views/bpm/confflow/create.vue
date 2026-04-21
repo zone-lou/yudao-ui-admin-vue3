@@ -248,7 +248,7 @@ const formRules = reactive({
 const handleOpenDialog = async () => {
   try {
     if (!formRef.value) return
-    const valid = await formRef.value.validate()
+    const valid = await formRef.value.validate().catch(() => false)
     if (!valid) return
     if (!processDefinitionId.value) {
       message.error('流程配置加载中，请稍后刷新重试')

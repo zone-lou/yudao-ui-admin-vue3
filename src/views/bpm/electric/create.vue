@@ -194,7 +194,7 @@ const getSelectUsers = async (item) => {
 /** 提交表单 */
 const submitForm = async () => {
   if (!formRef) return
-  const valid = await formRef.value.validate()
+  const valid = await formRef.value.validate().catch(() => false)
   if (!valid) return
 
   // 校验指定办理人
