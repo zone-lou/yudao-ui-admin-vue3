@@ -10,3 +10,4 @@ auto-*.d.ts
 .lh
 .env
 .gitignore
+pnpm-lock.yaml

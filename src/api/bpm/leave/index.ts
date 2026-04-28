@@ -72,5 +72,9 @@ export const leaveApi = {
 
   getLeaveHistoryPage: async (params: any) => {
     return await request.get({ url: `/bpm/leave/history`, params })
+  },
+  //获取年度统计
+  getYearlyStat: async (params: any) => {
+    return await request.get({ url: `/bpm/leave/get-yearly-stat`, params })
   }
 }

@@ -18,6 +18,7 @@ export interface DictDataType {
   value: string | number | boolean
   colorType: ElementPlusInfoType | ''
   cssClass: string
+  remark?: string
 }
 
 export interface NumberDictDataType extends DictDataType {

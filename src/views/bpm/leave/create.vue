@@ -110,10 +110,13 @@
                       <td class="input-cell">
                         <el-form-item prop="qxjEndDate" class="mb-0">
                           <el-date-picker
+                            :key="`picker-${formData.qxjType}-${endDateShortcuts.length}`"
                             v-model="formData.qxjEndDate"
                             type="date"
                             value-format="x"
                             placeholder="选择日期"
+                            :shortcuts="endDateShortcuts"
+                            popper-class="leave-date-picker-popper"
                             @change="calculateDuration"
                             style="width: 100%"
                           />
@@ -137,15 +140,25 @@
 
                     <tr>
                       <td class="label-cell">请假天数</td>
-                      <td class="input-cell" colspan="3">{{ formData.totalTs }} 天</td>
+                      <td class="input-cell" colspan="3">
+                        <span class="mr-2">{{ formData.totalTs }} 天</span>
+                        <span v-if="leaveLimitHint" class="text-red-500 text-xs">{{
+                          leaveLimitHint
+                        }}</span>
+                      </td>
                     </tr>
 
                     <tr class="print-hide-row">
-                      <td class="label-cell">附件列表</td>
+                      <td class="label-cell">
+                        <span v-if="isUploadRequired" class="text-red-500 mr-5px">*</span>附件列表
+                      </td>
                       <td class="input-cell" colspan="3">
                         <el-form-item prop="filepath" class="mb-0">
                           <UploadFile v-model="formData.filepath" />
                         </el-form-item>
+                        <div v-if="leaveFileHint" class="text-red-500 text-xs mt-1">{{
+                          leaveFileHint
+                        }}</div>
                       </td>
                     </tr>
 
@@ -284,6 +297,7 @@ import dayjs from 'dayjs'
 import { useUserStore } from '@/store/modules/user'
 import { getUserProfile } from '@/api/system/user/profile'
 import { useMessage } from '@/hooks/web/useMessage'
+import * as DictDataApi from '@/api/system/dict/dict.data'
 // 新增引入弹窗组件及节点常量
 import ProcessSendDialog from '@/components/ProcessSendDialog/index.vue'
 import { NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
@@ -324,12 +338,121 @@ const formData = ref<any>({
   endPeriod: 2
 })
 
+const yearlyStatsMap = ref<Record<string, any>>({})
+
+const leaveLimitHint = computed(() => {
+  const typeStr = String(formData.value.qxjType)
+  const dts = formData.value.totalTs
+  const stat = yearlyStatsMap.value[typeStr] || { leaveCount: 0, totalDays: 0 }
+  switch (typeStr) {
+    case '3':
+      return `登记结婚之日起一年内可请休婚假.至多18天,可至多分2次请假,剩余${Math.max(0, 18 - stat.totalDays)}天`
+    case '4':
+      return '一孩158天产假，二孩、三孩188天产假，生育双胞胎、三胞胎的可以享受188天产假'
+    case '6':
+      return '直系亲属及公婆去世时，给予丧假1－3天'
+    case '7':
+      return `探亲假每年至多分2次休假，总时长20天，剩余${Math.max(0, 20 - stat.totalDays)}天`
+    case '11':
+      return `独生子女陪护假每年享受5天，剩余${Math.max(0, 5 - stat.totalDays)}天`
+    case '12':
+      return `育儿假每年享受10天，剩余${Math.max(0, 10 - stat.totalDays)}天`
+    case '9':
+      return `护理假享受15天，剩余${Math.max(0, 15 - stat.totalDays)}天`
+  }
+  return ''
+})
+
+const leaveFileHint = computed(() => {
+  const typeStr = String(formData.value.qxjType)
+  if (typeStr === '2') {
+    return formData.value.totalTs >= 3
+      ? '3天及以上的病假必需提供本市二甲及以上医院出具的证明材料'
+      : '建议提供医学诊断证明、病假单、医嘱或住院证明等其中一项证明材料'
+  }
+  if (typeStr === '3') return '需提供结婚证明'
+  if (typeStr === '5') return '需提供医院诊断证明或婴儿出生证明'
+  if (typeStr === '9') return '需提供独生子女证明等相关证明材料'
+  if (typeStr === '12') return '需提供婴儿出生证明等材料'
+  return ''
+})
+
+const isUploadRequired = computed(() => {
+  const typeStr = String(formData.value.qxjType)
+  if (typeStr === '2' && formData.value.totalTs >= 3) return true
+  if (['3', '5', '9', '12'].includes(typeStr)) return true
+  return false
+})
+
+const validateFilepath = (_rule: any, value: any, callback: any) => {
+  const typeStr = String(formData.value.qxjType)
+  const isValueEmpty =
+    !value || (Array.isArray(value) && value.length === 0) || String(value).trim() === ''
+
+  if (typeStr === '2' && formData.value.totalTs >= 3 && isValueEmpty) {
+    callback(new Error('3天及以上的病假必需提供证明材料'))
+    return
+  }
+  if (['3', '5', '9', '12'].includes(typeStr) && isValueEmpty) {
+    callback(new Error('该请假类型必需提供证明材料'))
+    return
+  }
+  callback()
+}
+
+const validateLeaveLimits = (_rule: any, _value: any, callback: any) => {
+  const typeStr = String(formData.value.qxjType)
+  const dts = formData.value.totalTs
+  const stat = yearlyStatsMap.value[typeStr] || { leaveCount: 0, totalDays: 0 }
+
+  if (typeStr === '6' && dts > 3) {
+    return callback(new Error('丧假限制为 1－3 天，申请超限'))
+  }
+  if (typeStr === '4' && dts > 188) {
+    return callback(new Error('产假最长限制为 188 天，申请超限'))
+  }
+  if (typeStr === '3') {
+    if (stat.leaveCount >= 2) return callback(new Error('婚假只能请2次，目前的已请次数到达上限'))
+    if (stat.totalDays + dts > 18)
+      return callback(new Error(`最多还能请 ${Math.max(0, 18 - stat.totalDays)}天婚假，申请超限`))
+  }
+  if (typeStr === '7') {
+    if (stat.leaveCount >= 2) return callback(new Error('探亲假每年至多分2次休假，已达上限'))
+    if (stat.totalDays + dts > 20)
+      return callback(new Error(`最多还能请 ${Math.max(0, 20 - stat.totalDays)}天探亲假，申请超限`))
+  }
+  if (typeStr === '11') {
+    if (stat.totalDays + dts > 5)
+      return callback(
+        new Error(`每年享受5天，目前最多还能请 ${Math.max(0, 5 - stat.totalDays)}天，申请超限`)
+      )
+  }
+  if (typeStr === '12') {
+    if (stat.totalDays + dts > 10)
+      return callback(
+        new Error(`每年享受10天，目前最多还能请 ${Math.max(0, 10 - stat.totalDays)}天，申请超限`)
+      )
+  }
+  if (typeStr === '9') {
+    if (stat.totalDays + dts > 15)
+      return callback(
+        new Error(`护理假享受15天，目前最多还能请 ${Math.max(0, 15 - stat.totalDays)}天，申请超限`)
+      )
+  }
+
+  callback()
+}
+
 const formRules = reactive({
   qxjType: [{ required: true, message: '请假类型不能为空', trigger: 'change' }],
   qxjStartDate: [{ required: true, message: '开始时间不能为空', trigger: 'blur' }],
-  qxjEndDate: [{ required: true, message: '结束时间不能为空', trigger: 'blur' }],
+  qxjEndDate: [
+    { required: true, message: '结束时间不能为空', trigger: 'blur' },
+    { validator: validateLeaveLimits, trigger: ['blur', 'change'] }
+  ],
   sjReason: [{ required: true, message: '请假事由不能为空', trigger: 'blur' }],
-  applyDate: [{ required: true, message: '申请日期不能为空', trigger: 'blur' }]
+  applyDate: [{ required: true, message: '申请日期不能为空', trigger: 'blur' }],
+  filepath: [{ validator: validateFilepath, trigger: 'change' }]
 })
 const formRef = ref()
 
@@ -392,30 +515,157 @@ const maxPermissionRole = computed(() => {
 })
 
 const days_condition4 = computed(() => {
-  if (maxPermissionRole.value === 'grade_3' && duration.value <= 1) {
-    return '4_6'
-  } else {
-    return '4_3'
-  }
+  if (maxPermissionRole.value === 'grade_3' && duration.value <= 1) return '4_6'
+  return '4_3'
 })
 
 const days_condition3 = computed(() => {
   if (
     (maxPermissionRole.value === 'grade_3' && duration.value > 1 && duration.value < 30) ||
     (maxPermissionRole.value === 'grade_7' && duration.value <= 7)
-  ) {
+  )
     return '3_6'
-  }
+
   if (
     maxPermissionRole.value === 'grade_11' ||
     (maxPermissionRole.value === 'grade_7' && duration.value > 7) ||
     (maxPermissionRole.value === 'grade_3' && duration.value > 30)
-  ) {
+  )
     return '3_5'
-  } else return ''
+
+  return ''
 })
 
 const holidayCache = ref<Record<string, { workDay: string; restDay: string }>>({})
+const fullLeaveDictList = ref<any[]>([])
+const endDateShortcuts = ref<any[]>([])
+
+watch(
+  () => [formData.value.qxjStartDate, formData.value.qxjType, yearlyStatsMap.value],
+  () => {
+    let typeRaw = formData.value.qxjType
+    if (typeRaw === null || typeRaw === undefined || typeRaw === '') {
+      endDateShortcuts.value = []
+      return
+    }
+
+    const typeStr = String(typeRaw)
+    const stat = yearlyStatsMap.value[typeStr] || { leaveCount: 0, totalDays: 0 }
+
+    let maxDays = 0
+    switch (typeStr) {
+      case '6':
+        maxDays = 3
+        break
+      case '4':
+        maxDays = 188
+        break
+      case '3':
+        maxDays = Math.max(0, 18 - stat.totalDays)
+        break
+      case '7':
+        maxDays = Math.max(0, 20 - stat.totalDays)
+        break
+      case '11':
+        maxDays = Math.max(0, 5 - stat.totalDays)
+        break
+      case '12':
+        maxDays = Math.max(0, 10 - stat.totalDays)
+        break
+      case '9':
+        maxDays = Math.max(0, 15 - stat.totalDays)
+        break
+      default:
+        endDateShortcuts.value = []
+        return
+    }
+
+    if (maxDays <= 0) {
+      endDateShortcuts.value = []
+      return
+    }
+
+    endDateShortcuts.value = [
+      {
+        text: `自动最大天数 (${maxDays}天)`,
+        value: () => {
+          if (!formData.value.qxjStartDate) {
+            message.warning('快捷计算：请您先选择上方“请假开始时间”')
+            return new Date()
+          }
+
+          let isCalendarDayMode = false
+          if (fullLeaveDictList.value && fullLeaveDictList.value.length > 0) {
+            const currentFullDict = fullLeaveDictList.value.find(
+              (i) => i.value == formData.value.qxjType
+            )
+            isCalendarDayMode = currentFullDict?.remark?.includes('包含节假日') || false
+          } else {
+            const dictOptions = getIntDictOptions(DICT_TYPE.BPM_LEAVE_TYPE)
+            const currentDict = dictOptions.find((i) => i.value === formData.value.qxjType)
+            // @ts-ignore
+            isCalendarDayMode = currentDict?.remark?.includes('包含节假日') || false
+          }
+
+          const start = dayjs(formData.value.qxjStartDate).startOf('day')
+          const year = start.format('YYYY')
+
+          let holidayInfo: any = null
+          if (!isCalendarDayMode) {
+            const res = holidayCache.value[year] // Use cached
+            if (Array.isArray(res) && res.length > 0) {
+              holidayInfo = res[0]
+            } else {
+              holidayInfo = res
+            }
+          }
+
+          const isWorkDay = (date: dayjs.Dayjs) => {
+            const dateStr = date.format('YYYY-MM-DD')
+            if (isCalendarDayMode) return true
+            const isForceWork =
+              holidayInfo?.workDay?.includes && holidayInfo.workDay.includes(dateStr)
+            const isForceRest =
+              holidayInfo?.restDay?.includes && holidayInfo.restDay.includes(dateStr)
+            if (isForceWork) return true
+            if (isForceRest) return false
+            const day = date.day()
+            if (day === 0 || day === 6) return false
+            return true
+          }
+
+          let currentDate = start.clone()
+          let count = 0
+          let totalSoFar = 0
+
+          while (true) {
+            if (isWorkDay(currentDate)) {
+              let hitValue = 1
+              if (currentDate.isSame(start)) {
+                if (formData.value.startPeriod === PM) hitValue = 0.5
+              }
+
+              if (totalSoFar + hitValue >= maxDays) {
+                if (totalSoFar + hitValue === maxDays) {
+                  formData.value.endPeriod = PM
+                } else {
+                  formData.value.endPeriod = AM
+                }
+                return currentDate.toDate()
+              }
+              totalSoFar += hitValue
+            }
+            currentDate = currentDate.add(1, 'day')
+            count++
+            if (count > 2000) break
+          }
+          return currentDate.toDate()
+        }
+      }
+    ]
+  },
+  { deep: true, immediate: true }
+)
 
 const getHolidayData = async (year: string) => {
   if (holidayCache.value[year]) return holidayCache.value[year]
@@ -450,8 +700,16 @@ const calculateDuration = async () => {
 
   const dictOptions = getIntDictOptions(DICT_TYPE.BPM_LEAVE_TYPE)
   const currentDict = dictOptions.find((i) => i.value === formData.value.qxjType)
-  // @ts-ignore
-  const isCalendarDayMode = currentDict?.remark?.includes('包含节假日')
+
+  // 优先提取从后台新鲜拉取的含 remark 的完整字典
+  let isCalendarDayMode = false
+  if (fullLeaveDictList.value && fullLeaveDictList.value.length > 0) {
+    const currentFullDict = fullLeaveDictList.value.find((i) => i.value == formData.value.qxjType)
+    isCalendarDayMode = currentFullDict?.remark?.includes('包含节假日') || false
+  } else {
+    // @ts-ignore
+    isCalendarDayMode = currentDict?.remark?.includes('包含节假日') || false
+  }
 
   let holidayInfo: any = null
   if (!isCalendarDayMode) {
@@ -500,9 +758,9 @@ const calculateDuration = async () => {
 
 const handleSendClick = async () => {
   if (!formRef.value) return
+  await calculateDuration()
   const isValid = await formRef.value.validate().catch(() => false)
   if (!isValid) return
-  await calculateDuration()
 
   // 组装流程变量，唤起发送弹窗
   const variables = {
@@ -565,9 +823,23 @@ watch(
     formData.value.endPeriod,
     formData.value.qxjType
   ],
-  () => {
-    calculateDuration()
+  async () => {
+    await calculateDuration()
+    if (formData.value.qxjEndDate && formData.value.qxjStartDate && formRef.value) {
+      formRef.value.validateField('qxjEndDate').catch(() => {})
+    }
   }
+)
+
+watch(
+  () => formData.value.qxjStartDate,
+  async (newVal) => {
+    if (newVal) {
+      const year = dayjs(newVal).format('YYYY')
+      await getHolidayData(year)
+    }
+  },
+  { immediate: true }
 )
 
 onMounted(async () => {
@@ -575,6 +847,25 @@ onMounted(async () => {
   const userRes = await getUserProfile()
   if (userRes.dept) deptName.value = userRes.dept.name
   else if (userRes.users && userRes.users.dept) deptName.value = userRes.users.dept.name
+
+  // 获取最完整的字典(含remark)用于计算包含节假日的判断逻辑
+  try {
+    const dictRes = await DictDataApi.getDictDataPage({
+      dictType: DICT_TYPE.BPM_LEAVE_TYPE,
+      pageNo: 1,
+      pageSize: 50
+    } as any)
+    fullLeaveDictList.value = dictRes.list
+  } catch (e) {
+    console.error('获取完整请假字典失败', e)
+  }
+
+  const yearlyStat = await leaveApi.getYearlyStat({})
+  if (Array.isArray(yearlyStat)) {
+    yearlyStat.forEach((item: any) => {
+      yearlyStatsMap.value[String(item.qxjType)] = item
+    })
+  }
 
   const processDefinitionDetail = await DefinitionApi.getProcessDefinition(
     undefined,
@@ -736,6 +1027,39 @@ onMounted(async () => {
 @media print {
   .print-hide-row {
     display: none !important;
+  }
+}
+</style>
+
+<style lang="scss">
+/* 专门美化弹出层里的右侧（或下侧）快捷按钮，使其脱离单纯的文字链接样式，具备实体按钮的立体感和反馈感 */
+.el-popper.leave-date-picker-popper {
+  .el-picker-panel__shortcut {
+    width: 86% !important;
+    height: auto !important;
+    padding: 6px 0 !important;
+    margin: 10px auto !important;
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+    color: #fff !important;
+    text-align: center !important;
+    white-space: normal !important;
+    background-color: var(--el-color-primary, #409eff) !important;
+    border-radius: 4px !important;
+    box-shadow: 0 2px 4px rgb(64 158 255 / 20%) !important;
+    transition: all 0.2s !important;
+
+    &:hover {
+      color: #fff !important;
+      background-color: var(--el-color-primary-light-3, #79bbff) !important;
+      transform: translateY(-1px) !important;
+      box-shadow: 0 4px 8px rgb(64 158 255 / 30%) !important;
+    }
+
+    &:active {
+      transform: translateY(1px) !important;
+      box-shadow: none !important;
+    }
   }
 }
 </style>
