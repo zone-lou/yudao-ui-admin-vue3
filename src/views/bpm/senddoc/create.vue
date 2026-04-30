@@ -415,6 +415,7 @@ import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
 import { useUserStore } from '@/store/modules/user'
 import * as DefinitionApi from '@/api/bpm/definition'
 import { SendDocApi } from '@/api/bpm/senddoc'
+import { Base64 } from 'js-base64'
 
 // 引入弹窗组件及常量
 import ProcessSendDialog from '@/components/ProcessSendDialog/index.vue'
@@ -481,7 +482,7 @@ const buildRequestData = () => {
 
   // 对发送后端的富文本草稿进行 Base64 编码 (后端接收类型为 byte[])
   if (data.sendDocDraft) {
-    data.sendDocDraft = window.btoa(unescape(encodeURIComponent(data.sendDocDraft)))
+    data.sendDocDraft = Base64.encode(data.sendDocDraft)
   }
 
   return data

@@ -274,6 +274,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import * as ConfigApi from '@/api/infra/config'
+import { Base64 } from 'js-base64'
 
 defineOptions({ name: 'LeaveDetail' })
 
@@ -511,7 +512,7 @@ const previewFile = (file: any) => {
   }
 
   const kkBaseUrl = fileViewBaseUrl.value || 'http://192.168.50.239:8012/onlinePreview?url='
-  const encodedUrl = btoa(encodeURIComponent(fullUrl))
+  const encodedUrl = Base64.encode(fullUrl)
   const previewUrl = `${kkBaseUrl}${encodeURIComponent(encodedUrl)}`
   window.open(previewUrl, '_blank')
 }

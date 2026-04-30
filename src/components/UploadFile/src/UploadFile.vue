@@ -29,13 +29,19 @@
         <div class="flex items-center">
           <span :title="row.file.name">{{ row.file.name }}</span>
           <div class="ml-10px flex-shrink-0">
-            <el-button link type="primary" size="small" @click="handleDownload(row.file)">下载</el-button>
+            <el-button link type="primary" size="small" @click="handleDownload(row.file)"
+              >下载</el-button
+            >
           </div>
           <div class="ml-10px flex-shrink-0">
-            <el-button link type="primary" size="small" @click="handlePreview(row.file)">预览</el-button>
+            <el-button link type="primary" size="small" @click="handlePreview(row.file)"
+              >预览</el-button
+            >
           </div>
           <div class="ml-10px flex-shrink-0">
-            <el-button link type="danger" size="small" @click="handleRemove(row.file)">删除</el-button>
+            <el-button link type="danger" size="small" @click="handleRemove(row.file)"
+              >删除</el-button
+            >
           </div>
         </div>
       </template>
@@ -69,6 +75,7 @@ import { isString } from '@/utils/is'
 import { useUpload } from '@/components/UploadFile/src/useUpload'
 import Sortable from 'sortablejs' // 引入排序拖拽核心
 import * as ConfigApi from '@/api/infra/config'
+import { Base64 } from 'js-base64'
 
 defineOptions({ name: 'UploadFile' })
 
@@ -196,14 +203,42 @@ const externalPrefix = ref('')
 const internalPrefix = ref('')
 
 const DIRECT_RENDER_EXTENSIONS = [
-  'pdf', 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'ico', 'webp', 'svg', 'tif', 'tiff',
-  'mp4', 'webm', 'mkv', 'avi', 'flv', 'mov', 'wmv', 
-  'mp3', 'wav', 'flac', 'ogg', 'aac',
-  'txt', 'json', 'xml', 'md', 'java', 'js', 'css', 'html', 'sql'
+  'pdf',
+  'jpg',
+  'jpeg',
+  'png',
+  'gif',
+  'bmp',
+  'ico',
+  'webp',
+  'svg',
+  'tif',
+  'tiff',
+  'mp4',
+  'webm',
+  'mkv',
+  'avi',
+  'flv',
+  'mov',
+  'wmv',
+  'mp3',
+  'wav',
+  'flac',
+  'ogg',
+  'aac',
+  'txt',
+  'json',
+  'xml',
+  'md',
+  'java',
+  'js',
+  'css',
+  'html',
+  'sql'
 ]
 
 const handlePreview = (uploadFile: any) => {
-  let fullUrl = uploadFile.url || uploadFile.path;
+  let fullUrl = uploadFile.url || uploadFile.path
   if (!fullUrl) {
     message.error('文件路径为空，无法预览')
     return
@@ -229,14 +264,14 @@ const handlePreview = (uploadFile: any) => {
   }
 
   const kkBaseUrl = fileViewBaseUrl.value || 'http://192.168.50.239:8012/onlinePreview?url='
-  const encodedUrl = btoa(encodeURIComponent(fullUrl))
+  const encodedUrl = Base64.encode(fullUrl)
   const previewUrl = `${kkBaseUrl}${encodeURIComponent(encodedUrl)}`
 
   window.open(previewUrl, '_blank')
 }
 
 const handleDownload = (file: any) => {
-  let fullUrl = file.url || file.path;
+  let fullUrl = file.url || file.path
   if (!fullUrl) {
     message.error('文件路径为空，无法下载')
     return
@@ -362,7 +397,7 @@ onMounted(async () => {
     externalPrefix.value = await ConfigApi.getConfigKey('url.external.prefix')
     internalPrefix.value = await ConfigApi.getConfigKey('url.internal.prefix')
   } catch (e) {
-    console.error('获取预览配置失败', e)
+    console.error('获取配置失败', e)
   }
 })
 

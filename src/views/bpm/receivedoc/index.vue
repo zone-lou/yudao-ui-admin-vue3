@@ -12,8 +12,12 @@
           <el-form-item label="单位类别" prop="docClass">
             <el-select
               v-model="queryParams.docClass"
-              placeholder="请选择单位类别"
+              placeholder="请选择或输入单位类别"
               clearable
+              filterable
+              allow-create
+              default-first-option
+              @blur="(e) => handleSelectBlur(e, 'docClass', DICT_TYPE.BPM_RECEICE_CLASS)"
               class="!w-240px"
             >
               <el-option
@@ -29,8 +33,12 @@
           <el-form-item label="来文单位" prop="sendDept">
             <el-select
               v-model="queryParams.sendDept"
-              placeholder="请选择来文单位"
+              placeholder="请选择或输入来文单位"
               clearable
+              filterable
+              allow-create
+              default-first-option
+              @blur="(e) => handleSelectBlur(e, 'sendDept', DICT_TYPE.BPM_AGENCY_NAME)"
               class="!w-240px"
             >
               <el-option
@@ -39,8 +47,9 @@
                 :label="dict.label"
                 :value="dict.value"
               />
-            </el-select> </el-form-item
-        ></el-col>
+            </el-select>
+          </el-form-item>
+        </el-col>
         <el-col :span="6">
           <el-form-item label="来文字号" prop="sendDocNumber">
             <el-input
@@ -73,8 +82,12 @@
           <el-form-item label="文件类别" prop="docSecondClass">
             <el-select
               v-model="queryParams.docSecondClass"
-              placeholder="请选择文件类别"
+              placeholder="请选择或输入文件类别"
               clearable
+              filterable
+              allow-create
+              default-first-option
+              @blur="(e) => handleSelectBlur(e, 'docSecondClass', DICT_TYPE.BPM_DOC_CLASS, true)"
               class="!w-240px"
             >
               <el-option
@@ -83,8 +96,9 @@
                 :label="dict.label"
                 :value="dict.value"
               />
-            </el-select> </el-form-item
-        ></el-col>
+            </el-select>
+          </el-form-item>
+        </el-col>
         <el-col :span="12">
           <el-form-item label="收文日期" prop="receiveTime">
             <el-date-picker
@@ -103,9 +117,9 @@
     <el-col :span="24" class="text-right">
       <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" />查询</el-button>
       <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" />重置</el-button>
-<!--      <el-button type="primary" @click="handleCreate" v-hasPermi="['bpm:receive-doc:create']">-->
-<!--        <Icon icon="ep:plus" class="mr-5px" /> 新增-->
-<!--      </el-button>-->
+      <!--      <el-button type="primary" @click="handleCreate" v-hasPermi="['bpm:receive-doc:create']">-->
+      <!--        <Icon icon="ep:plus" class="mr-5px" /> 新增-->
+      <!--      </el-button>-->
     </el-col>
   </ContentWrap>
 
@@ -119,9 +133,22 @@
       @selection-change="handleRowCheckboxChange"
     >
       <el-table-column type="selection" width="55" />
+      <el-table-column
+        label="标题"
+        align="center"
+        prop="subject"
+        show-overflow-tooltip
+        width="355"
+      />
+
       <el-table-column label="单位类别" align="center" prop="docClass" width="120">
         <template #default="scope">
-          <dict-tag v-if="scope.row.docClass != null" :type="DICT_TYPE.BPM_RECEICE_CLASS" :value="scope.row.docClass" />
+          <el-tag
+            v-if="scope.row.docClass != null"
+            :style="getTagStyle('docClass', scope.row.docClass)"
+          >
+            {{ getDisplayText(DICT_TYPE.BPM_RECEICE_CLASS, scope.row.docClass) }}
+          </el-tag>
         </template>
       </el-table-column>
 
@@ -138,16 +165,42 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="来文单位" align="center" prop="sendDept">
+      <el-table-column label="来文单位" align="center" prop="sendDept" min-width="150">
         <template #default="scope">
-          <dict-tag v-if="scope.row.sendDept != null" :type="DICT_TYPE.BPM_AGENCY_NAME" :value="scope.row.sendDept" />
+          <el-tag
+            v-if="scope.row.sendDept != null"
+            :style="getTagStyle('sendDept', scope.row.sendDept)"
+          >
+            {{ getDisplayText(DICT_TYPE.BPM_AGENCY_NAME, scope.row.sendDept) }}
+          </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="来文字号" align="center" prop="sendDocNumber">
+      <el-table-column label="来文字号" align="center" prop="sendDocNumber" min-width="150">
         <template #default="scope">
           {{ formatSendDocNumber(scope.row.sendDocNumber) }}
         </template>
       </el-table-column>
+      <el-table-column label="文件类别" align="center" prop="docSecondClass" width="120">
+        <template #default="scope">
+          <el-tag
+            v-if="scope.row.docSecondClass != null"
+            :style="getTagStyle('docSecondClass', scope.row.docSecondClass)"
+          >
+            {{ getDisplayText(DICT_TYPE.BPM_DOC_CLASS, scope.row.docSecondClass, true) }}
+          </el-tag>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="紧急程度" align="center" prop="urgencyDegree" width="100">
+        <template #default="scope">
+          <dict-tag
+            v-if="scope.row.urgencyDegree != null"
+            :type="DICT_TYPE.BPM_EMERGENCY_DEGREE"
+            :value="scope.row.urgencyDegree"
+          />
+        </template>
+      </el-table-column>
+
       <el-table-column
         label="收文日期"
         align="center"
@@ -155,12 +208,6 @@
         :formatter="dateFormatter"
         width="120px"
       />
-      <el-table-column label="主题" align="center" prop="subject" show-overflow-tooltip />
-      <el-table-column label="紧急程度" align="center" prop="urgencyDegree" width="100">
-        <template #default="scope">
-          <dict-tag v-if="scope.row.urgencyDegree != null" :type="DICT_TYPE.BPM_EMERGENCY_DEGREE" :value="scope.row.urgencyDegree" />
-        </template>
-      </el-table-column>
 
       <el-table-column label="操作" align="center" width="180px" fixed="right">
         <template #default="scope">
@@ -241,6 +288,64 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+
+/** 处理输入框直接失去焦点时保留文字 */
+const handleSelectBlur = (e: any, field: string, dictType: string, isInt: boolean = false) => {
+  const val = e.target?.value
+  if (val === undefined) return
+  if (!val) {
+    ;(queryParams as any)[field] = undefined
+    return
+  }
+  const dicts = isInt ? getIntDictOptions(dictType as any) : getStrDictOptions(dictType as any)
+  const match = (dicts || []).find((d: any) => d.label === val)
+  if (match) {
+    ;(queryParams as any)[field] = match.value
+  } else {
+    ;(queryParams as any)[field] = isInt && !isNaN(Number(val)) ? Number(val) : val
+  }
+}
+
+/** 获取自定义样式，契合政务OA主题 */
+const getTagStyle = (type: string, val: string | number) => {
+  if (!val) return {}
+
+  // 采用契合党政机关或企业正式公文的沉稳色系
+  if (type === 'docClass') {
+    // 绿色系 (沉稳环保绿)
+    return {
+      backgroundColor: '#f0f9eb',
+      borderColor: '#e1f3d8',
+      color: '#2d8a4e'
+    }
+  } else if (type === 'sendDept') {
+    // 蓝色系 (政务/商务经典蓝)
+    return {
+      backgroundColor: '#f0f5ff',
+      borderColor: '#c6d9fd',
+      color: '#1d5bd1'
+    }
+  } else if (type === 'docSecondClass') {
+    // 红色系 (贴合红头文件/重点标识)
+    return {
+      backgroundColor: '#fdf2f2',
+      borderColor: '#fcd3d3',
+      color: '#d71920'
+    }
+  }
+  return {}
+}
+
+/** 获取显示文本 */
+const getDisplayText = (dictType: string, val: string | number, isInt: boolean = false) => {
+  if (val === null || val === undefined) return ''
+  const dicts = isInt ? getIntDictOptions(dictType as any) : getStrDictOptions(dictType as any)
+  if (!dicts) return String(val)
+  const match = dicts.find(
+    (d: any) => d.value === val || d.value === String(val) || d.value === Number(val)
+  )
+  return match ? match.label : String(val)
+}
 
 /** 查询列表 */
 const getList = async () => {

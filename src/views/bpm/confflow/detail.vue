@@ -234,7 +234,7 @@ import { ElMessage } from 'element-plus'
 defineOptions({ name: 'BpmConfflowDetail' })
 
 const props = defineProps({
-  id: propTypes.number.def(undefined),
+  id: propTypes.oneOfType([Number, String]).def(undefined),
   activityNodes: propTypes.array.def([]),
   taskId: propTypes.string.def(undefined), // 当前任务ID
   currentNode: propTypes.object.def({}) // 当前节点信息

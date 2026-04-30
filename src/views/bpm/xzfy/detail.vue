@@ -591,7 +591,7 @@ defineOptions({ name: 'BpmXzfyDetail' })
 const userStore = useUserStore()
 
 const props = defineProps({
-  id: propTypes.number.def(undefined),
+  id: propTypes.oneOfType([Number, String]).def(undefined),
   activityNodes: propTypes.array.def([]),
   viewType: propTypes.string.def(''),
   taskId: propTypes.string.def(undefined),

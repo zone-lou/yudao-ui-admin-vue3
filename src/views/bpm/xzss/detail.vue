@@ -653,7 +653,7 @@ import type { PropType } from 'vue'
 defineOptions({ name: 'BpmXzssDetail' })
 
 const props = defineProps({
-  id: propTypes.number.def(undefined),
+  id: propTypes.oneOfType([Number, String]).def(undefined),
   viewType: propTypes.string.def(''),
   activityNodes: {
     type: Array as PropType<any[]>,
