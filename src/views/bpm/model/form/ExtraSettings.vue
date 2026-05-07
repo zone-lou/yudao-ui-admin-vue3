@@ -423,6 +423,7 @@ provide('formFieldsObj', formFields)
 
 /** 兼容以前未配置更多设置的流程 */
 const initData = () => {
+  console.log(modelData, 'initData')
   if (!modelData.value.processIdRule) {
     modelData.value.processIdRule = {
       enable: false,
@@ -459,7 +460,11 @@ const initData = () => {
   if (modelData.value.taskAfterTriggerSetting) {
     taskAfterTriggerEnable.value = true
   }
-  if (modelData.value.allowWithdrawTask) {
+  // ✅ 修改为：
+  if (
+    modelData.value.allowWithdrawTask === undefined ||
+    modelData.value.allowWithdrawTask === null
+  ) {
     modelData.value.allowWithdrawTask = false
   }
   if (!modelData.value.printTemplateSetting) {

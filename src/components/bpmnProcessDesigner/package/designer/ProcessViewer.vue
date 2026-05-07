@@ -87,14 +87,14 @@
             prop="endTime"
             min-width="140"
           />
-          <el-table-column align="center" label="审批状态" prop="status" min-width="90">
+          <el-table-column align="center" label="办理状态" prop="status" min-width="90">
             <template #default="scope">
               <dict-tag :type="DICT_TYPE.BPM_TASK_STATUS" :value="scope.row.status" />
             </template>
           </el-table-column>
           <el-table-column
             align="center"
-            label="审批建议"
+            label="办理意见"
             prop="reason"
             min-width="120"
             v-if="selectActivityType === 'bpmn:UserTask'"

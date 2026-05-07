@@ -1,6 +1,5 @@
 <template>
   <ContentWrap>
-    <!-- 搜索工作栏 -->
     <el-form
       class="-mb-15px"
       :model="queryParams"
@@ -8,9 +7,6 @@
       :inline="true"
       label-width="auto"
     >
-      <!--      <el-row :gutter="20">-->
-
-      <!--      </el-row>-->
       <el-form-item label="来文号" prop="swWh">
         <el-input
           v-model="queryParams.swWh"
@@ -37,7 +33,7 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-220px"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="原告" prop="sqr">
@@ -151,73 +147,7 @@
           />
         </el-select>
       </el-form-item>
-      <!-- <el-form-item label="复议请求" prop="ssNr">
-        <el-input
-          v-model="queryParams.ssNr"
-          placeholder="请输入复议请求"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item> -->
-      <!-- <el-form-item label="承办人" prop="cbr">
-        <el-input
-          v-model="queryParams.cbr"
-          placeholder="请输入承办人"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="承办日期" prop="cbRq">
-        <el-date-picker
-          v-model="queryParams.cbRq"
-          value-format="YYYY-MM-DD"
-          type="date"
-          placeholder="选择承办日期"
-          clearable
-          class="!w-240px"
-        />
-      </el-form-item> -->
-      <!-- <el-form-item label="送法院日期" prop="sfyjgRq">
-        <el-date-picker
-          v-model="queryParams.sfyjgRq"
-          value-format="YYYY-MM-DD"
-          type="date"
-          placeholder="选择送法院日期"
-          clearable
-          class="!w-240px"
-        />
-      </el-form-item> -->
-      <!-- <el-form-item label="监督监管" prop="issupervise">
-        <el-input
-          v-model="queryParams.issupervise"
-          placeholder="请输入监督监管"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item> -->
-      <!--       <el-form-item label="是否已寄件提醒" prop="mailTip">
-        <el-input
-          v-model="queryParams.mailTip"
-          placeholder="请输入是否已寄件提醒"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item> -->
-      <el-form-item label="创建时间" prop="createTime">
-        <el-date-picker
-          v-model="queryParams.createTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-220px"
-        />
-      </el-form-item>
+
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -225,7 +155,6 @@
     </el-form>
   </ContentWrap>
 
-  <!-- 列表 -->
   <ContentWrap>
     <el-table
       row-key="id"
@@ -236,18 +165,29 @@
       @selection-change="handleRowCheckboxChange"
     >
       <el-table-column type="selection" width="55" />
-      <!-- 子表的列表 -->
-      <el-table-column type="expand">
+<!--      <el-table-column type="expand">-->
+<!--        <template #default="scope">-->
+<!--          <el-tabs model-value="xzssKz">-->
+<!--            <el-tab-pane label="行政诉讼拓展" name="xzssKz">-->
+<!--              <XzssKzList :xm-guid="scope.row.id" />-->
+<!--            </el-tab-pane>-->
+<!--          </el-tabs>-->
+<!--        </template>-->
+<!--      </el-table-column>-->
+
+      <el-table-column label="来文号" align="center" prop="swWh" min-width="180px">
         <template #default="scope">
-          <el-tabs model-value="xzssKz">
-            <el-tab-pane label="行政诉讼拓展" name="xzssKz">
-              <XzssKzList :xm-guid="scope.row.id" />
-            </el-tab-pane>
-          </el-tabs>
+          <div class="flex items-center justify-center">
+            <span>{{ scope.row.swWh }}</span>
+            <dict-tag
+              class="ml-2"
+              :type="DICT_TYPE.BPM_TASK_STATUS"
+              :value="scope.row.status !== null ? scope.row.status : 0"
+            />
+          </div>
         </template>
       </el-table-column>
-      <!-- <el-table-column label="主键" align="center" prop="id" /> -->
-      <el-table-column label="来文号" align="center" prop="swWh" width="130px" />
+
       <el-table-column label="来文机关" align="center" prop="swJg" width="150px">
         <template #default="scope">
           {{ formatDictOrStr(scope.row.swJg, DICT_TYPE.BPM_INCOMING_AUTHORITY_XZSS) }}
@@ -260,92 +200,68 @@
         :formatter="dateFormatter2"
         width="120px"
       />
-      <el-table-column label="原告" align="center" prop="sqr" width="100px" />
-      <el-table-column label="被告" align="center" prop="bsqr" width="100px" />
-      <el-table-column label="第三人" align="center" prop="dsr" width="100px" />
-      <el-table-column label="土地坐落" align="center" prop="tdZl" width="100px" />
+      <el-table-column label="原告" align="center" prop="sqr" width="150px" />
+      <el-table-column label="被告" align="center" prop="bsqr" width="150px" />
+      <el-table-column label="第三人" align="center" prop="dsr" width="150px" />
       <el-table-column label="诉讼类型" align="center" prop="ssLx" width="100px">
         <template #default="scope">
-          <dict-tag v-if="scope.row.ssLx != null" :type="DICT_TYPE.BPM_ADMINISTRATIVE_LITIGATION_STAGE" :value="scope.row.ssLx" />
+          <dict-tag
+            v-if="scope.row.ssLx != null"
+            :type="DICT_TYPE.BPM_ADMINISTRATIVE_LITIGATION_STAGE"
+            :value="scope.row.ssLx"
+          />
         </template>
       </el-table-column>
       <el-table-column label="案件类别" align="center" prop="lb1" width="100px">
         <template #default="scope">
-          <dict-tag v-if="scope.row.lb1 != null" :type="DICT_TYPE.BPM_XZSS_CLASS1" :value="scope.row.lb1" />
+          <dict-tag
+            v-if="scope.row.lb1 != null"
+            :type="DICT_TYPE.BPM_XZSS_CLASS1"
+            :value="scope.row.lb1"
+          />
         </template>
       </el-table-column>
       <el-table-column label="案件分类" align="center" prop="lb2" width="100px">
         <template #default="scope">
-          <dict-tag v-if="scope.row.lb2 != null" :type="DICT_TYPE.BPM_XZSS_CLASS2" :value="scope.row.lb2" />
+          <dict-tag
+            v-if="scope.row.lb2 != null"
+            :type="DICT_TYPE.BPM_XZSS_CLASS2"
+            :value="scope.row.lb2"
+          />
         </template>
       </el-table-column>
       <el-table-column label="涉及事项" align="center" prop="lb3" width="100px">
         <template #default="scope">
-          <dict-tag v-if="scope.row.lb3 != null" :type="DICT_TYPE.BPM_XZSS_CLASS3" :value="scope.row.lb3" />
+          <dict-tag
+            v-if="scope.row.lb3 != null"
+            :type="DICT_TYPE.BPM_XZSS_CLASS3"
+            :value="scope.row.lb3"
+          />
         </template>
       </el-table-column>
       <el-table-column label="案件类型" align="center" prop="lb4" width="100px">
         <template #default="scope">
-          <dict-tag v-if="scope.row.lb4 != null" :type="DICT_TYPE.BPM_XZSS_CLASS4" :value="scope.row.lb4" />
+          <dict-tag
+            v-if="scope.row.lb4 != null"
+            :type="DICT_TYPE.BPM_XZSS_CLASS4"
+            :value="scope.row.lb4"
+          />
         </template>
       </el-table-column>
       <el-table-column label="诉讼类别" align="center" prop="lb5" width="100px">
         <template #default="scope">
-          <dict-tag v-if="scope.row.lb5 != null" :type="DICT_TYPE.BPM_XZSS_CLASS5" :value="scope.row.lb5" />
+          <dict-tag
+            v-if="scope.row.lb5 != null"
+            :type="DICT_TYPE.BPM_XZSS_CLASS5"
+            :value="scope.row.lb5"
+          />
         </template>
       </el-table-column>
-      <el-table-column label="复议请求" align="center" prop="ssNr" />
-      <el-table-column label="承办人" align="center" prop="cbr" />
-      <el-table-column
-        label="承办日期"
-        align="center"
-        prop="cbRq"
-        :formatter="dateFormatter2"
-        width="120px"
-      />
-      <el-table-column
-        label="送法院日期"
-        align="center"
-        prop="sfyjgRq"
-        :formatter="dateFormatter2"
-        width="120px"
-      />
-      <el-table-column label="上诉人" align="center" prop="ssr" />
-      <el-table-column label="被上诉人" align="center" prop="bssr" />
-      <el-table-column label="再审申请人" align="center" prop="zssqr" />
-      <el-table-column label="再审被申请人" align="center" prop="zsbsqr" />
-      <el-table-column label="监督监管" align="center" prop="issupervise">
-        <template #default="scope">
-          {{ formatBoolean(scope.row.issupervise) }}
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="办理时限"
-        align="center"
-        prop="zhubandate"
-        :formatter="dateFormatter2"
-        width="120px"
-      />
-      <el-table-column label="诉讼内容" align="center" prop="ssnr" />
-      <el-table-column label="是否已寄件提醒" align="center" prop="mailTip">
-        <template #default="scope">
-          {{ formatBoolean(scope.row.mailTip) }}
-        </template>
-      </el-table-column>
-      <el-table-column label="办理状态" align="center" prop="status">
-        <template #default="scope">
-          <div class="flex items-center justify-center">
-            <dict-tag
-              class="ml-2"
-              :type="DICT_TYPE.BPM_TASK_STATUS"
-              :value="scope.row.status !== null ? scope.row.status : 0"
-            />
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" align="center" fixed="right" width="120px">
+
+      <el-table-column label="操作" align="center" fixed="right" width="180px">
         <template #default="scope">
           <el-button
+            v-if="!scope.row.processInstanceId"
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
@@ -353,6 +269,19 @@
           >
             编辑
           </el-button>
+
+          <el-button v-else link type="primary" @click="handleDetail(scope.row)"> 详情 </el-button>
+
+          <el-button
+            v-if="scope.row.processInstanceId"
+            link
+            type="warning"
+            @click="openForm('update', scope.row.id)"
+            v-hasPermi="['bpm:xzss:update']"
+          >
+            修改
+          </el-button>
+
           <el-button
             link
             type="danger"
@@ -365,7 +294,6 @@
         </template>
       </el-table-column>
     </el-table>
-    <!-- 分页 -->
     <Pagination
       :total="total"
       v-model:page="queryParams.pageNo"
@@ -374,25 +302,22 @@
     />
   </ContentWrap>
 
-  <!-- 表单弹窗：添加/修改 -->
   <XzssForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
-import { getIntDictOptions, getStrDictOptions, getDictOptions, DICT_TYPE } from '@/utils/dict'
-import { isEmpty } from '@/utils/is'
-import { dateFormatter, dateFormatter2 } from '@/utils/formatTime'
+import { getDictOptions, DICT_TYPE } from '@/utils/dict'
+import { dateFormatter2 } from '@/utils/formatTime'
 import { XzssApi, Xzss } from '@/api/bpm/xzss'
 import XzssForm from './XzssForm.vue'
 import XzssKzList from './components/XzssKzList.vue'
 import { useBpmInvalidate } from '@/hooks/bpm/useBpmInvalidate'
+import { useRouter } from 'vue-router'
 
 /** 行政诉讼 列表 */
 defineOptions({ name: 'Xzss' })
 
-const message = useMessage() // 消息弹窗
-const { t } = useI18n() // 国际化
-
+const router = useRouter()
 const loading = ref(true) // 列表的加载中
 const list = ref<Xzss[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
@@ -413,16 +338,13 @@ const queryParams = reactive({
   lb5: undefined,
   ssNr: undefined,
   cbr: undefined,
-  cbRq: undefined,
   cbRq: [],
-  sfyjgRq: undefined,
   sfyjgRq: [],
   issupervise: undefined,
   mailTip: undefined,
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
 
 /** 查询列表 */
 const getList = async () => {
@@ -456,6 +378,14 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
+/** 详情跳转逻辑 - 跳转到流程详情页 */
+const handleDetail = (row: any) => {
+  router.push({
+    name: 'BpmProcessInstanceDetail',
+    query: { id: row.processInstanceId }
+  })
+}
+
 const checkedIds = ref<number[]>([])
 const handleRowCheckboxChange = (records: Xzss[]) => {
   checkedIds.value = records.map((item) => item.id!)
@@ -471,12 +401,6 @@ const formatDictOrStr = (val: any, dictType: string) => {
     return dict.label
   }
   // 如果字典没找到，说明可能是手动输入的文本，或者本身就是文本
-  return val
-}
-
-const formatBoolean = (val: any) => {
-  if (val === 1) return '是'
-  if (val === 0) return '否'
   return val
 }
 

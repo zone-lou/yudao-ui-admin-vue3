@@ -81,7 +81,7 @@
           <dict-tag :type="DICT_TYPE.BPM_TASK_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="办理建议" prop="reason" min-width="180" />
+      <el-table-column align="center" label="办理意见" prop="reason" min-width="180" />
       <el-table-column align="center" label="耗时" prop="durationInMillis" width="160">
         <template #default="scope">
           {{ formatPast2(scope.row.durationInMillis) }}
