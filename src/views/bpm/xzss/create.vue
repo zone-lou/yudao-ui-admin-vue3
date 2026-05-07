@@ -166,7 +166,7 @@
                 </el-col>
                 <el-col :span="8">
                   <el-form-item label="后一审案号" prop="ssAh">
-                    <el-input  placeholder="自动获取后一审案号" />
+                    <el-input placeholder="自动获取后一审案号" />
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -440,14 +440,14 @@
                 <div class="meta-info">
                   <div class="meta-left">
                     <span
-                    >收文日期：<span class="meta-input">{{
+                      >收文日期：<span class="meta-input">{{
                         formatDate(formData.swRq)
                       }}</span></span
                     >
                   </div>
                   <div class="meta-right">
                     <span
-                    >来文号：<span class="meta-input">{{ formData.swWh }}</span></span
+                      >来文号：<span class="meta-input">{{ formData.swWh }}</span></span
                     >
                   </div>
                 </div>
@@ -460,80 +460,80 @@
                     <col style="width: 150px" />
                   </colgroup>
                   <tbody>
-                  <tr>
-                    <td class="label-cell">监督监管</td>
-                    <td class="data-text">
-                      <div
-                        class="check-item w-full h-full cursor-pointer select-none"
-                        @click="formData.issupervise = formData.issupervise === 1 ? 0 : 1"
-                      >
+                    <tr>
+                      <td class="label-cell">监督监管</td>
+                      <td class="data-text">
+                        <div
+                          class="check-item w-full h-full cursor-pointer select-none"
+                          @click="formData.issupervise = formData.issupervise === 1 ? 0 : 1"
+                        >
                           <span class="checkbox-mock">
                             <span v-if="formData.issupervise === 1">✔</span>
                           </span>
-                        进行监督监管
-                      </div>
-                    </td>
-                    <td class="label-cell">科室办理办结日期</td>
-                    <td class="data-text center-text" style="padding: 0">
-                      <el-date-picker
-                        v-model="formData.zhubandate"
-                        type="date"
-                        value-format="x"
-                        placeholder="选择日期"
-                        style="width: 100%; border: none"
-                      />
-                    </td>
-                  </tr>
+                          进行监督监管
+                        </div>
+                      </td>
+                      <td class="label-cell">科室办理办结日期</td>
+                      <td class="data-text center-text" style="padding: 0">
+                        <el-date-picker
+                          v-model="formData.zhubandate"
+                          type="date"
+                          value-format="x"
+                          placeholder="选择日期"
+                          style="width: 100%; border: none"
+                        />
+                      </td>
+                    </tr>
 
-                  <tr>
-                    <td class="label-cell" rowspan="2">拟办意见</td>
-                    <td colspan="3" class="h-80 data-text text-left"> </td>
-                  </tr>
-                  <tr>
-                    <td colspan="3" class="signature-row">
-                      <div class="sig-container">
-                        <span style="width: 40%">办理人：<span class="sign-input"></span></span>
-                        <span style="width: 40%">日期：<span class="sign-input"></span></span>
-                      </div>
-                    </td>
-                  </tr>
+                    <tr>
+                      <td class="label-cell" rowspan="2">拟办意见</td>
+                      <td colspan="3" class="h-80 data-text text-left"> </td>
+                    </tr>
+                    <tr>
+                      <td colspan="3" class="signature-row">
+                        <div class="sig-container">
+                          <span style="width: 40%">办理人：<span class="sign-input"></span></span>
+                          <span style="width: 40%">日期：<span class="sign-input"></span></span>
+                        </div>
+                      </td>
+                    </tr>
 
-                  <tr>
-                    <td class="label-cell" rowspan="2">局长意见</td>
-                    <td colspan="3" class="h-80 data-text text-left"> </td>
-                  </tr>
-                  <tr>
-                    <td colspan="3" class="signature-row">
-                      <div class="sig-container">
-                        <span style="width: 40%">办理人：<span class="sign-input"></span></span>
-                        <span style="width: 40%">日期：<span class="sign-input"></span></span>
-                      </div>
-                    </td>
-                  </tr>
+                    <tr>
+                      <td class="label-cell" rowspan="2">局长意见</td>
+                      <td colspan="3" class="h-80 data-text text-left"> </td>
+                    </tr>
+                    <tr>
+                      <td colspan="3" class="signature-row">
+                        <div class="sig-container">
+                          <span style="width: 40%">办理人：<span class="sign-input"></span></span>
+                          <span style="width: 40%">日期：<span class="sign-input"></span></span>
+                        </div>
+                      </td>
+                    </tr>
 
-                  <tr>
-                    <td class="label-cell" rowspan="2">局领导<br />意见</td>
-                    <td class="sub-header">办理意见</td>
-                    <td class="sub-header">办理人员</td>
-                    <td class="sub-header">办理日期</td>
-                  </tr>
-                  <tr>
-                    <td class="h-35 data-text"></td>
-                    <td class="h-35 data-text center-text"></td>
-                    <td class="h-35 data-text center-text"></td>
-                  </tr>
+                    <tr>
+                      <td class="label-cell" rowspan="2">局领导<br />意见</td>
+                      <td class="sub-header">办理意见</td>
+                      <td class="sub-header">办理人员</td>
+                      <td class="sub-header">办理日期</td>
+                    </tr>
+                    <tr>
+                      <td class="h-35 data-text"></td>
+                      <td class="h-35 data-text center-text"></td>
+                      <td class="h-35 data-text center-text"></td>
+                    </tr>
 
-                  <tr>
-                    <td class="label-cell" rowspan="2">科室单位<br />办理意见</td>
-                    <td class="sub-header">办理意见</td>
-                    <td class="sub-header">办理人员</td>
-                    <td class="sub-header">办理日期</td>
-                  </tr>
-                  <tr>
-                    <td class="h-35 data-text"></td>
-                    <td class="h-35 data-text center-text"></td>
-                    <td class="h-35 data-text center-text"></td>
-                  </tr>
+                    <tr>
+                      <td class="label-cell" rowspan="2">科室单位<br />办理意见</td>
+                      <td class="sub-header">办理意见</td>
+                      <td class="sub-header">办理人员</td>
+                      <td class="sub-header">办理日期</td>
+                    </tr>
+                    <tr>
+                      <td class="h-35 data-text"></td>
+                      <td class="h-35 data-text center-text"></td>
+                      <td class="h-35 data-text center-text"></td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -544,53 +544,14 @@
     </el-col>
   </el-row>
 
-  <el-dialog v-model="dialogVisible" title="流程处理" width="500px" append-to-body>
-    <el-form
-      ref="dialogFormRef"
-      :model="formData"
-      :rules="dialogRules"
-      label-width="120px"
-      v-loading="formLoading"
-    >
-      <el-form-item label="下一环节" prop="nextNode">
-        <el-select
-          v-model="formData.nextNode"
-          placeholder="请选择下一环节"
-          @change="nodeChange"
-          value-key="taskDefKey"
-          :empty-values="[null, undefined]"
-          style="width: 100%"
-        >
-          <el-option
-            v-for="dict in nextNodeOptions"
-            :key="dict.taskDefKey"
-            :label="dict.taskName"
-            :value="dict"
-          />
-        </el-select>
-      </el-form-item>
-
-      <el-form-item label="办理人" prop="tempNextUserSelectAssignees">
-        <el-select
-          v-model="formData.tempNextUserSelectAssignees"
-          placeholder="请选择办理人"
-          :multiple="multipleFlag"
-          style="width: 100%"
-        >
-          <el-option
-            v-for="dict in selectUserOptions"
-            :key="dict.id"
-            :label="dict.nickname"
-            :value="dict.id"
-          />
-        </el-select>
-      </el-form-item>
-    </el-form>
-    <template #footer>
-      <el-button @click="dialogVisible = false">取消</el-button>
-      <el-button type="primary" @click="submitForm" :loading="formLoading">确 定</el-button>
-    </template>
-  </el-dialog>
+  <ProcessSendDialog
+    ref="sendDialogRef"
+    title="发送诉讼申请"
+    :show-reason="false"
+    :process-definition-id="processDefinitionId"
+    :activity-id="startUserNodeId"
+    @submit="submitForm"
+  />
 
   <el-dialog v-model="fySelectVisible" title="选择复议案件" width="70%" append-to-body>
     <el-form :inline="true" :model="queryParamsFy" class="-mb-15px">
@@ -674,15 +635,14 @@
 </template>
 
 <script setup lang="ts">
+import ProcessSendDialog from '@/components/ProcessSendDialog/index.vue'
+
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as DefinitionApi from '@/api/bpm/definition'
-import * as ProcessInstanceApi from '@/api/bpm/processInstance'
-import { CandidateStrategy, NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
-import { ApprovalNodeInfo } from '@/api/bpm/processInstance'
+import { NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { XzssApi } from '@/api/bpm/xzss'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
-import { useUserStore } from '@/store/modules/user'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 
 import { XzfyApi } from '@/api/bpm/xzfy'
 import { dateUtil } from '@/utils/dateUtil'
@@ -693,8 +653,6 @@ defineOptions({ name: 'BpmXzssCreate' })
 const message = useMessage()
 const { delView } = useTagsViewStore()
 const { push, currentRoute } = useRouter()
-const route = useRoute()
-const userStore = useUserStore()
 
 const activeTab = ref('form')
 
@@ -714,9 +672,7 @@ const formLoading = ref(false)
 const formRef = ref()
 const uploadFileRef = ref()
 
-// 弹窗相关
-const dialogVisible = ref(false)
-const dialogFormRef = ref()
+const sendDialogRef = ref()
 
 // === 复议案件选择逻辑 ===
 const queryParamsFy = reactive({
@@ -736,14 +692,8 @@ const totalSs = ref(0)
 
 // 流程相关
 const processDefineKey = 'oa_lawsuit' // 流程 Key
-const startUserSelectTasks = ref([])
-const startUserSelectAssignees = ref({})
-const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])
 const processDefinitionId = ref('')
-
-const nextNodeOptions = ref([])
-const selectUserOptions = ref([])
-const multipleFlag = ref(false)
+const startUserNodeId = NodeId.START_USER_NODE_ID
 
 const tdZlPart1 = ref('')
 const tdZlPart2 = ref('')
@@ -802,10 +752,6 @@ const formData = ref({
     ktRq: undefined
   },
 
-  // 流程字段
-  nextNode: undefined,
-  tempNextUserSelectAssignees: undefined,
-
   attachFilePath: '',
   fileList: []
 })
@@ -828,12 +774,6 @@ const formRules = reactive({
   lb5: [{ required: true, message: '诉讼类别不能为空', trigger: 'change' }]
 })
 
-// 弹窗流程处理校验规则
-const dialogRules = reactive({
-  nextNode: [{ required: true, message: '下一环节不能为空', trigger: 'change' }],
-  tempNextUserSelectAssignees: [{ required: true, message: '办理人不能为空', trigger: 'change' }]
-})
-
 // === 动态表格操作 ===
 const addDocRow = () => {
   docList.value.push({ docName: '', docDate: '', docContent: '' })
@@ -854,18 +794,16 @@ const openFySelect = async () => {
   fySelectVisible.value = true
   // 重置页码
   queryParamsFy.pageNo = 1
-  // 直接调用统一的获取数据方法
   await getFyList()
 }
 
 const getFyList = async () => {
   listLoading.value = true
   try {
-    // 确保调用接口并赋值 total
     const res = await XzfyApi.getXzfyPageUnlinked(queryParamsFy)
     if (res) {
       xzfyList.value = res.list
-      totalFy.value = res.total // 必须赋值，否则分页组件不显示
+      totalFy.value = res.total
     }
   } catch (e) {
     console.error(e)
@@ -874,44 +812,15 @@ const getFyList = async () => {
   }
 }
 const selectFy = (row: any) => {
-  formData.value.fyAh = row.swWh // 备注：复议列表的 swWh 对应 复议案号
-  formData.value.fyGuid = row.xmGuid // 关联ID
+  formData.value.fyAh = row.swWh
+  formData.value.fyGuid = row.xmGuid
   fySelectVisible.value = false
 }
 
 const selectSs = (row: any) => {
-  formData.value.ssAh = row.swWh // 备注：上一审列表的 swWh 对应 案号
-  formData.value.ssGuid = row.xmGuid // 关联ID
+  formData.value.ssAh = row.swWh
+  formData.value.ssGuid = row.xmGuid
   ssSelectVisible.value = false
-}
-
-// === 下一步节点与选人逻辑 ===
-const nodeChange = async (val: any) => {
-  await getSelectUsers(val.extensionProperties)
-}
-
-const getSelectUsers = async (item: any) => {
-  const data = await ProcessInstanceApi.getSelectUserOptions({
-    chooseRule: item.choose_rule,
-    ruleValue: item.rule_value
-  })
-  multipleFlag.value = item.multiple_flag === '1'
-  selectUserOptions.value = data
-}
-
-const getNextApprovalNodes = async () => {
-  if (!processDefinitionId.value) return
-
-  const data = await ProcessInstanceApi.getNextSelectNodes({
-    processDefinitionId: processDefinitionId.value,
-    activityId: NodeId.START_USER_NODE_ID
-  })
-
-  nextNodeOptions.value = data
-  if (data.length > 0) {
-    formData.value.nextNode = data[0]
-    await getSelectUsers(data[0].extensionProperties)
-  }
 }
 
 // 顶部发送按钮点击处理
@@ -934,50 +843,24 @@ const handleSendClick = async () => {
     return
   }
 
-  // 3. 校验通过，打开弹窗
-  dialogVisible.value = true
+  // 3. 校验通过，打开统一组件弹窗
+  const variables = {}
+  sendDialogRef.value.open(variables)
 }
 
 // 弹窗确认提交
-const submitForm = async () => {
-  // 校验弹窗表单
-  if (!dialogFormRef.value) return
-  const isValid = await dialogFormRef.value.validate().catch(() => false)
-  if (!isValid) return
-
-  // 自选审批人校验
-  if (startUserSelectTasks.value?.length > 0) {
-    for (const userTask of startUserSelectTasks.value) {
-      if (
-        Array.isArray(startUserSelectAssignees.value[userTask.id]) &&
-        startUserSelectAssignees.value[userTask.id].length === 0
-      ) {
-        return message.warning(`请选择${userTask.name}的办理人`)
-      }
-    }
-  }
-
+const submitForm = async (submitData: { nextNodeAssignees: any; variables: any }) => {
   formLoading.value = true
   try {
     const data = { ...formData.value } as any
 
-    // 1. 处理动态表格数据 (复用 otherRelatedInfo 字段逻辑)
+    // 1. 处理动态表格数据
     data.otherRelatedInfo = JSON.stringify(docList.value)
 
-    // 2. 处理发起人自选审批人
-    if (startUserSelectTasks.value?.length > 0) {
-      data.startUserSelectAssignees = startUserSelectAssignees.value
-    }
+    // 2. 处理下一步流程审批人分配情况
+    data.nextNodeAssignees = submitData.nextNodeAssignees
 
-    // 3. 处理下一步流程选择
-    data.nextNodeAssignees = {}
-    const assignees = formData.value.tempNextUserSelectAssignees
-    if (assignees) {
-      const taskKey = formData.value.nextNode.taskDefKey
-      data.nextNodeAssignees[taskKey] = Array.isArray(assignees) ? assignees : [assignees]
-    }
-
-    // 4. 附件处理逻辑
+    // 3. 附件处理逻辑
     const rawFileList = uploadFileRef.value?.fileList || []
     data.fileList = rawFileList
       .filter((item: any) => item.status === 'success' || item.id)
@@ -1022,33 +905,16 @@ const submitForm = async () => {
     await XzssApi.createXzss(data)
     message.success('行政诉讼申请发起成功')
 
-    dialogVisible.value = false
+    sendDialogRef.value.close()
 
-    // 【关键修改】加入宏任务延迟，彻底避免页面过快重定向致使自身 tab 仍在 keep-alive 存活列队中
     setTimeout(() => {
       delView(unref(currentRoute))
       push('/bpm/unified')
     }, 200)
+  } catch (error) {
+    sendDialogRef.value.submitLoading = false
   } finally {
     formLoading.value = false
-  }
-}
-
-// === 初始化 ===
-const getApprovalDetail = async () => {
-  try {
-    const data = await ProcessInstanceApi.getApprovalDetail({
-      processDefinitionId: processDefinitionId.value,
-      activityId: NodeId.START_USER_NODE_ID,
-      processVariablesStr: JSON.stringify({})
-    })
-    if (!data) return
-    activityNodes.value = data.activityNodes
-    startUserSelectTasks.value = data.activityNodes?.filter(
-      (node: ApprovalNodeInfo) => CandidateStrategy.START_USER_SELECT === node.candidateStrategy
-    )
-  } catch (e) {
-    console.error(e)
   }
 }
 
@@ -1066,7 +932,6 @@ const openSsSelect = () => {
 const getSsList = async () => {
   listLoading.value = true
   try {
-    // @ts-ignore
     const res = await XzssApi.getXzssPage(queryParamsSs)
     if (res) {
       historyXzssList.value = res.list
@@ -1085,10 +950,6 @@ const resetQuerySs = () => {
   getSsList()
 }
 
-const selectUserConfirm = (id: string, userList: any[]) => {
-  startUserSelectAssignees.value[id] = userList?.map((item: any) => item.id)
-}
-
 onMounted(async () => {
   const processDefinitionDetail = await DefinitionApi.getProcessDefinition(
     undefined,
@@ -1099,23 +960,10 @@ onMounted(async () => {
     return
   }
   processDefinitionId.value = processDefinitionDetail.id
-  startUserSelectTasks.value = processDefinitionDetail.startUserSelectTasks
-
-  await getNextApprovalNodes()
-  await getApprovalDetail()
 })
-
-watch(
-  () => formData.value.nextNode,
-  () => {
-    getApprovalDetail()
-  }
-)
 </script>
 
 <style scoped>
-/* stylelint-disable selector-id-pattern */
-
 .section-title {
   padding-left: 10px;
   margin-bottom: 15px;
@@ -1128,7 +976,6 @@ watch(
   margin-top: -10px;
 }
 
-/* ================= 导入红头办理单专用样式 ================= */
 #printDivTag {
   padding: 20px;
   font-family: SimSun, 'Songti SC', STSong, serif;
@@ -1204,11 +1051,6 @@ watch(
   vertical-align: top;
 }
 
-#printDivTag .h-large {
-  height: 120px;
-  vertical-align: top;
-}
-
 #printDivTag .h-35 {
   height: 35px;
 }
@@ -1262,8 +1104,9 @@ watch(
   align-items: center;
   justify-content: center;
 }
+
 .pagination-wrapper {
-  overflow: hidden; /* 核心：强制包含内部的 float-right 元素 */
+  overflow: hidden;
   width: 100%;
   padding-top: 10px;
 }

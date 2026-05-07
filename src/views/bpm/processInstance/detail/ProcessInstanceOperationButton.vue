@@ -598,7 +598,7 @@ const handleDirectFinish = async () => {
 
   // 3. 构建请求级多表单变量
   let variables = getUpdatedProcessInstanceVariables()
-  
+
   // 注入来自业务表单的额外数据（如打字、校对反馈）
   if (props.getBusinessFormValues) {
     const extraValues = await props.getBusinessFormValues()
@@ -701,11 +701,11 @@ const loadApprovalNodes = async () => {
         if (
           node.taskDefKey === 'end' ||
           node.taskDefKey?.toLowerCase().includes('endevent') ||
-          (
-            ['请销假', '请假', '公出', '外出', '公出申请', '外出申请', '因公外出'].includes(node.taskName) &&
+          (['请销假', '请假', '公出', '外出', '公出申请', '外出申请', '因公外出'].includes(
+            node.taskName
+          ) &&
             (!node.candidateUsers || node.candidateUsers.length === 0) &&
-            (!node.extensionProperties || !node.extensionProperties.choose_rule)
-          )
+            (!node.extensionProperties || !node.extensionProperties.choose_rule))
         ) {
           node.taskName = '办理完成'
           node.name = '办理完成'
@@ -715,7 +715,11 @@ const loadApprovalNodes = async () => {
         if (node.taskDefKey?.includes('_internal_loop') && node.candidateUsers) {
           node.candidateUsers = filterTreeMySelf(node.candidateUsers, userId)
         }
-        node.checked = false
+        if (node.extensionProperties?.specified_flag === '1') {
+          node.checked = true
+        } else {
+          node.checked = false
+        }
         node.selectedUsers = []
 
         // 如果没有预设候选人，尝试通过规则获取
@@ -983,6 +987,16 @@ const handleApproveConfirm = async () => {
     return
   }
 
+  const unCheckedSpecifiedNode = approvalNodes.value.find(
+    (n) => n.extensionProperties?.specified_flag === '1' && !n.checked
+  )
+  if (unCheckedSpecifiedNode) {
+    message.warning(
+      `节点【${unCheckedSpecifiedNode.taskName || unCheckedSpecifiedNode.name}】为必填项，请勾选并选择办理人！`
+    )
+    return
+  }
+
   // 必须选中至少一个节点
   const selectedNodes = approvalNodes.value.filter((n) => n.checked)
   if (approvalNodes.value.length > 0 && selectedNodes.length === 0) {
@@ -1017,8 +1031,14 @@ const handleApproveConfirm = async () => {
     // 过滤出用户
     const userIds = checkedNodes.filter((n: any) => n.id && n.nickname).map((n: any) => n.id)
 
+    const isSpecifiedNode = node.extensionProperties?.specified_flag === '1'
+
     // 针对常规节点：发现没有勾选任何人，进行阻断
     if (userIds.length === 0) {
+      if (isSpecifiedNode) {
+        message.warning(`【${node.taskName || node.name}】为必填项，请至少选择一名人员！`)
+        return
+      }
       // 容错补充：防止配置出错该节点天生没配置候选人树，如果是这种没树的节点，理论上可以放它走或者依据业务退回
       // 既然前面提示过“无需选择办理人(自动分配或无需办理)”，我们就放行它
       if (!node.candidateUsers || node.candidateUsers.length === 0) {
@@ -1026,6 +1046,17 @@ const handleApproveConfirm = async () => {
       }
       message.warning(`节点【${node.taskName}】请至少选择一名办理人`)
       return
+    }
+
+    if (isSpecifiedNode) {
+      const varKey =
+        node.extensionProperties.variable_name || node.extensionProperties.specified_variable
+      if (varKey) {
+        variables[varKey] =
+          node.extensionProperties.multiple_flag === '0' ? userIds[0] : userIds.join(',')
+      }
+      // ！！！关键：虚拟节点处理完变量后，直接跳过后面的真实任务分配逻辑
+      continue
     }
 
     // 需求：如果节点包含 _internal_loop，人员放入 addSignUserIds
