@@ -1,7 +1,10 @@
 <template>
   <el-row :gutter="20">
     <el-col :span="24">
-      <ContentWrap title="创建公出申请" :bodyStyle="{ background: '#ffffff', minHeight: 'calc(100vh - 120px)' }">
+      <ContentWrap
+        title="创建公出申请"
+        :bodyStyle="{ background: '#ffffff', minHeight: 'calc(100vh - 120px)' }"
+      >
         <template #header>
           <el-button type="primary" @click="handleSendClick" :loading="formLoading">
             <Icon icon="ep:promotion" class="mr-5px" /> 发送
@@ -153,51 +156,47 @@
 
                 <!-- 审批意见占位行 -->
                 <tr>
-                    <td class="label-cell" rowspan="2">科室(单位)负责人意见</td>
-                    <td colspan="3" class="input-cell h-large">
-                    </td>
+                  <td class="label-cell" rowspan="2">科室(单位)负责人意见</td>
+                  <td colspan="3" class="input-cell h-large"> </td>
                 </tr>
                 <tr>
-                    <td colspan="3" class="signature-row">
-                        <span class="sig-item">办理人：<span class="sig-line"></span></span>
-                        <span class="sig-item">日期：<span class="sig-line"></span></span>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td class="label-cell" rowspan="2">办公室意见</td>
-                    <td colspan="3" class="input-cell h-large">
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="3" class="signature-row">
-                        <span class="sig-item">办理人：<span class="sig-line"></span></span>
-                        <span class="sig-item">日期：<span class="sig-line"></span></span>
-                    </td>
+                  <td colspan="3" class="signature-row">
+                    <span class="sig-item">办理人：<span class="sig-line"></span></span>
+                    <span class="sig-item">日期：<span class="sig-line"></span></span>
+                  </td>
                 </tr>
 
                 <tr>
-                    <td class="label-cell" rowspan="2">局分管领导意见</td>
-                    <td colspan="3" class="input-cell h-large">
-                    </td>
+                  <td class="label-cell" rowspan="2">办公室意见</td>
+                  <td colspan="3" class="input-cell h-large"> </td>
                 </tr>
                 <tr>
-                    <td colspan="3" class="signature-row">
-                        <span class="sig-item">办理人：<span class="sig-line"></span></span>
-                        <span class="sig-item">日期：<span class="sig-line"></span></span>
-                    </td>
+                  <td colspan="3" class="signature-row">
+                    <span class="sig-item">办理人：<span class="sig-line"></span></span>
+                    <span class="sig-item">日期：<span class="sig-line"></span></span>
+                  </td>
                 </tr>
 
                 <tr>
-                    <td class="label-cell" rowspan="2">局主要领导意见</td>
-                    <td colspan="3" class="input-cell h-large">
-                    </td>
+                  <td class="label-cell" rowspan="2">局分管领导意见</td>
+                  <td colspan="3" class="input-cell h-large"> </td>
                 </tr>
                 <tr>
-                    <td colspan="3" class="signature-row">
-                        <span class="sig-item">办理人：<span class="sig-line"></span></span>
-                        <span class="sig-item">日期：<span class="sig-line"></span></span>
-                    </td>
+                  <td colspan="3" class="signature-row">
+                    <span class="sig-item">办理人：<span class="sig-line"></span></span>
+                    <span class="sig-item">日期：<span class="sig-line"></span></span>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="label-cell" rowspan="2">局主要领导意见</td>
+                  <td colspan="3" class="input-cell h-large"> </td>
+                </tr>
+                <tr>
+                  <td colspan="3" class="signature-row">
+                    <span class="sig-item">办理人：<span class="sig-line"></span></span>
+                    <span class="sig-item">日期：<span class="sig-line"></span></span>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -206,6 +205,14 @@
       </ContentWrap>
     </el-col>
   </el-row>
+
+  <!-- 发送弹窗 -->
+  <ProcessSendDialog
+    ref="processSendDialogRef"
+    :process-definition-id="processDefinitionId"
+    title="发送"
+    @submit="submitForm"
+  />
 </template>
 
 <script setup lang="ts">
@@ -214,6 +221,7 @@ import { useRouter } from 'vue-router'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as DefinitionApi from '@/api/bpm/definition'
 import { TimeExplainApi } from '@/api/bpm/timeexplain'
+import ProcessSendDialog from '@/components/ProcessSendDialog/index.vue'
 import dayjs from 'dayjs'
 import { useUserStore } from '@/store/modules/user'
 import { getUserProfile } from '@/api/system/user/profile'
@@ -256,6 +264,7 @@ const formRules = reactive({
   endPlace: [{ required: true, message: '目的地不能为空', trigger: 'blur' }]
 })
 const formRef = ref()
+const processSendDialogRef = ref()
 
 const processDefineKey = 'oa_out'
 const processDefinitionId = ref('')
@@ -281,21 +290,18 @@ const calculateDuration = () => {
 
   let totalDays = 0
   let currentDate = start.clone()
-  const isHoliday = (date: dayjs.Dayjs) => date.day() === 0 || date.day() === 6
 
   while (currentDate.isBefore(end) || currentDate.isSame(end)) {
-    if (!isHoliday(currentDate)) {
-      if (currentDate.isSame(start) && currentDate.isSame(end)) {
-        if (formData.value.startPeriod === AM && formData.value.endPeriod === AM) totalDays = 0.5
-        else if (formData.value.startPeriod === PM && formData.value.endPeriod === PM) totalDays = 0.5
-        else totalDays = 1
-      } else if (currentDate.isSame(start)) {
-        totalDays += formData.value.startPeriod === PM ? 0.5 : 1
-      } else if (currentDate.isSame(end)) {
-        totalDays += formData.value.endPeriod === AM ? 0.5 : 1
-      } else {
-        totalDays += 1
-      }
+    if (currentDate.isSame(start) && currentDate.isSame(end)) {
+      if (formData.value.startPeriod === AM && formData.value.endPeriod === AM) totalDays = 0.5
+      else if (formData.value.startPeriod === PM && formData.value.endPeriod === PM) totalDays = 0.5
+      else totalDays = 1
+    } else if (currentDate.isSame(start)) {
+      totalDays += formData.value.startPeriod === PM ? 0.5 : 1
+    } else if (currentDate.isSame(end)) {
+      totalDays += formData.value.endPeriod === AM ? 0.5 : 1
+    } else {
+      totalDays += 1
     }
     currentDate = currentDate.add(1, 'day')
   }
@@ -324,7 +330,7 @@ const handleSendClick = async () => {
   if (!isValid) return
   calculateDuration()
   const variables = { role_condition: maxPermissionRole.value }
-  submitForm({ nextNodeAssignees: {}, variables })
+  processSendDialogRef.value.open(variables)
 }
 
 const submitForm = async (submitData: { nextNodeAssignees: any; variables: any }) => {
@@ -338,6 +344,10 @@ const submitForm = async (submitData: { nextNodeAssignees: any; variables: any }
       role_condition: maxPermissionRole.value,
       ...(submitData.variables || {})
     })
+    
+    // 将发送弹窗选择的下一节点审批人信息注入到表单数据中
+    data.nextNodeAssignees = submitData.nextNodeAssignees
+    
     await TimeExplainApi.createTimeExplain(data)
     message.success('公出申请发起成功')
     setTimeout(() => {
@@ -356,33 +366,39 @@ onMounted(async () => {
   const res = await getUserProfile()
   if (res.dept) deptName.value = res.dept.name
   else if (res.users && res.users.dept) deptName.value = res.users.dept.name
-  const processDefinitionDetail = await DefinitionApi.getProcessDefinition(undefined, processDefineKey)
+  const processDefinitionDetail = await DefinitionApi.getProcessDefinition(
+    undefined,
+    processDefineKey
+  )
   if (processDefinitionDetail) processDefinitionId.value = processDefinitionDetail.id
 })
 </script>
 
 <style scoped lang="scss">
-
 :deep(.el-form-item) {
   margin-bottom: 0 !important;
 }
+
 :deep(.el-input__wrapper),
 :deep(.el-textarea__inner),
 :deep(.el-select__wrapper) {
-  box-shadow: none !important;
+  padding: 0 !important;
   background-color: transparent !important;
   border: none !important;
-  padding: 0 !important;
+  box-shadow: none !important;
 }
+
 :deep(.el-input__inner),
 :deep(.el-textarea__inner) {
   padding: 0 !important;
 }
+
 :deep(.el-input-group__append) {
   background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;
 }
+
 :deep(.el-form-item.is-error .el-input__wrapper),
 :deep(.el-form-item.is-error .el-textarea__inner),
 :deep(.el-form-item.is-error .el-select__wrapper) {
@@ -393,7 +409,7 @@ onMounted(async () => {
   width: 100%;
   padding: 10px 20px;
   margin: 0 auto;
-  font-family: SimSun, "Songti SC", serif;
+  font-family: SimSun, 'Songti SC', serif;
   background-color: #fff;
 }
 
@@ -412,26 +428,26 @@ onMounted(async () => {
   pointer-events: none;
   background: #f56c6c !important;
   border-radius: 4px !important;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 10px rgb(0 0 0 / 20%);
 }
 
 :deep(.el-form-item__error)::after {
-  content: "";
   position: absolute;
   top: 100%;
   left: 10px;
   display: block;
-  border-width: 4px 4px 0 4px;
+  border-color: #f56c6c transparent transparent;
   border-style: solid;
-  border-color: #f56c6c transparent transparent transparent;
+  border-width: 4px 4px 0;
+  content: '';
 }
 
 .doc-title {
   margin-bottom: 20px;
   font-size: 26px;
   font-weight: bold;
-  color: #b1351e;
   letter-spacing: 1px;
+  color: #b1351e;
   text-align: center;
 }
 
@@ -442,6 +458,7 @@ onMounted(async () => {
   border-collapse: collapse;
   table-layout: fixed;
 }
+
 .oa-table td {
   padding: 6px 10px;
   line-height: 1.4;
@@ -449,18 +466,21 @@ onMounted(async () => {
   vertical-align: middle;
   border: 1px solid #8cb4e0;
 }
+
 .label-cell {
   font-weight: bold;
   color: #333;
   text-align: center;
   background-color: #dbe9f8;
 }
+
 .input-cell {
   position: relative;
   min-height: 24px;
   overflow: visible !important;
   background-color: #fff;
 }
+
 .h-large {
   height: 100px;
   padding: 10px;
@@ -481,10 +501,12 @@ onMounted(async () => {
   text-align: right;
   background-color: #fff;
 }
+
 .sig-item {
   display: inline-block;
   margin-left: 30px;
 }
+
 .sig-line {
   display: inline-block;
   min-width: 80px;
