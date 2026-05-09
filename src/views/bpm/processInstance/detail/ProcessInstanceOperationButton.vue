@@ -218,10 +218,17 @@
                 <el-tab-pane
                   v-for="group in groupedApprovalNodes"
                   :key="group.tabKey"
-                  :label="group.tabLabel"
                   :name="group.tabKey"
                   class="flex-1"
                 >
+                  <template #label>
+                    <span
+                      v-if="(group.tabLabel || '').includes('法规科办理人')"
+                      style="margin-right: 4px; color: red"
+                      >*</span
+                    >
+                    <span>{{ group.tabLabel }}</span>
+                  </template>
                   <div
                     class="h-[390px] flex flex-row gap-3 overflow-x-auto overflow-y-hidden pb-1 custom-scrollbar"
                   >
@@ -236,12 +243,14 @@
                       >
                         <el-checkbox
                           v-model="node.checked"
-                          :label="node.name || node.taskName"
                           size="large"
                           class="!font-bold !text-gray-800 dark:!text-gray-200"
                           @change="(val) => handleNodeCheckboxChange(val, node)"
                         >
-                          {{ node.name || node.taskName }}
+                          <span class="inline-flex items-center">
+                            <!-- <span v-if="(node.flowName || node.name || node.taskName || '').includes('法规科办理人')" style="color: red; margin-right: 4px;">*</span> -->
+                            <span>{{ node.name || node.taskName }}</span>
+                          </span>
                         </el-checkbox>
                       </div>
                       <div class="pl-2 py-1 flex-1 overflow-y-auto custom-scrollbar">
@@ -1004,6 +1013,17 @@ const handleApproveConfirm = async () => {
     return
   }
 
+  // 针对“法规科办理人”节点的特殊必填校验
+  const fgkNode = approvalNodes.value.find(
+    (n) =>
+      (n.flowName || n.name || '').includes('法规科办理人') ||
+      (n.taskName || '').includes('法规科办理人')
+  )
+  if (fgkNode && !fgkNode.checked) {
+    message.warning('【法规科办理人】为必填项，请勾选并选择办理人员')
+    return
+  }
+
   // 校验节点下的人员
   // 遍历 selectedNodes
   const nextNodeAssignees: Record<string, number[]> = {}
@@ -1044,7 +1064,7 @@ const handleApproveConfirm = async () => {
       if (!node.candidateUsers || node.candidateUsers.length === 0) {
         continue
       }
-      message.warning(`节点【${node.taskName}】请至少选择一名办理人`)
+      message.warning(`节点【${node.taskName || node.name || '未知节点'}】请至少选择一名办理人`)
       return
     }
 

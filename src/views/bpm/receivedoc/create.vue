@@ -191,8 +191,13 @@
                       <td class="label-cell">监督监管</td>
                       <td colspan="3" class="input-cell" style="padding: 10px;"> 
                           <div class="compact-row">
-                              <div class="check-item mr-10px">
-                                  <span class="checkbox-mock"></span>
+                              <div
+                                class="check-item mr-10px cursor-pointer select-none"
+                                @click="formData.issupervise = !formData.issupervise"
+                              >
+                                  <span class="checkbox-mock">
+                                    <span v-if="formData.issupervise">✔</span>
+                                  </span>
                                   <span>进行监督监管</span>
                               </div>
                               
@@ -333,6 +338,7 @@ const formData = ref({
   attachFilePath: '',
   zhubandate: undefined,
   xiebandate: undefined,
+  issupervise: true,
   fileList: []
 })
 

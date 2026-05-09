@@ -198,7 +198,7 @@
       <el-table-column align="center" label="操作" fixed="right" width="150">
         <template #default="scope">
           <el-button link type="primary" @click="handleDetail(scope.row)">详情</el-button>
-          <el-button link type="warning" @click="handleWithdraw(scope.row)">撤回</el-button>
+          <el-button v-if="scope.row.status === 2" link type="warning" @click="handleWithdraw(scope.row)">撤回</el-button>
         </template>
       </el-table-column>
     </el-table>
