@@ -111,6 +111,16 @@
                         >
                           下载
                         </el-button>
+                        <el-button
+                          v-if="file.taskId === props.taskId && props.taskId"
+                          link
+                          type="danger"
+                          size="small"
+                          @click="handleDeleteAttach(file)"
+                          style="margin-left: 8px"
+                        >
+                          删除
+                        </el-button>
                       </div>
                     </div>
                   </div>
@@ -697,7 +707,47 @@ const getDocAttachments = async () => {
 
 // 辅助方法：判断是否为诉讼本身附件（taskId为空/null/undefined）
 const isBaseAttach = (taskId: any) => {
-  return !taskId || taskId === 'null' || taskId === 'undefined'
+  // 1. 无 taskId 的情况（直接上传的诉讼本身附件）
+  if (!taskId || taskId === 'null' || taskId === 'undefined') {
+    return true
+  }
+
+  // 2. 如果是当前正在办理的任务节点
+  if (taskId === props.taskId) {
+    const nodeName = props.currentNode?.name || ''
+
+    // 排除掉不展示在办理单中的特定节点（如上诉、结果录入），强制将它们的附件整合到顶部
+    if (nodeName.includes('(上诉)') || nodeName.includes('法规科(结果录入)')) {
+      return true
+    }
+
+    // 判断当前节点是否属于四大分类之一
+    const is4Category =
+      isEditable('拟办') ||
+      isEditable('法规科交办') ||
+      isEditable('局长') ||
+      isEditable('主要领导') ||
+      isEditable('分管领导') ||
+      isEditable('分管局长') ||
+      isEditable('相关单位') ||
+      isEditable('法规科办理') ||
+      isEditable('科室')
+
+    // 如果不属于这四大分类，就整合到顶部
+    return !is4Category
+  }
+
+  // 3. 如果是历史节点，判断该节点是否被四大分类的展示列表收录
+  // 提示：如果在历史节点上传了附件但没填意见，它不会进入这些 list，为了防止附件不可见，也会被整合到顶部
+  const isHistoricalCategorized = [
+    ...nibanList.value,
+    ...juzhangList.value,
+    ...lingdaoList.value,
+    ...keshiList.value
+  ].some((item) => item.taskId === taskId)
+
+  // 如果不在四大分类列表中，则整合到顶部
+  return !isHistoricalCategorized
 }
 
 // 统计诉讼本身的附件数量
@@ -1006,10 +1056,11 @@ const processActivityNodes = () => {
             taskName.includes('科室')
           ) {
             tempKeshi.push(info)
-          } else {
-            // 兜底进入科室办理
-            tempKeshi.push(info)
           }
+          // else {
+          //   // 兜底进入科室办理
+          //   tempKeshi.push(info)
+          // }
         }
       })
     }
