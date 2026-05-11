@@ -628,7 +628,51 @@ const getDocAttachments = async () => {
 
 // 辅助方法：判断是否为复议本身附件（taskId为空/null/undefined）
 const isBaseAttach = (taskId: any) => {
-  return !taskId || taskId === 'null' || taskId === 'undefined'
+  if (!taskId || taskId === 'null' || taskId === 'undefined') return true
+
+  const opinionKeys = [
+    '拟办', '法规科交办', '局长', '分管局长', '相关单位', 
+    '法规科办理', '科室', '法规科审核', '分管领导', '协助人员'
+  ]
+
+  // 1. 当前正在办理的任务
+  if (taskId === props.taskId) {
+    const hasOpinionBox = opinionKeys.some((key) => isEditable(key))
+    if (!hasOpinionBox) return true // 没有意见框的环节，附件放主列表
+    return false
+  }
+
+  // 2. 历史任务：去 activityNodes 里找对应的环节名称
+  let taskName = ''
+  for (const node of (props.activityNodes || [])) {
+    if (node.tasks) {
+      for (const task of node.tasks) {
+        if (task.id === taskId) {
+          taskName = task.name || node.name || ''
+          break
+        }
+      }
+    }
+    if (taskName) break
+  }
+
+  if (taskName) {
+    if (taskName.includes('结果录入')) return true
+    const isOpinionBox = opinionKeys.some(key => taskName.includes(key))
+    if (!isOpinionBox) {
+      return true // 名字不包含意见关键字的环节，附件放主列表
+    }
+  }
+
+  // 3. 兜底逻辑：即使是意见环节，如果没在表格展示出来，也放主列表
+  const displayedTaskIds = [
+    ...(nibanList?.value || []),
+    ...(juzhangList?.value || []),
+    ...(lingdaoList?.value || []),
+    ...(keshiList?.value || [])
+  ].map((item) => item.taskId)
+  
+  return !displayedTaskIds.includes(taskId)
 }
 
 // 统计复议本身的附件数量
