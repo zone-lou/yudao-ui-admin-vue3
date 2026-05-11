@@ -1051,11 +1051,11 @@ const handleApproveConfirm = async () => {
     // 过滤出用户
     const userIds = checkedNodes.filter((n: any) => n.id && n.nickname).map((n: any) => n.id)
 
-    const isSpecifiedNode = node.extensionProperties?.specified_flag === '1'
+    const isVirtualNode = node.taskDefKey && node.taskDefKey.endsWith('_specified')
 
     // 针对常规节点：发现没有勾选任何人，进行阻断
     if (userIds.length === 0) {
-      if (isSpecifiedNode) {
+      if (isVirtualNode) {
         message.warning(`【${node.taskName || node.name}】为必填项，请至少选择一名人员！`)
         return
       }
@@ -1068,7 +1068,7 @@ const handleApproveConfirm = async () => {
       return
     }
 
-    if (isSpecifiedNode) {
+    if (isVirtualNode) {
       const varKey =
         node.extensionProperties.variable_name || node.extensionProperties.specified_variable
       if (varKey) {
