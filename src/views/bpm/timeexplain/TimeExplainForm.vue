@@ -47,8 +47,12 @@
       <el-form-item label="请假天数" prop="days">
         <el-input v-model="formData.days" placeholder="请输入请假天数" />
       </el-form-item>
-      <el-form-item label="文件路径" prop="filepath">
-        <el-input v-model="formData.filepath" placeholder="请输入文件路径" />
+      <el-form-item label="附件" prop="filepath">
+        <UploadFile
+          ref="uploadFileRef"
+          v-model="formData.filepath"
+          :upload-api="uploadReturnInfo"
+        />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -60,6 +64,7 @@
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { TimeExplainApi, TimeExplain } from '@/api/bpm/timeexplain'
+import { uploadReturnInfo } from '@/api/infra/file'
 
 /** 外出请假补假 表单 */
 defineOptions({ name: 'TimeExplainForm' })
@@ -79,10 +84,12 @@ const formData = ref({
   reason: undefined,
   status: undefined,
   days: undefined,
-  filepath: undefined
+  filepath: undefined,
+  fileList: []
 })
 const formRules = reactive({})
 const formRef = ref() // 表单 Ref
+const uploadFileRef = ref() // 上传组件 Ref
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -110,7 +117,54 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as TimeExplain
+    const data = formData.value as unknown as any
+
+    // 处理文件上传 fileList
+    const rawFileList = uploadFileRef.value?.fileList || []
+    data.fileList = rawFileList
+      .map((item: any, index: number) => {
+        let fileId = undefined
+        let fileName = item.name
+        let filePath = ''
+        let fileExtension = ''
+
+        if (item.response?.data) {
+          const fileResponse = item.response.data
+          fileId =
+            typeof fileResponse === 'object' && fileResponse !== null
+              ? fileResponse.id
+              : fileResponse
+          fileName =
+            typeof fileResponse === 'object' && fileResponse !== null
+              ? fileResponse.name
+              : item.name
+          filePath =
+            typeof fileResponse === 'object' && fileResponse !== null
+              ? (fileResponse.path || fileResponse.url || '')
+              : ''
+          if (fileName && fileName.includes('.')) {
+            fileExtension = fileName.split('.').pop() || ''
+          }
+        } else if (item.id) {
+          fileId = item.attachFileId || item.response?.data?.id
+          fileName = item.name
+          filePath = item.url || ''
+          if (fileName && fileName.includes('.')) {
+            fileExtension = fileName.split('.').pop() || ''
+          }
+        }
+
+        return {
+          id: item.id || undefined,
+          timeExplainId: data.id,
+          attachFileId: fileId,
+          filePath: filePath,
+          fileName: fileName,
+          fileExtension: fileExtension
+        }
+      })
+      .filter((item: any) => item.attachFileId || item.id)
+
     if (formType.value === 'create') {
       await TimeExplainApi.createTimeExplain(data)
       message.success(t('common.createSuccess'))
@@ -136,7 +190,8 @@ const resetForm = () => {
     reason: undefined,
     status: undefined,
     days: undefined,
-    filepath: undefined
+    filepath: undefined,
+    fileList: []
   }
   formRef.value?.resetFields()
 }
