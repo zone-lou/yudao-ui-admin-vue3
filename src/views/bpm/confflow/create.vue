@@ -111,7 +111,11 @@
                   <td class="label-cell">附件列表</td>
                   <td colspan="3" class="input-cell">
                     <el-form-item prop="attachFilePath" class="mb-0">
-                      <UploadFile v-model="formData.attachFilePath" />
+                      <UploadFile
+                        ref="uploadFileRef"
+                        v-model="formData.attachFilePath"
+                        :upload-api="uploadReturnInfo"
+                      />
                     </el-form-item>
                   </td>
                 </tr>
@@ -192,7 +196,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { useUserStore } from '@/store/modules/user'
@@ -200,6 +204,7 @@ import { useMessage } from '@/hooks/web/useMessage'
 import * as DefinitionApi from '@/api/bpm/definition'
 import { Confflow, ConfflowApi } from '@/api/bpm/confflow'
 import { dateUtil } from '@/utils/dateUtil'
+import { uploadReturnInfo } from '@/api/infra/file'
 
 import ProcessSendDialog from '@/components/ProcessSendDialog/index.vue'
 import { NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
@@ -220,6 +225,7 @@ const processDefineKey = 'conference_report'
 
 const formLoading = ref(false)
 const formRef = ref()
+const uploadFileRef = ref()
 
 // 表单数据初始化
 const formData = ref({
@@ -244,10 +250,68 @@ const formRules = reactive({
   venue: [{ required: true, message: '会议地点不能为空', trigger: 'blur' }]
 })
 
+/** 构建请求数据 */
+const buildRequestData = () => {
+  const data = { ...formData.value } as any
+
+  const rawFileList = uploadFileRef.value?.fileList || []
+
+  data.fileList = rawFileList
+    .filter((item: any) => item.status === 'success' || item.id)
+    .map((item: any, index: number) => {
+      let fileId = undefined
+      let fileName = item.name
+      let filePath = ''
+      let fileExtension = ''
+
+      if (item.response?.data) {
+        const fileResponse = item.response.data
+        fileId =
+          typeof fileResponse === 'object' && fileResponse !== null ? fileResponse.id : fileResponse
+        fileName =
+          typeof fileResponse === 'object' && fileResponse !== null ? fileResponse.name : item.name
+        filePath =
+          typeof fileResponse === 'object' && fileResponse !== null
+            ? (fileResponse.path || fileResponse.url || '')
+            : ''
+        if (fileName && fileName.includes('.')) {
+          fileExtension = fileName.split('.').pop() || ''
+        }
+      } else if (item.id) {
+        fileId = item.attachFileId || item.response?.data?.id
+        fileName = item.name
+        filePath = item.url || ''
+        if (fileName && fileName.includes('.')) {
+          fileExtension = fileName.split('.').pop() || ''
+        }
+      }
+
+      return {
+        id: item.id || undefined,
+        confflowId: data.id,
+        attachFileId: fileId,
+        filePath: filePath,
+        fileName: fileName,
+        fileExtension: fileExtension
+      }
+    })
+    .filter((item: any) => item.attachFileId || item.id)
+
+  return data
+}
+
 /** 点击发送打开弹窗 */
 const handleOpenDialog = async () => {
   try {
     if (!formRef.value) return
+    const rawFileList = uploadFileRef.value?.fileList || []
+    const isUploading = rawFileList.some(
+      (file: any) => file.status === 'ready' || file.status === 'uploading'
+    )
+    if (isUploading) {
+      message.warning('还有文件正在上传中，请稍后发送')
+      return
+    }
     const valid = await formRef.value.validate().catch(() => false)
     if (!valid) return
     if (!processDefinitionId.value) {
@@ -265,13 +329,17 @@ const handleOpenDialog = async () => {
 const submitProcess = async (submitData: { nextNodeAssignees: any; variables: any }) => {
   formLoading.value = true
   try {
-    const data = { ...formData.value } as unknown as Confflow
+    const data = buildRequestData()
     data.nextNodeAssignees = submitData.nextNodeAssignees
     if (submitData.variables && Object.keys(submitData.variables).length > 0) {
       data.processVariablesStr = JSON.stringify(submitData.variables)
     }
 
-    await ConfflowApi.createConfflow(data)
+    if (data.id) {
+      await ConfflowApi.updateConfflow(data)
+    } else {
+      await ConfflowApi.createConfflow(data)
+    }
     message.success('会议报告单发起成功')
 
     if (sendDialogRef.value) {
@@ -312,6 +380,31 @@ onMounted(async () => {
       processDefinitionId.value = processDefinitionDetail.id
     } else {
       message.error(`流程(${processDefineKey})未配置`)
+    }
+
+    // 编辑模式：加载已有数据和附件
+    const queryId = route.query.id
+    if (queryId) {
+      const detail = await ConfflowApi.getConfflow(Number(queryId))
+      if (detail) {
+        Object.assign(formData.value, detail)
+
+        const attachList = await ConfflowApi.getConfflowAttachList(Number(queryId))
+        if (attachList && attachList.length > 0) {
+          const files = attachList.map((item: any) => ({
+            name: item.fileName,
+            url: item.fileUrl,
+            id: item.id,
+            attachFileId: item.attachFileId,
+            response: { data: { id: item.attachFileId, name: item.fileName, url: item.fileUrl, path: item.filePath } }
+          }))
+          nextTick(() => {
+            if (uploadFileRef.value) {
+              uploadFileRef.value.fileList = files
+            }
+          })
+        }
+      }
     }
   } catch (error) {
     console.error('初始化失败:', error)

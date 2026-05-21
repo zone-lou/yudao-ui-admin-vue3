@@ -56,5 +56,12 @@ export const ConfflowApi = {
   // 导出会议报告单 Excel
   exportConfflow: async (params) => {
     return await request.download({ url: `/bpm/confflow/export-excel`, params })
+  },
+
+  // 获取会议报告单附件列表
+  getConfflowAttachList: async (confflowId: number) => {
+    return await request.get({
+      url: `/bpm/confflow/confflow-attach/list-by-confflow-id?confflowId=` + confflowId
+    })
   }
 }
