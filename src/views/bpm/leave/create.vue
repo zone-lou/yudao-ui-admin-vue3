@@ -154,11 +154,7 @@
                       </td>
                       <td class="input-cell" colspan="3">
                         <el-form-item prop="filepath" class="mb-0">
-                          <UploadFile
-                            ref="uploadFileRef"
-                            v-model="formData.filepath"
-                            :upload-api="uploadReturnInfo"
-                          />
+                          <UploadFile v-model="formData.filepath" />
                         </el-form-item>
                         <div v-if="leaveFileHint" class="text-red-500 text-xs mt-1">{{
                           leaveFileHint
@@ -290,8 +286,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch, unref, onMounted, nextTick } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { ref, reactive, computed, watch, unref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as DefinitionApi from '@/api/bpm/definition'
 import { leaveApi } from '@/api/bpm/leave'
@@ -302,7 +298,6 @@ import { useUserStore } from '@/store/modules/user'
 import { getUserProfile } from '@/api/system/user/profile'
 import { useMessage } from '@/hooks/web/useMessage'
 import * as DictDataApi from '@/api/system/dict/dict.data'
-import { uploadReturnInfo } from '@/api/infra/file'
 // 新增引入弹窗组件及节点常量
 import ProcessSendDialog from '@/components/ProcessSendDialog/index.vue'
 import { NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
@@ -316,7 +311,6 @@ const deptName = ref('')
 const message = useMessage()
 const { delView } = useTagsViewStore()
 const { push, currentRoute } = useRouter()
-const route = useRoute()
 
 // ===== 弹窗控制 =====
 const sendDialogRef = ref()
@@ -461,7 +455,6 @@ const formRules = reactive({
   filepath: [{ validator: validateFilepath, trigger: 'change' }]
 })
 const formRef = ref()
-const uploadFileRef = ref()
 
 const processDefineKey = 'oa_leave'
 const processDefinitionId = ref('')
@@ -763,66 +756,8 @@ const calculateDuration = async () => {
   formData.value.totalTs = totalDays
 }
 
-/** 构建请求数据 */
-const buildRequestData = () => {
-  const data = { ...formData.value } as any
-
-  const rawFileList = uploadFileRef.value?.fileList || []
-
-  data.fileList = rawFileList
-    .filter((item: any) => item.status === 'success' || item.id)
-    .map((item: any, index: number) => {
-      let fileId = undefined
-      let fileName = item.name
-      let filePath = ''
-      let fileExtension = ''
-
-      if (item.response?.data) {
-        const fileResponse = item.response.data
-        fileId =
-          typeof fileResponse === 'object' && fileResponse !== null ? fileResponse.id : fileResponse
-        fileName =
-          typeof fileResponse === 'object' && fileResponse !== null ? fileResponse.name : item.name
-        filePath =
-          typeof fileResponse === 'object' && fileResponse !== null
-            ? (fileResponse.path || fileResponse.url || '')
-            : ''
-        if (fileName && fileName.includes('.')) {
-          fileExtension = fileName.split('.').pop() || ''
-        }
-      } else if (item.id) {
-        fileId = item.attachFileId || item.response?.data?.id
-        fileName = item.name
-        filePath = item.url || ''
-        if (fileName && fileName.includes('.')) {
-          fileExtension = fileName.split('.').pop() || ''
-        }
-      }
-
-      return {
-        id: item.id || undefined,
-        leaveId: data.id,
-        attachFileId: fileId,
-        filePath: filePath,
-        fileName: fileName,
-        fileExtension: fileExtension
-      }
-    })
-    .filter((item: any) => item.attachFileId || item.id)
-
-  return data
-}
-
 const handleSendClick = async () => {
   if (!formRef.value) return
-  const rawFileList = uploadFileRef.value?.fileList || []
-  const isUploading = rawFileList.some(
-    (file: any) => file.status === 'ready' || file.status === 'uploading'
-  )
-  if (isUploading) {
-    message.warning('还有文件正在上传中，请稍后发送')
-    return
-  }
   await calculateDuration()
   const isValid = await formRef.value.validate().catch(() => false)
   if (!isValid) return
@@ -840,7 +775,10 @@ const handleSendClick = async () => {
 const submitForm = async (submitData: { nextNodeAssignees: any; variables: any }) => {
   formLoading.value = true
   try {
-    const data = buildRequestData()
+    const data = { ...formData.value } as any
+    if (Array.isArray(data.filepath)) {
+      data.filepath = data.filepath.join(',')
+    }
 
     // 携带流程变量
     data.processVariablesStr = JSON.stringify({
@@ -853,11 +791,7 @@ const submitForm = async (submitData: { nextNodeAssignees: any; variables: any }
     // 携带下一步办理人
     data.nextNodeAssignees = submitData.nextNodeAssignees
 
-    if (data.id) {
-      await leaveApi.updateleave(data)
-    } else {
-      await leaveApi.createleave(data)
-    }
+    await leaveApi.createleave(data)
     message.success('请假申请发起成功')
 
     if (sendDialogRef.value) {
@@ -941,36 +875,6 @@ onMounted(async () => {
     processDefinitionId.value = processDefinitionDetail.id
   } else {
     message.error('流程未配置，请检查 Key: ' + processDefineKey)
-  }
-
-  // 编辑模式：加载已有数据和附件
-  const queryId = route.query.id
-  if (queryId) {
-    formLoading.value = true
-    try {
-      const detail = await leaveApi.getleave(Number(queryId))
-      if (detail) {
-        Object.assign(formData.value, detail)
-
-        const attachList = await leaveApi.getLeaveAttachList(Number(queryId))
-        if (attachList && attachList.length > 0) {
-          const files = attachList.map((item: any) => ({
-            name: item.fileName,
-            url: item.fileUrl,
-            id: item.id,
-            attachFileId: item.attachFileId,
-            response: { data: { id: item.attachFileId, name: item.fileName, url: item.fileUrl } }
-          }))
-          nextTick(() => {
-            if (uploadFileRef.value) {
-              uploadFileRef.value.fileList = files
-            }
-          })
-        }
-      }
-    } finally {
-      formLoading.value = false
-    }
   }
 })
 </script>
