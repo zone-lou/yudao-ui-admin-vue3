@@ -59,12 +59,8 @@
       <el-form-item label="参会人员会议情况及建议" prop="situation">
         <el-input v-model="formData.situation" placeholder="请输入参会人员会议情况及建议" />
       </el-form-item>
-      <el-form-item label="附件" prop="attachFilePath">
-        <UploadFile
-          ref="uploadFileRef"
-          v-model="formData.attachFilePath"
-          :upload-api="uploadReturnInfo"
-        />
+      <el-form-item label="附件路径" prop="attachFilePath">
+        <el-input v-model="formData.attachFilePath" placeholder="请输入附件路径" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -75,7 +71,6 @@
 </template>
 <script setup lang="ts">
 import { ConfflowApi, Confflow } from '@/api/bpm/confflow'
-import { uploadReturnInfo } from '@/api/infra/file'
 
 /** 会议报告单 表单 */
 defineOptions({ name: 'ConfflowForm' })
@@ -103,8 +98,7 @@ const formData = ref({
   offerUnit: undefined,
   offerPerson: undefined,
   situation: undefined,
-  attachFilePath: undefined,
-  fileList: []
+  attachFilePath: undefined
 })
 const formRules = reactive({
   startDate: [{ required: true, message: '会议时间不能为空', trigger: 'blur' }],
@@ -112,7 +106,6 @@ const formRules = reactive({
   venue: [{ required: true, message: '会议地点不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const uploadFileRef = ref() // 上传组件 Ref
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -140,54 +133,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as any
-
-    // 处理文件上传 fileList
-    const rawFileList = uploadFileRef.value?.fileList || []
-    data.fileList = rawFileList
-      .map((item: any, index: number) => {
-        let fileId = undefined
-        let fileName = item.name
-        let filePath = ''
-        let fileExtension = ''
-
-        if (item.response?.data) {
-          const fileResponse = item.response.data
-          fileId =
-            typeof fileResponse === 'object' && fileResponse !== null
-              ? fileResponse.id
-              : fileResponse
-          fileName =
-            typeof fileResponse === 'object' && fileResponse !== null
-              ? fileResponse.name
-              : item.name
-          filePath =
-            typeof fileResponse === 'object' && fileResponse !== null
-              ? (fileResponse.path || fileResponse.url || '')
-              : ''
-          if (fileName && fileName.includes('.')) {
-            fileExtension = fileName.split('.').pop() || ''
-          }
-        } else if (item.id) {
-          fileId = item.attachFileId || item.response?.data?.id
-          fileName = item.name
-          filePath = item.url || ''
-          if (fileName && fileName.includes('.')) {
-            fileExtension = fileName.split('.').pop() || ''
-          }
-        }
-
-        return {
-          id: item.id || undefined,
-          confflowId: data.id,
-          attachFileId: fileId,
-          filePath: filePath,
-          fileName: fileName,
-          fileExtension: fileExtension
-        }
-      })
-      .filter((item: any) => item.attachFileId || item.id)
-
+    const data = formData.value as unknown as Confflow
     if (formType.value === 'create') {
       await ConfflowApi.createConfflow(data)
       message.success(t('common.createSuccess'))
@@ -221,8 +167,7 @@ const resetForm = () => {
     offerUnit: undefined,
     offerPerson: undefined,
     situation: undefined,
-    attachFilePath: undefined,
-    fileList: []
+    attachFilePath: undefined
   }
   formRef.value?.resetFields()
 }
