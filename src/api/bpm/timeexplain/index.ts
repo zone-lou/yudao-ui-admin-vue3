@@ -55,12 +55,5 @@ export const TimeExplainApi = {
   // 导出外出请假补假 Excel
   exportTimeExplain: async (params) => {
     return await request.download({ url: `/bpm/time-explain/export-excel`, params })
-  },
-
-  // 获取外出请假补假附件列表
-  getTimeExplainAttachList: async (timeExplainId: number) => {
-    return await request.get({
-      url: `/bpm/time-explain/time-explain-attach/list-by-time-explain-id?timeExplainId=` + timeExplainId
-    })
   }
 }
