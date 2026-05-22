@@ -355,11 +355,11 @@ const fallbackToDefault = () => {
 defineExpose({ open })
 
 const parseFormFields = () => {
-  if (!printData.value) return
+  if (!printData.value?.processInstance) return
   const formFieldsObj = decodeFields(
     printData.value.processInstance.processDefinition?.formFields || []
   )
-  const processVariables = printData.value.processInstance.formVariables
+  const processVariables = printData.value.processInstance.formVariables || {}
   let res: any = []
   for (const item of formFieldsObj) {
     const id = item['field']

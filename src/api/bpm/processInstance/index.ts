@@ -130,15 +130,17 @@ export const getProcessInstanceBpmnModelView = async (id: string) => {
   return await request.get({ url: '/bpm/process-instance/get-bpmn-model-view?id=' + id })
 }
 
-// 获取流程实例打印数据（下载 docx）
+// 获取流程实例打印数据
 export const getProcessInstancePrintData = async (id: string) => {
   return await request.download({
-    url: '/bpm/process-instance/get-print-word?processInstanceId=' + id
+    url: '/bpm/process-instance/get-print-data?processInstanceId=' + id
   })
 }
 // 获取流程实例 Word 文件地址（供 OnlyOffice 打开）
 export const getProcessInstancePrintWordFile = async (id: string) => {
-  return await request.get({ url: '/bpm/process-instance/get-print-word-file?processInstanceId=' + id })
+  return await request.get({
+    url: '/bpm/process-instance/get-print-word-file?processInstanceId=' + id
+  })
 }
 // 获得统一流程实例分页 (办件查询)
 export const getUnifiedProcessInstancePage = (params: any) => {

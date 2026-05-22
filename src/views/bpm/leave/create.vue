@@ -558,7 +558,7 @@ watch(
         maxDays = 3
         break
       case '4':
-        maxDays = 188
+        maxDays = 158
         break
       case '3':
         maxDays = Math.max(0, 18 - stat.totalDays)
@@ -915,7 +915,6 @@ onMounted(async () => {
 }
 
 .oa-container {
-  box-sizing: border-box !important;
   width: 994px !important;
   max-width: 100% !important;
   min-height: 1123px !important;
@@ -924,6 +923,7 @@ onMounted(async () => {
   font-family: SimSun, 'Songti SC', STSong, serif;
   background-color: #fff;
   box-shadow: 0 4px 16px rgb(0 0 0 / 15%) !important;
+  box-sizing: border-box !important;
 }
 
 :deep(.el-form-item__error) {
