@@ -213,7 +213,7 @@
             <td class="center-text label-cell" style="background: none">日 期</td>
           </tr>
           <tr v-if="isEditable('领导意见')" class="print-hide-row">
-            <td class="center-text data-text" style="height: 35px">
+            <td class="center-text data-text" style="height: 50px">
               {{ userStore.getUser.nickname }}
             </td>
             <td colspan="2" class="data-text" style="padding: 4px 8px; text-align: left">
@@ -235,7 +235,7 @@
             )"
             :key="'leader-' + index"
           >
-            <td class="center-text data-text" style="height: 35px">
+            <td class="center-text data-text" style="height: 50px">
               {{ info.assigneeUser?.nickname || info.name || '' }}
             </td>
             <td colspan="2" class="data-text" style="padding: 4px 8px; text-align: left">
@@ -252,7 +252,7 @@
             <td class="center-text label-cell" style="background: none">日 期</td>
           </tr>
           <tr v-if="isEditable('分管领导') || isEditable('局领导')" class="print-hide-row">
-            <td class="center-text data-text" style="height: 35px">
+            <td class="center-text data-text" style="height: 50px">
               {{ userStore.getUser.nickname }}
             </td>
             <td colspan="2" class="data-text" style="padding: 4px 8px; text-align: left">
@@ -274,7 +274,7 @@
             )"
             :key="'deputy-' + index"
           >
-            <td class="center-text data-text" style="height: 35px">
+            <td class="center-text data-text" style="height: 50px">
               {{ info.assigneeUser?.nickname || info.name || '' }}
             </td>
             <td colspan="2" class="data-text" style="padding: 4px 8px; text-align: left">
@@ -303,7 +303,7 @@
             "
             class="print-hide-row"
           >
-            <td class="center-text data-text" style="height: 35px">
+            <td class="center-text data-text" style="height: 50px">
               {{ userStore.getUser.nickname }}
             </td>
             <td colspan="2" class="data-text" style="padding: 4px 8px; text-align: left">
@@ -333,7 +333,7 @@
             )"
             :key="'reader-' + index"
           >
-            <td class="center-text data-text" style="height: 35px">
+            <td class="center-text data-text" style="height: 50px">
               <span
                 v-if="(info.name || '').includes('主办')"
                 style="margin-right: 4px; font-weight: bold; color: red"
@@ -598,10 +598,37 @@ const formatCommaData = (val: any) => {
 
 const DIRECT_RENDER_EXTENSIONS = [
   'pdf',
-  'jpg', 'jpeg', 'png', 'gif', 'bmp', 'ico', 'webp', 'svg', 'tif', 'tiff',
-  'mp4', 'webm', 'mkv', 'avi', 'flv', 'mov', 'wmv', 
-  'mp3', 'wav', 'flac', 'ogg', 'aac',
-  'txt', 'json', 'xml', 'md', 'java', 'js', 'css', 'html', 'sql'
+  'jpg',
+  'jpeg',
+  'png',
+  'gif',
+  'bmp',
+  'ico',
+  'webp',
+  'svg',
+  'tif',
+  'tiff',
+  'mp4',
+  'webm',
+  'mkv',
+  'avi',
+  'flv',
+  'mov',
+  'wmv',
+  'mp3',
+  'wav',
+  'flac',
+  'ogg',
+  'aac',
+  'txt',
+  'json',
+  'xml',
+  'md',
+  'java',
+  'js',
+  'css',
+  'html',
+  'sql'
 ]
 
 const handlePreview = (file: any) => {
@@ -674,15 +701,28 @@ onMounted(() => {
   .print-hide-row {
     display: none !important;
   }
+
+  /* stylelint-disable-next-line selector-id-pattern */
+  #printDivTag .oa-container {
+    width: 100% !important;
+    min-height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+  }
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .oa-container {
-  width: 100%;
-  padding: 10px 20px;
-  margin: 0 auto;
+  width: 994px !important; /* 参照A4纸宽度 */
+  max-width: 100% !important;
+  min-height: 1123px !important; /* 参照A4高度比例 */
+  padding: 40px 50px !important; /* 适当减小左右留白 */
+  margin: 20px auto !important;
   font-family: SimSun, 'Songti SC', STSong, serif;
   background-color: #fff;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 15%) !important;
+  box-sizing: border-box !important;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -721,7 +761,7 @@ onMounted(() => {
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .data-text {
   font-family: SimSun, 'Songti SC', STSong, serif;
-  font-size: 14px !important;
+  font-size: 15px !important; /* 稍微增大字体 */
   color: #000;
   word-break: break-all;
   border-bottom: none !important;
@@ -737,9 +777,9 @@ onMounted(() => {
 
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .oa-table td {
-  padding: 4px 6px;
-  font-size: 14px;
-  line-height: 1.4;
+  padding: 16px 12px !important; /* 强制增大单元格上下内边距，使单行行高明显增高 */
+  font-size: 15px !important;
+  line-height: 1.5 !important;
   color: #000;
   vertical-align: middle;
   border: 1px solid #d71920;
@@ -747,7 +787,7 @@ onMounted(() => {
 
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .label-cell {
-  width: 110px;
+  width: 140px !important; /* 标签单元格稍微加宽以适配较大的留白和字体 */
   font-weight: bold;
   color: #d71920;
   text-align: center;
@@ -801,18 +841,18 @@ onMounted(() => {
 
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .h-80 {
-  height: 80px;
+  height: 100px; /* 从80增高到100 */
   vertical-align: top;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .h-40 {
-  height: 40px;
+  height: 50px;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .h-35 {
-  height: 35px;
+  height: 45px;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */

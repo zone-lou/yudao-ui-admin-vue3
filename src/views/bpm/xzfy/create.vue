@@ -364,7 +364,7 @@
                   <colgroup>
                     <col style="width: 120px" />
                     <col style="width: auto" />
-                    <col style="width: 140px" />
+                    <col style="width: 160px" />
                     <col style="width: 150px" />
                   </colgroup>
                   <tbody>
@@ -381,7 +381,7 @@
                         进行监督监管
                       </div>
                     </td>
-                    <td class="label-cell">科室办理办结日期</td>
+                    <td class="label-cell" style="white-space: nowrap">科室办理办结日期</td>
                     <td class="data-text center-text" style="padding: 0">
                       <el-date-picker
                         v-model="formData.zhubandate"
@@ -429,9 +429,9 @@
                     <td class="sub-header">办理日期</td>
                   </tr>
                   <tr>
-                    <td class="h-35 data-text"></td>
-                    <td class="h-35 data-text center-text"></td>
-                    <td class="h-35 data-text center-text"></td>
+                    <td class="h-60 data-text"></td>
+                    <td class="h-60 data-text center-text"></td>
+                    <td class="h-60 data-text center-text"></td>
                   </tr>
 
                   <!-- 科室单位办理意见 (多人列表) -->
@@ -442,9 +442,9 @@
                     <td class="sub-header">办理日期</td>
                   </tr>
                   <tr>
-                    <td class="h-35 data-text"></td>
-                    <td class="h-35 data-text center-text"></td>
-                    <td class="h-35 data-text center-text"></td>
+                    <td class="h-60 data-text"></td>
+                    <td class="h-60 data-text center-text"></td>
+                    <td class="h-60 data-text center-text"></td>
                   </tr>
                   </tbody>
                 </table>
@@ -753,12 +753,14 @@ onMounted(async () => {
 }
 
 #printDivTag .oa-container {
-  width: 1100px;
-  max-width: 100%;
-  padding: 40px;
-  margin: 0 auto;
+  box-sizing: border-box !important;
+  width: 994px !important;
+  max-width: 100% !important;
+  min-height: 1123px !important;
+  padding: 40px 50px !important;
+  margin: 20px auto !important;
   background-color: #fff;
-  box-shadow: none;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 15%) !important;
 }
 
 #printDivTag .doc-title {
@@ -795,15 +797,16 @@ onMounted(async () => {
 
 #printDivTag .oa-table {
   width: 100%;
+  font-size: 15px !important;
   border: 2px solid #d71920;
   border-collapse: collapse;
   table-layout: fixed;
 }
 
 #printDivTag .oa-table td {
-  padding: 6px 8px;
-  font-size: 15px;
-  line-height: 1.5;
+  padding: 16px 12px !important;
+  font-size: 15px !important;
+  line-height: 1.5 !important;
   color: #000;
   word-wrap: break-word;
   vertical-align: middle;
@@ -822,6 +825,10 @@ onMounted(async () => {
   vertical-align: top;
 }
 
+#printDivTag .h-60 {
+  height: 60px;
+}
+
 #printDivTag .h-large {
   height: 120px;
   vertical-align: top;
@@ -831,9 +838,9 @@ onMounted(async () => {
   height: 35px;
 }
 
-#printDivTag .signature-row {
-  height: 30px;
-  padding: 0 !important;
+#printDivTag .oa-table td.signature-row {
+  height: 35px;
+  padding: 5px 12px !important;
 }
 
 #printDivTag .sig-container {
@@ -849,8 +856,9 @@ onMounted(async () => {
   min-width: 100px;
 }
 
-#printDivTag .sub-header {
-  height: 30px;
+#printDivTag .oa-table td.sub-header {
+  height: 35px;
+  padding: 5px 12px !important;
   font-weight: normal;
   text-align: center;
 }

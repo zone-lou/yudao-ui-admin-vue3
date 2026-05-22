@@ -36,12 +36,12 @@
 
             <table class="oa-table">
               <colgroup>
-                <col style="width: 15%" />
-                <col style="width: 20%" />
-                <col style="width: 15%" />
-                <col style="width: 20%" />
-                <col style="width: 15%" />
-                <col style="width: 15%" />
+                <col style="width: 120px" />
+                <col style="width: auto" />
+                <col style="width: 100px" />
+                <col style="width: 120px" />
+                <col style="width: 120px" />
+                <col style="width: 120px" />
               </colgroup>
               <tbody>
                 <!-- 标题 -->
@@ -65,6 +65,7 @@
                   >
                   <td class="input-cell" rowspan="2" colspan="2">
                     <div
+                      class="doc-number-wrap"
                       style="display: flex; align-items: center; justify-content: center; gap: 4px"
                     >
                       <el-form-item prop="sendDocNumber" style="width: 130px">
@@ -78,7 +79,7 @@
                         </el-select>
                       </el-form-item>
                       <span>〔</span>
-                      <el-form-item prop="year" style="width: 80px">
+                      <el-form-item prop="year" style="width: 60px">
                         <el-date-picker
                           v-model="formData.year"
                           type="year"
@@ -88,7 +89,7 @@
                         />
                       </el-form-item>
                       <span>〕</span>
-                      <el-form-item prop="docSequence" style="width: 80px">
+                      <el-form-item prop="docSequence" style="width: 60px">
                         <el-input v-model="formData.docSequence" placeholder="" />
                       </el-form-item>
                       <span>号</span>
@@ -210,78 +211,42 @@
                 </tr>
 
                 <!-- 合法性审查 -->
-                <tr style="height: 35px">
+                <tr>
                   <td class="label-cell" rowspan="2">合法性审查</td>
-                  <td class="label-cell" style="text-align: center; background-color: transparent"
-                    >姓名</td
-                  >
-                  <td
-                    class="label-cell"
-                    style="text-align: center; background-color: transparent"
-                    colspan="2"
-                    >日期</td
-                  >
-                  <td
-                    class="label-cell"
-                    style="text-align: center; background-color: transparent"
-                    colspan="2"
-                    >意见</td
-                  >
+                  <td class="sub-header">姓名</td>
+                  <td class="sub-header" colspan="2">日期</td>
+                  <td class="sub-header" colspan="2">意见</td>
                 </tr>
-                <tr style="height: 35px">
-                  <td class="data-text"></td>
-                  <td class="data-text" colspan="2"></td>
-                  <td class="data-text" colspan="2"></td>
+                <tr>
+                  <td class="h-60 data-text center-text"></td>
+                  <td class="h-60 data-text center-text" colspan="2"></td>
+                  <td class="h-60 data-text center-text" colspan="2"></td>
                 </tr>
 
                 <!-- 文字格式审查 -->
-                <tr style="height: 35px">
+                <tr>
                   <td class="label-cell" rowspan="2">文字格式审查</td>
-                  <td class="label-cell" style="text-align: center; background-color: transparent"
-                    >姓名</td
-                  >
-                  <td
-                    class="label-cell"
-                    style="text-align: center; background-color: transparent"
-                    colspan="2"
-                    >日期</td
-                  >
-                  <td
-                    class="label-cell"
-                    style="text-align: center; background-color: transparent"
-                    colspan="2"
-                    >意见</td
-                  >
+                  <td class="sub-header">姓名</td>
+                  <td class="sub-header" colspan="2">日期</td>
+                  <td class="sub-header" colspan="2">意见</td>
                 </tr>
-                <tr style="height: 35px">
-                  <td class="data-text"></td>
-                  <td class="data-text" colspan="2"></td>
-                  <td class="data-text" colspan="2"></td>
+                <tr>
+                  <td class="h-60 data-text center-text"></td>
+                  <td class="h-60 data-text center-text" colspan="2"></td>
+                  <td class="h-60 data-text center-text" colspan="2"></td>
                 </tr>
 
                 <!-- 分管领导审阅 -->
-                <tr style="height: 35px">
+                <tr>
                   <td class="label-cell" rowspan="2">分管领导审阅</td>
-                  <td class="label-cell" style="text-align: center; background-color: transparent"
-                    >姓名</td
-                  >
-                  <td
-                    class="label-cell"
-                    style="text-align: center; background-color: transparent"
-                    colspan="2"
-                    >日期</td
-                  >
-                  <td
-                    class="label-cell"
-                    style="text-align: center; background-color: transparent"
-                    colspan="2"
-                    >意见</td
-                  >
+                  <td class="sub-header">姓名</td>
+                  <td class="sub-header" colspan="2">日期</td>
+                  <td class="sub-header" colspan="2">意见</td>
                 </tr>
-                <tr style="height: 35px">
-                  <td class="data-text"></td>
-                  <td class="data-text" colspan="2"></td>
-                  <td class="data-text" colspan="2"></td>
+                <tr>
+                  <td class="h-60 data-text center-text"></td>
+                  <td class="h-60 data-text center-text" colspan="2"></td>
+                  <td class="h-60 data-text center-text" colspan="2"></td>
                 </tr>
 
                 <!-- 机关信息 -->
@@ -641,16 +606,20 @@ onMounted(async () => {
   }
 }
 
-.oa-container {
+#printDivTag {
   width: 100%;
-  padding: 10px 20px;
-  margin: 0 auto;
-  font-family: SimSun, 'Songti SC', STSong, serif;
+  max-width: 994px;
+  min-height: 1123px;
+  padding: 50px 72px;
+  margin: 0 auto 20px;
   background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
 }
 
-.doc-title {
+#printDivTag .doc-title {
   margin-bottom: 20px;
+  font-family: SimSun, 'Songti SC', STSong, serif;
   font-size: 26px;
   font-weight: bold;
   letter-spacing: 2px;
@@ -658,46 +627,92 @@ onMounted(async () => {
   text-align: center;
 }
 
-.oa-table {
+#printDivTag .oa-table {
   width: 100%;
+  font-family: SimSun, 'Songti SC', STSong, serif;
+  font-size: 15px;
   border: 2px solid #d71920;
   border-collapse: collapse;
   table-layout: fixed;
 }
 
-.oa-table td {
-  padding: 4px 6px;
-  font-size: 14px;
-  line-height: 1.4;
+#printDivTag .oa-table td {
+  padding: 16px 12px !important;
+  line-height: 1.5;
   color: #000;
-  vertical-align: middle;
   border: 1px solid #d71920;
 }
 
-.label-cell {
+#printDivTag .label-cell {
   width: 120px;
   font-weight: bold;
   color: #d71920;
   text-align: center;
   white-space: nowrap;
-  background-color: #fffbfc;
 }
 
-.center-text {
+#printDivTag .data-text {
+  color: #333;
+}
+
+#printDivTag .center-text {
   text-align: center;
 }
 
-.min-h-cell {
+#printDivTag .h-80 {
+  height: 80px;
+}
+
+#printDivTag .h-60 {
+  height: 60px;
+}
+
+#printDivTag .h-large {
+  height: 120px;
+  vertical-align: top;
+}
+
+#printDivTag .oa-table td.signature-row {
   height: 35px;
+  padding: 5px 12px !important;
+}
+
+#printDivTag .sig-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 100%;
+  color: #444;
+}
+
+#printDivTag .sign-input {
+  display: inline-block;
+  min-width: 100px;
+}
+
+#printDivTag .oa-table td.sub-header {
+  height: 35px;
+  padding: 5px 12px !important;
+  font-weight: normal;
+  text-align: center;
+  background-color: transparent !important;
+}
+
+#printDivTag .sub-header-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 
 .input-cell {
-  padding: 4px 8px !important;
   overflow: visible; /* 防止 el-form-item__error 被截断 */
 }
 
 /* ================== Element Plus 覆写 ================== */
 :deep(.el-input__wrapper),
+:deep(.el-select__wrapper),
 :deep(.el-textarea__inner) {
   padding: 0;
   background-color: transparent;
@@ -759,5 +774,9 @@ onMounted(async () => {
     outline: none;
     box-shadow: none !important;
   }
+}
+
+.doc-number-wrap :deep(.el-input__inner) {
+  text-align: center !important;
 }
 </style>

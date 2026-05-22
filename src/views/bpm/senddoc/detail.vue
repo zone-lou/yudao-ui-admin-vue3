@@ -5,12 +5,12 @@
 
       <table class="oa-table">
         <colgroup>
-          <col style="width: 15%" />
-          <col style="width: 20%" />
-          <col style="width: 15%" />
-          <col style="width: 20%" />
-          <col style="width: 15%" />
-          <col style="width: 15%" />
+          <col style="width: 120px" />
+          <col style="width: auto" />
+          <col style="width: 100px" />
+          <col style="width: 120px" />
+          <col style="width: 120px" />
+          <col style="width: 120px" />
         </colgroup>
         <tbody>
           <!-- 标题 -->
@@ -96,78 +96,47 @@
             </td>
           </tr>
 
-          <!-- 审查环节预留展示位 -->
-          <!-- 合法性审查 -->
-          <tr style="height: 35px;">
-            <td class="label-cell" rowspan="2">合法性审查</td>
-            <td class="label-cell" style="text-align: center; background-color: transparent;">姓名</td>
-            <td class="label-cell" style="text-align: center; background-color: transparent;" colspan="2">日期</td>
-            <td class="label-cell" style="text-align: center; background-color: transparent;" colspan="2">意见</td>
-          </tr>
-          <tr style="height: 35px;">
-            <td class="data-text"></td>
-            <td class="data-text" colspan="2"></td>
-            <td class="data-text" colspan="2"></td>
-          </tr>
-          
-          <!-- 文字格式审查 -->
-          <tr style="height: 35px;">
-            <td class="label-cell" rowspan="2">文字格式审查</td>
-            <td class="label-cell" style="text-align: center; background-color: transparent;">姓名</td>
-            <td class="label-cell" style="text-align: center; background-color: transparent;" colspan="2">日期</td>
-            <td class="label-cell" style="text-align: center; background-color: transparent;" colspan="2">意见</td>
-          </tr>
-          <tr style="height: 35px;">
-            <td class="data-text"></td>
-            <td class="data-text" colspan="2"></td>
-            <td class="data-text" colspan="2"></td>
-          </tr>
-
-          <!-- 分管领导审阅 -->
-          <tr style="height: 35px;">
-            <td class="label-cell" rowspan="2">分管领导审阅</td>
-            <td class="label-cell" style="text-align: center; background-color: transparent;">姓名</td>
-            <td class="label-cell" style="text-align: center; background-color: transparent;" colspan="2">日期</td>
-            <td class="label-cell" style="text-align: center; background-color: transparent;" colspan="2">意见</td>
-          </tr>
-          <tr style="height: 35px;">
-            <td class="data-text"></td>
-            <td class="data-text" colspan="2"></td>
-            <td class="data-text" colspan="2"></td>
-          </tr>
+          <!-- 审查环节通过下方 nodeBlocks 动态渲染 -->
 
           <template v-for="(block, idx) in nodeBlocks" :key="idx">
             <tr>
               <td class="label-cell" :rowspan="(isEditable(block.keywords) ? (block.list.length + 1) : Math.max(1, block.list.length)) + 1">{{ block.title }}</td>
-              <td class="label-cell min-h-cell" style="text-align: center; background-color: transparent;">姓名</td>
-              <td class="label-cell min-h-cell" style="text-align: center; background-color: transparent;" colspan="2">日期</td>
-              <td class="label-cell min-h-cell" style="text-align: center; background-color: transparent;" colspan="2">意见</td>
+              <td class="sub-header">姓名</td>
+              <td class="sub-header" colspan="2">日期</td>
+              <td class="sub-header" colspan="2">意见</td>
             </tr>
             <!-- 已有的办理记录 -->
             <tr v-for="(info, i) in block.list" :key="'item-' + idx + '-' + i">
-              <td class="data-text min-h-cell" style="text-align: center;">{{ info.assigneeUser?.nickname }}</td>
-              <td class="data-text min-h-cell" style="text-align: center;" colspan="2">{{ formatDateExact(info.endTime) }}</td>
-              <td class="data-text min-h-cell" colspan="2">{{ info.comment }}</td>
+              <td class="h-60 data-text center-text">{{ info.assigneeUser?.nickname }}</td>
+              <td class="h-60 data-text center-text" colspan="2">{{ formatDateExact(info.endTime) }}</td>
+              <td class="h-60 data-text" colspan="2" style="padding: 0; vertical-align: top;">
+                <div class="relative w-full h-full" style="padding: 6px 8px">
+                  <div class="text-left break-all whitespace-pre-wrap">{{ info.comment }}</div>
+                </div>
+              </td>
             </tr>
             <!-- 当前正在处理激活的行（直接获取当前登录人回显） -->
-            <tr v-if="isEditable(block.keywords)">
-              <td class="data-text min-h-cell" style="text-align: center;">{{ userStore.getUser.nickname }}</td>
-              <td class="data-text min-h-cell" style="text-align: center;" colspan="2">{{ formatDateExact(new Date().getTime()) }}</td>
-              <td class="data-text min-h-cell" colspan="2" style="padding: 0;">
-                <el-input
-                  v-model="currentOpinion"
-                  type="textarea"
-                  :rows="2"
-                  :placeholder="`请输入${block.title}意见`"
-                  class="w-full h-full"
-                />
+            <tr v-if="isEditable(block.keywords)" class="print-hide-row">
+              <td class="h-60 data-text center-text">{{ userStore.getUser.nickname }}</td>
+              <td class="h-60 data-text center-text" colspan="2">{{ formatDateExact(new Date().getTime()) }}</td>
+              <td class="h-60 data-text" colspan="2" style="padding: 0; vertical-align: top;">
+                <div class="w-full h-full relative" style="padding: 6px 8px">
+                  <el-input
+                    v-model="currentOpinion"
+                    type="textarea"
+                    :rows="2"
+                    :placeholder="`请输入${block.title}意见`"
+                    class="w-full h-full"
+                    style="border: none"
+                  />
+                </div>
               </td>
             </tr>
             <!-- 无数据且非当前处理人时做占位空行 -->
             <tr v-if="block.list.length === 0 && !isEditable(block.keywords)">
-              <td class="data-text min-h-cell" style="text-align: center;"></td>
-              <td class="data-text min-h-cell" style="text-align: center;" colspan="2"></td>
-              <td class="data-text min-h-cell" colspan="2"></td>
+              <td class="h-60 data-text center-text"></td>
+              <td class="h-60 data-text center-text" colspan="2"></td>
+              <td class="h-60 data-text" colspan="2"></td>
             </tr>
           </template>
 
@@ -554,17 +523,21 @@ defineExpose({
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
-#printDivTag .oa-container {
+#printDivTag {
   width: 100%;
-  padding: 10px 20px;
-  margin: 0 auto;
-  font-family: SimSun, 'Songti SC', STSong, serif;
+  max-width: 994px;
+  min-height: 1123px;
+  padding: 50px 72px;
+  margin: 0 auto 20px;
   background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .doc-title {
   margin-bottom: 20px;
+  font-family: SimSun, 'Songti SC', STSong, serif;
   font-size: 26px;
   font-weight: bold;
   letter-spacing: 2px;
@@ -575,6 +548,8 @@ defineExpose({
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .oa-table {
   width: 100%;
+  font-family: SimSun, 'Songti SC', STSong, serif;
+  font-size: 15px;
   border: 2px solid #d71920;
   border-collapse: collapse;
   table-layout: fixed;
@@ -582,17 +557,10 @@ defineExpose({
 
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .oa-table td {
-  padding: 4px 6px;
-  font-size: 14px;
-  line-height: 1.4;
+  padding: 16px 12px !important;
+  line-height: 1.5;
   color: #000;
-  vertical-align: middle;
   border: 1px solid #d71920;
-}
-
-/* 之前为“姓名、日期、意见”加的特供最小高度，避免因为统一 padding 导致过扁 */
-#printDivTag .oa-table td.min-h-cell {
-  height: 40px;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -601,16 +569,62 @@ defineExpose({
   color: #d71920;
   text-align: center;
   white-space: nowrap;
-  background-color: #fffbfc; /* 回归收文的浅粉红色背景，去除纯绿等色块 */
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .data-text {
-  font-family: SimSun, 'Songti SC', STSong, serif;
-  font-size: 14px !important;
-  color: #000;
-  word-break: break-all;
-  border-bottom: none !important;
+  color: #333;
+}
+
+#printDivTag .center-text {
+  text-align: center;
+}
+
+#printDivTag .h-80 {
+  height: 80px;
+}
+
+#printDivTag .h-60 {
+  height: 60px;
+}
+
+#printDivTag .h-large {
+  height: 120px;
+  vertical-align: top;
+}
+
+#printDivTag .oa-table td.signature-row {
+  height: 35px;
+  padding: 5px 12px !important;
+}
+
+#printDivTag .sig-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 100%;
+  color: #444;
+}
+
+#printDivTag .sign-input {
+  display: inline-block;
+  min-width: 100px;
+}
+
+#printDivTag .oa-table td.sub-header {
+  height: 35px;
+  padding: 5px 12px !important;
+  font-weight: normal;
+  text-align: center;
+  background-color: transparent !important;
+}
+
+#printDivTag .sub-header-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 
 .signature-line {

@@ -170,10 +170,12 @@
                   <td colspan="3" class="footer-row">
                     <div
                       class="footer-content"
-                      style="display: flex; justify-content: center; gap: 50px"
+                      style="display: flex; justify-content: start; gap: 20px"
                     >
-                      <span>办理人员：<span class="sign-input"></span></span>
-                      <span>日期：<span class="sign-input"></span></span>
+                      <span style="margin-left: 20px"
+                        >办理人员：<span class="sign-input"></span
+                      ></span>
+                      <span>办理日期：<span class="sign-input"></span></span>
                     </div>
                   </td>
                 </tr>
@@ -272,7 +274,7 @@ const buildRequestData = () => {
           typeof fileResponse === 'object' && fileResponse !== null ? fileResponse.name : item.name
         filePath =
           typeof fileResponse === 'object' && fileResponse !== null
-            ? (fileResponse.path || fileResponse.url || '')
+            ? fileResponse.path || fileResponse.url || ''
             : ''
         if (fileName && fileName.includes('.')) {
           fileExtension = fileName.split('.').pop() || ''
@@ -396,7 +398,14 @@ onMounted(async () => {
             url: item.fileUrl,
             id: item.id,
             attachFileId: item.attachFileId,
-            response: { data: { id: item.attachFileId, name: item.fileName, url: item.fileUrl, path: item.filePath } }
+            response: {
+              data: {
+                id: item.attachFileId,
+                name: item.fileName,
+                url: item.fileUrl,
+                path: item.filePath
+              }
+            }
           }))
           nextTick(() => {
             if (uploadFileRef.value) {
@@ -422,11 +431,15 @@ onMounted(async () => {
 }
 
 .oa-container {
-  width: 100%;
-  padding: 10px 20px;
-  margin: 0 auto;
+  width: 994px !important;
+  max-width: 100% !important;
+  min-height: 1123px !important;
+  padding: 40px 50px !important;
+  margin: 20px auto !important;
   font-family: SimSun, 'Songti SC', STSong, serif;
   background-color: #fff;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 15%) !important;
+  box-sizing: border-box !important;
 }
 
 .doc-title {
@@ -440,15 +453,16 @@ onMounted(async () => {
 
 .oa-table {
   width: 100%;
+  font-size: 15px !important;
   border: 1px solid #d71920;
   border-collapse: collapse;
   table-layout: fixed;
 }
 
 .oa-table td {
-  padding: 8px;
-  font-size: 14px;
-  line-height: 1.4;
+  padding: 16px 12px !important;
+  font-size: 15px !important;
+  line-height: 1.5 !important;
   color: #000;
   word-wrap: break-word;
   vertical-align: middle;
@@ -484,8 +498,9 @@ onMounted(async () => {
   vertical-align: top;
 }
 
-.footer-row {
+.oa-table td.footer-row {
   height: 35px;
+  padding: 5px 12px !important;
   vertical-align: middle;
 }
 
@@ -499,7 +514,8 @@ onMounted(async () => {
   text-align: center;
 }
 
-.nested-table-container {
+.oa-table td.nested-table-container {
+  height: 100%;
   padding: 0 !important;
 }
 
@@ -512,7 +528,7 @@ onMounted(async () => {
 }
 
 .nested-table td {
-  padding: 5px;
+  padding: 5px !important;
   vertical-align: middle;
   border: none;
   border-right: 1px solid #d71920 !important;
@@ -529,9 +545,10 @@ onMounted(async () => {
 
 .sub-header {
   height: 30px;
-  font-weight: bold;
-  color: #d71920;
+  // font-weight: bold;
+  color: #000;
   text-align: center;
+  background-color: transparent;
 }
 
 .sub-content {

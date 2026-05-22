@@ -206,12 +206,12 @@
         </tr>
         <tr v-else>
           <td colspan="3" class="footer-row">
-            <div class="footer-content" style="justify-content: center">
-              <span
+            <div class="footer-content" style="justify-content: start">
+              <span style="margin-left: 20px"
                 >办理人员：<span class="sign-input">{{ directorHandler }}</span></span
               >
-              <span style="margin-left: 50px"
-                >日期：<span class="sign-input">{{ directorDate }}</span></span
+              <span
+                >办理日期：<span class="sign-input">{{ directorDate }}</span></span
               >
             </div>
           </td>
@@ -428,10 +428,37 @@ const processFileList = (pathStr: string | undefined) => {
 
 const DIRECT_RENDER_EXTENSIONS = [
   'pdf',
-  'jpg', 'jpeg', 'png', 'gif', 'bmp', 'ico', 'webp', 'svg', 'tif', 'tiff',
-  'mp4', 'webm', 'mkv', 'avi', 'flv', 'mov', 'wmv', 
-  'mp3', 'wav', 'flac', 'ogg', 'aac',
-  'txt', 'json', 'xml', 'md', 'java', 'js', 'css', 'html', 'sql'
+  'jpg',
+  'jpeg',
+  'png',
+  'gif',
+  'bmp',
+  'ico',
+  'webp',
+  'svg',
+  'tif',
+  'tiff',
+  'mp4',
+  'webm',
+  'mkv',
+  'avi',
+  'flv',
+  'mov',
+  'wmv',
+  'mp3',
+  'wav',
+  'flac',
+  'ogg',
+  'aac',
+  'txt',
+  'json',
+  'xml',
+  'md',
+  'java',
+  'js',
+  'css',
+  'html',
+  'sql'
 ]
 
 /** 处理预览 */
@@ -484,13 +511,15 @@ onMounted(() => {
 
 <style scoped>
 .oa-container {
-  width: 1100px;
-  max-width: 100%;
-  padding: 30px 40px;
-  margin: 0 auto;
+  width: 994px !important;
+  max-width: 100% !important;
+  min-height: 1123px !important;
+  padding: 40px 50px !important;
+  margin: 20px auto !important;
   font-family: SimSun, 'Songti SC', STSong, serif;
   background-color: #fff;
-  box-shadow: none;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 15%) !important;
+  box-sizing: border-box !important;
 }
 
 /* 标题样式 */
@@ -506,15 +535,16 @@ onMounted(() => {
 /* 表格通用样式 */
 .oa-table {
   width: 100%;
+  font-size: 15px !important;
   border: 1px solid #d71920;
   border-collapse: collapse;
   table-layout: fixed;
 }
 
 .oa-table td {
-  padding: 8px;
-  font-size: 14px;
-  line-height: 1.4;
+  padding: 16px 12px !important;
+  font-size: 15px !important;
+  line-height: 1.5 !important;
   color: #000;
   word-wrap: break-word;
   vertical-align: middle;
@@ -548,8 +578,9 @@ onMounted(() => {
 }
 
 /* 底部签字区域 */
-.footer-row {
+.oa-table td.footer-row {
   height: 35px;
+  padding: 5px 12px !important;
   vertical-align: middle;
 }
 
@@ -569,7 +600,7 @@ onMounted(() => {
 }
 
 /* === 修复后的嵌套表格样式 (核心修改) === */
-.nested-table-container {
+.oa-table td.nested-table-container {
   height: 100%;
   padding: 0 !important; /* 强制移除内边距 */
 }
@@ -586,7 +617,7 @@ onMounted(() => {
 .nested-table td,
 .sub-header,
 .sub-content {
-  padding: 5px;
+  padding: 5px !important;
   vertical-align: middle;
   border: none; /* 重置 */
   border-right: 1px solid #d71920 !important;
@@ -608,7 +639,8 @@ onMounted(() => {
 /* 子表头样式 */
 .sub-header {
   height: 30px;
-  font-weight: bold;
+
+  /* font-weight: bold; */
   color: #000;
   text-align: center;
   background-color: transparent;

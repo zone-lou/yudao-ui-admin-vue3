@@ -589,12 +589,15 @@ defineExpose({
 }
 
 .oa-container {
-  width: 100%;
-  max-width: 900px;
-  padding: 20px;
-  margin: 0 auto;
-  font-family: SimSun, 'Songti SC', serif;
+  box-sizing: border-box !important;
+  width: 994px !important;
+  max-width: 100% !important;
+  min-height: 1123px !important;
+  padding: 40px 50px !important;
+  margin: 20px auto !important;
+  font-family: SimSun, 'Songti SC', STSong, serif;
   background-color: #fff;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 15%) !important;
 }
 
 .doc-title {
@@ -608,14 +611,15 @@ defineExpose({
 
 .oa-table {
   width: 100%;
-  font-size: 14px;
+  font-size: 15px !important;
   border: 1px solid #8cb4e0;
   border-collapse: collapse;
 }
 
 .oa-table td {
-  padding: 6px 10px;
-  line-height: 1.4;
+  padding: 16px 12px !important;
+  font-size: 15px !important;
+  line-height: 1.5 !important;
   color: #333;
   vertical-align: middle;
   border: 1px solid #8cb4e0;

@@ -32,8 +32,11 @@
             v-if="processInstance.status"
             :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS"
             :value="processInstance.status" />
-          <Icon icon="ep:printer" class="ml-15px cursor-pointer" @click="handlePrint"
-        /></div>
+          <Icon icon="ep:printer" class="ml-15px cursor-pointer" @click="handlePrint" />
+          <el-button size="small" type="primary" class="ml-15px" @click="handleWordPrintTest">
+            测试Word流打印
+          </el-button>
+        </div>
         <!-- <el-divider class="!my-8px" /> -->
         <!-- <div class="flex items-center gap-5 mb-10px h-40px">
           <div class="text-26px font-bold mb-5px">{{ processInstance.name }}</div>
@@ -162,6 +165,8 @@
 
   <!-- 打印预览弹窗 -->
   <PrintDialog ref="printRef" />
+  <!-- Word 流转 HTML 测试弹窗 -->
+  <WordPrintTestDialog ref="wordPrintTestRef" />
 </template>
 <script lang="ts" setup>
 import { formatDate } from '@/utils/formatTime'
@@ -186,6 +191,7 @@ import approveSvg from '@/assets/svgs/bpm/approve.svg'
 import rejectSvg from '@/assets/svgs/bpm/reject.svg'
 import cancelSvg from '@/assets/svgs/bpm/cancel.svg'
 import PrintDialog from './PrintDialog.vue'
+import WordPrintTestDialog from './WordPrintTestDialog.vue'
 
 defineOptions({ name: 'BpmProcessInstanceDetail' })
 const props = defineProps<{
@@ -427,6 +433,12 @@ const refresh = () => {
 const printRef = ref()
 const handlePrint = async () => {
   printRef.value.open(props.id)
+}
+
+/** 测试 Word 转 HTML 打印 */
+const wordPrintTestRef = ref()
+const handleWordPrintTest = () => {
+  wordPrintTestRef.value.open(props.id)
 }
 
 /** 当前的 Tab */

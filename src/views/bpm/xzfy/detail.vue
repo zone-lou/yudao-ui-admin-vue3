@@ -232,7 +232,6 @@
                   <div
                     v-if="isEditable('法规科交办')"
                     class="w-full h-full print-hide-row relative"
-                    style="padding: 6px 8px"
                   >
                     <el-input
                       v-model="currentOpinion"
@@ -253,7 +252,7 @@
                     </div>
                   </div>
 
-                  <div v-else class="w-full h-full" style="padding: 6px 8px">
+                  <div v-else class="w-full h-full">
                     <div
                       v-for="(info, index) in ensureMinRows(nibanList, 3)"
                       :key="index"
@@ -308,7 +307,6 @@
                   <div
                     v-if="isEditable('局长') && !isEditable('分管局长')"
                     class="w-full h-full print-hide-row relative"
-                    style="padding: 6px 8px"
                   >
                     <el-input
                       v-model="currentOpinion"
@@ -329,7 +327,7 @@
                     </div>
                   </div>
 
-                  <div v-else class="w-full h-full" style="padding: 6px 8px">
+                  <div v-else class="w-full h-full">
                     <div
                       v-for="(info, index) in ensureMinRows(juzhangList, 3)"
                       :key="index"
@@ -387,7 +385,7 @@
                 <td class="sub-header"><div class="sub-header-text">办理日期</div></td>
               </tr>
               <tr v-if="isEditable('分管局长')" class="print-hide-row">
-                <td class="h-35 data-text" style="padding: 0; vertical-align: top">
+                <td class="h-60 data-text" style="padding: 0; vertical-align: top">
                   <div class="w-full h-full relative" style="padding: 6px 8px">
                     <el-input
                       v-model="currentOpinion"
@@ -399,8 +397,8 @@
                     />
                   </div>
                 </td>
-                <td class="h-35 data-text center-text">{{ userStore.getUser.nickname }}</td>
-                <td class="h-35 data-text center-text">
+                <td class="h-60 data-text center-text">{{ userStore.getUser.nickname }}</td>
+                <td class="h-60 data-text center-text">
                   <div class="relative w-full h-full flex items-center justify-center">
                     {{ formatDate(new Date()) }}
                     <div
@@ -417,13 +415,13 @@
               </tr>
               <template v-if="lingdaoList.length > 0">
                 <tr v-for="(info, index) in lingdaoList" :key="index">
-                  <td class="h-35 data-text" style="padding: 0; vertical-align: top">
+                  <td class="h-60 data-text" style="padding: 0; vertical-align: top">
                     <div class="relative w-full h-full" style="padding: 6px 8px">
                       <div class="text-left break-all whitespace-pre-wrap">{{ info.comment }}</div>
                     </div>
                   </td>
-                  <td class="h-35 data-text center-text">{{ info.assigneeUser?.nickname }}</td>
-                  <td class="h-35 data-text center-text">
+                  <td class="h-60 data-text center-text">{{ info.assigneeUser?.nickname }}</td>
+                  <td class="h-60 data-text center-text">
                     <div class="relative w-full h-full flex items-center justify-center">
                       {{ formatDate(info.endTime) }}
                       <div
@@ -444,9 +442,9 @@
                 </tr>
               </template>
               <tr v-else-if="!isEditable('分管局长')">
-                <td class="h-35 data-text"></td>
-                <td class="h-35 data-text center-text"></td>
-                <td class="h-35 data-text center-text"></td>
+                <td class="h-60 data-text"></td>
+                <td class="h-60 data-text center-text"></td>
+                <td class="h-60 data-text center-text"></td>
               </tr>
 
               <tr>
@@ -463,7 +461,7 @@
                 v-if="isEditable('相关单位') || isEditable('法规科办理') || isEditable('科室')"
                 class="print-hide-row"
               >
-                <td class="h-35 data-text" style="padding: 0; vertical-align: top">
+                <td class="h-60 data-text" style="padding: 0; vertical-align: top">
                   <div class="w-full h-full relative" style="padding: 6px 8px">
                     <el-input
                       v-model="currentOpinion"
@@ -475,8 +473,8 @@
                     />
                   </div>
                 </td>
-                <td class="h-35 data-text center-text">{{ userStore.getUser.nickname }}</td>
-                <td class="h-35 data-text center-text">
+                <td class="h-60 data-text center-text">{{ userStore.getUser.nickname }}</td>
+                <td class="h-60 data-text center-text">
                   <div class="relative w-full h-full flex items-center justify-center">
                     {{ formatDate(new Date()) }}
                     <div
@@ -493,13 +491,13 @@
               </tr>
               <template v-if="keshiList.length > 0">
                 <tr v-for="(info, index) in keshiList" :key="'keshi' + index">
-                  <td class="h-35 data-text" style="padding: 0; vertical-align: top">
+                  <td class="h-60 data-text" style="padding: 0; vertical-align: top">
                     <div class="relative w-full h-full" style="padding: 6px 8px">
                       <div class="text-left break-all whitespace-pre-wrap">{{ info.comment }}</div>
                     </div>
                   </td>
-                  <td class="h-35 data-text center-text">{{ info.assigneeUser?.nickname }}</td>
-                  <td class="h-35 data-text center-text">
+                  <td class="h-60 data-text center-text">{{ info.assigneeUser?.nickname }}</td>
+                  <td class="h-60 data-text center-text">
                     <div class="relative w-full h-full flex items-center justify-center">
                       {{ formatDate(info.endTime) }}
                       <div
@@ -524,9 +522,9 @@
                   !(isEditable('相关单位') || isEditable('法规科办理') || isEditable('科室'))
                 "
               >
-                <td class="h-35 data-text"></td>
-                <td class="h-35 data-text center-text"></td>
-                <td class="h-35 data-text center-text"></td>
+                <td class="h-60 data-text"></td>
+                <td class="h-60 data-text center-text"></td>
+                <td class="h-60 data-text center-text"></td>
               </tr>
             </tbody>
           </table>
@@ -1011,13 +1009,15 @@ onMounted(() => {
 }
 
 #printDivTag .oa-container {
-  width: 1100px;
-  max-width: 100%;
-  padding: 40px;
-  margin: 0 auto;
+  box-sizing: border-box !important;
+  width: 994px !important;
+  max-width: 100% !important;
+  min-height: 1123px !important;
+  padding: 40px 50px !important;
+  margin: 20px auto !important;
   overflow: visible;
   background-color: #fff;
-  box-shadow: none;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 15%) !important;
 }
 
 #printDivTag .doc-title {
@@ -1054,15 +1054,16 @@ onMounted(() => {
 
 #printDivTag .oa-table {
   width: 100%;
+  font-size: 15px !important;
   border: 2px solid #d71920;
   border-collapse: collapse;
   table-layout: fixed;
 }
 
 #printDivTag .oa-table td {
-  padding: 6px 8px;
-  font-size: 14px;
-  line-height: 1.5;
+  padding: 16px 12px !important;
+  font-size: 15px !important;
+  line-height: 1.5 !important;
   color: #000;
   word-wrap: break-word;
   vertical-align: middle;
@@ -1086,13 +1087,17 @@ onMounted(() => {
   vertical-align: top;
 }
 
+#printDivTag .h-60 {
+  height: 60px;
+}
+
 #printDivTag .h-35 {
   height: 35px;
 }
 
-#printDivTag .signature-row {
-  height: 30px;
-  padding: 0 !important;
+#printDivTag .oa-table td.signature-row {
+  height: 35px;
+  padding: 5px 12px !important;
 }
 
 #printDivTag .sig-container {
@@ -1108,9 +1113,9 @@ onMounted(() => {
   min-width: 100px;
 }
 
-#printDivTag .sub-header {
-  height: 30px;
-  padding: 0 !important;
+#printDivTag .oa-table td.sub-header {
+  height: 35px;
+  padding: 5px 12px !important;
   font-weight: normal;
   text-align: center;
   background-color: transparent !important;
