@@ -175,6 +175,12 @@ const remainingRouter: AppRouteRecordRaw[] = [
     ]
   },
   {
+    path: '/onlyoffice',
+    name: 'OnlyOffice',
+    component: () => import('@/views/bpm/processInstance/detail/OnlyOfficePage.vue'),
+    meta: { hidden: true, title: '文本编辑器' }
+  },
+  {
     path: '/login',
     component: () => import('@/views/Login/Login.vue'),
     name: 'Login',

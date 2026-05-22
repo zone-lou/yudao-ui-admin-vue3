@@ -166,8 +166,6 @@
 
   <!-- 打印预览弹窗 -->
   <PrintDialog ref="printRef" />
-  <!-- OnlyOffice 编辑/打印弹窗 -->
-  <OnlyOfficeDialog ref="onlyOfficeRef" />
 </template>
 <script lang="ts" setup>
 import { formatDate } from '@/utils/formatTime'
@@ -192,7 +190,6 @@ import approveSvg from '@/assets/svgs/bpm/approve.svg'
 import rejectSvg from '@/assets/svgs/bpm/reject.svg'
 import cancelSvg from '@/assets/svgs/bpm/cancel.svg'
 import PrintDialog from './PrintDialog.vue'
-import OnlyOfficeDialog from './OnlyOfficeDialog.vue'
 
 
 defineOptions({ name: 'BpmProcessInstanceDetail' })
@@ -438,10 +435,10 @@ const handlePrint = async () => {
 }
 
 
-/** OnlyOffice 编辑/打印 */
-const onlyOfficeRef = ref()
+/** OnlyOffice 编辑/打印（新标签页打开） */
 const handleOnlyOffice = () => {
-  onlyOfficeRef.value.open(props.id)
+  const url = router.resolve({ path: '/onlyoffice', query: { id: props.id } }).href
+  window.open(url, '_blank')
 }
 
 /** 当前的 Tab */
