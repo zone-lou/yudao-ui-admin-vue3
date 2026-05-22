@@ -33,6 +33,10 @@
             :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS"
             :value="processInstance.status" />
           <Icon icon="ep:printer" class="ml-15px cursor-pointer" @click="handlePrint" />
+
+          <el-button size="small" type="success" class="ml-15px" @click="handleOnlyOffice">
+            <Icon icon="ep:edit" class="mr-5px" /> Word编辑/打印
+          </el-button>
         </div>
         <!-- <el-divider class="!my-8px" /> -->
         <!-- <div class="flex items-center gap-5 mb-10px h-40px">
@@ -162,6 +166,8 @@
 
   <!-- 打印预览弹窗 -->
   <PrintDialog ref="printRef" />
+  <!-- OnlyOffice 编辑/打印弹窗 -->
+  <OnlyOfficeDialog ref="onlyOfficeRef" />
 </template>
 <script lang="ts" setup>
 import { formatDate } from '@/utils/formatTime'
@@ -186,6 +192,8 @@ import approveSvg from '@/assets/svgs/bpm/approve.svg'
 import rejectSvg from '@/assets/svgs/bpm/reject.svg'
 import cancelSvg from '@/assets/svgs/bpm/cancel.svg'
 import PrintDialog from './PrintDialog.vue'
+import OnlyOfficeDialog from './OnlyOfficeDialog.vue'
+
 
 defineOptions({ name: 'BpmProcessInstanceDetail' })
 const props = defineProps<{
@@ -427,6 +435,13 @@ const refresh = () => {
 const printRef = ref()
 const handlePrint = async () => {
   printRef.value.open(props.id)
+}
+
+
+/** OnlyOffice 编辑/打印 */
+const onlyOfficeRef = ref()
+const handleOnlyOffice = () => {
+  onlyOfficeRef.value.open(props.id)
 }
 
 /** 当前的 Tab */
