@@ -54,7 +54,11 @@
         <el-input v-model="formData.userid" placeholder="请输入申请用户" />
       </el-form-item>
       <el-form-item label="文件地址" prop="filepath">
-        <UploadFile v-model="formData.filepath" />
+        <UploadFile
+          ref="uploadFileRef"
+          v-model="formData.filepath"
+          :upload-api="uploadReturnInfo"
+        />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -66,6 +70,7 @@
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { leaveApi, leave } from '@/api/bpm/leave'
+import { uploadReturnInfo } from '@/api/infra/file'
 
 /** 假期申请审批 表单 */
 defineOptions({ name: 'LeaveForm' })
@@ -87,11 +92,13 @@ const formData = ref({
   totalTs: undefined,
   spzt: undefined,
   userid: undefined,
-  filepath: undefined
+  filepath: undefined,
+  fileList: []
 })
 const formRules = reactive({
 })
 const formRef = ref() // 表单 Ref
+const uploadFileRef = ref() // 上传组件 Ref
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -119,7 +126,54 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as leave
+    const data = formData.value as unknown as any
+
+    // 处理文件上传 fileList
+    const rawFileList = uploadFileRef.value?.fileList || []
+    data.fileList = rawFileList
+      .map((item: any, index: number) => {
+        let fileId = undefined
+        let fileName = item.name
+        let filePath = ''
+        let fileExtension = ''
+
+        if (item.response?.data) {
+          const fileResponse = item.response.data
+          fileId =
+            typeof fileResponse === 'object' && fileResponse !== null
+              ? fileResponse.id
+              : fileResponse
+          fileName =
+            typeof fileResponse === 'object' && fileResponse !== null
+              ? fileResponse.name
+              : item.name
+          filePath =
+            typeof fileResponse === 'object' && fileResponse !== null
+              ? (fileResponse.path || fileResponse.url || '')
+              : ''
+          if (fileName && fileName.includes('.')) {
+            fileExtension = fileName.split('.').pop() || ''
+          }
+        } else if (item.id) {
+          fileId = item.attachFileId || item.response?.data?.id
+          fileName = item.name
+          filePath = item.url || ''
+          if (fileName && fileName.includes('.')) {
+            fileExtension = fileName.split('.').pop() || ''
+          }
+        }
+
+        return {
+          id: item.id || undefined,
+          leaveId: data.id,
+          attachFileId: fileId,
+          filePath: filePath,
+          fileName: fileName,
+          fileExtension: fileExtension
+        }
+      })
+      .filter((item: any) => item.attachFileId || item.id)
+
     if (formType.value === 'create') {
       await leaveApi.createleave(data)
       message.success(t('common.createSuccess'))
@@ -147,7 +201,8 @@ const resetForm = () => {
     totalTs: undefined,
     spzt: undefined,
     userid: undefined,
-    filepath: undefined
+    filepath: undefined,
+    fileList: []
   }
   formRef.value?.resetFields()
 }
