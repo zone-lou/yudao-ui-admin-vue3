@@ -175,7 +175,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
     ]
   },
   {
-    path: '/onlyoffice',
+    path: '/office-editor',
     name: 'OnlyOffice',
     component: () => import('@/views/bpm/processInstance/detail/OnlyOfficePage.vue'),
     meta: { hidden: true, title: '文本编辑器' }

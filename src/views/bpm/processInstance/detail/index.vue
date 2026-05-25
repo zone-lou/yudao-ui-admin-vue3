@@ -437,7 +437,7 @@ const handlePrint = async () => {
 /** OnlyOffice 编辑/打印 */
 const onlyOfficeRef = ref()
 const handleOnlyOffice = () => {
-  const url = router.resolve({ path: '/onlyoffice', query: { id: props.id } }).href
+  const url = router.resolve({ path: '/office-editor', query: { id: props.id } }).href
   window.open(url, '_blank')
 }
 
