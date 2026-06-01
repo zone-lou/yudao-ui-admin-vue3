@@ -48,7 +48,7 @@
           <td class="input-cell" colspan="3">
             <div v-if="fileList.length > 0">
               <div v-for="(file, index) in fileList" :key="index" style="margin-bottom: 5px">
-                <span>{{ file.name }}</span>
+                <span class="link-type cursor-pointer" @click="previewFile(file)">{{ file.name }}</span>
                 <el-button link type="primary" size="small" @click="previewFile(file)" class="ml-2">
                   预览
                 </el-button>

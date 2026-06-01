@@ -37,8 +37,9 @@
                     <el-form-item prop="startDate" class="mb-0">
                       <el-date-picker
                         v-model="formData.startDate"
-                        type="date"
+                        type="datetime"
                         value-format="x"
+                        format="YYYY-MM-DD HH:mm"
                         placeholder="选择会议时间"
                         style="width: 100%"
                       />

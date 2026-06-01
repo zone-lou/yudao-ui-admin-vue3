@@ -193,13 +193,11 @@
           {{ formatDictOrStr(scope.row.swJg, DICT_TYPE.BPM_INCOMING_AUTHORITY_XZSS) }}
         </template>
       </el-table-column>
-      <el-table-column
-        label="收文日期"
-        align="center"
-        prop="swRq"
-        :formatter="dateFormatter2"
-        width="120px"
-      />
+      <el-table-column label="收文日期" align="center" prop="swRq" width="200px">
+        <template #default="scope">
+          {{ scope.row.swRq ? dateUtil(scope.row.swRq).format('YYYY-MM-DD HH:mm') : '' }}
+        </template>
+      </el-table-column>
       <el-table-column label="原告" align="center" prop="sqr" width="150px" />
       <el-table-column label="被告" align="center" prop="bsqr" width="150px" />
       <el-table-column label="第三人" align="center" prop="dsr" width="150px" />
@@ -307,7 +305,7 @@
 
 <script setup lang="ts">
 import { getDictOptions, DICT_TYPE } from '@/utils/dict'
-import { dateFormatter2 } from '@/utils/formatTime'
+import { dateUtil } from '@/utils/dateUtil'
 import { XzssApi, Xzss } from '@/api/bpm/xzss'
 import XzssForm from './XzssForm.vue'
 import XzssKzList from './components/XzssKzList.vue'

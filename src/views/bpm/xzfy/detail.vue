@@ -190,13 +190,14 @@
                       style="display: flex; align-items: center; width: 100%"
                     >
                       <span
-                        class="mr-2"
+                        class="mr-2 cursor-pointer"
                         style="
                           font-size: 14px;
                           line-height: 1.5;
                           color: #303133;
                           word-break: break-all;
                         "
+                        @click="handlePreview(file)"
                       >
                         <Icon icon="ep:paperclip" class="mr-1" />{{ file.filename }}
                       </span>
@@ -858,7 +859,7 @@ const getKzData = () => {
 
 const formatDate = (val: any) => {
   if (!val) return ''
-  return dateUtil(val).format('YYYY-MM-DD')
+  return dateUtil(val).format('YYYY-MM-DD HH:mm')
 }
 
 const formatBoolean = (val: any) => {

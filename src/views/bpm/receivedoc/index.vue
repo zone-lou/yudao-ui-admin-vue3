@@ -99,6 +99,18 @@
             </el-select>
           </el-form-item>
         </el-col>
+        <el-col :span="6">
+          <el-form-item label="状态" prop="status">
+            <el-select v-model="queryParams.status" clearable class="!w-240px" placeholder="请选择状态">
+              <el-option
+                v-for="dict in getIntDictOptions(DICT_TYPE.BPM_TASK_STATUS)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
         <el-col :span="12">
           <el-form-item label="收文日期" prop="receiveTime">
             <el-date-picker
@@ -133,13 +145,11 @@
       @selection-change="handleRowCheckboxChange"
     >
       <el-table-column type="selection" width="55" />
-      <el-table-column
-        label="标题"
-        align="center"
-        prop="subject"
-        show-overflow-tooltip
-        width="355"
-      />
+      <el-table-column label="标题" align="center" prop="subject" show-overflow-tooltip width="355">
+        <template #default="scope">
+          <span class="link-type" @click="handleEdit(scope.row.id)">{{ scope.row.subject }}</span>
+        </template>
+      </el-table-column>
 
       <el-table-column label="单位类别" align="center" prop="docClass" width="120">
         <template #default="scope">
@@ -167,12 +177,12 @@
 
       <el-table-column label="来文单位" align="center" prop="sendDept" min-width="150">
         <template #default="scope">
-          <el-tag
-            v-if="scope.row.sendDept != null"
-            :style="getTagStyle('sendDept', scope.row.sendDept)"
-          >
-            {{ getDisplayText(DICT_TYPE.BPM_AGENCY_NAME, scope.row.sendDept) }}
-          </el-tag>
+          <template v-if="scope.row.sendDept">
+            <el-tag :style="getTagStyle('sendDept', scope.row.sendDept)">
+              {{ getDisplayText(DICT_TYPE.BPM_AGENCY_NAME, scope.row.sendDept) }}
+            </el-tag>
+          </template>
+          <span v-else class="text-gray-400">—</span>
         </template>
       </el-table-column>
       <el-table-column label="来文字号" align="center" prop="sendDocNumber" min-width="150">
@@ -201,13 +211,11 @@
         </template>
       </el-table-column>
 
-      <el-table-column
-        label="收文日期"
-        align="center"
-        prop="receiveTime"
-        :formatter="dateFormatter"
-        width="120px"
-      />
+      <el-table-column label="收文日期" align="center" prop="receiveTime" width="200px">
+        <template #default="scope">
+          {{ scope.row.receiveTime ? dateUtil(scope.row.receiveTime).format('YYYY-MM-DD HH:mm') : '' }}
+        </template>
+      </el-table-column>
 
       <el-table-column label="操作" align="center" width="180px" fixed="right">
         <template #default="scope">
@@ -258,7 +266,7 @@
 <script setup lang="ts">
 import { getIntDictOptions, getStrDictOptions, DICT_TYPE } from '@/utils/dict'
 import { isEmpty } from '@/utils/is'
-import { dateFormatter } from '@/utils/formatTime'
+import { dateUtil } from '@/utils/dateUtil'
 import download from '@/utils/download'
 import { ReceiveDocApi, ReceiveDoc } from '@/api/bpm/receivedoc'
 import { useRouter } from 'vue-router'
@@ -284,7 +292,8 @@ const queryParams = reactive({
   receiveTime: [],
   subject: undefined,
   urgencyDegree: undefined,
-  docSecondClass: undefined
+  docSecondClass: undefined,
+  status: 0
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
@@ -441,3 +450,11 @@ onMounted(() => {
   getList()
 })
 </script>
+
+<style scoped>
+.link-type {
+  color: #303133;
+  text-decoration: underline;
+  cursor: pointer;
+}
+</style>

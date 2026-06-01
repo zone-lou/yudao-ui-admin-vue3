@@ -27,7 +27,7 @@
 
       <template #file="row">
         <div class="flex items-center">
-          <span :title="row.file.name">{{ row.file.name }}</span>
+          <span :title="row.file.name" class="link-type cursor-pointer" @click="handlePreview(row.file)">{{ row.file.name }}</span>
           <div class="ml-10px flex-shrink-0">
             <el-button link type="primary" size="small" @click="handleDownload(row.file)"
               >下载</el-button
@@ -50,7 +50,7 @@
 
   <div v-if="disabled" class="upload-file">
     <div v-for="(file, index) in fileList" :key="index" class="flex items-center file-list-item">
-      <span :title="file.name">{{ file.name }}</span>
+      <span :title="file.name" class="link-type cursor-pointer" @click="handlePreview(file)">{{ file.name }}</span>
       <div class="ml-10px flex-shrink-0">
         <el-button link type="primary" size="small" @click="handleDownload(file)">下载</el-button>
       </div>
@@ -440,5 +440,11 @@ defineExpose({ fileList })
 .sortable-ghost {
   background: #f0f2f5;
   opacity: 0.5;
+}
+
+.link-type {
+  color: #303133;
+  text-decoration: underline;
+  cursor: pointer;
 }
 </style>

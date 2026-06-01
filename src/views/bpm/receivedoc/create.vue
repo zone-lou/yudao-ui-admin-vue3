@@ -78,13 +78,14 @@
                       >收文日期：</span
                     >
                   </div>
-                  <div style="display: flex; width: 140px; align-items: center">
+                  <div style="display: flex; width: 185px; align-items: center">
                     <el-form-item prop="receiveTime" style="width: 100%; margin-bottom: 0">
                       <el-date-picker
                         v-model="formData.receiveTime"
-                        type="date"
+                        type="datetime"
                         value-format="x"
-                        placeholder="日期"
+                        format="YYYY-MM-DD HH:mm"
+                        placeholder="选择日期时间"
                         style="width: 100%"
                       />
                     </el-form-item>

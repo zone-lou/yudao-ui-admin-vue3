@@ -162,13 +162,11 @@
       </el-table-column>
       <el-table-column label="来文字号" align="center" prop="sendDocNumber" />
       <el-table-column label="收文编号" align="center" prop="receiveDocNumber" />
-      <el-table-column
-        label="收文日期"
-        align="center"
-        prop="receiveTime"
-        :formatter="dateFormatter"
-        width="180px"
-      />
+      <el-table-column label="收文日期" align="center" prop="receiveTime" width="200px">
+        <template #default="scope">
+          {{ scope.row.receiveTime ? dateUtil(scope.row.receiveTime).format('YYYY-MM-DD HH:mm') : '' }}
+        </template>
+      </el-table-column>
       <el-table-column label="主题" align="center" prop="subject" />
       <el-table-column label="紧急程度" align="center" prop="urgencyDegree">
         <template #default="scope">
@@ -233,6 +231,7 @@
 import { getIntDictOptions, getStrDictOptions, DICT_TYPE } from '@/utils/dict'
 import { isEmpty } from '@/utils/is'
 import { dateFormatter } from '@/utils/formatTime'
+import { dateUtil } from '@/utils/dateUtil'
 import download from '@/utils/download'
 import { ReceiveDocApi, ReceiveDoc } from '@/api/bpm/receivedoc'
 import ReceiveDocForm from './ReceiveDocForm.vue'

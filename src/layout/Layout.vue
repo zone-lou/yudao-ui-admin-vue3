@@ -60,10 +60,12 @@ export default defineComponent({
     onMounted(() => {
       // 页面加载时立即获取一次
       bpmStore.updateTaskCount()
+      bpmStore.updateReceiveDocPendingCount()
 
       // 开启轮询 (例如每 60 秒刷新一次)
       bpmTimer = setInterval(() => {
         bpmStore.updateTaskCount()
+        bpmStore.updateReceiveDocPendingCount()
       }, 60000)
     })
 

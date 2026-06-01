@@ -22,6 +22,9 @@ export const useRenderMenuTitle = () => {
       } else if (path.includes('bpm/done')) {
         badgeValue = bpmStore.taskCount.doneCount
         showBadge = true
+      } else if (path.includes('receive-doc')) {
+        badgeValue = bpmStore.receiveDocPendingCount
+        showBadge = true
       }
     }
 

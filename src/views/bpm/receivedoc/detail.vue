@@ -48,7 +48,7 @@
             <td colspan="3" class="data-text">
               <div v-if="fileList.length > 0">
                 <div v-for="(file, index) in fileList" :key="index" style="margin-bottom: 5px">
-                  <span>{{ file.name }}</span>
+                  <span class="link-type cursor-pointer" @click="handlePreview(file)">{{ file.name }}</span>
                   <el-button
                     link
                     type="primary"
@@ -455,26 +455,14 @@ const getInfo = async () => {
     }
     detailData.value = data
 
-    // 附件处理增强
-    if (data.attachFilePath) {
-      try {
-        const parsed = JSON.parse(data.attachFilePath)
-        if (Array.isArray(parsed)) {
-          fileList.value = parsed
-        } else {
-          fileList.value = [
-            { name: data.attachFilePath.split('/').pop(), url: data.attachFilePath }
-          ]
-        }
-      } catch (e) {
-        const paths = data.attachFilePath.split(',')
-        fileList.value = paths
-          .filter((path: string) => path && path.trim())
-          .map((path: string) => ({
-            name: path.split('/').pop(),
-            url: path
-          }))
-      }
+    // 从子表加载附件（流程前后都能正确获取）
+    const attachList = await ReceiveDocApi.ReceiveDocApi.getReceiveDocXmGuid(queryId)
+    if (attachList && attachList.length > 0) {
+      fileList.value = attachList.map((item) => ({
+        name: item.attachFileName,
+        url: item.fileUrl,
+        id: item.attachFileId
+      }))
     } else {
       fileList.value = []
     }
@@ -578,7 +566,7 @@ const formatSendDocNumber = (val: any) => {
 
 const formatDate = (val: any) => {
   if (!val) return ''
-  return dateUtil(val).format('YYYY-MM-DD')
+  return dateUtil(val).format('YYYY-MM-DD HH:mm')
 }
 
 const formatCommaData = (val: any) => {

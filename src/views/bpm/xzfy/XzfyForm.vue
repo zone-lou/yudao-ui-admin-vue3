@@ -19,8 +19,9 @@
       <el-form-item label="来文日期" prop="swRq">
         <el-date-picker
           v-model="formData.swRq"
-          type="date"
+          type="datetime"
           value-format="x"
+          format="YYYY-MM-DD HH:mm"
           placeholder="选择来文日期"
         />
       </el-form-item>

@@ -30,8 +30,9 @@
           <el-form-item label="收文日期" prop="swRq">
             <el-date-picker
               v-model="formData.swRq"
-              type="date"
+              type="datetime"
               value-format="x"
+              format="YYYY-MM-DD HH:mm"
               placeholder="选择收文日期"
               style="width: 100%"
             />

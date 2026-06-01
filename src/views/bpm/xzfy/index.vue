@@ -31,7 +31,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="来文日期" prop="swRq">
+          <el-form-item label="收文日期" prop="swRq">
             <el-date-picker
               v-model="queryParams.swRq"
               value-format="YYYY-MM-DD HH:mm:ss"
@@ -149,13 +149,11 @@
           {{ formatDictOrStr(scope.row.swJg, DICT_TYPE.BPM_INCOMING_AUTHORITY) }}
         </template>
       </el-table-column>
-      <el-table-column
-        label="来文日期"
-        align="center"
-        prop="swRq"
-        :formatter="dateFormatter"
-        width="180px"
-      />
+      <el-table-column label="来文日期" align="center" prop="swRq" width="200px">
+        <template #default="scope">
+          {{ scope.row.swRq ? dateUtil(scope.row.swRq).format('YYYY-MM-DD HH:mm') : '' }}
+        </template>
+      </el-table-column>
       <el-table-column label="申请人" align="center" prop="sqr" width="150px" />
       <el-table-column label="被申请人" align="center" prop="bsqr" width="150px" />
       <el-table-column label="第三人" align="center" prop="dsr" width="150px" />
@@ -237,7 +235,7 @@
 
 <script setup lang="ts">
 import { getIntDictOptions, getDictOptions, DICT_TYPE } from '@/utils/dict'
-import { dateFormatter } from '@/utils/formatTime'
+import { dateUtil } from '@/utils/dateUtil'
 import { XzfyApi, Xzfy } from '@/api/bpm/xzfy'
 import XzfyForm from './XzfyForm.vue'
 import XzfyKzList from './components/XzfyKzList.vue'

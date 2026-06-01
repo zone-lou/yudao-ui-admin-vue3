@@ -47,7 +47,11 @@
       <el-descriptions-item label="收文附件" label-align="center" align="center" :span="2">
         <div v-if="fileList.length > 0">
           <el-table :data="fileList" border style="width: 100%" size="small">
-            <el-table-column label="文件名" prop="name" show-overflow-tooltip />
+            <el-table-column label="文件名" show-overflow-tooltip>
+              <template #default="scope">
+                <span class="link-type cursor-pointer" @click="handlePreview(scope.row)">{{ scope.row.name }}</span>
+              </template>
+            </el-table-column>
             <el-table-column label="格式" width="80" align="center">
               <template #default="scope">
                 <el-tag size="small" type="info">{{ scope.row.ext }}</el-tag>
@@ -139,7 +143,7 @@ const processFileList = (pathStr: string | undefined) => {
 /** 格式化日期 */
 const formatDate = (val: any) => {
   if (!val) return ''
-  return dateUtil(val).format('YYYY-MM-DD')
+  return dateUtil(val).format('YYYY-MM-DD HH:mm')
 }
 
 /** 格式化多选数据 */

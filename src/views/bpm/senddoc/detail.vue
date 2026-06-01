@@ -57,7 +57,7 @@
                   :key="index"
                   class="flex items-center"
                 >
-                  <span class="mr-3">{{ file.name }}</span>
+                  <span class="link-type cursor-pointer mr-3" @click="handlePreview(file)">{{ file.name }}</span>
                   <el-button link type="primary" size="small" @click="handlePreview(file)" class="mr-2">预览</el-button>
                   <el-button link type="primary" size="small" @click="handleDownload(file)">下载</el-button>
                 </div>

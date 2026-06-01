@@ -17,7 +17,9 @@ defineOptions({ name: 'BpmOnlyOfficeEditor' })
 const ONLYOFFICE_API_URL =
   import.meta.env.VITE_ONLYOFFICE_API_URL || '/onlyoffice/web-apps/apps/api/documents/api.js'
 const BACKEND_URL =
-  import.meta.env.VITE_ONLYOFFICE_BACKEND_URL || import.meta.env.VITE_BASE_URL || window.location.origin
+  import.meta.env.VITE_ONLYOFFICE_BACKEND_URL ||
+  import.meta.env.VITE_BASE_URL ||
+  window.location.origin
 
 const route = useRoute()
 const id = route.query.id as string
@@ -26,9 +28,15 @@ const errorMsg = ref('')
 let editorInstance: any = null
 
 function loadScript(url: string, callback: () => void) {
-  if ((window as any).DocsAPI) { callback(); return }
+  if ((window as any).DocsAPI) {
+    callback()
+    return
+  }
   const existing = document.querySelector(`script[src="${url}"]`)
-  if (existing) { existing.addEventListener('load', callback); return }
+  if (existing) {
+    existing.addEventListener('load', callback)
+    return
+  }
   const script = document.createElement('script')
   script.src = url
   script.onload = callback
@@ -62,10 +70,19 @@ function initEditor(fileUrl: string) {
       mode: 'edit',
       callbackUrl: BACKEND_URL + '/admin-api/bpm/process-instance/save-print-word',
       lang: 'zh-CN',
-      customization: { autosave: false, forcesave: false, help: false, chat: false, comments: false }
+      customization: {
+        autosave: false,
+        forcesave: false,
+        help: false,
+        chat: false,
+        comments: false,
+        spellcheck: false
+      }
     },
     events: {
-      onDocumentReady: () => { loading.value = false },
+      onDocumentReady: () => {
+        loading.value = false
+      },
       onError: () => {
         loading.value = false
         errorMsg.value = '编辑器加载失败'
@@ -97,7 +114,12 @@ onMounted(async () => {
     const internalPrefix = intRes?.data ?? intRes
     let fileUrl = await ProcessInstanceApi.getProcessInstancePrintWordFile(id)
     // 外网前缀替换为内网前缀，OnlyOffice 容器才能下载
-    if (externalPrefix && internalPrefix && typeof externalPrefix === 'string' && fileUrl.includes(externalPrefix)) {
+    if (
+      externalPrefix &&
+      internalPrefix &&
+      typeof externalPrefix === 'string' &&
+      fileUrl.includes(externalPrefix)
+    ) {
       fileUrl = fileUrl.replace(externalPrefix, internalPrefix)
     }
     if (!fileUrl) {
@@ -115,7 +137,10 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
-  if (editorInstance) { editorInstance.destroyEditor(); editorInstance = null }
+  if (editorInstance) {
+    editorInstance.destroyEditor()
+    editorInstance = null
+  }
 })
 </script>
 
@@ -144,6 +169,6 @@ onBeforeUnmount(() => {
   background: #fff;
   padding: 20px 30px;
   border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 </style>

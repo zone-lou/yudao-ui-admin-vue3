@@ -51,7 +51,7 @@
           <td colspan="3" style="padding: 10px">
             <div v-if="fileList.length > 0">
               <div v-for="(file, index) in fileList" :key="index" style="margin-bottom: 5px">
-                <span>{{ file.name }}</span>
+                <span class="link-type cursor-pointer" @click="handlePreview(file)">{{ file.name }}</span>
                 <el-button
                   link
                   type="primary"
@@ -249,7 +249,7 @@ const currentOpinion = ref('') // 当前正在填写的办理意见
 /** 格式化日期 */
 const formatDate = (val: any) => {
   if (!val) return ''
-  return dateUtil(val).format('YYYY-MM-DD')
+  return dateUtil(val).format('YYYY-MM-DD HH:mm')
 }
 // Template data fields
 const title = computed(() => detailData.value.title)

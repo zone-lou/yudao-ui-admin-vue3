@@ -47,8 +47,9 @@
                   <el-form-item label="收文日期" prop="swRq">
                     <el-date-picker
                       v-model="formData.swRq"
-                      type="date"
+                      type="datetime"
                       value-format="x"
+                      format="YYYY-MM-DD HH:mm"
                       placeholder="选择收文日期"
                       style="width: 100%"
                     />
@@ -587,7 +588,7 @@ const dialogRules = reactive({
 
 const formatDate = (val: any) => {
   if (!val) return ''
-  return dateUtil(val).format('YYYY-MM-DD')
+  return dateUtil(val).format('YYYY-MM-DD HH:mm')
 }
 
 const addDocRow = () => {

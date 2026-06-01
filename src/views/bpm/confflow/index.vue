@@ -85,15 +85,13 @@
         align="center"
         prop="applyDate"
         :formatter="dateFormatter"
-        width="180px"
+        width="200px"
       />
-      <el-table-column
-        label="会议时间"
-        align="center"
-        prop="startDate"
-        :formatter="dateFormatter"
-        width="180px"
-      />
+      <el-table-column label="会议时间" align="center" prop="startDate" width="200px">
+        <template #default="scope">
+          {{ scope.row.startDate ? dateUtil(scope.row.startDate).format('YYYY-MM-DD HH:mm') : '' }}
+        </template>
+      </el-table-column>
       <el-table-column label="办理状态" align="center" prop="status">
         <template #default="scope">
           <div class="flex items-center justify-center">
@@ -142,6 +140,7 @@
 
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
+import { dateUtil } from '@/utils/dateUtil'
 import { ConfflowApi, Confflow } from '@/api/bpm/confflow'
 import ConfflowForm from './ConfflowForm.vue'
 import { useBpmInvalidate } from '@/hooks/bpm/useBpmInvalidate'

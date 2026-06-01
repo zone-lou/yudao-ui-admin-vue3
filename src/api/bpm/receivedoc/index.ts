@@ -81,5 +81,10 @@ export const ReceiveDocApi = {
     return await request.get({
       url: `/bpm/receive-doc/receive-doc-attach/list-by-receive-doc-id?receiveDocId=` + receiveDocId
     })
+  },
+
+  // 获得待收文数量
+  getPendingCount: async () => {
+    return await request.get<number>({ url: '/bpm/receive-doc/get-pending-count' })
   }
 }
