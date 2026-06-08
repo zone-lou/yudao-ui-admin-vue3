@@ -299,7 +299,15 @@ const getInfo = async () => {
       return
     }
     detailData.value = res || {}
-    processFileList(res.attachFilePath)
+    // 优先使用后端返回的结构化附件列表
+    if (res.fileList && res.fileList.length > 0) {
+      fileList.value = res.fileList.map((item: any) => ({
+        name: item.fileName || '',
+        url: item.fileUrl || item.filePath || ''
+      }))
+    } else {
+      processFileList(res.attachFilePath)
+    }
     processActivityNodes()
   } finally {
     detailLoading.value = false

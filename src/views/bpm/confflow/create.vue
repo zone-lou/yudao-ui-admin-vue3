@@ -167,12 +167,10 @@
                   <td colspan="3" class="footer-row">
                     <div
                       class="footer-content"
-                      style="display: flex; justify-content: start; gap: 20px"
+                      style="display: flex; justify-content: center; gap: 50px"
                     >
-                      <span style="margin-left: 20px"
-                        >办理人员：<span class="sign-input"></span
-                      ></span>
-                      <span>办理日期：<span class="sign-input"></span></span>
+                      <span>办理人员：<span class="sign-input"></span></span>
+                      <span>日期：<span class="sign-input"></span></span>
                     </div>
                   </td>
                 </tr>
@@ -195,7 +193,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { useUserStore } from '@/store/modules/user'
@@ -203,6 +201,7 @@ import { useMessage } from '@/hooks/web/useMessage'
 import * as DefinitionApi from '@/api/bpm/definition'
 import { Confflow, ConfflowApi } from '@/api/bpm/confflow'
 import { dateUtil } from '@/utils/dateUtil'
+import { uploadReturnInfo } from '@/api/infra/file'
 
 import ProcessSendDialog from '@/components/ProcessSendDialog/index.vue'
 import { NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
@@ -223,6 +222,7 @@ const processDefineKey = 'conference_report'
 
 const formLoading = ref(false)
 const formRef = ref()
+const uploadFileRef = ref()
 
 // 表单数据初始化
 const formData = ref({
@@ -301,6 +301,14 @@ const buildRequestData = () => {
 const handleOpenDialog = async () => {
   try {
     if (!formRef.value) return
+    const rawFileList = uploadFileRef.value?.fileList || []
+    const isUploading = rawFileList.some(
+      (file: any) => file.status === 'ready' || file.status === 'uploading'
+    )
+    if (isUploading) {
+      message.warning('还有文件正在上传中，请稍后发送')
+      return
+    }
     const valid = await formRef.value.validate().catch(() => false)
     if (!valid) return
     if (!processDefinitionId.value) {
@@ -318,13 +326,17 @@ const handleOpenDialog = async () => {
 const submitProcess = async (submitData: { nextNodeAssignees: any; variables: any }) => {
   formLoading.value = true
   try {
-    const data = { ...formData.value } as unknown as Confflow
+    const data = buildRequestData()
     data.nextNodeAssignees = submitData.nextNodeAssignees
     if (submitData.variables && Object.keys(submitData.variables).length > 0) {
       data.processVariablesStr = JSON.stringify(submitData.variables)
     }
 
-    await ConfflowApi.createConfflow(data)
+    if (data.id) {
+      await ConfflowApi.updateConfflow(data)
+    } else {
+      await ConfflowApi.createConfflow(data)
+    }
     message.success('会议报告单发起成功')
 
     if (sendDialogRef.value) {
@@ -481,9 +493,8 @@ onMounted(async () => {
   vertical-align: top;
 }
 
-.oa-table td.footer-row {
+.footer-row {
   height: 35px;
-  padding: 5px 12px !important;
   vertical-align: middle;
 }
 
