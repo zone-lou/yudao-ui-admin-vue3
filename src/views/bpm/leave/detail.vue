@@ -441,12 +441,33 @@ const fileViewBaseUrl = ref('')
 
 // 处理文件列表
 const fileList = computed(() => {
+  // 优先使用后端返回的结构化附件列表
+  if (detailData.value.fileList && detailData.value.fileList.length > 0) {
+    return detailData.value.fileList.map((item: any) => ({
+      name: item.fileName || '',
+      url: item.fileUrl || item.filePath || ''
+    }))
+  }
+
+  // 兼容旧数据：从 filepath 字符串解析
   const path = detailData.value.filepath
   if (!path) return []
 
-  // 处理字符串格式（逗号分隔）
+  // 尝试 JSON 解析
   if (typeof path === 'string') {
-    return path.split(',').filter(Boolean).map(processFilePath)
+    try {
+      const parsed = JSON.parse(path)
+      if (Array.isArray(parsed)) {
+        return parsed.map((item: any) => ({
+          name: item.name || item.attachFileName || '',
+          url: item.url || item.fileUrl || ''
+        }))
+      }
+      return [{ name: path.split('/').pop(), url: path }]
+    } catch (e) {
+      // JSON 解析失败，按逗号分隔处理
+      return path.split(',').filter(Boolean).map(processFilePath)
+    }
   }
 
   // 处理数组格式（兼容旧数据）
@@ -457,15 +478,14 @@ const fileList = computed(() => {
   return []
 })
 
-// 处理文件路径，提取文件名、大小等信息
+// 处理文件路径，提取文件名
 const processFilePath = (filePath: string) => {
-  // 从文件路径中提取文件名
   const parts = filePath.split('/')
   const fileName = parts[parts.length - 1] || '附件'
 
   return {
     name: decodeURIComponent(fileName),
-    path: filePath
+    url: filePath
   }
 }
 
@@ -482,11 +502,11 @@ const DIRECT_RENDER_EXTENSIONS = [
 
 //预览文件
 const previewFile = (file: any) => {
-  if (!file || !file.path) {
+  if (!file || !file.url) {
     ElMessage.error('无效的文件')
     return
   }
-  let fullUrl = file.path.trim()
+  let fullUrl = file.url.trim()
   if (!fullUrl) {
     ElMessage.error('文件路径为空，无法预览')
     return
@@ -521,7 +541,7 @@ const previewFile = (file: any) => {
 const handleDownload = (file: any) => {
   const link = document.createElement('a')
   link.style.display = 'none'
-  link.href = file.path
+  link.href = file.url
   link.setAttribute('download', file.name)
   document.body.appendChild(link)
   link.click()

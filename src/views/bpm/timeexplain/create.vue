@@ -135,7 +135,11 @@
                   <td class="label-cell">附件列表</td>
                   <td class="input-cell" colspan="3">
                     <el-form-item prop="filepath" class="mb-0">
-                      <UploadFile v-model="formData.filepath" />
+                      <UploadFile
+                        ref="uploadFileRef"
+                        v-model="formData.filepath"
+                        :upload-api="uploadReturnInfo"
+                      />
                     </el-form-item>
                   </td>
                 </tr>
@@ -216,11 +220,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, unref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, computed, unref, onMounted, nextTick } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as DefinitionApi from '@/api/bpm/definition'
 import { TimeExplainApi } from '@/api/bpm/timeexplain'
+import { uploadReturnInfo } from '@/api/infra/file'
 import ProcessSendDialog from '@/components/ProcessSendDialog/index.vue'
 import dayjs from 'dayjs'
 import { useUserStore } from '@/store/modules/user'
@@ -236,6 +241,7 @@ const deptName = ref('')
 const message = useMessage()
 const { delView } = useTagsViewStore()
 const { push, currentRoute } = useRouter()
+const route = useRoute()
 
 const formLoading = ref(false)
 
@@ -264,6 +270,7 @@ const formRules = reactive({
   endPlace: [{ required: true, message: '目的地不能为空', trigger: 'blur' }]
 })
 const formRef = ref()
+const uploadFileRef = ref()
 const processSendDialogRef = ref()
 
 const processDefineKey = 'oa_out'
@@ -324,8 +331,66 @@ const maxPermissionRole = computed(() => {
   })
 })
 
+/** 构建请求数据 */
+const buildRequestData = () => {
+  const data = { ...formData.value } as any
+
+  const rawFileList = uploadFileRef.value?.fileList || []
+
+  data.fileList = rawFileList
+    .filter((item: any) => item.status === 'success' || item.id)
+    .map((item: any, index: number) => {
+      let fileId = undefined
+      let fileName = item.name
+      let filePath = ''
+      let fileExtension = ''
+
+      if (item.response?.data) {
+        const fileResponse = item.response.data
+        fileId =
+          typeof fileResponse === 'object' && fileResponse !== null ? fileResponse.id : fileResponse
+        fileName =
+          typeof fileResponse === 'object' && fileResponse !== null ? fileResponse.name : item.name
+        filePath =
+          typeof fileResponse === 'object' && fileResponse !== null
+            ? (fileResponse.path || fileResponse.url || '')
+            : ''
+        if (fileName && fileName.includes('.')) {
+          fileExtension = fileName.split('.').pop() || ''
+        }
+      } else if (item.id) {
+        fileId = item.attachFileId || item.response?.data?.id
+        fileName = item.name
+        filePath = item.url || ''
+        if (fileName && fileName.includes('.')) {
+          fileExtension = fileName.split('.').pop() || ''
+        }
+      }
+
+      return {
+        id: item.id || undefined,
+        timeExplainId: data.id,
+        attachFileId: fileId,
+        filePath: filePath,
+        fileName: fileName,
+        fileExtension: fileExtension
+      }
+    })
+    .filter((item: any) => item.attachFileId || item.id)
+
+  return data
+}
+
 const handleSendClick = async () => {
   if (!formRef.value) return
+  const rawFileList = uploadFileRef.value?.fileList || []
+  const isUploading = rawFileList.some(
+    (file: any) => file.status === 'ready' || file.status === 'uploading'
+  )
+  if (isUploading) {
+    message.warning('还有文件正在上传中，请稍后发送')
+    return
+  }
   const isValid = await formRef.value.validate().catch(() => false)
   if (!isValid) return
   calculateDuration()
@@ -336,19 +401,20 @@ const handleSendClick = async () => {
 const submitForm = async (submitData: { nextNodeAssignees: any; variables: any }) => {
   formLoading.value = true
   try {
-    const data = { ...formData.value } as any
-    if (Array.isArray(data.filepath)) {
-      data.filepath = data.filepath.join(',')
-    }
+    const data = buildRequestData()
     data.processVariablesStr = JSON.stringify({
       role_condition: maxPermissionRole.value,
       ...(submitData.variables || {})
     })
-    
+
     // 将发送弹窗选择的下一节点审批人信息注入到表单数据中
     data.nextNodeAssignees = submitData.nextNodeAssignees
-    
-    await TimeExplainApi.createTimeExplain(data)
+
+    if (data.id) {
+      await TimeExplainApi.updateTimeExplain(data)
+    } else {
+      await TimeExplainApi.createTimeExplain(data)
+    }
     message.success('公出申请发起成功')
     setTimeout(() => {
       delView(unref(currentRoute))
@@ -371,6 +437,36 @@ onMounted(async () => {
     processDefineKey
   )
   if (processDefinitionDetail) processDefinitionId.value = processDefinitionDetail.id
+
+  // 编辑模式：加载已有数据和附件
+  const queryId = route.query.id
+  if (queryId) {
+    formLoading.value = true
+    try {
+      const detail = await TimeExplainApi.getTimeExplain(Number(queryId))
+      if (detail) {
+        Object.assign(formData.value, detail)
+
+        const attachList = await TimeExplainApi.getTimeExplainAttachList(Number(queryId))
+        if (attachList && attachList.length > 0) {
+          const files = attachList.map((item: any) => ({
+            name: item.fileName,
+            url: item.fileUrl,
+            id: item.id,
+            attachFileId: item.attachFileId,
+            response: { data: { id: item.attachFileId, name: item.fileName, url: item.fileUrl, path: item.filePath } }
+          }))
+          nextTick(() => {
+            if (uploadFileRef.value) {
+              uploadFileRef.value.fileList = files
+            }
+          })
+        }
+      }
+    } finally {
+      formLoading.value = false
+    }
+  }
 })
 </script>
 

@@ -76,5 +76,12 @@ export const leaveApi = {
   //获取年度统计
   getYearlyStat: async (params: any) => {
     return await request.get({ url: `/bpm/leave/get-yearly-stat`, params })
+  },
+
+  // 获取请假附件列表
+  getLeaveAttachList: async (leaveId: number) => {
+    return await request.get({
+      url: `/bpm/leave/leave-attach/list-by-leave-id?leaveId=` + leaveId
+    })
   }
 }
