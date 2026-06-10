@@ -2,38 +2,30 @@
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
-      class="-mb-15px"
+      class="search-form"
       :model="queryParams"
       ref="queryFormRef"
       :inline="true"
-      label-width="auto"
+      label-width="90px"
     >
-      <el-form-item label="人员姓名" prop="userName">
+      <el-form-item label="申请用户" prop="nickName">
         <el-input
-          v-model="queryParams.userName"
-          placeholder="请输入人员姓名"
+          v-model="queryParams.nickName"
+          placeholder="请输入申请用户"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="开始时间" prop="checkBegin">
+      <el-form-item label="外出时间" prop="outingTime">
         <el-date-picker
-          v-model="queryParams.checkBegin"
-          value-format="YYYY-MM-DD"
-          type="date"
-          placeholder="选择开始时间"
-          clearable
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="结束时间" prop="checkEnd">
-        <el-date-picker
-          v-model="queryParams.checkEnd"
-          value-format="YYYY-MM-DD"
-          type="date"
-          placeholder="选择结束时间"
-          clearable
+          v-model="queryParams.outingTime"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          type="daterange"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          :shortcuts="defaultShortcuts"
           class="!w-240px"
         />
       </el-form-item>
@@ -52,79 +44,94 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-<!--        <el-button-->
-<!--          type="primary"-->
-<!--          plain-->
-<!--          @click="openForm('create')"-->
-<!--          v-hasPermi="['bpm:time-explain:create']"-->
-<!--        >-->
-<!--          <Icon icon="ep:plus" class="mr-5px" /> 新增-->
-<!--        </el-button>-->
-        <el-button
-          type="success"
-          plain
-          @click="handleExport"
-          :loading="exportLoading"
-          v-hasPermi="['bpm:time-explain:export']"
-        >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
-        </el-button>
+      <el-form-item label="出发地" prop="startPlace">
+        <el-input
+          v-model="queryParams.startPlace"
+          placeholder="请输入出发地"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="目的地" prop="endPlace">
+        <el-input
+          v-model="queryParams.endPlace"
+          placeholder="请输入目的地"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="外出事由" prop="reason">
+        <el-input
+          v-model="queryParams.reason"
+          placeholder="请输入外出事由"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
       </el-form-item>
     </el-form>
+    <div class="search-actions">
+      <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+      <el-button type="primary" @click="handleQuery">
+        <Icon icon="ep:search" class="mr-5px" /> 搜索
+      </el-button>
+    </div>
   </ContentWrap>
 
   <!-- 列表 -->
   <ContentWrap>
+    <div class="mb-15px flex justify-end">
+      <el-button
+        type="success"
+        plain
+        @click="handleExport"
+        :loading="exportLoading"
+        v-hasPermi="['bpm:time-explain:export']"
+      >
+        <Icon icon="ep:download" class="mr-5px" /> 导出
+      </el-button>
+    </div>
     <el-table
       row-key="id"
       v-loading="loading"
       :data="list"
       :stripe="true"
       :show-overflow-tooltip="true"
-      @selection-change="handleRowCheckboxChange"
     >
-      <el-table-column type="selection" width="55" />
-      <!-- <el-table-column label="主键" align="center" prop="id" /> -->
-      <!-- <el-table-column label="人员编号" align="center" prop="userId" /> -->
-      <el-table-column label="人员姓名" align="center" prop="nickName" />
-      <el-table-column
-        label="登记时间"
-        align="center"
-        prop="checkDate"
-        :formatter="dateFormatter"
-        width="180px"
-      />
+      <el-table-column label="申请用户" align="center" prop="nickName" width="120" />
       <el-table-column
         label="开始时间"
         align="center"
         prop="checkBegin"
-        :formatter="dateFormatter"
+        :formatter="dateTimeFormatter"
         width="180px"
       />
       <el-table-column
         label="结束时间"
         align="center"
         prop="checkEnd"
-        :formatter="dateFormatter"
+        :formatter="dateTimeFormatter"
         width="180px"
       />
+      <el-table-column label="出发地" align="center" prop="startPlace" min-width="120" />
+      <el-table-column label="目的地" align="center" prop="endPlace" min-width="120" />
+      <el-table-column label="外出事由" align="center" prop="reason" min-width="180" />
+      <el-table-column label="外出天数" align="center" prop="days" width="100" />
       <el-table-column label="办理状态" align="center" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="请假天数" align="center" prop="days" />
       <el-table-column
-        label="创建时间"
+        label="申请时间"
         align="center"
-        prop="createTime"
-        :formatter="dateFormatter"
+        prop="checkDate"
+        :formatter="dateTimeFormatter"
         width="180px"
       />
-      <el-table-column label="操作" align="center" min-width="120px">
+      <el-table-column label="操作" align="center" width="180px" fixed="right">
         <template #default="scope">
           <el-button link type="primary" @click="handleDetail(scope.row)"> 详情 </el-button>
           <el-button
@@ -162,8 +169,7 @@
 
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
-import { isEmpty } from '@/utils/is'
-import { dateFormatter } from '@/utils/formatTime'
+import { defaultShortcuts, formatDate } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { TimeExplainApi, TimeExplain } from '@/api/bpm/timeexplain'
 import TimeExplainForm from './TimeExplainForm.vue'
@@ -174,7 +180,6 @@ import { useBpmInvalidate } from '@/hooks/bpm/useBpmInvalidate'
 defineOptions({ name: 'TimeExplain' })
 
 const message = useMessage() // 消息弹窗
-const { t } = useI18n() // 国际化
 const router = useRouter()
 
 const loading = ref(true) // 列表的加载中
@@ -185,19 +190,19 @@ const queryParams = reactive({
   pageSize: 10,
   actinstId: undefined,
   userId: undefined,
-  userName: undefined,
-  checkDate: [],
-  checkBegin: undefined,
-  checkBegin: [],
-  checkEnd: undefined,
-  checkEnd: [],
+  nickName: undefined as string | undefined,
+  outingTime: [],
   status: undefined,
-  days: undefined,
-  year: undefined,
-  createTime: []
+  startPlace: undefined,
+  endPlace: undefined,
+  reason: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+
+const dateTimeFormatter = (_row: any, _column: any, cellValue: any) => {
+  return cellValue ? formatDate(cellValue, 'YYYY-MM-DD HH:mm') : ''
+}
 
 /** 查询列表 */
 const getList = async () => {
@@ -236,23 +241,6 @@ const { handleInvalidate: handleDelete } = useBpmInvalidate(
   getList
 )
 
-/** 批量删除外出请假补假 */
-const handleDeleteBatch = async () => {
-  try {
-    // 删除的二次确认
-    await message.delConfirm()
-    await TimeExplainApi.deleteTimeExplainList(checkedIds.value)
-    checkedIds.value = []
-    message.success(t('common.delSuccess'))
-    await getList()
-  } catch {}
-}
-
-const checkedIds = ref<number[]>([])
-const handleRowCheckboxChange = (records: TimeExplain[]) => {
-  checkedIds.value = records.map((item) => item.id!)
-}
-
 /** 详情跳转 */
 const handleDetail = (row: any) => {
   router.push({
@@ -286,3 +274,31 @@ onMounted(() => {
   getList()
 })
 </script>
+
+<style scoped>
+.search-form {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 16px;
+  margin-bottom: -18px;
+}
+
+.search-form :deep(.el-form-item) {
+  margin-right: 0;
+}
+
+.search-form :deep(.el-form-item__content > .el-input),
+.search-form :deep(.el-form-item__content > .el-select),
+.search-form :deep(.el-form-item__content > .el-date-editor) {
+  width: 240px !important;
+  max-width: 240px;
+}
+
+.search-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  padding-top: 16px;
+}
+</style>

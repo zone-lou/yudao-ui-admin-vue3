@@ -4,8 +4,8 @@ import type { Dayjs } from 'dayjs';
 /** 发文信息 */
 export interface SendDoc {
           id: number; // 发文表主键
-          sendDocDraft: byte[]; // 发文草稿内容
-          sendDocResult: byte[]; // 发文结果内容
+          sendDocDraft: number[]; // 发文草稿内容
+          sendDocResult: number[]; // 发文结果内容
           docProperty: string; // 公文性质
           primarySendDept: string; // 主送机关
           copySendDept: string; // 抄送机关
@@ -81,7 +81,7 @@ export interface SendDoc {
           yongyinren: string; // 用印
           fenfaren: string; // 分发
           docType: number; // 文件类型 1党务 2政务
-          sendDocNotion: byte[]; // 发文审批内容
+          sendDocNotion: number[]; // 发文审批内容
           docRange: string; // 公文范围
           isunion: string; // 是否是联合发文
           uniondepts: string; // 联合发文单位

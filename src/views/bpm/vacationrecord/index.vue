@@ -128,7 +128,7 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="请（休）假种类" align="center" prop="qxjType">
+      <el-table-column label="请(休)假种类" align="center" prop="qxjType">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.LEAVE_TYPE" :value="scope.row.qxjType" />
         </template>

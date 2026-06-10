@@ -7,7 +7,7 @@ export interface leave {
   applyDate: string | Dayjs // 申请时间
   qxjStartDate: string | Dayjs // 开始时间(请假时间段中最小的时间)
   qxjEndDate: string | Dayjs // 结束时间(请假时间段中最大的时间)
-  qxjType: number // 请（休）假种类
+  qxjType: number // 请(休)假种类
   sjReason: string // 事假理由
   totalTs: number // 共计天数
   spzt: number // 审批状态

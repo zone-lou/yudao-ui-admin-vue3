@@ -4,6 +4,8 @@ import type { Dayjs } from 'dayjs';
 /** 会议报告单信息 */
 export interface Confflow {
           id: number; // 主键
+          docGuid?: string; // 办件GUID
+          docType?: string; // 办件类型
           userId: number; // 申请人ID
           userName: string; // 申请人
           deptId: number; // 申请人部门ID
@@ -19,6 +21,11 @@ export interface Confflow {
           offerPerson: string; // 我局参会人员
           situation: string; // 参会人员会议情况及建议
           attachFilePath: string; // 附件路径
+          processInstanceId?: string; // 流程实例编号
+          status?: number; // 审批状态
+          nextNodeAssignees?: any; // 下一节点审批人
+          startUserSelectAssignees?: any; // 发起人自选审批人
+          processVariablesStr?: string; // 流程变量
   }
 
 // 会议报告单 API
@@ -36,6 +43,16 @@ export const ConfflowApi = {
   // 新增会议报告单
   createConfflow: async (data: Confflow) => {
     return await request.post({ url: `/bpm/confflow/create`, data })
+  },
+
+  // 保存会议报告单草稿
+  saveConfflow: async (data: Confflow) => {
+    return await request.post({ url: `/bpm/confflow/save`, data })
+  },
+
+  // 草稿发起会议报告单流程
+  createFlowConfflow: async (data: Confflow) => {
+    return await request.post({ url: `/bpm/confflow/create-flow`, data })
   },
 
   // 修改会议报告单
@@ -61,7 +78,7 @@ export const ConfflowApi = {
   // 获取会议报告单附件列表
   getConfflowAttachList: async (confflowId: number) => {
     return await request.get({
-      url: `/bpm/confflow/confflow-attach/list-by-confflow-id?confflowId=` + confflowId
+      url: `/bpm/confflow/confflow-attach/list-by-comm-id?commId=` + confflowId
     })
   }
 }

@@ -1,115 +1,82 @@
 <template>
   <ContentWrap>
     <el-form
-      class="-mb-15px"
+      class="search-form"
       :model="queryParams"
       ref="queryFormRef"
       :inline="true"
-      label-width="auto"
+      label-width="90px"
     >
-      <el-row :gutter="20">
-        <el-col :span="6">
-          <el-form-item label="来文号" prop="swWh">
-            <el-input
-              v-model="queryParams.swWh"
-              placeholder="请输入来文号"
-              clearable
-              @keyup.enter="handleQuery"
-              class="!w-240px"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="6">
-          <el-form-item label="来文机关" prop="swJg">
-            <el-input
-              v-model="queryParams.swJg"
-              placeholder="请输入来文机关"
-              clearable
-              @keyup.enter="handleQuery"
-              class="!w-240px"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="收文日期" prop="swRq">
-            <el-date-picker
-              v-model="queryParams.swRq"
-              value-format="YYYY-MM-DD HH:mm:ss"
-              type="daterange"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="6">
-          <el-form-item label="申请人" prop="sqr">
-            <el-input
-              v-model="queryParams.sqr"
-              placeholder="请输入申请人"
-              clearable
-              @keyup.enter="handleQuery"
-              class="!w-240px"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="6">
-          <el-form-item label="案件分类" prop="lb1">
-            <el-select
-              v-model="queryParams.lb1"
-              placeholder="请选择案件分类"
-              clearable
-              class="!w-240px"
-            >
-              <el-option
-                v-for="dict in getIntDictOptions(DICT_TYPE.BPM_XZFY_CLASS1)"
-                :key="dict.value"
-                :label="dict.label"
-                :value="dict.value"
-              />
-            </el-select>
-          </el-form-item>
-        </el-col>
-        <el-col :span="6">
-          <el-form-item label="涉及事项" prop="lb2">
-            <el-select
-              v-model="queryParams.lb2"
-              placeholder="请选择涉及事项"
-              clearable
-              class="!w-240px"
-            >
-              <el-option
-                v-for="dict in getIntDictOptions(DICT_TYPE.BPM_XZFY_CLASS2)"
-                :key="dict.value"
-                :label="dict.label"
-                :value="dict.value"
-              />
-            </el-select>
-          </el-form-item>
-        </el-col>
-        <el-col :span="6">
-          <el-form-item label="案件类型" prop="lb3">
-            <el-select
-              v-model="queryParams.lb3"
-              placeholder="请选择案件类型"
-              clearable
-              class="!w-240px"
-            >
-              <el-option
-                v-for="dict in getIntDictOptions(DICT_TYPE.BPM_XZFY_CLASS3)"
-                :key="dict.value"
-                :label="dict.label"
-                :value="dict.value"
-              />
-            </el-select>
-          </el-form-item>
-        </el-col>
-      </el-row>
+      <el-form-item label="来文号" prop="swWh">
+        <el-input v-model="queryParams.swWh" placeholder="请输入来文号" clearable @keyup.enter="handleQuery" />
+      </el-form-item>
+      <el-form-item label="来文机关" prop="swJg">
+        <el-input v-model="queryParams.swJg" placeholder="请输入来文机关" clearable @keyup.enter="handleQuery" />
+      </el-form-item>
+      <el-form-item label="收文日期" prop="swRq">
+        <el-date-picker
+          v-model="queryParams.swRq"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          type="daterange"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          :shortcuts="defaultShortcuts"
+        />
+      </el-form-item>
+      <el-form-item label="申请人" prop="sqr">
+        <el-input v-model="queryParams.sqr" placeholder="请输入申请人" clearable @keyup.enter="handleQuery" />
+      </el-form-item>
+      <el-form-item label="第三人" prop="dsr">
+        <el-input v-model="queryParams.dsr" placeholder="请输入第三人" clearable @keyup.enter="handleQuery" />
+      </el-form-item>
+      <el-form-item label="案件分类" prop="lb1">
+        <el-select v-model="queryParams.lb1" placeholder="请选择案件分类" clearable>
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_XZFY_CLASS1)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="涉及事项" prop="lb2">
+        <el-select v-model="queryParams.lb2" placeholder="请选择涉及事项" clearable>
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_XZFY_CLASS2)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="案件类型" prop="lb3">
+        <el-select v-model="queryParams.lb3" placeholder="请选择案件类型" clearable>
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_XZFY_CLASS3)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="办理状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="请选择办理状态" clearable>
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_TASK_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
     </el-form>
-    <el-col :span="24" class="text-right" style="margin-top: 10px">
-      <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" />查询</el-button>
+    <div class="search-actions">
       <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" />重置</el-button>
-    </el-col>
+      <el-button type="primary" @click="handleQuery">
+        <Icon icon="ep:search" class="mr-5px" />查询
+      </el-button>
+    </div>
   </ContentWrap>
 
   <ContentWrap>
@@ -120,7 +87,6 @@
       :stripe="true"
       :show-overflow-tooltip="true"
     >
-      <el-table-column type="selection" width="55" />
       <!--      <el-table-column type="expand">-->
       <!--        <template #default="scope">-->
       <!--          <el-tabs model-value="xzfyKz">-->
@@ -236,9 +202,9 @@
 <script setup lang="ts">
 import { getIntDictOptions, getDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateUtil } from '@/utils/dateUtil'
+import { defaultShortcuts } from '@/utils/formatTime'
 import { XzfyApi, Xzfy } from '@/api/bpm/xzfy'
 import XzfyForm from './XzfyForm.vue'
-import XzfyKzList from './components/XzfyKzList.vue'
 import { useBpmInvalidate } from '@/hooks/bpm/useBpmInvalidate'
 import { useRouter } from 'vue-router'
 
@@ -260,7 +226,8 @@ const queryParams = reactive({
   dsr: undefined,
   lb1: undefined,
   lb2: undefined,
-  lb3: undefined
+  lb3: undefined,
+  status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 
@@ -322,3 +289,31 @@ onMounted(() => {
   getList()
 })
 </script>
+
+<style scoped>
+.search-form {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 16px;
+  margin-bottom: -18px;
+}
+
+.search-form :deep(.el-form-item) {
+  margin-right: 0;
+}
+
+.search-form :deep(.el-form-item__content > .el-input),
+.search-form :deep(.el-form-item__content > .el-select),
+.search-form :deep(.el-form-item__content > .el-date-editor) {
+  width: 240px !important;
+  max-width: 240px;
+}
+
+.search-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  padding-top: 16px;
+}
+</style>

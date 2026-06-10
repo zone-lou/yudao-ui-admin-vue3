@@ -10,6 +10,8 @@ export interface TimeExplain {
   reason: string // 原因说明
   status: number // 审核状态（0审批中 1审核完毕 2删除）
   days: number // 请假天数
+  startPlace: string // 出发地
+  endPlace: string // 目的地
   filepath: string // 文件路径
   processInstanceId: string // 流程实例的编号
 

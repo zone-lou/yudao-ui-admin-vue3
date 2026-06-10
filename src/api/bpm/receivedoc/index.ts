@@ -18,6 +18,7 @@ export interface ReceiveDoc {
   xiebandate: string | Dayjs // 协办办结时间
   status: number
   cancelReason: string
+  source: string // 来源
 }
 export interface ReceiveDocSign {
   docClass: string // 单位类别

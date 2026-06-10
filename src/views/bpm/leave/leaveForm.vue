@@ -31,8 +31,8 @@
           placeholder="选择结束时间(请假时间段中最大的时间)"
         />
       </el-form-item>
-      <el-form-item label="请（休）假种类" prop="qxjType">
-        <el-select v-model="formData.qxjType" placeholder="请选择请（休）假种类">
+      <el-form-item label="请(休)假种类" prop="qxjType">
+        <el-select v-model="formData.qxjType" placeholder="请选择请(休)假种类">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.LEAVE_TYPE)"
             :key="dict.value"

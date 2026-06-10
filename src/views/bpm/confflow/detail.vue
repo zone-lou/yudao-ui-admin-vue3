@@ -253,9 +253,6 @@ const formatDate = (val: any) => {
 }
 // Template data fields
 const title = computed(() => detailData.value.title)
-const userName = computed(() => detailData.value.userName)
-const deptName = computed(() => detailData.value.deptName)
-const applyDate = computed(() => formatDate(detailData.value.applyDate)) // However, template uses startDate
 const startDate = computed(() => formatDate(detailData.value.startDate))
 const venue = computed(() => detailData.value.venue)
 const joinUnit = computed(() => detailData.value.joinUnit)
@@ -284,7 +281,7 @@ const internalPrefix = ref('') // 内网地址前缀
 
 /** 获取详情数据 */
 const getInfo = async () => {
-  const queryId = props.id || (query.id as unknown as number)
+  const queryId = Number(props.id || query.id)
   if (!queryId) return
 
   detailLoading.value = true

@@ -1,11 +1,11 @@
 <template>
   <ContentWrap>
     <el-form
-      class="-mb-15px"
+      class="search-form"
       :model="queryParams"
       ref="queryFormRef"
       :inline="true"
-      label-width="auto"
+      label-width="90px"
     >
       <el-form-item label="来文号" prop="swWh">
         <el-input
@@ -33,7 +33,7 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
+          :shortcuts="defaultShortcuts"
         />
       </el-form-item>
       <el-form-item label="原告" prop="sqr">
@@ -64,15 +64,30 @@
         />
       </el-form-item>
       <el-form-item label="诉讼类型" prop="ssLx">
-        <el-input
+        <el-select
           v-model="queryParams.ssLx"
-          placeholder="请输入诉讼类型"
+          placeholder="请选择诉讼类型"
           clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
+        >
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_ADMINISTRATIVE_LITIGATION_STAGE)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
-      <el-form-item label="案件类别" prop="lb1">
+      <el-form-item label="办理状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="请选择办理状态" clearable>
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_TASK_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item v-show="showMore" label="案件类别" prop="lb1">
         <el-select
           v-model="queryParams.lb1"
           placeholder="请选择案件类别"
@@ -87,7 +102,7 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="案件分类" prop="lb2">
+      <el-form-item v-show="showMore" label="案件分类" prop="lb2">
         <el-select
           v-model="queryParams.lb2"
           placeholder="请选择案件分类"
@@ -102,7 +117,7 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="涉及事项" prop="lb3">
+      <el-form-item v-show="showMore" label="涉及事项" prop="lb3">
         <el-select
           v-model="queryParams.lb3"
           placeholder="请选择涉及事项"
@@ -117,7 +132,7 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="案件类型" prop="lb4">
+      <el-form-item v-show="showMore" label="案件类型" prop="lb4">
         <el-select
           v-model="queryParams.lb4"
           placeholder="请选择案件类型"
@@ -132,7 +147,7 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="诉讼类别" prop="lb5">
+      <el-form-item v-show="showMore" label="诉讼类别" prop="lb5">
         <el-select
           v-model="queryParams.lb5"
           placeholder="请选择诉讼类别"
@@ -147,12 +162,78 @@
           />
         </el-select>
       </el-form-item>
-
-      <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-      </el-form-item>
+<!--      <el-form-item v-show="showMore" label="诉讼内容" prop="ssNr">-->
+<!--        <el-input-->
+<!--          v-model="queryParams.ssNr"-->
+<!--          placeholder="请输入诉讼内容"-->
+<!--          clearable-->
+<!--          @keyup.enter="handleQuery"-->
+<!--        />-->
+<!--      </el-form-item>-->
+<!--      <el-form-item v-show="showMore" label="承办人" prop="cbr">-->
+<!--        <el-input-->
+<!--          v-model="queryParams.cbr"-->
+<!--          placeholder="请输入承办人"-->
+<!--          clearable-->
+<!--          @keyup.enter="handleQuery"-->
+<!--        />-->
+<!--      </el-form-item>-->
+<!--      <el-form-item v-show="showMore" label="承办日期" prop="cbRq">-->
+<!--        <el-date-picker-->
+<!--          v-model="queryParams.cbRq"-->
+<!--          value-format="YYYY-MM-DD HH:mm:ss"-->
+<!--          type="daterange"-->
+<!--          start-placeholder="开始日期"-->
+<!--          end-placeholder="结束日期"-->
+<!--          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"-->
+<!--          :shortcuts="defaultShortcuts"-->
+<!--        />-->
+<!--      </el-form-item>-->
+<!--      <el-form-item v-show="showMore" label="送法院日期" prop="sfyjgRq">-->
+<!--        <el-date-picker-->
+<!--          v-model="queryParams.sfyjgRq"-->
+<!--          value-format="YYYY-MM-DD HH:mm:ss"-->
+<!--          type="daterange"-->
+<!--          start-placeholder="开始日期"-->
+<!--          end-placeholder="结束日期"-->
+<!--          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"-->
+<!--          :shortcuts="defaultShortcuts"-->
+<!--        />-->
+<!--      </el-form-item>-->
+<!--      <el-form-item v-show="showMore" label="监督监管" prop="issupervise">-->
+<!--        <el-select v-model="queryParams.issupervise" placeholder="请选择监督监管状态" clearable>-->
+<!--          <el-option label="是" :value="1" />-->
+<!--          <el-option label="否" :value="0" />-->
+<!--        </el-select>-->
+<!--      </el-form-item>-->
+<!--      <el-form-item v-show="showMore" label="寄件提醒" prop="mailTip">-->
+<!--        <el-select v-model="queryParams.mailTip" placeholder="请选择寄件提醒状态" clearable>-->
+<!--          <el-option label="已提醒" :value="1" />-->
+<!--          <el-option label="未提醒" :value="0" />-->
+<!--        </el-select>-->
+<!--      </el-form-item>-->
+<!--      <el-form-item v-show="showMore" label="创建时间" prop="createTime">-->
+<!--        <el-date-picker-->
+<!--          v-model="queryParams.createTime"-->
+<!--          value-format="YYYY-MM-DD HH:mm:ss"-->
+<!--          type="daterange"-->
+<!--          start-placeholder="开始日期"-->
+<!--          end-placeholder="结束日期"-->
+<!--          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"-->
+<!--          :shortcuts="defaultShortcuts"-->
+<!--        />-->
+<!--      </el-form-item>-->
     </el-form>
+    <div class="search-actions">
+      <el-button link type="primary" @click="showMore = !showMore">
+        {{ showMore ? '收起条件' : '更多条件' }}
+        <Icon :icon="showMore ? 'ep:arrow-up' : 'ep:arrow-down'" class="ml-5px" />
+      </el-button>
+      <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+      <el-button type="primary" @click="handleQuery">
+        <Icon icon="ep:search" class="mr-5px" /> 搜索
+      </el-button>
+    </div>
   </ContentWrap>
 
   <ContentWrap>
@@ -162,9 +243,7 @@
       :data="list"
       :stripe="true"
       :show-overflow-tooltip="true"
-      @selection-change="handleRowCheckboxChange"
     >
-      <el-table-column type="selection" width="55" />
 <!--      <el-table-column type="expand">-->
 <!--        <template #default="scope">-->
 <!--          <el-tabs model-value="xzssKz">-->
@@ -304,11 +383,11 @@
 </template>
 
 <script setup lang="ts">
-import { getDictOptions, DICT_TYPE } from '@/utils/dict'
+import { getDictOptions, getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateUtil } from '@/utils/dateUtil'
+import { defaultShortcuts } from '@/utils/formatTime'
 import { XzssApi, Xzss } from '@/api/bpm/xzss'
 import XzssForm from './XzssForm.vue'
-import XzssKzList from './components/XzssKzList.vue'
 import { useBpmInvalidate } from '@/hooks/bpm/useBpmInvalidate'
 import { useRouter } from 'vue-router'
 
@@ -340,9 +419,11 @@ const queryParams = reactive({
   sfyjgRq: [],
   issupervise: undefined,
   mailTip: undefined,
+  status: undefined,
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
+const showMore = ref(false)
 
 /** 查询列表 */
 const getList = async () => {
@@ -384,11 +465,6 @@ const handleDetail = (row: any) => {
   })
 }
 
-const checkedIds = ref<number[]>([])
-const handleRowCheckboxChange = (records: Xzss[]) => {
-  checkedIds.value = records.map((item) => item.id!)
-}
-
 const formatDictOrStr = (val: any, dictType: string) => {
   if (val === undefined || val === null || val === '') return val
   const strVal = String(val)
@@ -407,3 +483,31 @@ onMounted(() => {
   getList()
 })
 </script>
+
+<style scoped>
+.search-form {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 16px;
+  margin-bottom: -18px;
+}
+
+.search-form :deep(.el-form-item) {
+  margin-right: 0;
+}
+
+.search-form :deep(.el-form-item__content > .el-input),
+.search-form :deep(.el-form-item__content > .el-select),
+.search-form :deep(.el-form-item__content > .el-date-editor) {
+  width: 240px !important;
+  max-width: 240px;
+}
+
+.search-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  padding-top: 16px;
+}
+</style>

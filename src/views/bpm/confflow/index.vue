@@ -2,62 +2,81 @@
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
-      class="-mb-15px"
+      class="search-form"
       :model="queryParams"
       ref="queryFormRef"
       :inline="true"
-      label-width="auto"
+      label-width="90px"
     >
-      <el-row :gutter="20">
-        <el-col :span="6">
-          <el-form-item label="申请人" prop="userName">
-            <el-input
-              v-model="queryParams.userName"
-              placeholder="请输入申请人"
-              clearable
-              @keyup.enter="handleQuery"
-              class="!w-240px"
-            /> </el-form-item
-        ></el-col>
-        <el-col :span="6">
-          <el-form-item label="参会科室" prop="deptName">
-            <el-input
-              v-model="queryParams.deptName"
-              placeholder="请输入申请部门"
-              clearable
-              @keyup.enter="handleQuery"
-              class="!w-240px"
-            /> </el-form-item
-        ></el-col>
-        <el-col :span="6">
-          <el-form-item label="会议时间" prop="startDate">
-            <el-date-picker
-              v-model="queryParams.startDate"
-              value-format="YYYY-MM-DD HH:mm:ss"
-              type="daterange"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-              class="!w-240px"
-            /> </el-form-item
-        ></el-col>
-        <el-col :span="6">
-          <el-form-item label="会议地点" prop="venue">
-            <el-input
-              v-model="queryParams.venue"
-              placeholder="请输入会议地点"
-              clearable
-              @keyup.enter="handleQuery"
-              class="!w-240px"
-            />
-          </el-form-item>
-        </el-col>
-      </el-row>
+      <el-form-item label="会议名称" prop="title">
+        <el-input
+          v-model="queryParams.title"
+          placeholder="请输入会议名称"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="会议时间" prop="startDate">
+        <el-date-picker
+          v-model="queryParams.startDate"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          type="daterange"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          :shortcuts="defaultShortcuts"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="办理状态" prop="status">
+        <el-select
+          v-model="queryParams.status"
+          placeholder="请选择办理状态"
+          clearable
+          class="!w-240px"
+        >
+          <el-option label="草稿" :value="0" />
+          <el-option label="办理中" :value="1" />
+          <el-option label="办理完成" :value="2" />
+          <el-option label="已取消" :value="4" />
+          <el-option label="已作废" :value="5" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="召集单位" prop="joinUnit">
+        <el-input
+          v-model="queryParams.joinUnit"
+          placeholder="请输入召集单位或召集人"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="会议地点" prop="venue">
+        <el-input
+          v-model="queryParams.venue"
+          placeholder="请输入会议地点"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="参会科室" prop="offerUnit">
+        <el-input
+          v-model="queryParams.offerUnit"
+          placeholder="请输入我局参会科室"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
     </el-form>
-    <el-col :span="24" class="text-right" style="margin-top: 10px">
-      <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" />查询</el-button>
+    <div class="search-actions">
       <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" />重置</el-button>
-    </el-col>
+      <el-button type="primary" @click="handleQuery">
+        <Icon icon="ep:search" class="mr-5px" />查询
+      </el-button>
+    </div>
   </ContentWrap>
 
   <!-- 列表 -->
@@ -68,34 +87,36 @@
       :data="list"
       :stripe="true"
       :show-overflow-tooltip="true"
-      @selection-change="handleRowCheckboxChange"
     >
-      <el-table-column type="selection" width="55" />
       <!--      <el-table-column label="申请人" align="center" prop="userName" />-->
       <!--      <el-table-column label="申请人部门" align="center" prop="deptName" />-->
 
-      <el-table-column label="会议名称" align="center" prop="title" />
-      <el-table-column label="提议内容" align="center" prop="content" />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="会议地点" align="center" prop="venue" />
-      <el-table-column label="我局参会科室" align="center" prop="offerUnit" />
-      <el-table-column label="我局参会人员" align="center" prop="offerPerson" />
-      <el-table-column
-        label="申请日期"
-        align="center"
-        prop="applyDate"
-        :formatter="dateFormatter"
-        width="200px"
-      />
-      <el-table-column label="会议时间" align="center" prop="startDate" width="200px">
+      <el-table-column label="会议名称" prop="title" min-width="280" show-overflow-tooltip>
+        <template #default="scope">
+          <span class="link-type" @click="handleRecord(scope.row)">{{ scope.row.title }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="会议时间" align="center" prop="startDate" width="165">
         <template #default="scope">
           {{ scope.row.startDate ? dateUtil(scope.row.startDate).format('YYYY-MM-DD HH:mm') : '' }}
         </template>
       </el-table-column>
-      <el-table-column label="办理状态" align="center" prop="status">
+      <el-table-column label="会议地点" prop="venue" min-width="180" show-overflow-tooltip />
+      <el-table-column label="召集单位" prop="joinUnit" min-width="150" show-overflow-tooltip />
+      <el-table-column
+        label="我局参会科室"
+        prop="offerUnit"
+        min-width="220"
+        show-overflow-tooltip
+      />
+      <el-table-column label="办理状态" align="center" prop="status" width="110">
         <template #default="scope">
           <div class="flex items-center justify-center">
+            <el-tag v-if="scope.row.status === 0 || !scope.row.processInstanceId" type="info">
+              草稿
+            </el-tag>
             <dict-tag
+              v-else
               class="ml-2"
               :type="DICT_TYPE.BPM_TASK_STATUS"
               :value="scope.row.status !== null ? scope.row.status : 0"
@@ -103,15 +124,28 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" min-width="120px">
+      <el-table-column label="操作" align="center" width="180" fixed="right">
         <template #default="scope">
           <el-button
+            v-if="!scope.row.processInstanceId"
             link
             type="primary"
-            @click="openForm('update', scope.row.id)"
+            @click="handleEdit(scope.row.id)"
             v-hasPermi="['bpm:confflow:update']"
           >
             编辑
+          </el-button>
+          <el-button v-else link type="primary" @click="handleDetail(scope.row)">
+            详情
+          </el-button>
+          <el-button
+            v-if="scope.row.processInstanceId"
+            link
+            type="warning"
+            @click="handleEdit(scope.row.id)"
+            v-hasPermi="['bpm:confflow:update']"
+          >
+            修改
           </el-button>
           <el-button
             link
@@ -133,24 +167,20 @@
       @pagination="getList"
     />
   </ContentWrap>
-
-  <!-- 表单弹窗：添加/修改 -->
-  <ConfflowForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
-import { dateFormatter } from '@/utils/formatTime'
 import { dateUtil } from '@/utils/dateUtil'
 import { ConfflowApi, Confflow } from '@/api/bpm/confflow'
-import ConfflowForm from './ConfflowForm.vue'
 import { useBpmInvalidate } from '@/hooks/bpm/useBpmInvalidate'
 import { DICT_TYPE } from '@/utils/dict'
+import { defaultShortcuts } from '@/utils/formatTime'
+import { useRouter } from 'vue-router'
 
 /** 会议报告单 列表 */
 defineOptions({ name: 'Confflow' })
 
-const message = useMessage() // 消息弹窗
-const { t } = useI18n() // 国际化
+const { push } = useRouter()
 
 const loading = ref(true) // 列表的加载中
 const list = ref<Confflow[]>([]) // 列表的数据
@@ -164,9 +194,14 @@ const queryParams = reactive({
   deptName: undefined,
   applyDate: [],
   startDate: [],
+  title: undefined,
   content: undefined,
   remark: undefined,
-  venue: undefined
+  venue: undefined,
+  joinUnit: undefined,
+  offerUnit: undefined,
+  offerPerson: undefined,
+  status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 
@@ -196,15 +231,26 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 添加/修改操作 */
-const formRef = ref()
-const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id)
+/** 草稿编辑 */
+const handleEdit = (id: number) => {
+  push({ name: 'OAconfflowCreate', query: { id } })
 }
 
-const checkedIds = ref<number[]>([])
-const handleRowCheckboxChange = (records: Confflow[]) => {
-  checkedIds.value = records.map((item) => item.id!)
+/** 办理中、已办结记录进入流程详情 */
+const handleDetail = (row: Confflow) => {
+  push({
+    name: 'BpmProcessInstanceDetail',
+    query: { id: row.processInstanceId }
+  })
+}
+
+/** 点击会议名称时，根据是否发起流程进入对应页面 */
+const handleRecord = (row: Confflow) => {
+  if (row.processInstanceId) {
+    handleDetail(row)
+    return
+  }
+  handleEdit(row.id)
 }
 
 /** 初始化 **/
@@ -212,3 +258,31 @@ onMounted(() => {
   getList()
 })
 </script>
+
+<style scoped>
+.search-form {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 16px;
+  margin-bottom: -18px;
+}
+
+.search-form :deep(.el-form-item) {
+  margin-right: 0;
+}
+
+.search-form :deep(.el-form-item__content > .el-input),
+.search-form :deep(.el-form-item__content > .el-select),
+.search-form :deep(.el-form-item__content > .el-date-editor) {
+  width: 240px !important;
+  max-width: 240px;
+}
+
+.search-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  padding-top: 16px;
+}
+</style>

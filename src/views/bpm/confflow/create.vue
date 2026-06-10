@@ -3,6 +3,9 @@
     <el-col :span="24">
       <ContentWrap title="会议报告单申请信息">
         <template #header>
+          <el-button @click="handleSaveDraft" :loading="formLoading">
+            <Icon icon="ep:document-checked" class="mr-5px" /> 保存草稿
+          </el-button>
           <el-button type="primary" @click="handleOpenDialog" :loading="formLoading">
             <Icon icon="ep:promotion" class="mr-5px" /> 发送
           </el-button>
@@ -112,7 +115,11 @@
                   <td class="label-cell">附件列表</td>
                   <td colspan="3" class="input-cell">
                     <el-form-item prop="attachFilePath" class="mb-0">
-                      <UploadFile v-model="formData.attachFilePath" />
+                      <UploadFile
+                        ref="uploadFileRef"
+                        v-model="formData.attachFilePath"
+                        :upload-api="uploadReturnInfo"
+                      />
                     </el-form-item>
                   </td>
                 </tr>
@@ -199,7 +206,7 @@ import { useTagsViewStore } from '@/store/modules/tagsView'
 import { useUserStore } from '@/store/modules/user'
 import { useMessage } from '@/hooks/web/useMessage'
 import * as DefinitionApi from '@/api/bpm/definition'
-import { Confflow, ConfflowApi } from '@/api/bpm/confflow'
+import { ConfflowApi } from '@/api/bpm/confflow'
 import { dateUtil } from '@/utils/dateUtil'
 import { uploadReturnInfo } from '@/api/infra/file'
 
@@ -225,7 +232,7 @@ const formRef = ref()
 const uploadFileRef = ref()
 
 // 表单数据初始化
-const formData = ref({
+const formData = ref<any>({
   id: undefined,
   title: undefined,
   applyDate: undefined,
@@ -255,16 +262,13 @@ const buildRequestData = () => {
 
   data.fileList = rawFileList
     .filter((item: any) => item.status === 'success' || item.id)
-    .map((item: any, index: number) => {
-      let fileId = undefined
+    .map((item: any) => {
       let fileName = item.name
       let filePath = ''
       let fileExtension = ''
 
       if (item.response?.data) {
         const fileResponse = item.response.data
-        fileId =
-          typeof fileResponse === 'object' && fileResponse !== null ? fileResponse.id : fileResponse
         fileName =
           typeof fileResponse === 'object' && fileResponse !== null ? fileResponse.name : item.name
         filePath =
@@ -275,7 +279,6 @@ const buildRequestData = () => {
           fileExtension = fileName.split('.').pop() || ''
         }
       } else if (item.id) {
-        fileId = item.attachFileId || item.response?.data?.id
         fileName = item.name
         filePath = item.url || ''
         if (fileName && fileName.includes('.')) {
@@ -284,17 +287,35 @@ const buildRequestData = () => {
       }
 
       return {
-        id: item.id || undefined,
-        confflowId: data.id,
-        attachFileId: fileId,
+        confflowAttachId: item.confflowAttachId || item.id || undefined,
+        commId: data.id,
         filePath: filePath,
         fileName: fileName,
         fileExtension: fileExtension
       }
     })
-    .filter((item: any) => item.attachFileId || item.id)
+    .filter((item: any) => item.filePath || item.fileName || item.confflowAttachId)
 
   return data
+}
+
+/** 保存草稿 */
+const handleSaveDraft = async () => {
+  formLoading.value = true
+  try {
+    const data = buildRequestData()
+    if (data.id) {
+      await ConfflowApi.updateConfflow(data)
+    } else {
+      const id = await ConfflowApi.saveConfflow(data)
+      formData.value.id = id
+    }
+    message.success('草稿保存成功')
+  } catch (error) {
+    console.error(error)
+  } finally {
+    formLoading.value = false
+  }
 }
 
 /** 点击发送打开弹窗 */
@@ -333,7 +354,7 @@ const submitProcess = async (submitData: { nextNodeAssignees: any; variables: an
     }
 
     if (data.id) {
-      await ConfflowApi.updateConfflow(data)
+      await ConfflowApi.createFlowConfflow(data)
     } else {
       await ConfflowApi.createConfflow(data)
     }
@@ -391,11 +412,10 @@ onMounted(async () => {
           const files = attachList.map((item: any) => ({
             name: item.fileName,
             url: item.fileUrl,
-            id: item.id,
-            attachFileId: item.attachFileId,
+            id: item.confflowAttachId,
+            confflowAttachId: item.confflowAttachId,
             response: {
               data: {
-                id: item.attachFileId,
                 name: item.fileName,
                 url: item.fileUrl,
                 path: item.filePath

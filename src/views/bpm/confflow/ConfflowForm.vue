@@ -75,8 +75,9 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { ConfflowApi, Confflow } from '@/api/bpm/confflow'
+import { ConfflowApi } from '@/api/bpm/confflow'
 import { uploadReturnInfo } from '@/api/infra/file'
+import { nextTick } from 'vue'
 
 /** 会议报告单 表单 */
 defineOptions({ name: 'ConfflowForm' })
@@ -88,7 +89,7 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formData = ref({
+const formData = ref<any>({
   id: undefined,
   userId: undefined,
   userName: undefined,
@@ -104,7 +105,7 @@ const formData = ref({
   offerUnit: undefined,
   offerPerson: undefined,
   situation: undefined,
-  attachFilePath: undefined,
+  attachFilePath: '',
   fileList: []
 })
 const formRules = reactive({
@@ -126,6 +127,27 @@ const open = async (type: string, id?: number) => {
     formLoading.value = true
     try {
       formData.value = await ConfflowApi.getConfflow(id)
+      const attachList = await ConfflowApi.getConfflowAttachList(id)
+      if (attachList && attachList.length > 0) {
+        const files = attachList.map((item: any) => ({
+          name: item.fileName,
+          url: item.fileUrl,
+          id: item.confflowAttachId,
+          confflowAttachId: item.confflowAttachId,
+          response: {
+            data: {
+              name: item.fileName,
+              url: item.fileUrl,
+              path: item.filePath
+            }
+          }
+        }))
+        nextTick(() => {
+          if (uploadFileRef.value) {
+            uploadFileRef.value.fileList = files
+          }
+        })
+      }
     } finally {
       formLoading.value = false
     }
@@ -146,18 +168,13 @@ const submitForm = async () => {
     // 处理文件上传 fileList
     const rawFileList = uploadFileRef.value?.fileList || []
     data.fileList = rawFileList
-      .map((item: any, index: number) => {
-        let fileId = undefined
+      .map((item: any) => {
         let fileName = item.name
         let filePath = ''
         let fileExtension = ''
 
         if (item.response?.data) {
           const fileResponse = item.response.data
-          fileId =
-            typeof fileResponse === 'object' && fileResponse !== null
-              ? fileResponse.id
-              : fileResponse
           fileName =
             typeof fileResponse === 'object' && fileResponse !== null
               ? fileResponse.name
@@ -170,7 +187,6 @@ const submitForm = async () => {
             fileExtension = fileName.split('.').pop() || ''
           }
         } else if (item.id) {
-          fileId = item.attachFileId || item.response?.data?.id
           fileName = item.name
           filePath = item.url || ''
           if (fileName && fileName.includes('.')) {
@@ -179,18 +195,17 @@ const submitForm = async () => {
         }
 
         return {
-          id: item.id || undefined,
-          confflowId: data.id,
-          attachFileId: fileId,
+          confflowAttachId: item.confflowAttachId || item.id || undefined,
+          commId: data.id,
           filePath: filePath,
           fileName: fileName,
           fileExtension: fileExtension
         }
       })
-      .filter((item: any) => item.attachFileId || item.id)
+      .filter((item: any) => item.filePath || item.fileName || item.confflowAttachId)
 
     if (formType.value === 'create') {
-      await ConfflowApi.createConfflow(data)
+      await ConfflowApi.saveConfflow(data)
       message.success(t('common.createSuccess'))
     } else {
       await ConfflowApi.updateConfflow(data)
@@ -222,7 +237,7 @@ const resetForm = () => {
     offerUnit: undefined,
     offerPerson: undefined,
     situation: undefined,
-    attachFilePath: undefined,
+    attachFilePath: '',
     fileList: []
   }
   formRef.value?.resetFields()

@@ -2,101 +2,108 @@
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
-      class="-mb-15px"
+      class="search-form"
       :model="queryParams"
       ref="queryFormRef"
       :inline="true"
-      label-width="auto"
+      label-width="90px"
     >
-      <el-row :gutter="20">
-        <el-col :span="6">
-          <el-form-item label="发文字号" prop="sendDocNumber">
-            <el-input
-              v-model="queryParams.sendDocNumber"
-              placeholder="请输入发文字号"
-              clearable
-              @keyup.enter="handleQuery"
-              class="!w-240px"
-            /> </el-form-item
-        ></el-col>
-        <el-col :span="6"
-          ><el-form-item label="发文日期" prop="sendTime">
-            <el-date-picker
-              v-model="queryParams.sendTime"
-              value-format="YYYY-MM-DD HH:mm:ss"
-              type="daterange"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-              class="!w-240px"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="6">
-          <el-form-item label="主题" prop="subject">
-            <el-input
-              v-model="queryParams.subject"
-              placeholder="请输入主题"
-              clearable
-              @keyup.enter="handleQuery"
-              class="!w-240px"
-            /> </el-form-item
-        ></el-col>
-        <el-col :span="6">
-          <el-form-item label="文件类型" prop="docType">
-            <el-select
-              v-model="queryParams.docType"
-              placeholder="请选择文件类型"
-              clearable
-              class="!w-240px"
-            >
-              <el-option label="党务" :value="1" />
-              <el-option label="政务" :value="2" />
-            </el-select> </el-form-item
-        ></el-col>
-        <el-col :span="6">
-          <el-form-item label="紧急程度" prop="urgencyDegree">
-            <el-select
-              v-model="queryParams.urgencyDegree"
-              placeholder="请选择紧急程度"
-              clearable
-              class="!w-240px"
-            >
-              <el-option
-                v-for="dict in getStrDictOptions(DICT_TYPE.BPM_EMERGENCY_DEGREE)"
-                :key="dict.value"
-                :label="dict.label"
-                :value="dict.value"
-              />
-            </el-select> </el-form-item
-        ></el-col>
-        <el-col :span="6">
-          <el-form-item label="拟稿人" prop="draftPerson">
-            <el-input
-              v-model="queryParams.draftPerson"
-              placeholder="请输入拟稿人"
-              clearable
-              @keyup.enter="handleQuery"
-              class="!w-240px"
-            /> </el-form-item
-        ></el-col>
-        <el-col :span="6">
-          <el-form-item label="发文单位" prop="sendUnitid">
-            <el-input
-              v-model="queryParams.sendUnitid"
-              placeholder="请输入发文单位"
-              clearable
-              @keyup.enter="handleQuery"
-              class="!w-240px"
-            />
-          </el-form-item>
-        </el-col>
-      </el-row>
+      <el-form-item label="主题" prop="subject">
+        <el-input
+          v-model="queryParams.subject"
+          placeholder="请输入主题"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="发文日期" prop="sendTime">
+        <el-date-picker
+          v-model="queryParams.sendTime"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          type="daterange"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          :shortcuts="defaultShortcuts"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="办理状态" prop="status">
+        <el-select
+          v-model="queryParams.status"
+          placeholder="请选择办理状态"
+          clearable
+          class="!w-240px"
+        >
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_TASK_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="文件类型" prop="docType">
+        <el-select
+          v-model="queryParams.docType"
+          placeholder="请选择文件类型"
+          clearable
+          class="!w-240px"
+        >
+          <el-option label="党务" :value="1" />
+          <el-option label="政务" :value="2" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="发文字号" prop="sendDocNumber">
+        <el-input
+          v-model="queryParams.sendDocNumber"
+          placeholder="请输入发文字号"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="拟稿人" prop="draftPerson">
+        <el-input
+          v-model="queryParams.draftPerson"
+          placeholder="请输入拟稿人"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="发文单位" prop="sendDept">
+        <el-input
+          v-model="queryParams.sendDept"
+          placeholder="请输入发文单位"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="紧急程度" prop="urgencyDegree">
+        <el-select
+          v-model="queryParams.urgencyDegree"
+          placeholder="请选择紧急程度"
+          clearable
+          class="!w-240px"
+        >
+          <el-option
+            v-for="dict in getStrDictOptions(DICT_TYPE.BPM_EMERGENCY_DEGREE)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
     </el-form>
-    <el-col :span="24" class="text-right">
-      <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
+    <div class="search-actions">
       <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-    </el-col>
+      <el-button type="primary" @click="handleQuery">
+        <Icon icon="ep:search" class="mr-5px" /> 搜索
+      </el-button>
+    </div>
   </ContentWrap>
 
   <!-- 列表 -->
@@ -107,9 +114,7 @@
       :data="list"
       :stripe="true"
       :show-overflow-tooltip="true"
-      @selection-change="handleRowCheckboxChange"
     >
-      <el-table-column type="selection" width="55" />
       <el-table-column label="发文字号" align="center" prop="sendDocNumber" min-width="180">
         <template #default="scope">
           <div class="flex items-center justify-center">
@@ -185,7 +190,7 @@
 
 <script setup lang="ts">
 import { getIntDictOptions, getStrDictOptions, DICT_TYPE } from '@/utils/dict'
-import { dateFormatter } from '@/utils/formatTime'
+import { dateFormatter, defaultShortcuts } from '@/utils/formatTime'
 import { SendDocApi, SendDoc } from '@/api/bpm/senddoc'
 import { useRouter } from 'vue-router'
 import { useBpmInvalidate } from '@/hooks/bpm/useBpmInvalidate'
@@ -193,8 +198,6 @@ import { useBpmInvalidate } from '@/hooks/bpm/useBpmInvalidate'
 /** 发文 列表 */
 defineOptions({ name: 'SendDoc' })
 
-const message = useMessage() // 消息弹窗
-const { t } = useI18n() // 国际化
 const router = useRouter()
 
 const loading = ref(true) // 列表的加载中
@@ -209,7 +212,8 @@ const queryParams = reactive({
   docType: undefined,
   urgencyDegree: undefined,
   draftPerson: undefined,
-  sendUnitid: undefined
+  sendDept: undefined,
+  status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 
@@ -255,11 +259,6 @@ const handleDetail = (row: any) => {
   })
 }
 
-const checkedIds = ref<number[]>([])
-const handleRowCheckboxChange = (records: SendDoc[]) => {
-  checkedIds.value = records.map((item) => item.id!)
-}
-
 const formatSendDocNumber = (val: any) => {
   if (val === undefined || val === null || val === '') return val
   const strVal = String(val)
@@ -279,3 +278,31 @@ onMounted(() => {
   getList()
 })
 </script>
+
+<style scoped>
+.search-form {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 16px;
+  margin-bottom: -18px;
+}
+
+.search-form :deep(.el-form-item) {
+  margin-right: 0;
+}
+
+.search-form :deep(.el-form-item__content > .el-input),
+.search-form :deep(.el-form-item__content > .el-select),
+.search-form :deep(.el-form-item__content > .el-date-editor) {
+  width: 240px !important;
+  max-width: 240px;
+}
+
+.search-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  padding-top: 16px;
+}
+</style>
