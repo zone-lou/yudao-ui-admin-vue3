@@ -22,7 +22,7 @@
         <el-form-item prop="processDefinitionKey">
           <el-select
             v-model="queryParams.processDefinitionKey"
-            placeholder="请选择流程定义"
+            placeholder="请选择办件类型"
             clearable
             @change="handleQuery"
             class="!w-390px"
@@ -41,7 +41,7 @@
             v-model="queryParams.name"
             class="!w-200px"
             clearable
-            placeholder="请输入任务名称"
+            placeholder="请输入办件名称"
             @keyup.enter="handleQuery"
           />
         </el-form-item>
@@ -142,10 +142,16 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" />
+    <el-table
+      v-loading="loading"
+      :data="list"
+      border
+      @selection-change="handleSelectionChange"
+      @sort-change="handleSortChange"
+    >
+      <el-table-column type="selection" width="55" resizable />
       <!-- 1. 标签 (超时标识) -->
-      <el-table-column label="chaosh" width="40" align="center">
+      <el-table-column label="chaosh" width="40" align="center" resizable>
         <template #header>
           <el-icon><Clock /></el-icon>
         </template>
@@ -166,7 +172,7 @@
       </el-table-column>
 
       <!-- 2. 紧急程度 -->
-      <el-table-column label="紧急程度" align="center" width="100">
+      <el-table-column label="紧急程度" align="center" prop="urgencyDegree" width="120" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag
             v-if="scope.row.urgencyDegree"
@@ -177,15 +183,15 @@
       </el-table-column>
 
       <!-- 3. 办件名称 (绑定 processInstance.name) -->
-      <el-table-column align="center" label="办件名称" prop="processInstance.name" width="250" />
+      <el-table-column align="center" label="办件名称" prop="processInstance.name" width="250" sortable="custom" resizable />
 
       <!-- 4. 办件编号 (已移除) -->
       <!-- <el-table-column align="center" label="办件编号" prop="processInstanceId" width="250" /> -->
       <!-- 5. 当前环节 (任务名称) -->
-      <el-table-column align="center" label="当前环节" prop="name" width="150" />
+      <el-table-column align="center" label="当前环节" prop="name" width="150" sortable="custom" resizable />
 
       <!-- 6. 办件类型 (绑定 taskName) -->
-      <el-table-column align="center" label="办件类型" prop="taskName" width="120" />
+      <el-table-column align="center" label="办件类型" prop="taskName" width="120" resizable />
 
       <!-- 7. 开始日期 (流程发起时间) -->
       <el-table-column
@@ -194,10 +200,12 @@
         label="开始日期"
         prop="processInstance.createTime"
         width="180"
+        sortable="custom"
+        resizable
       />
 
       <!-- 8. 办结时限 (流程截止时间 - 暂无字段，使用占位或 hidden) -->
-      <el-table-column label="办结时限" width="180" align="center">
+      <el-table-column label="办结时限" prop="deadlineDate" width="180" align="center" sortable="custom" resizable>
         <template #default="scope">
           {{ formatProcessDeadline(scope.row) }}
         </template>
@@ -210,10 +218,12 @@
         label="环节时限"
         prop="dueDate"
         width="180"
+        sortable="custom"
+        resizable
       />
 
       <!-- 10. 状态 -->
-      <el-table-column label="状态" align="center" width="220">
+      <el-table-column label="状态" align="center" width="220" resizable>
         <template #default="scope">
           <span>待办</span>
 
@@ -227,7 +237,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="操作" fixed="right" width="80">
+      <el-table-column align="center" label="操作" fixed="right" width="80" resizable>
         <template #default="scope">
           <el-button link type="primary" @click="handleAudit(scope.row)">办理</el-button>
         </template>
@@ -350,7 +360,9 @@ const queryParams = reactive({
   sendingUnit: '', // 来文单位
   createTime: [],
   dueDate: [], // 环节时限 (任务截止)
-  processDeadline: [] // 办结时限 (流程截止)
+  processDeadline: [], // 办结时限 (流程截止)
+  orderField: undefined as string | undefined,
+  orderDirection: undefined as string | undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const categoryList = ref<CategoryVO[]>([]) // 流程分类列表
@@ -358,7 +370,9 @@ const showPopover = ref(false) // 高级筛选是否展示
 
 const getProcessDeadline = (row: any) => {
   const createTime = row.processInstance?.createTime
-  // 假设 completionTime 字段在 processInstance 中 (请根据实际后端返回字段调整，如 row.completionTime)
+  if (row.deadlineDate) {
+    return dayjs(row.deadlineDate)
+  }
   const completionHours = row.completionTime
 
   if (!createTime || !completionHours) {
@@ -416,9 +430,17 @@ const handleQuery = () => {
   getList()
 }
 
+const handleSortChange = ({ prop, order }: any) => {
+  queryParams.orderField = order ? prop : undefined
+  queryParams.orderDirection = order === 'ascending' ? 'asc' : order === 'descending' ? 'desc' : undefined
+  handleQuery()
+}
+
 /** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
+  queryParams.orderField = undefined
+  queryParams.orderDirection = undefined
   handleQuery()
 }
 

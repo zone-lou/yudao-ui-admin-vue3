@@ -243,6 +243,8 @@
       :data="list"
       :stripe="true"
       :show-overflow-tooltip="true"
+      border
+      @sort-change="handleSortChange"
     >
 <!--      <el-table-column type="expand">-->
 <!--        <template #default="scope">-->
@@ -254,7 +256,7 @@
 <!--        </template>-->
 <!--      </el-table-column>-->
 
-      <el-table-column label="来文号" align="center" prop="swWh" min-width="180px">
+      <el-table-column label="来文号" align="center" prop="swWh" min-width="180px" sortable="custom" resizable>
         <template #default="scope">
           <div class="flex items-center justify-center">
             <span>{{ scope.row.swWh }}</span>
@@ -267,20 +269,20 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="来文机关" align="center" prop="swJg" width="150px">
+      <el-table-column label="来文机关" align="center" prop="swJg" width="150px" sortable="custom" resizable>
         <template #default="scope">
           {{ formatDictOrStr(scope.row.swJg, DICT_TYPE.BPM_INCOMING_AUTHORITY_XZSS) }}
         </template>
       </el-table-column>
-      <el-table-column label="收文日期" align="center" prop="swRq" width="200px">
+      <el-table-column label="收文日期" align="center" prop="swRq" width="200px" sortable="custom" resizable>
         <template #default="scope">
           {{ scope.row.swRq ? dateUtil(scope.row.swRq).format('YYYY-MM-DD HH:mm') : '' }}
         </template>
       </el-table-column>
-      <el-table-column label="原告" align="center" prop="sqr" width="150px" />
-      <el-table-column label="被告" align="center" prop="bsqr" width="150px" />
-      <el-table-column label="第三人" align="center" prop="dsr" width="150px" />
-      <el-table-column label="诉讼类型" align="center" prop="ssLx" width="100px">
+      <el-table-column label="原告" align="center" prop="sqr" width="150px" sortable="custom" resizable />
+      <el-table-column label="被告" align="center" prop="bsqr" width="150px" sortable="custom" resizable />
+      <el-table-column label="第三人" align="center" prop="dsr" width="150px" sortable="custom" resizable />
+      <el-table-column label="诉讼类型" align="center" prop="ssLx" width="120px" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag
             v-if="scope.row.ssLx != null"
@@ -289,7 +291,7 @@
           />
         </template>
       </el-table-column>
-      <el-table-column label="案件类别" align="center" prop="lb1" width="100px">
+      <el-table-column label="案件类别" align="center" prop="lb1" width="120px" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag
             v-if="scope.row.lb1 != null"
@@ -298,7 +300,7 @@
           />
         </template>
       </el-table-column>
-      <el-table-column label="案件分类" align="center" prop="lb2" width="100px">
+      <el-table-column label="案件分类" align="center" prop="lb2" width="120px" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag
             v-if="scope.row.lb2 != null"
@@ -307,7 +309,7 @@
           />
         </template>
       </el-table-column>
-      <el-table-column label="涉及事项" align="center" prop="lb3" width="100px">
+      <el-table-column label="涉及事项" align="center" prop="lb3" width="120px" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag
             v-if="scope.row.lb3 != null"
@@ -316,7 +318,7 @@
           />
         </template>
       </el-table-column>
-      <el-table-column label="案件类型" align="center" prop="lb4" width="100px">
+      <el-table-column label="案件类型" align="center" prop="lb4" width="120px" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag
             v-if="scope.row.lb4 != null"
@@ -325,7 +327,7 @@
           />
         </template>
       </el-table-column>
-      <el-table-column label="诉讼类别" align="center" prop="lb5" width="100px">
+      <el-table-column label="诉讼类别" align="center" prop="lb5" width="120px" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag
             v-if="scope.row.lb5 != null"
@@ -335,7 +337,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="操作" align="center" fixed="right" width="180px">
+      <el-table-column label="操作" align="center" fixed="right" width="180px" resizable>
         <template #default="scope">
           <el-button
             v-if="!scope.row.processInstanceId"
@@ -420,7 +422,9 @@ const queryParams = reactive({
   issupervise: undefined,
   mailTip: undefined,
   status: undefined,
-  createTime: []
+  createTime: [],
+  orderField: undefined as string | undefined,
+  orderDirection: undefined as string | undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const showMore = ref(false)
@@ -443,6 +447,12 @@ const { handleInvalidate: handleDelete } = useBpmInvalidate(XzssApi.deleteXzss, 
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
+}
+
+const handleSortChange = ({ prop, order }: any) => {
+  queryParams.orderField = order ? prop : undefined
+  queryParams.orderDirection = order === 'ascending' ? 'asc' : order === 'descending' ? 'desc' : undefined
+  handleQuery()
 }
 
 /** 重置按钮操作 */

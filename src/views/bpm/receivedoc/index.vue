@@ -161,14 +161,16 @@
       :data="list"
       :stripe="true"
       :show-overflow-tooltip="true"
+      border
+      @sort-change="handleSortChange"
     >
-      <el-table-column label="标题" align="center" prop="subject" show-overflow-tooltip width="355">
+      <el-table-column label="标题" align="center" prop="subject" show-overflow-tooltip width="355" sortable="custom" resizable>
         <template #default="scope">
           <span class="link-type" @click="handleEdit(scope.row.id)">{{ scope.row.subject }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="单位类别" align="center" prop="docClass" width="120">
+      <el-table-column label="单位类别" align="center" prop="docClass" width="120" sortable="custom" resizable>
         <template #default="scope">
           <el-tag
             v-if="scope.row.docClass != null"
@@ -179,7 +181,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="收文编号" align="center" prop="receiveDocNumber" min-width="180">
+      <el-table-column label="收文编号" align="center" prop="receiveDocNumber" min-width="180" sortable="custom" resizable>
         <template #default="scope">
           <div class="flex items-center justify-center">
             <span>{{ scope.row.receiveDocNumber }}</span>
@@ -192,7 +194,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="来源" align="center" prop="source" width="128">
+      <el-table-column label="来源" align="center" prop="source" width="128" sortable="custom" resizable>
         <template #default="scope">
           <el-tag :style="getSourceTagStyle(scope.row.source)">
             {{ getSourceText(scope.row.source) }}
@@ -200,7 +202,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="来文单位" align="center" prop="sendDept" min-width="150">
+      <el-table-column label="来文单位" align="center" prop="sendDept" min-width="150" sortable="custom" resizable>
         <template #default="scope">
           <template v-if="scope.row.sendDept">
             <el-tag :style="getTagStyle('sendDept', scope.row.sendDept)">
@@ -210,12 +212,12 @@
           <span v-else class="text-gray-400">—</span>
         </template>
       </el-table-column>
-      <el-table-column label="来文字号" align="center" prop="sendDocNumber" min-width="150">
+      <el-table-column label="来文字号" align="center" prop="sendDocNumber" min-width="150" sortable="custom" resizable>
         <template #default="scope">
           {{ formatSendDocNumber(scope.row.sendDocNumber) }}
         </template>
       </el-table-column>
-      <el-table-column label="文件类别" align="center" prop="docSecondClass" width="120">
+      <el-table-column label="文件类别" align="center" prop="docSecondClass" width="120" sortable="custom" resizable>
         <template #default="scope">
           <el-tag
             v-if="scope.row.docSecondClass != null"
@@ -226,7 +228,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="紧急程度" align="center" prop="urgencyDegree" width="100">
+      <el-table-column label="紧急程度" align="center" prop="urgencyDegree" width="120" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag
             v-if="scope.row.urgencyDegree != null"
@@ -236,13 +238,13 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="收文日期" align="center" prop="receiveTime" width="200px">
+      <el-table-column label="收文日期" align="center" prop="receiveTime" width="200px" sortable="custom" resizable>
         <template #default="scope">
           {{ scope.row.receiveTime ? dateUtil(scope.row.receiveTime).format('YYYY-MM-DD HH:mm') : '' }}
         </template>
       </el-table-column>
 
-      <el-table-column label="操作" align="center" width="180px" fixed="right">
+      <el-table-column label="操作" align="center" width="180px" fixed="right" resizable>
         <template #default="scope">
           <el-button
             v-if="!scope.row.processInstanceId"
@@ -316,7 +318,9 @@ const queryParams = reactive({
   urgencyDegree: undefined,
   docSecondClass: undefined,
   status: 0,
-  source: undefined
+  source: undefined,
+  orderField: undefined as string | undefined,
+  orderDirection: undefined as string | undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const showMore = ref(false)
@@ -422,7 +426,9 @@ const getList = async () => {
       urgencyDegree: queryParams.urgencyDegree,
       docSecondClass: queryParams.docSecondClass,
       status: queryParams.status,
-      source: queryParams.source
+      source: queryParams.source,
+      orderField: queryParams.orderField,
+      orderDirection: queryParams.orderDirection
     }
     const data = await ReceiveDocApi.getReceiveDocPage(params)
     list.value = data.list
@@ -438,6 +444,12 @@ const { handleInvalidate: handleDelete } = useBpmInvalidate(ReceiveDocApi.delete
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
+}
+
+const handleSortChange = ({ prop, order }: any) => {
+  queryParams.orderField = order ? prop : undefined
+  queryParams.orderDirection = order === 'ascending' ? 'asc' : order === 'descending' ? 'desc' : undefined
+  handleQuery()
 }
 
 /** 重置按钮操作 */

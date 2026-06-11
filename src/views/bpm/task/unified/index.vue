@@ -121,8 +121,10 @@
       highlight-current-row
       height="600"
       style="width: 100%"
+      border
+      @sort-change="handleSortChange"
     >
-      <el-table-column type="index" label="序号" width="55" align="center" fixed="left" />
+      <el-table-column type="index" label="序号" width="55" align="center" fixed="left" resizable />
 
       <el-table-column
         label="办件名称"
@@ -131,23 +133,27 @@
         width="300"
         fixed="left"
         show-overflow-tooltip
+        sortable="custom"
+        resizable
       >
         <template #default="scope">
           <span class="link-type" @click="handleDetail(scope.row)">{{ scope.row.name }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="办件类型" align="center" prop="category" width="120" />
+      <el-table-column label="办件类型" align="center" prop="category" width="120" sortable="custom" resizable />
       <el-table-column
         label="来文单位"
         align="center"
         prop="sourceUnit"
         width="150"
         show-overflow-tooltip
+        sortable="custom"
+        resizable
       >
         <template #default="scope"> {{ scope.row.sourceUnit || '-' }} </template>
       </el-table-column>
-      <el-table-column label="紧急程度" align="center" prop="urgencyDegree" width="100">
+      <el-table-column label="紧急程度" align="center" prop="urgencyDegree" width="120" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag
             v-if="scope.row.urgencyDegree"
@@ -156,18 +162,18 @@
           />
         </template>
       </el-table-column>
-      <el-table-column label="开始日期" align="center" prop="createTime" width="160">
+      <el-table-column label="开始日期" align="center" prop="createTime" width="160" sortable="custom" resizable>
         <template #default="scope"
           ><span>{{ parseTime(scope.row.createTime, 'YYYY-MM-DD HH:mm') }}</span></template
         >
       </el-table-column>
-      <el-table-column label="办结时限" align="center" prop="deadlineDate" width="160">
+      <el-table-column label="办结时限" align="center" prop="deadlineDate" width="160" sortable="custom" resizable>
         <template #default="scope"
           ><span>{{ parseTime(scope.row.deadlineDate, 'YYYY-MM-DD HH:mm') || '-' }}</span></template
         >
       </el-table-column>
 
-      <el-table-column label="办件状态" align="center" width="120">
+      <el-table-column label="办件状态" align="center" prop="status" width="120" sortable="custom" resizable>
         <template #default="scope">
           <el-tooltip
             :content="scope.row.processReason || '无详细原因'"
@@ -207,7 +213,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="状态" width="50" align="center">
+      <el-table-column label="状态" width="50" align="center" resizable>
         <template #header
           ><el-icon><Clock /></el-icon
         ></template>
@@ -234,6 +240,8 @@
         prop="currTaskName"
         width="150"
         show-overflow-tooltip
+        sortable="custom"
+        resizable
       >
         <template #default="scope">
           <span v-if="scope.row.status === 1" style="color: #409eff">{{
@@ -248,6 +256,8 @@
         prop="currTaskAssignee"
         width="120"
         show-overflow-tooltip
+        sortable="custom"
+        resizable
       >
         <template #default="scope">
           <span v-if="scope.row.status === 1">{{ scope.row.currTaskAssignee }}</span>
@@ -292,7 +302,9 @@ const queryParams = reactive({
   overdueDays: undefined,
   status: null,
   processResult: null,
-  createTime: []
+  createTime: [],
+  orderField: undefined as string | undefined,
+  orderDirection: undefined as string | undefined
 })
 
 const parseTime = (time: any, pattern = 'YYYY-MM-DD HH:mm:ss') => {
@@ -334,6 +346,12 @@ const handleQuery = () => {
   getList()
 }
 
+const handleSortChange = ({ prop, order }: any) => {
+  queryParams.orderField = order ? prop : undefined
+  queryParams.orderDirection = order === 'ascending' ? 'asc' : order === 'descending' ? 'desc' : undefined
+  handleQuery()
+}
+
 const resetQuery = () => {
   queryParams.name = ''
   queryParams.processInstanceId = ''
@@ -343,6 +361,8 @@ const resetQuery = () => {
   queryParams.status = null
   queryParams.processResult = null
   queryParams.createTime = []
+  queryParams.orderField = undefined
+  queryParams.orderDirection = undefined
   handleQuery()
 }
 

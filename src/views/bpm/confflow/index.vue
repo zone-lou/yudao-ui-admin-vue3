@@ -87,29 +87,33 @@
       :data="list"
       :stripe="true"
       :show-overflow-tooltip="true"
+      border
+      @sort-change="handleSortChange"
     >
       <!--      <el-table-column label="申请人" align="center" prop="userName" />-->
       <!--      <el-table-column label="申请人部门" align="center" prop="deptName" />-->
 
-      <el-table-column label="会议名称" prop="title" min-width="280" show-overflow-tooltip>
+      <el-table-column label="会议名称" prop="title" min-width="280" show-overflow-tooltip sortable="custom" resizable>
         <template #default="scope">
           <span class="link-type" @click="handleRecord(scope.row)">{{ scope.row.title }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="会议时间" align="center" prop="startDate" width="165">
+      <el-table-column label="会议时间" align="center" prop="startDate" width="165" sortable="custom" resizable>
         <template #default="scope">
           {{ scope.row.startDate ? dateUtil(scope.row.startDate).format('YYYY-MM-DD HH:mm') : '' }}
         </template>
       </el-table-column>
-      <el-table-column label="会议地点" prop="venue" min-width="180" show-overflow-tooltip />
-      <el-table-column label="召集单位" prop="joinUnit" min-width="150" show-overflow-tooltip />
+      <el-table-column label="会议地点" prop="venue" min-width="180" show-overflow-tooltip sortable="custom" resizable />
+      <el-table-column label="召集单位" prop="joinUnit" min-width="150" show-overflow-tooltip sortable="custom" resizable />
       <el-table-column
         label="我局参会科室"
         prop="offerUnit"
         min-width="220"
         show-overflow-tooltip
+        sortable="custom"
+        resizable
       />
-      <el-table-column label="办理状态" align="center" prop="status" width="110">
+      <el-table-column label="办理状态" align="center" prop="status" width="110" sortable="custom" resizable>
         <template #default="scope">
           <div class="flex items-center justify-center">
             <el-tag v-if="scope.row.status === 0 || !scope.row.processInstanceId" type="info">
@@ -124,7 +128,7 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="180" fixed="right">
+      <el-table-column label="操作" align="center" width="180" fixed="right" resizable>
         <template #default="scope">
           <el-button
             v-if="!scope.row.processInstanceId"
@@ -201,7 +205,9 @@ const queryParams = reactive({
   joinUnit: undefined,
   offerUnit: undefined,
   offerPerson: undefined,
-  status: undefined
+  status: undefined,
+  orderField: undefined as string | undefined,
+  orderDirection: undefined as string | undefined
 })
 const queryFormRef = ref() // 搜索的表单
 
@@ -223,6 +229,12 @@ const { handleInvalidate: handleDelete } = useBpmInvalidate(ConfflowApi.deleteCo
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
+}
+
+const handleSortChange = ({ prop, order }: any) => {
+  queryParams.orderField = order ? prop : undefined
+  queryParams.orderDirection = order === 'ascending' ? 'asc' : order === 'descending' ? 'desc' : undefined
+  handleQuery()
 }
 
 /** 重置按钮操作 */

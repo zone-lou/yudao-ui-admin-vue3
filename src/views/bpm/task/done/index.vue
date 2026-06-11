@@ -7,7 +7,7 @@
         <el-form-item prop="processDefinitionKey">
           <el-select
             v-model="queryParams.processDefinitionKey"
-            placeholder="请选择流程定义"
+            placeholder="请选择办件类型"
             clearable
             @change="handleQuery"
             class="!w-390px"
@@ -26,7 +26,7 @@
             v-model="queryParams.name"
             class="!w-200px"
             clearable
-            placeholder="请输入任务名称"
+            placeholder="请输入办件名称"
             @keyup.enter="handleQuery"
           />
         </el-form-item>
@@ -128,8 +128,8 @@
   </ContentWrap>
 
   <ContentWrap>
-    <el-table v-loading="loading" :data="list">
-      <el-table-column label="状态" width="80" align="center">
+    <el-table v-loading="loading" :data="list" border @sort-change="handleSortChange">
+      <el-table-column label="状态" width="80" align="center" resizable>
         <template #header>
           <el-icon><Clock /></el-icon>
         </template>
@@ -149,7 +149,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="紧急程度" align="center" width="100">
+      <el-table-column label="紧急程度" align="center" prop="urgencyDegree" width="120" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag
             v-if="scope.row.urgencyDegree"
@@ -159,13 +159,13 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="办件名称" prop="processInstance.name" width="250" />
+      <el-table-column align="center" label="办件名称" prop="processInstance.name" width="250" sortable="custom" resizable />
 
       <!-- <el-table-column align="center" label="办件编号" prop="processInstanceId" width="250" /> -->
 
-      <el-table-column align="center" label="环节名称" prop="name" width="150" />
+      <el-table-column align="center" label="环节名称" prop="name" width="150" sortable="custom" resizable />
 
-      <el-table-column align="center" label="办件类型" prop="taskName" width="180" />
+      <el-table-column align="center" label="办件类型" prop="taskName" width="180" resizable />
 
       <el-table-column
         :formatter="dateFormatter"
@@ -173,9 +173,11 @@
         label="发起时间"
         prop="processInstance.createTime"
         width="180"
+        sortable="custom"
+        resizable
       />
 
-      <el-table-column label="办结时限" width="180" align="center">
+      <el-table-column label="办结时限" prop="deadlineDate" width="180" align="center" sortable="custom" resizable>
         <template #default="scope">
           {{ formatProcessDeadline(scope.row) }}
         </template>
@@ -187,15 +189,17 @@
         label="办理时间"
         prop="endTime"
         width="180"
+        sortable="custom"
+        resizable
       />
 
-      <el-table-column align="center" label="办理状态" prop="status" width="120">
+      <el-table-column align="center" label="办理状态" prop="status" width="120" resizable>
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.BPM_TASK_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="操作" fixed="right" width="150">
+      <el-table-column align="center" label="操作" fixed="right" width="150" resizable>
         <template #default="scope">
           <el-button link type="primary" @click="handleDetail(scope.row)">详情</el-button>
           <el-button v-if="scope.row.status === 2" link type="warning" @click="handleWithdraw(scope.row)">撤回</el-button>
@@ -244,6 +248,9 @@ const getTimeoutStatus = (row: any) => {
 }
 
 const getProcessDeadline = (row: any) => {
+  if (row.deadlineDate) {
+    return dayjs(row.deadlineDate)
+  }
   const createTime = row.processInstance?.createTime
   const completionHours = row.completionTime
   if (!createTime || !completionHours) {
@@ -278,7 +285,9 @@ const queryParams = reactive({
   sendingUnit: '',
   createTime: [],
   dueDate: [],
-  processDeadline: []
+  processDeadline: [],
+  orderField: undefined as string | undefined,
+  orderDirection: undefined as string | undefined
 })
 const queryFormRef = ref()
 
@@ -302,9 +311,17 @@ const handleQuery = () => {
   getList()
 }
 
+const handleSortChange = ({ prop, order }: any) => {
+  queryParams.orderField = order ? prop : undefined
+  queryParams.orderDirection = order === 'ascending' ? 'asc' : order === 'descending' ? 'desc' : undefined
+  handleQuery()
+}
+
 /** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
+  queryParams.orderField = undefined
+  queryParams.orderDirection = undefined
   handleQuery()
 }
 

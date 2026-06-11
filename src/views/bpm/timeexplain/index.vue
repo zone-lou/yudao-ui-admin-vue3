@@ -99,14 +99,18 @@
       :data="list"
       :stripe="true"
       :show-overflow-tooltip="true"
+      border
+      @sort-change="handleSortChange"
     >
-      <el-table-column label="申请用户" align="center" prop="nickName" width="120" />
+      <el-table-column label="申请用户" align="center" prop="nickName" width="120" sortable="custom" resizable />
       <el-table-column
         label="开始时间"
         align="center"
         prop="checkBegin"
         :formatter="dateTimeFormatter"
         width="180px"
+        sortable="custom"
+        resizable
       />
       <el-table-column
         label="结束时间"
@@ -114,12 +118,14 @@
         prop="checkEnd"
         :formatter="dateTimeFormatter"
         width="180px"
+        sortable="custom"
+        resizable
       />
-      <el-table-column label="出发地" align="center" prop="startPlace" min-width="120" />
-      <el-table-column label="目的地" align="center" prop="endPlace" min-width="120" />
-      <el-table-column label="外出事由" align="center" prop="reason" min-width="180" />
-      <el-table-column label="外出天数" align="center" prop="days" width="100" />
-      <el-table-column label="办理状态" align="center" prop="status">
+      <el-table-column label="出发地" align="center" prop="startPlace" min-width="120" sortable="custom" resizable />
+      <el-table-column label="目的地" align="center" prop="endPlace" min-width="120" sortable="custom" resizable />
+      <el-table-column label="外出事由" align="center" prop="reason" min-width="180" sortable="custom" resizable />
+      <el-table-column label="外出天数" align="center" prop="days" width="100" sortable="custom" resizable />
+      <el-table-column label="办理状态" align="center" prop="status" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="scope.row.status" />
         </template>
@@ -130,8 +136,10 @@
         prop="checkDate"
         :formatter="dateTimeFormatter"
         width="180px"
+        sortable="custom"
+        resizable
       />
-      <el-table-column label="操作" align="center" width="180px" fixed="right">
+      <el-table-column label="操作" align="center" width="180px" fixed="right" resizable>
         <template #default="scope">
           <el-button link type="primary" @click="handleDetail(scope.row)"> 详情 </el-button>
           <el-button
@@ -195,7 +203,9 @@ const queryParams = reactive({
   status: undefined,
   startPlace: undefined,
   endPlace: undefined,
-  reason: undefined
+  reason: undefined,
+  orderField: undefined as string | undefined,
+  orderDirection: undefined as string | undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
@@ -220,6 +230,12 @@ const getList = async () => {
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
+}
+
+const handleSortChange = ({ prop, order }: any) => {
+  queryParams.orderField = order ? prop : undefined
+  queryParams.orderDirection = order === 'ascending' ? 'asc' : order === 'descending' ? 'desc' : undefined
+  handleQuery()
 }
 
 /** 重置按钮操作 */
