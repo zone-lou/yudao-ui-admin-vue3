@@ -36,11 +36,12 @@
           clearable
           class="!w-240px"
         >
-          <el-option label="草稿" :value="0" />
-          <el-option label="办理中" :value="1" />
-          <el-option label="办理完成" :value="2" />
-          <el-option label="已取消" :value="4" />
-          <el-option label="已作废" :value="5" />
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_TASK_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
         </el-select>
       </el-form-item>
       <el-form-item label="召集单位" prop="joinUnit">
@@ -177,7 +178,7 @@
 import { dateUtil } from '@/utils/dateUtil'
 import { ConfflowApi, Confflow } from '@/api/bpm/confflow'
 import { useBpmInvalidate } from '@/hooks/bpm/useBpmInvalidate'
-import { DICT_TYPE } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { defaultShortcuts } from '@/utils/formatTime'
 import { useRouter } from 'vue-router'
 

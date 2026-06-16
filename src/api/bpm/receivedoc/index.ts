@@ -12,7 +12,7 @@ export interface ReceiveDoc {
   subject: string // 主题
   urgencyDegree: string // 紧急程度
   remark: string // 备注
-  docSecondClass: number // 文件类别
+  docSecondClass: string | number // 文件类别
   attachFilePath: string // 附件路径
   zhubandate: string | Dayjs // 主办办结时间
   xiebandate: string | Dayjs // 协办办结时间

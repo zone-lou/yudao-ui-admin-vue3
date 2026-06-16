@@ -408,6 +408,8 @@ const processDefineKey = 'receice_doc_v2_copy_copy' // 流程 Key
 const formLoading = ref(false)
 const uploadFileRef = ref()
 const formRef = ref()
+const initializingExistingRecord = ref(false)
+let receiveDocNumberRequestId = 0
 
 // 去除了写死的节点变量
 const formData = ref({
@@ -609,16 +611,17 @@ const formatSendDocNumberLabel = (label: string) => {
 }
 
 const generateReceiveDocNumber = async () => {
-  if (!formData.value.docClass || !formData.value.receiveTime) {
+  if (initializingExistingRecord.value || !formData.value.docClass || !formData.value.receiveTime) {
     return
   }
+  const requestId = ++receiveDocNumberRequestId
   const year = dateUtil(formData.value.receiveTime).format('YYYY')
   try {
     const res = await ReceiveDocApi.getReceiveDocSign({
       docClass: formData.value.docClass.toString(),
       year: year
     })
-    if (res) {
+    if (res && requestId === receiveDocNumberRequestId) {
       formData.value.receiveDocNumber = res
     }
   } catch (error) {
@@ -650,6 +653,7 @@ onMounted(async () => {
     const queryId = route.query.id
     if (queryId) {
       formLoading.value = true
+      initializingExistingRecord.value = true
       const detail = await ReceiveDocApi.getReceiveDoc(Number(queryId))
       if (detail) {
         Object.assign(formData.value, detail)
@@ -684,6 +688,7 @@ onMounted(async () => {
     console.error('收文发起页初始化失败:', error)
     // message.error('页面数据加载失败')
   } finally {
+    initializingExistingRecord.value = false
     formLoading.value = false
   }
 })

@@ -220,7 +220,7 @@
       <el-table-column label="文件类别" align="center" prop="docSecondClass" width="120" sortable="custom" resizable>
         <template #default="scope">
           <el-tag
-            v-if="scope.row.docSecondClass != null"
+            v-if="String(scope.row.docSecondClass ?? '').trim()"
             :style="getTagStyle('docSecondClass', scope.row.docSecondClass)"
           >
             {{ getDisplayText(DICT_TYPE.BPM_DOC_CLASS, scope.row.docSecondClass, true) }}
@@ -404,10 +404,13 @@ const getDisplayText = (dictType: string, val: string | number, isInt: boolean =
   if (val === null || val === undefined) return ''
   const dicts = isInt ? getIntDictOptions(dictType as any) : getStrDictOptions(dictType as any)
   if (!dicts) return String(val)
-  const match = dicts.find(
-    (d: any) => d.value === val || d.value === String(val) || d.value === Number(val)
-  )
-  return match ? match.label : String(val)
+  const text = String(val)
+  const match = dicts.find((d: any) => {
+    const dictValue = String(d.value)
+    const dictLabel = String(d.label)
+    return dictValue === text || dictLabel === text
+  })
+  return match ? match.label : text
 }
 
 /** 查询列表 */
