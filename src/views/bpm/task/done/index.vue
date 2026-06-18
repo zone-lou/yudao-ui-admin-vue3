@@ -21,9 +21,9 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item prop="name">
+        <el-form-item prop="processInstanceName">
           <el-input
-            v-model="queryParams.name"
+            v-model="queryParams.processInstanceName"
             class="!w-200px"
             clearable
             placeholder="请输入办件名称"
@@ -128,28 +128,74 @@
   </ContentWrap>
 
   <ContentWrap>
+    <div class="mb-15px flex items-center justify-end gap-8px">
+      <BpmColumnSetting
+        v-model="checkedColumnKeys"
+        :columns="columnOptions"
+        @reset="resetColumns"
+      />
+    </div>
     <el-table v-loading="loading" :data="list" border @sort-change="handleSortChange">
-      <el-table-column label="状态" width="80" align="center" resizable>
-        <template #header>
-          <el-icon><Clock /></el-icon>
-        </template>
-        <template #default="scope">
-          <div
-            :style="{
-              color: getTimeoutStatus(scope.row).color,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }"
-          >
-            <el-icon style="margin-right: 5px">
-              <Clock />
-            </el-icon>
-          </div>
-        </template>
-      </el-table-column>
+      <el-table-column type="index" label="序号" width="60" align="center" fixed="left" resizable />
+      <!--      <el-table-column v-if="visibleColumn('timeout')" label="状态" width="80" align="center" resizable>-->
+      <!--        <template #header>-->
+      <!--          <el-icon><Clock /></el-icon>-->
+      <!--        </template>-->
+      <!--        <template #default="scope">-->
+      <!--          <div-->
+      <!--            :style="{-->
+      <!--              color: getTimeoutStatus(scope.row).color,-->
+      <!--              display: 'flex',-->
+      <!--              alignItems: 'center',-->
+      <!--              justifyContent: 'center'-->
+      <!--            }"-->
+      <!--          >-->
+      <!--            <el-icon style="margin-right: 5px">-->
+      <!--              <Clock />-->
+      <!--            </el-icon>-->
+      <!--          </div>-->
+      <!--        </template>-->
+      <!--      </el-table-column>-->
 
-      <el-table-column label="紧急程度" align="center" prop="urgencyDegree" width="120" sortable="custom" resizable>
+      <el-table-column
+        v-if="visibleColumn('processInstanceName')"
+        align="center"
+        label="办件名称"
+        prop="processInstance.name"
+        width="250"
+        sortable="custom"
+        resizable
+      />
+
+      <!-- <el-table-column align="center" label="办件编号" prop="processInstanceId" width="250" /> -->
+
+      <el-table-column
+        v-if="visibleColumn('name')"
+        align="center"
+        label="环节名称"
+        prop="name"
+        width="150"
+        sortable="custom"
+        resizable
+      />
+
+      <el-table-column
+        v-if="visibleColumn('taskName')"
+        align="center"
+        label="办件类型"
+        prop="taskName"
+        width="180"
+        resizable
+      />
+      <el-table-column
+        v-if="visibleColumn('urgencyDegree')"
+        label="紧急程度"
+        align="center"
+        prop="urgencyDegree"
+        width="120"
+        sortable="custom"
+        resizable
+      >
         <template #default="scope">
           <dict-tag
             v-if="scope.row.urgencyDegree"
@@ -158,16 +204,8 @@
           />
         </template>
       </el-table-column>
-
-      <el-table-column align="center" label="办件名称" prop="processInstance.name" width="250" sortable="custom" resizable />
-
-      <!-- <el-table-column align="center" label="办件编号" prop="processInstanceId" width="250" /> -->
-
-      <el-table-column align="center" label="环节名称" prop="name" width="150" sortable="custom" resizable />
-
-      <el-table-column align="center" label="办件类型" prop="taskName" width="180" resizable />
-
       <el-table-column
+        v-if="visibleColumn('createTime')"
         :formatter="dateFormatter"
         align="center"
         label="发起时间"
@@ -177,13 +215,22 @@
         resizable
       />
 
-      <el-table-column label="办结时限" prop="deadlineDate" width="180" align="center" sortable="custom" resizable>
+      <el-table-column
+        v-if="visibleColumn('deadlineDate')"
+        label="办结时限"
+        prop="deadlineDate"
+        width="180"
+        align="center"
+        sortable="custom"
+        resizable
+      >
         <template #default="scope">
           {{ formatProcessDeadline(scope.row) }}
         </template>
       </el-table-column>
 
       <el-table-column
+        v-if="visibleColumn('endTime')"
         :formatter="dateFormatter"
         align="center"
         label="办理时间"
@@ -193,16 +240,63 @@
         resizable
       />
 
-      <el-table-column align="center" label="办理状态" prop="status" width="120" resizable>
+      <el-table-column
+        v-if="visibleColumn('status')"
+        align="center"
+        label="办理状态"
+        prop="status"
+        width="120"
+        resizable
+      >
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.BPM_TASK_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
+      <el-table-column
+        v-if="visibleColumn('id')"
+        label="任务编号"
+        align="center"
+        prop="id"
+        min-width="220"
+        show-overflow-tooltip
+        resizable
+      />
+      <el-table-column
+        v-if="visibleColumn('startUser')"
+        label="发起人"
+        align="center"
+        prop="processInstance.startUser.nickname"
+        width="120"
+        resizable
+      />
+      <el-table-column
+        v-if="visibleColumn('assigneeUser')"
+        label="办理人"
+        align="center"
+        prop="assigneeUser.nickname"
+        width="120"
+        resizable
+      />
+      <el-table-column
+        v-if="visibleColumn('durationInMillis')"
+        label="耗时(ms)"
+        align="center"
+        prop="durationInMillis"
+        width="120"
+        sortable="custom"
+        resizable
+      />
 
       <el-table-column align="center" label="操作" fixed="right" width="150" resizable>
         <template #default="scope">
           <el-button link type="primary" @click="handleDetail(scope.row)">详情</el-button>
-          <el-button v-if="scope.row.status === 2" link type="warning" @click="handleWithdraw(scope.row)">撤回</el-button>
+          <el-button
+            v-if="scope.row.status === 2"
+            link
+            type="warning"
+            @click="handleWithdraw(scope.row)"
+            >撤回</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
@@ -224,6 +318,8 @@ import * as DefinitionApi from '@/api/bpm/definition'
 import dayjs from 'dayjs'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import { Clock } from '@element-plus/icons-vue'
+import BpmColumnSetting from '@/views/bpm/components/BpmColumnSetting.vue'
+import { useBpmColumnSetting } from '@/hooks/bpm/useBpmColumnSetting'
 
 defineOptions({ name: 'BpmDoneTask' })
 
@@ -290,6 +386,35 @@ const queryParams = reactive({
   orderDirection: undefined as string | undefined
 })
 const queryFormRef = ref()
+const { columnOptions, checkedColumnKeys, visibleColumn, resetColumns } = useBpmColumnSetting(
+  'bpm:task:done:columns',
+  [
+    { key: 'timeout', label: '状态标识' },
+    { key: 'urgencyDegree', label: '紧急程度' },
+    { key: 'processInstanceName', label: '办件名称' },
+    { key: 'name', label: '环节名称' },
+    { key: 'taskName', label: '办件类型' },
+    { key: 'createTime', label: '发起时间' },
+    { key: 'deadlineDate', label: '办结时限' },
+    { key: 'endTime', label: '办理时间' },
+    { key: 'status', label: '办理状态' },
+    { key: 'id', label: '任务编号' },
+    { key: 'startUser', label: '发起人' },
+    { key: 'assigneeUser', label: '办理人' },
+    { key: 'durationInMillis', label: '耗时(ms)' }
+  ],
+  [
+    'timeout',
+    'urgencyDegree',
+    'processInstanceName',
+    'name',
+    'taskName',
+    'createTime',
+    'deadlineDate',
+    'endTime',
+    'status'
+  ]
+)
 
 /** 查询已办任务列表 */
 const getList = async () => {
@@ -313,7 +438,8 @@ const handleQuery = () => {
 
 const handleSortChange = ({ prop, order }: any) => {
   queryParams.orderField = order ? prop : undefined
-  queryParams.orderDirection = order === 'ascending' ? 'asc' : order === 'descending' ? 'desc' : undefined
+  queryParams.orderDirection =
+    order === 'ascending' ? 'asc' : order === 'descending' ? 'desc' : undefined
   handleQuery()
 }
 

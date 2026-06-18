@@ -83,6 +83,13 @@
   </ContentWrap>
 
   <ContentWrap>
+    <div class="mb-15px flex items-center justify-end gap-8px">
+      <BpmColumnSetting
+        v-model="checkedColumnKeys"
+        :columns="columnOptions"
+        @reset="resetColumns"
+      />
+    </div>
     <el-table
       row-key="id"
       v-loading="loading"
@@ -92,7 +99,8 @@
       border
       @sort-change="handleSortChange"
     >
-      <!--      <el-table-column type="expand">-->
+      <el-table-column type="index" label="序号" width="60" align="center" fixed="left" resizable />
+<!--      <el-table-column type="expand">-->
       <!--        <template #default="scope">-->
       <!--          <el-tabs model-value="xzfyKz">-->
       <!--            <el-tab-pane label="行政复议扩展" name="xzfyKz">-->
@@ -102,7 +110,7 @@
       <!--        </template>-->
       <!--      </el-table-column>-->
 
-      <el-table-column label="来文号" align="center" prop="swWh" min-width="180px" sortable="custom" resizable>
+      <el-table-column v-if="visibleColumn('swWh')" label="来文号" align="center" prop="swWh" min-width="180px" sortable="custom" resizable>
         <template #default="scope">
           <div class="flex items-center justify-center">
             <span>{{ scope.row.swWh }}</span>
@@ -115,21 +123,21 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="来文机关" align="center" prop="swJg" width="150px" sortable="custom" resizable>
+      <el-table-column v-if="visibleColumn('swJg')" label="来文机关" align="center" prop="swJg" width="150px" sortable="custom" resizable>
         <template #default="scope">
           {{ formatDictOrStr(scope.row.swJg, DICT_TYPE.BPM_INCOMING_AUTHORITY) }}
         </template>
       </el-table-column>
-      <el-table-column label="来文日期" align="center" prop="swRq" width="200px" sortable="custom" resizable>
+      <el-table-column v-if="visibleColumn('swRq')" label="来文日期" align="center" prop="swRq" width="200px" sortable="custom" resizable>
         <template #default="scope">
           {{ scope.row.swRq ? dateUtil(scope.row.swRq).format('YYYY-MM-DD HH:mm') : '' }}
         </template>
       </el-table-column>
-      <el-table-column label="申请人" align="center" prop="sqr" width="150px" sortable="custom" resizable />
-      <el-table-column label="被申请人" align="center" prop="bsqr" width="150px" sortable="custom" resizable />
-      <el-table-column label="第三人" align="center" prop="dsr" width="150px" sortable="custom" resizable />
-      <el-table-column label="土地坐落" align="center" prop="tdZl" width="200px" sortable="custom" resizable />
-      <el-table-column label="案件分类" align="center" prop="lb1" width="120px" sortable="custom" resizable>
+      <el-table-column v-if="visibleColumn('sqr')" label="申请人" align="center" prop="sqr" width="150px" sortable="custom" resizable />
+      <el-table-column v-if="visibleColumn('bsqr')" label="被申请人" align="center" prop="bsqr" width="150px" sortable="custom" resizable />
+      <el-table-column v-if="visibleColumn('dsr')" label="第三人" align="center" prop="dsr" width="150px" sortable="custom" resizable />
+      <el-table-column v-if="visibleColumn('tdZl')" label="土地坐落" align="center" prop="tdZl" width="200px" sortable="custom" resizable />
+      <el-table-column v-if="visibleColumn('lb1')" label="案件分类" align="center" prop="lb1" width="120px" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag
             v-if="scope.row.lb1 != null"
@@ -138,7 +146,7 @@
           />
         </template>
       </el-table-column>
-      <el-table-column label="涉及事项" align="center" prop="lb2" width="120px" sortable="custom" resizable>
+      <el-table-column v-if="visibleColumn('lb2')" label="涉及事项" align="center" prop="lb2" width="120px" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag
             v-if="scope.row.lb2 != null"
@@ -147,7 +155,7 @@
           />
         </template>
       </el-table-column>
-      <el-table-column label="案件类型" align="center" prop="lb3" width="120px" sortable="custom" resizable>
+      <el-table-column v-if="visibleColumn('lb3')" label="案件类型" align="center" prop="lb3" width="120px" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag
             v-if="scope.row.lb3 != null"
@@ -156,7 +164,18 @@
           />
         </template>
       </el-table-column>
-
+      <el-table-column v-if="visibleColumn('fyNr')" label="复议请求" align="center" prop="fyNr" min-width="220" show-overflow-tooltip sortable="custom" resizable />
+      <el-table-column v-if="visibleColumn('cbr')" label="承办人" align="center" prop="cbr" width="120px" sortable="custom" resizable />
+      <el-table-column v-if="visibleColumn('cbRq')" label="承办日期" align="center" prop="cbRq" width="180px" sortable="custom" resizable>
+        <template #default="scope">
+          {{ scope.row.cbRq ? dateUtil(scope.row.cbRq).format('YYYY-MM-DD HH:mm') : '' }}
+        </template>
+      </el-table-column>
+      <el-table-column v-if="visibleColumn('sfyjgRq')" label="送复议机关日期" align="center" prop="sfyjgRq" width="180px" sortable="custom" resizable>
+        <template #default="scope">
+          {{ scope.row.sfyjgRq ? dateUtil(scope.row.sfyjgRq).format('YYYY-MM-DD HH:mm') : '' }}
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" fixed="right" width="180px" resizable>
         <template #default="scope">
           <el-button
@@ -188,7 +207,7 @@
             v-if="!['4', '5', 4, 5].includes(scope.row.status)"
             v-hasPermi="['bpm:xzfy:delete']"
           >
-            作废
+            删除
           </el-button>
         </template>
       </el-table-column>
@@ -212,6 +231,8 @@ import { XzfyApi, Xzfy } from '@/api/bpm/xzfy'
 import XzfyForm from './XzfyForm.vue'
 import { useBpmInvalidate } from '@/hooks/bpm/useBpmInvalidate'
 import { useRouter } from 'vue-router'
+import BpmColumnSetting from '@/views/bpm/components/BpmColumnSetting.vue'
+import { useBpmColumnSetting } from '@/hooks/bpm/useBpmColumnSetting'
 
 /** 行政复议 列表 */
 defineOptions({ name: 'Xzfy' })
@@ -238,6 +259,26 @@ const queryParams = reactive({
   orderDirection: undefined as string | undefined
 })
 const queryFormRef = ref() // 搜索的表单
+const { columnOptions, checkedColumnKeys, visibleColumn, resetColumns } = useBpmColumnSetting(
+  'bpm:xzfy:columns',
+  [
+    { key: 'swWh', label: '来文号' },
+    { key: 'swJg', label: '来文机关' },
+    { key: 'swRq', label: '来文日期' },
+    { key: 'sqr', label: '申请人' },
+    { key: 'bsqr', label: '被申请人' },
+    { key: 'dsr', label: '第三人' },
+    { key: 'tdZl', label: '土地坐落' },
+    { key: 'lb1', label: '案件分类' },
+    { key: 'lb2', label: '涉及事项' },
+    { key: 'lb3', label: '案件类型' },
+    { key: 'fyNr', label: '复议请求' },
+    { key: 'cbr', label: '承办人' },
+    { key: 'cbRq', label: '承办日期' },
+    { key: 'sfyjgRq', label: '送复议机关日期' }
+  ],
+  ['swWh', 'swJg', 'swRq', 'sqr', 'bsqr', 'dsr', 'tdZl', 'lb1', 'lb2', 'lb3']
+)
 
 /** 查询列表 */
 const getList = async () => {

@@ -155,6 +155,13 @@
   </ContentWrap>
 
   <ContentWrap>
+    <div class="mb-15px flex items-center justify-end gap-8px">
+      <BpmColumnSetting
+        v-model="checkedColumnKeys"
+        :columns="columnOptions"
+        @reset="resetColumns"
+      />
+    </div>
     <el-table
       row-key="id"
       v-loading="loading"
@@ -164,24 +171,25 @@
       border
       @sort-change="handleSortChange"
     >
-      <el-table-column label="标题" align="center" prop="subject" show-overflow-tooltip width="355" sortable="custom" resizable>
+      <el-table-column type="index" label="序号" width="60" align="center" fixed="left" resizable />
+      <el-table-column v-if="visibleColumn('subject')" label="标题" align="center" prop="subject" show-overflow-tooltip width="355" sortable="custom" resizable>
         <template #default="scope">
           <span class="link-type" @click="handleEdit(scope.row.id)">{{ scope.row.subject }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="单位类别" align="center" prop="docClass" width="120" sortable="custom" resizable>
-        <template #default="scope">
-          <el-tag
-            v-if="scope.row.docClass != null"
-            :style="getTagStyle('docClass', scope.row.docClass)"
-          >
-            {{ getDisplayText(DICT_TYPE.BPM_RECEICE_CLASS, scope.row.docClass) }}
-          </el-tag>
-        </template>
-      </el-table-column>
+<!--      <el-table-column label="单位类别" align="center" prop="docClass" width="120" sortable="custom" resizable>-->
+<!--        <template #default="scope">-->
+<!--          <el-tag-->
+<!--            v-if="scope.row.docClass != null"-->
+<!--            :style="getTagStyle('docClass', scope.row.docClass)"-->
+<!--          >-->
+<!--            {{ getDisplayText(DICT_TYPE.BPM_RECEICE_CLASS, scope.row.docClass) }}-->
+<!--          </el-tag>-->
+<!--        </template>-->
+<!--      </el-table-column>-->
 
-      <el-table-column label="收文编号" align="center" prop="receiveDocNumber" min-width="180" sortable="custom" resizable>
+      <el-table-column v-if="visibleColumn('receiveDocNumber')" label="收文编号" align="center" prop="receiveDocNumber" min-width="180" sortable="custom" resizable>
         <template #default="scope">
           <div class="flex items-center justify-center">
             <span>{{ scope.row.receiveDocNumber }}</span>
@@ -194,7 +202,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="来源" align="center" prop="source" width="128" sortable="custom" resizable>
+      <el-table-column v-if="visibleColumn('source')" label="来源" align="center" prop="source" width="128" sortable="custom" resizable>
         <template #default="scope">
           <el-tag :style="getSourceTagStyle(scope.row.source)">
             {{ getSourceText(scope.row.source) }}
@@ -202,7 +210,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="来文单位" align="center" prop="sendDept" min-width="150" sortable="custom" resizable>
+      <el-table-column v-if="visibleColumn('sendDept')" label="来文单位" align="center" prop="sendDept" min-width="150" sortable="custom" resizable>
         <template #default="scope">
           <template v-if="scope.row.sendDept">
             <el-tag :style="getTagStyle('sendDept', scope.row.sendDept)">
@@ -212,12 +220,12 @@
           <span v-else class="text-gray-400">—</span>
         </template>
       </el-table-column>
-      <el-table-column label="来文字号" align="center" prop="sendDocNumber" min-width="150" sortable="custom" resizable>
+      <el-table-column v-if="visibleColumn('sendDocNumber')" label="来文字号" align="center" prop="sendDocNumber" min-width="150" sortable="custom" resizable>
         <template #default="scope">
           {{ formatSendDocNumber(scope.row.sendDocNumber) }}
         </template>
       </el-table-column>
-      <el-table-column label="文件类别" align="center" prop="docSecondClass" width="120" sortable="custom" resizable>
+      <el-table-column v-if="visibleColumn('docSecondClass')" label="文件类别" align="center" prop="docSecondClass" width="120" sortable="custom" resizable>
         <template #default="scope">
           <el-tag
             v-if="String(scope.row.docSecondClass ?? '').trim()"
@@ -228,7 +236,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="紧急程度" align="center" prop="urgencyDegree" width="120" sortable="custom" resizable>
+      <el-table-column v-if="visibleColumn('urgencyDegree')" label="紧急程度" align="center" prop="urgencyDegree" width="120" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag
             v-if="scope.row.urgencyDegree != null"
@@ -238,22 +246,31 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="收文日期" align="center" prop="receiveTime" width="200px" sortable="custom" resizable>
+      <el-table-column v-if="visibleColumn('receiveTime')" label="收文日期" align="center" prop="receiveTime" width="200px" sortable="custom" resizable>
         <template #default="scope">
           {{ scope.row.receiveTime ? dateUtil(scope.row.receiveTime).format('YYYY-MM-DD HH:mm') : '' }}
         </template>
       </el-table-column>
-
+      <el-table-column v-if="visibleColumn('remark')" label="备注" align="center" prop="remark" min-width="180" show-overflow-tooltip resizable />
+      <el-table-column v-if="visibleColumn('zhubandate')" label="主办办结时间" align="center" prop="zhubandate" width="180" sortable="custom" resizable>
+        <template #default="scope">
+          {{ scope.row.zhubandate ? dateUtil(scope.row.zhubandate).format('YYYY-MM-DD HH:mm') : '' }}
+        </template>
+      </el-table-column>
+      <el-table-column v-if="visibleColumn('xiebandate')" label="协办办结时间" align="center" prop="xiebandate" width="180" sortable="custom" resizable>
+        <template #default="scope">
+          {{ scope.row.xiebandate ? dateUtil(scope.row.xiebandate).format('YYYY-MM-DD HH:mm') : '' }}
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" width="180px" fixed="right" resizable>
         <template #default="scope">
           <el-button
             v-if="!scope.row.processInstanceId"
             link
             type="primary"
-            @click="handleEdit(scope.row.id)"
-            v-hasPermi="['bpm:receive-doc:update']"
+            @click="handleDetail(scope.row)"
           >
-            编辑
+            详情
           </el-button>
 
           <el-button v-else link type="primary" @click="handleDetail(scope.row)"> 详情 </el-button>
@@ -275,7 +292,7 @@
             v-if="!['4', '5', 4, 5].includes(scope.row.status)"
             v-hasPermi="['bpm:receive-doc:delete']"
           >
-            作废
+            删除
           </el-button>
         </template>
       </el-table-column>
@@ -297,6 +314,8 @@ import { defaultShortcuts } from '@/utils/formatTime'
 import { ReceiveDocApi, ReceiveDoc } from '@/api/bpm/receivedoc'
 import { useRouter } from 'vue-router'
 import { useBpmInvalidate } from '@/hooks/bpm/useBpmInvalidate'
+import BpmColumnSetting from '@/views/bpm/components/BpmColumnSetting.vue'
+import { useBpmColumnSetting } from '@/hooks/bpm/useBpmColumnSetting'
 
 /** 收文 列表 */
 defineOptions({ name: 'ReceiveDoc' })
@@ -324,6 +343,32 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const showMore = ref(false)
+const { columnOptions, checkedColumnKeys, visibleColumn, resetColumns } = useBpmColumnSetting(
+  'bpm:receivedoc:columns',
+  [
+    { key: 'subject', label: '标题' },
+    { key: 'receiveDocNumber', label: '收文编号' },
+    { key: 'source', label: '来源' },
+    { key: 'sendDept', label: '来文单位' },
+    { key: 'sendDocNumber', label: '来文字号' },
+    { key: 'docSecondClass', label: '文件类别' },
+    { key: 'urgencyDegree', label: '紧急程度' },
+    { key: 'receiveTime', label: '收文日期' },
+    { key: 'remark', label: '备注' },
+    { key: 'zhubandate', label: '主办办结时间' },
+    { key: 'xiebandate', label: '协办办结时间' }
+  ],
+  [
+    'subject',
+    'receiveDocNumber',
+    'source',
+    'sendDept',
+    'sendDocNumber',
+    'docSecondClass',
+    'urgencyDegree',
+    'receiveTime'
+  ]
+)
 const WEB_CREATE_SOURCE = '网页新建'
 const sourceOptions = [
   { label: '市局公文', value: '市局公文' },
@@ -469,11 +514,17 @@ const handleEdit = (id: number) => {
   })
 }
 
-// 修改点：详情跳转逻辑改为跳转到流程详情页
 const handleDetail = (row: any) => {
+  if (!row.processInstanceId) {
+    router.push({
+      name: 'OAReceiveDocDetail',
+      query: { id: row.id }
+    })
+    return
+  }
   router.push({
-    name: 'BpmProcessInstanceDetail',
-    query: { id: row.processInstanceId }
+    name: 'BpmProcessInstanceRecord',
+    query: { id: row.processInstanceId, title: row.subject }
   })
 }
 

@@ -117,9 +117,17 @@
 
   <!-- 列表 -->
   <ContentWrap>
+    <div class="mb-15px flex items-center justify-end gap-8px">
+      <BpmColumnSetting
+        v-model="checkedColumnKeys"
+        :columns="columnOptions"
+        @reset="resetColumns"
+      />
+    </div>
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="流程名称" align="center" prop="name" min-width="200px" fixed="left" />
-      <el-table-column label="摘要" prop="summary" width="180" fixed="left">
+      <el-table-column type="index" label="序号" width="60" align="center" fixed="left" />
+      <el-table-column v-if="visibleColumn('name')" label="流程名称" align="center" prop="name" min-width="200px" fixed="left" />
+      <el-table-column v-if="visibleColumn('summary')" label="摘要" prop="summary" width="180" fixed="left">
         <template #default="scope">
           <div class="flex flex-col" v-if="scope.row.summary && scope.row.summary.length > 0">
             <div v-for="(item, index) in scope.row.summary" :key="index">
@@ -129,13 +137,14 @@
         </template>
       </el-table-column>
       <el-table-column
+        v-if="visibleColumn('categoryName')"
         label="流程分类"
         align="center"
         prop="categoryName"
         min-width="100"
         fixed="left"
       />
-      <el-table-column label="流程状态" prop="status" min-width="200">
+      <el-table-column v-if="visibleColumn('status')" label="流程状态" prop="status" min-width="200">
         <template #default="scope">
           <!-- 办理中状态 -->
           <template
@@ -169,6 +178,7 @@
         </template>
       </el-table-column>
       <el-table-column
+        v-if="visibleColumn('startTime')"
         label="发起时间"
         align="center"
         prop="startTime"
@@ -176,12 +186,19 @@
         :formatter="dateFormatter"
       />
       <el-table-column
+        v-if="visibleColumn('endTime')"
         label="结束时间"
         align="center"
         prop="endTime"
         width="180"
         :formatter="dateFormatter"
       />
+      <el-table-column v-if="visibleColumn('businessKey')" label="业务编号" align="center" prop="businessKey" min-width="120" show-overflow-tooltip />
+      <el-table-column v-if="visibleColumn('startUser')" label="发起人" align="center" prop="startUser.nickname" width="120" />
+      <el-table-column v-if="visibleColumn('startDept')" label="发起部门" align="center" prop="startUser.deptName" min-width="140" show-overflow-tooltip />
+      <el-table-column v-if="visibleColumn('processDefinitionId')" label="流程定义编号" align="center" prop="processDefinitionId" min-width="220" show-overflow-tooltip />
+      <el-table-column v-if="visibleColumn('processDefinitionKey')" label="流程定义Key" align="center" prop="processDefinition.key" min-width="160" show-overflow-tooltip />
+      <el-table-column v-if="visibleColumn('durationInMillis')" label="耗时(ms)" align="center" prop="durationInMillis" width="120" />
       <el-table-column label="操作" align="center" fixed="right" width="180">
         <template #default="scope">
           <el-button
@@ -225,6 +242,8 @@ import { CategoryApi, CategoryVO } from '@/api/bpm/category'
 import { ProcessInstanceVO } from '@/api/bpm/processInstance'
 import * as DefinitionApi from '@/api/bpm/definition'
 import { BpmProcessInstanceStatus } from '@/utils/constants'
+import BpmColumnSetting from '@/views/bpm/components/BpmColumnSetting.vue'
+import { useBpmColumnSetting } from '@/hooks/bpm/useBpmColumnSetting'
 
 defineOptions({ name: 'BpmProcessInstanceMy' })
 
@@ -248,6 +267,24 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 const categoryList = ref<CategoryVO[]>([]) // 流程分类列表
 const showPopover = ref(false) // 高级筛选是否展示
+const { columnOptions, checkedColumnKeys, visibleColumn, resetColumns } = useBpmColumnSetting(
+  'bpm:process-instance:my:columns',
+  [
+    { key: 'name', label: '流程名称' },
+    { key: 'summary', label: '摘要' },
+    { key: 'categoryName', label: '流程分类' },
+    { key: 'status', label: '流程状态' },
+    { key: 'startTime', label: '发起时间' },
+    { key: 'endTime', label: '结束时间' },
+    { key: 'businessKey', label: '业务编号' },
+    { key: 'startUser', label: '发起人' },
+    { key: 'startDept', label: '发起部门' },
+    { key: 'processDefinitionId', label: '流程定义编号' },
+    { key: 'processDefinitionKey', label: '流程定义Key' },
+    { key: 'durationInMillis', label: '耗时(ms)' }
+  ],
+  ['name', 'summary', 'categoryName', 'status', 'startTime', 'endTime']
+)
 
 /** 查询列表 */
 const getList = async () => {

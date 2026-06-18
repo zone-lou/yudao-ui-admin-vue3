@@ -36,9 +36,9 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item prop="name">
+        <el-form-item prop="processInstanceName">
           <el-input
-            v-model="queryParams.name"
+            v-model="queryParams.processInstanceName"
             class="!w-200px"
             clearable
             placeholder="请输入办件名称"
@@ -142,6 +142,13 @@
 
   <!-- 列表 -->
   <ContentWrap>
+    <div class="mb-15px flex items-center justify-end gap-8px">
+      <BpmColumnSetting
+        v-model="checkedColumnKeys"
+        :columns="columnOptions"
+        @reset="resetColumns"
+      />
+    </div>
     <el-table
       v-loading="loading"
       :data="list"
@@ -150,8 +157,16 @@
       @sort-change="handleSortChange"
     >
       <el-table-column type="selection" width="55" resizable />
+      <el-table-column type="index" label="序号" width="60" align="center" fixed="left" resizable />
+
       <!-- 1. 标签 (超时标识) -->
-      <el-table-column label="chaosh" width="40" align="center" resizable>
+      <el-table-column
+        v-if="visibleColumn('timeout')"
+        label="chaosh"
+        width="40"
+        align="center"
+        resizable
+      >
         <template #header>
           <el-icon><Clock /></el-icon>
         </template>
@@ -172,7 +187,15 @@
       </el-table-column>
 
       <!-- 2. 紧急程度 -->
-      <el-table-column label="紧急程度" align="center" prop="urgencyDegree" width="120" sortable="custom" resizable>
+      <el-table-column
+        v-if="visibleColumn('urgencyDegree')"
+        label="紧急程度"
+        align="center"
+        prop="urgencyDegree"
+        width="120"
+        sortable="custom"
+        resizable
+      >
         <template #default="scope">
           <dict-tag
             v-if="scope.row.urgencyDegree"
@@ -183,18 +206,42 @@
       </el-table-column>
 
       <!-- 3. 办件名称 (绑定 processInstance.name) -->
-      <el-table-column align="center" label="办件名称" prop="processInstance.name" width="250" sortable="custom" resizable />
+      <el-table-column
+        v-if="visibleColumn('processInstanceName')"
+        align="center"
+        label="办件名称"
+        prop="processInstance.name"
+        width="250"
+        sortable="custom"
+        resizable
+      />
 
       <!-- 4. 办件编号 (已移除) -->
       <!-- <el-table-column align="center" label="办件编号" prop="processInstanceId" width="250" /> -->
       <!-- 5. 当前环节 (任务名称) -->
-      <el-table-column align="center" label="当前环节" prop="name" width="150" sortable="custom" resizable />
+      <el-table-column
+        v-if="visibleColumn('name')"
+        align="center"
+        label="当前环节"
+        prop="name"
+        width="150"
+        sortable="custom"
+        resizable
+      />
 
       <!-- 6. 办件类型 (绑定 taskName) -->
-      <el-table-column align="center" label="办件类型" prop="taskName" width="120" resizable />
+      <el-table-column
+        v-if="visibleColumn('taskName')"
+        align="center"
+        label="办件类型"
+        prop="taskName"
+        width="120"
+        resizable
+      />
 
       <!-- 7. 开始日期 (流程发起时间) -->
       <el-table-column
+        v-if="visibleColumn('createTime')"
         :formatter="dateFormatter"
         align="center"
         label="开始日期"
@@ -205,7 +252,15 @@
       />
 
       <!-- 8. 办结时限 (流程截止时间 - 暂无字段，使用占位或 hidden) -->
-      <el-table-column label="办结时限" prop="deadlineDate" width="180" align="center" sortable="custom" resizable>
+      <el-table-column
+        v-if="visibleColumn('deadlineDate')"
+        label="办结时限"
+        prop="deadlineDate"
+        width="180"
+        align="center"
+        sortable="custom"
+        resizable
+      >
         <template #default="scope">
           {{ formatProcessDeadline(scope.row) }}
         </template>
@@ -213,6 +268,7 @@
 
       <!-- 9. 环节时限 (任务截止时间) -->
       <el-table-column
+        v-if="visibleColumn('dueDate')"
         :formatter="dateFormatter"
         align="center"
         label="环节时限"
@@ -223,7 +279,13 @@
       />
 
       <!-- 10. 状态 -->
-      <el-table-column label="状态" align="center" width="220" resizable>
+      <el-table-column
+        v-if="visibleColumn('status')"
+        label="状态"
+        align="center"
+        width="220"
+        resizable
+      >
         <template #default="scope">
           <span>待办</span>
 
@@ -236,6 +298,31 @@
           </span>
         </template>
       </el-table-column>
+      <el-table-column
+        v-if="visibleColumn('id')"
+        label="任务编号"
+        align="center"
+        prop="id"
+        min-width="220"
+        show-overflow-tooltip
+        resizable
+      />
+      <el-table-column
+        v-if="visibleColumn('startUser')"
+        label="发起人"
+        align="center"
+        prop="processInstance.startUser.nickname"
+        width="120"
+        resizable
+      />
+      <el-table-column
+        v-if="visibleColumn('assigneeUser')"
+        label="办理人"
+        align="center"
+        prop="assigneeUser.nickname"
+        width="120"
+        resizable
+      />
 
       <el-table-column align="center" label="操作" fixed="right" width="80" resizable>
         <template #default="scope">
@@ -262,6 +349,8 @@ import dayjs from 'dayjs'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import { Clock } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import BpmColumnSetting from '@/views/bpm/components/BpmColumnSetting.vue'
+import { useBpmColumnSetting } from '@/hooks/bpm/useBpmColumnSetting'
 
 defineOptions({ name: 'BpmTodoTask' })
 const selectionList = ref<any[]>([])
@@ -367,6 +456,34 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 const categoryList = ref<CategoryVO[]>([]) // 流程分类列表
 const showPopover = ref(false) // 高级筛选是否展示
+const { columnOptions, checkedColumnKeys, visibleColumn, resetColumns } = useBpmColumnSetting(
+  'bpm:task:todo:columns',
+  [
+    { key: 'timeout', label: '状态标识' },
+    { key: 'urgencyDegree', label: '紧急程度' },
+    { key: 'processInstanceName', label: '办件名称' },
+    { key: 'name', label: '当前环节' },
+    { key: 'taskName', label: '办件类型' },
+    { key: 'createTime', label: '开始日期' },
+    { key: 'deadlineDate', label: '办结时限' },
+    { key: 'dueDate', label: '环节时限' },
+    { key: 'status', label: '状态' },
+    { key: 'id', label: '任务编号' },
+    { key: 'startUser', label: '发起人' },
+    { key: 'assigneeUser', label: '办理人' }
+  ],
+  [
+    'timeout',
+    'urgencyDegree',
+    'processInstanceName',
+    'name',
+    'taskName',
+    'createTime',
+    'deadlineDate',
+    'dueDate',
+    'status'
+  ]
+)
 
 const getProcessDeadline = (row: any) => {
   const createTime = row.processInstance?.createTime
@@ -406,11 +523,6 @@ const isProcessOverdue = (row: any) => {
   return now.isAfter(deadline)
 }
 
-const handleDone = () => {
-  // TODO: 实现办结逻辑
-  console.log('点击了办结')
-}
-
 /** 查询任务列表 */
 const getList = async () => {
   loading.value = true
@@ -432,7 +544,8 @@ const handleQuery = () => {
 
 const handleSortChange = ({ prop, order }: any) => {
   queryParams.orderField = order ? prop : undefined
-  queryParams.orderDirection = order === 'ascending' ? 'asc' : order === 'descending' ? 'desc' : undefined
+  queryParams.orderDirection =
+    order === 'ascending' ? 'asc' : order === 'descending' ? 'desc' : undefined
   handleQuery()
 }
 

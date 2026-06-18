@@ -149,6 +149,7 @@
       :show-overflow-tooltip="true"
       @selection-change="handleRowCheckboxChange"
     >
+      <el-table-column type="index" label="序号" width="60" align="center" fixed="left" resizable />
       <el-table-column type="selection" width="55" />
       <el-table-column label="单位类别" align="center" prop="docClass">
         <template #default="scope">

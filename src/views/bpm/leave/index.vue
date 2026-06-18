@@ -91,7 +91,12 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <div class="mb-15px flex justify-end">
+    <div class="mb-15px flex items-center justify-end gap-8px">
+      <BpmColumnSetting
+        v-model="checkedColumnKeys"
+        :columns="columnOptions"
+        @reset="resetColumns"
+      />
       <el-button
         type="success"
         plain
@@ -109,10 +114,13 @@
       :stripe="true"
       :show-overflow-tooltip="true"
       border
+      header-cell-class-name="nowrap-table-header"
       @sort-change="handleSortChange"
     >
-      <el-table-column label="申请用户" align="center" prop="nickName" width="120" sortable="custom" resizable />
+      <el-table-column type="index" label="序号" width="60" align="center" fixed="left" resizable />
+      <el-table-column v-if="visibleColumn('nickName')" label="申请用户" align="center" prop="nickName" width="120" sortable="custom" resizable />
       <el-table-column
+        v-if="visibleColumn('qxjStartDate')"
         label="开始时间"
         align="center"
         prop="qxjStartDate"
@@ -122,6 +130,7 @@
         resizable
       />
       <el-table-column
+        v-if="visibleColumn('qxjEndDate')"
         label="结束时间"
         align="center"
         prop="qxjEndDate"
@@ -130,19 +139,20 @@
         sortable="custom"
         resizable
       />
-      <el-table-column label="请(休)假种类" align="center" prop="qxjType" width="130" sortable="custom" resizable>
+      <el-table-column v-if="visibleColumn('qxjType')" label="请(休)假种类" align="center" prop="qxjType" width="155" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.BPM_LEAVE_TYPE" :value="scope.row.qxjType" />
         </template>
       </el-table-column>
-      <el-table-column label="请假事由" align="center" prop="sjReason" min-width="180" sortable="custom" resizable />
-      <el-table-column label="请假天数" align="center" prop="totalTs" width="100" sortable="custom" resizable />
-      <el-table-column label="办理状态" align="center" prop="spzt" sortable="custom" resizable>
+      <el-table-column v-if="visibleColumn('sjReason')" label="请假事由" align="center" prop="sjReason" min-width="180" sortable="custom" resizable />
+      <el-table-column v-if="visibleColumn('totalTs')" label="请假天数" align="center" prop="totalTs" width="120" sortable="custom" resizable />
+      <el-table-column v-if="visibleColumn('spzt')" label="办理状态" align="center" prop="spzt" width="120" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="scope.row.spzt" />
         </template>
       </el-table-column>
       <el-table-column
+        v-if="visibleColumn('applyDate')"
         label="申请时间"
         align="center"
         prop="applyDate"
@@ -169,7 +179,7 @@
             v-if="!['4', '5', 4, 5].includes(scope.row.spzt)"
             v-hasPermi="['bpm:leave:delete']"
           >
-            作废
+            删除
           </el-button>
         </template>
       </el-table-column>
@@ -195,6 +205,8 @@ import { leaveApi, leave } from '@/api/bpm/leave'
 import leaveForm from './leaveForm.vue'
 import { useRouter } from 'vue-router'
 import { useBpmInvalidate } from '@/hooks/bpm/useBpmInvalidate'
+import BpmColumnSetting from '@/views/bpm/components/BpmColumnSetting.vue'
+import { useBpmColumnSetting } from '@/hooks/bpm/useBpmColumnSetting'
 
 /** 假期申请审批 列表 */
 defineOptions({ name: 'Leave' })
@@ -220,6 +232,29 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+const { columnOptions, checkedColumnKeys, visibleColumn, resetColumns } = useBpmColumnSetting(
+  'bpm:leave:columns',
+  [
+    { key: 'nickName', label: '申请用户' },
+    { key: 'qxjStartDate', label: '开始时间' },
+    { key: 'qxjEndDate', label: '结束时间' },
+    { key: 'qxjType', label: '请(休)假种类' },
+    { key: 'sjReason', label: '请假事由' },
+    { key: 'totalTs', label: '请假天数' },
+    { key: 'spzt', label: '办理状态' },
+    { key: 'applyDate', label: '申请时间' }
+  ],
+  [
+    'nickName',
+    'qxjStartDate',
+    'qxjEndDate',
+    'qxjType',
+    'sjReason',
+    'totalTs',
+    'spzt',
+    'applyDate'
+  ]
+)
 
 const dateTimeFormatter = (_row: any, _column: any, cellValue: any) => {
   return cellValue ? formatDate(cellValue, 'YYYY-MM-DD HH:mm') : ''
@@ -320,5 +355,9 @@ onMounted(() => {
   align-items: center;
   gap: 4px;
   padding-top: 16px;
+}
+
+:deep(.nowrap-table-header .cell) {
+  white-space: nowrap;
 }
 </style>

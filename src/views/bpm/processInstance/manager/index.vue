@@ -89,6 +89,7 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
+      <el-table-column type="index" label="序号" width="60" align="center" fixed="left" />
       <el-table-column label="流程名称" align="center" prop="name" min-width="200px" fixed="left" />
       <el-table-column
         label="流程分类"

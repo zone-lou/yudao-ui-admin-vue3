@@ -82,6 +82,13 @@
 
   <!-- 列表 -->
   <ContentWrap>
+    <div class="mb-15px flex items-center justify-end gap-8px">
+      <BpmColumnSetting
+        v-model="checkedColumnKeys"
+        :columns="columnOptions"
+        @reset="resetColumns"
+      />
+    </div>
     <el-table
       row-key="id"
       v-loading="loading"
@@ -91,22 +98,24 @@
       border
       @sort-change="handleSortChange"
     >
+      <el-table-column type="index" label="序号" width="60" align="center" fixed="left" resizable />
       <!--      <el-table-column label="申请人" align="center" prop="userName" />-->
       <!--      <el-table-column label="申请人部门" align="center" prop="deptName" />-->
 
-      <el-table-column label="会议名称" prop="title" min-width="280" show-overflow-tooltip sortable="custom" resizable>
+      <el-table-column v-if="visibleColumn('title')" label="会议名称" prop="title" min-width="280" show-overflow-tooltip sortable="custom" resizable>
         <template #default="scope">
           <span class="link-type" @click="handleRecord(scope.row)">{{ scope.row.title }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="会议时间" align="center" prop="startDate" width="165" sortable="custom" resizable>
+      <el-table-column v-if="visibleColumn('startDate')" label="会议时间" align="center" prop="startDate" width="165" sortable="custom" resizable>
         <template #default="scope">
           {{ scope.row.startDate ? dateUtil(scope.row.startDate).format('YYYY-MM-DD HH:mm') : '' }}
         </template>
       </el-table-column>
-      <el-table-column label="会议地点" prop="venue" min-width="180" show-overflow-tooltip sortable="custom" resizable />
-      <el-table-column label="召集单位" prop="joinUnit" min-width="150" show-overflow-tooltip sortable="custom" resizable />
+      <el-table-column v-if="visibleColumn('venue')" label="会议地点" prop="venue" min-width="180" show-overflow-tooltip sortable="custom" resizable />
+      <el-table-column v-if="visibleColumn('joinUnit')" label="召集单位" prop="joinUnit" min-width="150" show-overflow-tooltip sortable="custom" resizable />
       <el-table-column
+        v-if="visibleColumn('offerUnit')"
         label="我局参会科室"
         prop="offerUnit"
         min-width="220"
@@ -114,7 +123,7 @@
         sortable="custom"
         resizable
       />
-      <el-table-column label="办理状态" align="center" prop="status" width="110" sortable="custom" resizable>
+      <el-table-column v-if="visibleColumn('status')" label="办理状态" align="center" prop="status" width="110" sortable="custom" resizable>
         <template #default="scope">
           <div class="flex items-center justify-center">
             <el-tag v-if="scope.row.status === 0 || !scope.row.processInstanceId" type="info">
@@ -129,6 +138,14 @@
           </div>
         </template>
       </el-table-column>
+      <el-table-column v-if="visibleColumn('userName')" label="申请人" align="center" prop="userName" width="120" sortable="custom" resizable />
+      <el-table-column v-if="visibleColumn('deptName')" label="申请人部门" align="center" prop="deptName" min-width="140" show-overflow-tooltip sortable="custom" resizable />
+      <el-table-column v-if="visibleColumn('applyDate')" label="申请日期" align="center" prop="applyDate" width="165" sortable="custom" resizable>
+        <template #default="scope">
+          {{ scope.row.applyDate ? dateUtil(scope.row.applyDate).format('YYYY-MM-DD HH:mm') : '' }}
+        </template>
+      </el-table-column>
+      <el-table-column v-if="visibleColumn('offerPerson')" label="我局参会人员" prop="offerPerson" min-width="180" show-overflow-tooltip sortable="custom" resizable />
       <el-table-column label="操作" align="center" width="180" fixed="right" resizable>
         <template #default="scope">
           <el-button
@@ -159,7 +176,7 @@
             v-if="!['4', '5', 4, 5].includes(scope.row.status)"
             v-hasPermi="['bpm:confflow:delete']"
           >
-            作废
+            删除
           </el-button>
         </template>
       </el-table-column>
@@ -181,6 +198,8 @@ import { useBpmInvalidate } from '@/hooks/bpm/useBpmInvalidate'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { defaultShortcuts } from '@/utils/formatTime'
 import { useRouter } from 'vue-router'
+import BpmColumnSetting from '@/views/bpm/components/BpmColumnSetting.vue'
+import { useBpmColumnSetting } from '@/hooks/bpm/useBpmColumnSetting'
 
 /** 会议报告单 列表 */
 defineOptions({ name: 'Confflow' })
@@ -211,6 +230,22 @@ const queryParams = reactive({
   orderDirection: undefined as string | undefined
 })
 const queryFormRef = ref() // 搜索的表单
+const { columnOptions, checkedColumnKeys, visibleColumn, resetColumns } = useBpmColumnSetting(
+  'bpm:confflow:columns',
+  [
+    { key: 'title', label: '会议名称' },
+    { key: 'startDate', label: '会议时间' },
+    { key: 'venue', label: '会议地点' },
+    { key: 'joinUnit', label: '召集单位' },
+    { key: 'offerUnit', label: '我局参会科室' },
+    { key: 'status', label: '办理状态' },
+    { key: 'userName', label: '申请人' },
+    { key: 'deptName', label: '申请人部门' },
+    { key: 'applyDate', label: '申请日期' },
+    { key: 'offerPerson', label: '我局参会人员' }
+  ],
+  ['title', 'startDate', 'venue', 'joinUnit', 'offerUnit', 'status']
+)
 
 /** 查询列表 */
 const getList = async () => {

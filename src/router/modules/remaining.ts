@@ -313,6 +313,22 @@ const remainingRouter: AppRouteRecordRaw[] = [
         })
       },
       {
+        path: 'process-instance/record',
+        component: () => import('@/views/bpm/processInstance/record/index.vue'),
+        name: 'BpmProcessInstanceRecord',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '流转记录',
+          activeMenu: '/bpm/receivedoc'
+        },
+        props: (route) => ({
+          id: route.query.id,
+          title: route.query.title
+        })
+      },
+      {
         path: 'process-instance/report',
         component: () => import('@/views/bpm/processInstance/report/index.vue'),
         name: 'BpmProcessInstanceReport',

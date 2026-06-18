@@ -108,6 +108,13 @@
 
   <!-- 列表 -->
   <ContentWrap>
+    <div class="mb-15px flex items-center justify-end gap-8px">
+      <BpmColumnSetting
+        v-model="checkedColumnKeys"
+        :columns="columnOptions"
+        @reset="resetColumns"
+      />
+    </div>
     <el-table
       row-key="id"
       v-loading="loading"
@@ -115,7 +122,8 @@
       :stripe="true"
       :show-overflow-tooltip="true"
     >
-      <el-table-column label="发文字号" align="center" prop="sendDocNumber" min-width="180">
+      <el-table-column type="index" label="序号" width="60" align="center" fixed="left" resizable />
+      <el-table-column v-if="visibleColumn('sendDocNumber')" label="发文字号" align="center" prop="sendDocNumber" min-width="180">
         <template #default="scope">
           <div class="flex items-center justify-center">
             <span>{{ formatSendDocNumber(scope.row.sendDocNumber) }}</span>
@@ -127,21 +135,34 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="主题" align="center" prop="subject" show-overflow-tooltip />
-      <el-table-column label="发文单位" align="center" prop="sendDept" />
+      <el-table-column v-if="visibleColumn('subject')" label="主题" align="center" prop="subject" show-overflow-tooltip />
+      <el-table-column v-if="visibleColumn('sendDept')" label="发文单位" align="center" prop="sendDept" />
       <el-table-column
+        v-if="visibleColumn('sendTime')"
         label="发文日期"
         align="center"
         prop="sendTime"
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="拟稿人" align="center" prop="draftPerson" />
-      <el-table-column label="紧急程度" align="center" prop="urgencyDegree" width="100">
+      <el-table-column v-if="visibleColumn('draftPerson')" label="拟稿人" align="center" prop="draftPerson" />
+      <el-table-column v-if="visibleColumn('urgencyDegree')" label="紧急程度" align="center" prop="urgencyDegree" width="100">
         <template #default="scope">
           <dict-tag v-if="scope.row.urgencyDegree != null" :type="DICT_TYPE.BPM_EMERGENCY_DEGREE" :value="scope.row.urgencyDegree" />
         </template>
       </el-table-column>
+      <el-table-column v-if="visibleColumn('docProperty')" label="公文性质" align="center" prop="docProperty" width="120" />
+      <el-table-column v-if="visibleColumn('primarySendDept')" label="主送机关" align="center" prop="primarySendDept" min-width="160" show-overflow-tooltip />
+      <el-table-column v-if="visibleColumn('copySendDept')" label="抄送机关" align="center" prop="copySendDept" min-width="160" show-overflow-tooltip />
+      <el-table-column v-if="visibleColumn('secretDegree')" label="机密程度" align="center" prop="secretDegree" width="120" />
+      <el-table-column v-if="visibleColumn('draftDate')" label="拟稿时间" align="center" prop="draftDate" :formatter="dateFormatter" width="180px" />
+      <el-table-column v-if="visibleColumn('draftDept')" label="拟稿单位" align="center" prop="draftDept" min-width="150" show-overflow-tooltip />
+      <el-table-column v-if="visibleColumn('responsibleDept')" label="主办部门" align="center" prop="responsibleDept" min-width="150" show-overflow-tooltip />
+      <el-table-column v-if="visibleColumn('dealTimelimit')" label="办件时限" align="center" prop="dealTimelimit" :formatter="dateFormatter" width="180px" />
+      <el-table-column v-if="visibleColumn('docClass')" label="一级分类" align="center" prop="docClass" width="120" />
+      <el-table-column v-if="visibleColumn('docSecondClass')" label="二级分类" align="center" prop="docSecondClass" width="120" />
+      <el-table-column v-if="visibleColumn('docType')" label="文件类型" align="center" prop="docType" width="120" />
+      <el-table-column v-if="visibleColumn('acceptNumber')" label="受理文号" align="center" prop="acceptNumber" min-width="160" show-overflow-tooltip />
       <el-table-column label="操作" align="center" width="180px" fixed="right">
         <template #default="scope">
           <el-button
@@ -173,7 +194,7 @@
             v-if="!['4', '5', 4, 5].includes(scope.row.status)"
             v-hasPermi="['bpm:send-doc:delete']"
           >
-            作废
+            删除
           </el-button>
         </template>
       </el-table-column>
@@ -194,6 +215,8 @@ import { dateFormatter, defaultShortcuts } from '@/utils/formatTime'
 import { SendDocApi, SendDoc } from '@/api/bpm/senddoc'
 import { useRouter } from 'vue-router'
 import { useBpmInvalidate } from '@/hooks/bpm/useBpmInvalidate'
+import BpmColumnSetting from '@/views/bpm/components/BpmColumnSetting.vue'
+import { useBpmColumnSetting } from '@/hooks/bpm/useBpmColumnSetting'
 
 /** 发文 列表 */
 defineOptions({ name: 'SendDoc' })
@@ -216,6 +239,30 @@ const queryParams = reactive({
   status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
+const { columnOptions, checkedColumnKeys, visibleColumn, resetColumns } = useBpmColumnSetting(
+  'bpm:senddoc:columns',
+  [
+    { key: 'sendDocNumber', label: '发文字号' },
+    { key: 'subject', label: '主题' },
+    { key: 'sendDept', label: '发文单位' },
+    { key: 'sendTime', label: '发文日期' },
+    { key: 'draftPerson', label: '拟稿人' },
+    { key: 'urgencyDegree', label: '紧急程度' },
+    { key: 'docProperty', label: '公文性质' },
+    { key: 'primarySendDept', label: '主送机关' },
+    { key: 'copySendDept', label: '抄送机关' },
+    { key: 'secretDegree', label: '机密程度' },
+    { key: 'draftDate', label: '拟稿时间' },
+    { key: 'draftDept', label: '拟稿单位' },
+    { key: 'responsibleDept', label: '主办部门' },
+    { key: 'dealTimelimit', label: '办件时限' },
+    { key: 'docClass', label: '一级分类' },
+    { key: 'docSecondClass', label: '二级分类' },
+    { key: 'docType', label: '文件类型' },
+    { key: 'acceptNumber', label: '受理文号' }
+  ],
+  ['sendDocNumber', 'subject', 'sendDept', 'sendTime', 'draftPerson', 'urgencyDegree']
+)
 
 /** 查询列表 */
 const getList = async () => {

@@ -206,7 +206,7 @@
                 <el-tag v-if="scope.row.status === 1" type="primary" effect="plain">办理中</el-tag>
                 <el-tag v-else-if="scope.row.status === 2" type="success">已办结</el-tag>
                 <el-tag v-else-if="scope.row.processStatus == 3" type="info">已取消</el-tag>
-                <el-tag v-else type="danger">作废/异常</el-tag>
+                <el-tag v-else type="danger">已删除/异常</el-tag>
               </template>
             </div>
           </el-tooltip>

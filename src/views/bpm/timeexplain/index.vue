@@ -82,7 +82,12 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <div class="mb-15px flex justify-end">
+    <div class="mb-15px flex items-center justify-end gap-8px">
+      <BpmColumnSetting
+        v-model="checkedColumnKeys"
+        :columns="columnOptions"
+        @reset="resetColumns"
+      />
       <el-button
         type="success"
         plain
@@ -100,10 +105,13 @@
       :stripe="true"
       :show-overflow-tooltip="true"
       border
+      header-cell-class-name="nowrap-table-header"
       @sort-change="handleSortChange"
     >
-      <el-table-column label="申请用户" align="center" prop="nickName" width="120" sortable="custom" resizable />
+      <el-table-column type="index" label="序号" width="60" align="center" fixed="left" resizable />
+      <el-table-column v-if="visibleColumn('nickName')" label="申请用户" align="center" prop="nickName" width="120" sortable="custom" resizable />
       <el-table-column
+        v-if="visibleColumn('checkBegin')"
         label="开始时间"
         align="center"
         prop="checkBegin"
@@ -113,6 +121,7 @@
         resizable
       />
       <el-table-column
+        v-if="visibleColumn('checkEnd')"
         label="结束时间"
         align="center"
         prop="checkEnd"
@@ -121,16 +130,17 @@
         sortable="custom"
         resizable
       />
-      <el-table-column label="出发地" align="center" prop="startPlace" min-width="120" sortable="custom" resizable />
-      <el-table-column label="目的地" align="center" prop="endPlace" min-width="120" sortable="custom" resizable />
-      <el-table-column label="外出事由" align="center" prop="reason" min-width="180" sortable="custom" resizable />
-      <el-table-column label="外出天数" align="center" prop="days" width="100" sortable="custom" resizable />
-      <el-table-column label="办理状态" align="center" prop="status" sortable="custom" resizable>
+      <el-table-column v-if="visibleColumn('startPlace')" label="出发地" align="center" prop="startPlace" min-width="130" sortable="custom" resizable />
+      <el-table-column v-if="visibleColumn('endPlace')" label="目的地" align="center" prop="endPlace" min-width="130" sortable="custom" resizable />
+      <el-table-column v-if="visibleColumn('reason')" label="外出事由" align="center" prop="reason" min-width="180" sortable="custom" resizable />
+      <el-table-column v-if="visibleColumn('days')" label="外出天数" align="center" prop="days" width="120" sortable="custom" resizable />
+      <el-table-column v-if="visibleColumn('status')" label="办理状态" align="center" prop="status" width="120" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column
+        v-if="visibleColumn('checkDate')"
         label="申请时间"
         align="center"
         prop="checkDate"
@@ -157,7 +167,7 @@
             v-if="!['4', '5', 4, 5].includes(scope.row.status)"
             v-hasPermi="['bpm:time-explain:delete']"
           >
-            作废
+            删除
           </el-button>
         </template>
       </el-table-column>
@@ -183,6 +193,8 @@ import { TimeExplainApi, TimeExplain } from '@/api/bpm/timeexplain'
 import TimeExplainForm from './TimeExplainForm.vue'
 import { useRouter } from 'vue-router'
 import { useBpmInvalidate } from '@/hooks/bpm/useBpmInvalidate'
+import BpmColumnSetting from '@/views/bpm/components/BpmColumnSetting.vue'
+import { useBpmColumnSetting } from '@/hooks/bpm/useBpmColumnSetting'
 
 /** 外出请假补假 列表 */
 defineOptions({ name: 'TimeExplain' })
@@ -209,6 +221,31 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+const { columnOptions, checkedColumnKeys, visibleColumn, resetColumns } = useBpmColumnSetting(
+  'bpm:timeexplain:columns',
+  [
+    { key: 'nickName', label: '申请用户' },
+    { key: 'checkBegin', label: '开始时间' },
+    { key: 'checkEnd', label: '结束时间' },
+    { key: 'startPlace', label: '出发地' },
+    { key: 'endPlace', label: '目的地' },
+    { key: 'reason', label: '外出事由' },
+    { key: 'days', label: '外出天数' },
+    { key: 'status', label: '办理状态' },
+    { key: 'checkDate', label: '申请时间' }
+  ],
+  [
+    'nickName',
+    'checkBegin',
+    'checkEnd',
+    'startPlace',
+    'endPlace',
+    'reason',
+    'days',
+    'status',
+    'checkDate'
+  ]
+)
 
 const dateTimeFormatter = (_row: any, _column: any, cellValue: any) => {
   return cellValue ? formatDate(cellValue, 'YYYY-MM-DD HH:mm') : ''
@@ -251,7 +288,6 @@ const openForm = (type: string, id?: number) => {
 }
 
 /** 删除按钮操作 */
-/** 删除(作废)按钮操作 */
 const { handleInvalidate: handleDelete } = useBpmInvalidate(
   TimeExplainApi.deleteTimeExplain,
   getList
@@ -316,5 +352,9 @@ onMounted(() => {
   align-items: center;
   gap: 4px;
   padding-top: 16px;
+}
+
+:deep(.nowrap-table-header .cell) {
+  white-space: nowrap;
 }
 </style>
