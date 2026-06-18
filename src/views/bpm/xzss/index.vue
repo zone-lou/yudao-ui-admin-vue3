@@ -63,6 +63,15 @@
           class="!w-240px"
         />
       </el-form-item>
+      <el-form-item label="街道地址" prop="tdZl">
+        <el-input
+          v-model="queryParams.tdZl"
+          placeholder="请输入街道地址"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
       <el-form-item label="诉讼类型" prop="ssLx">
         <el-select
           v-model="queryParams.ssLx"
@@ -282,6 +291,7 @@
       <el-table-column label="原告" align="center" prop="sqr" width="150px" sortable="custom" resizable />
       <el-table-column label="被告" align="center" prop="bsqr" width="150px" sortable="custom" resizable />
       <el-table-column label="第三人" align="center" prop="dsr" width="150px" sortable="custom" resizable />
+      <el-table-column label="土地坐落" align="center" prop="tdZl" width="200px" sortable="custom" resizable />
       <el-table-column label="诉讼类型" align="center" prop="ssLx" width="120px" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag
@@ -409,6 +419,7 @@ const queryParams = reactive({
   sqr: undefined,
   bsqr: undefined,
   dsr: undefined,
+  tdZl: undefined,
   ssLx: undefined,
   lb1: undefined,
   lb2: undefined,

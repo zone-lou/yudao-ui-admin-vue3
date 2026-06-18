@@ -30,6 +30,9 @@
       <el-form-item label="第三人" prop="dsr">
         <el-input v-model="queryParams.dsr" placeholder="请输入第三人" clearable @keyup.enter="handleQuery" />
       </el-form-item>
+      <el-form-item label="街道地址" prop="tdZl">
+        <el-input v-model="queryParams.tdZl" placeholder="请输入街道地址" clearable @keyup.enter="handleQuery" />
+      </el-form-item>
       <el-form-item label="案件分类" prop="lb1">
         <el-select v-model="queryParams.lb1" placeholder="请选择案件分类" clearable>
           <el-option
@@ -226,6 +229,7 @@ const queryParams = reactive({
   swRq: [],
   sqr: undefined,
   dsr: undefined,
+  tdZl: undefined,
   lb1: undefined,
   lb2: undefined,
   lb3: undefined,
