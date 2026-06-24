@@ -454,6 +454,24 @@ const approveReasonRule = computed(() => {
   }
 })
 
+const RECEIVE_REGISTER_TASK_ID = 'Activity_04ykbd0'
+const DEFAULT_RECEIVE_REGISTER_REASON = '发送'
+
+const isReceiveRegisterTask = () => {
+  const taskName = runningTask.value?.name || props.currentNode?.name || ''
+  return (
+    runningTask.value?.taskDefinitionKey === RECEIVE_REGISTER_TASK_ID ||
+    taskName.includes('收文登记') ||
+    taskName.includes('来文登记')
+  )
+}
+
+const ensureReceiveRegisterReason = () => {
+  if (isReceiveRegisterTask() && !approveReasonForm.reason) {
+    approveReasonForm.reason = DEFAULT_RECEIVE_REGISTER_REASON
+  }
+}
+
 // 减签表单
 const deleteSignFormRef = ref<FormInstance>()
 const deleteSignForm = reactive({
@@ -599,6 +617,8 @@ const handleDirectFinish = async () => {
       reason = opinion
     }
   }
+  ensureReceiveRegisterReason()
+  reason = approveReasonForm.reason || reason
 
   if (!reason || reason.trim() === '') {
     message.warning('请填写环节意见！')
@@ -672,6 +692,10 @@ const openApproveDialog = async () => {
       approveReasonForm.reason = ''
       requireDialogReasonInput.value = true
     }
+  }
+  ensureReceiveRegisterReason()
+  if (isReceiveRegisterTask()) {
+    requireDialogReasonInput.value = false
   }
 
   // 并行或提前加载节点，减少卡顿感，弹出动作剥离到外层优先
@@ -991,6 +1015,7 @@ const handleApproveConfirm = async () => {
   if (!valid) return
 
   // 防御：如果是来自内置审批栏，由于 el-form-item v-if 会导致其必填失效，故追加硬校验
+  ensureReceiveRegisterReason()
   if (!approveReasonForm.reason || approveReasonForm.reason.trim() === '') {
     message.warning('办理意见不能为空')
     return

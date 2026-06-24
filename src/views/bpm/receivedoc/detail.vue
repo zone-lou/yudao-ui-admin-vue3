@@ -1,6 +1,9 @@
 <template>
   <div id="printDivTag">
     <div class="oa-container">
+      <div v-if="canEditReceiveInfo" class="print-hide-row edit-toolbar">
+        <el-button type="primary" size="small" @click="handleEditReceiveInfo">修改收文信息</el-button>
+      </div>
       <div class="doc-title">义乌市自然资源和规划局收文阅办单</div>
 
       <div class="meta-info">
@@ -355,15 +358,14 @@
 </template>
 
 <script setup lang="ts">
-import { getIntDictOptions, getStrDictOptions, DICT_TYPE } from '@/utils/dict'
-import { dateFormatter } from '@/utils/formatTime'
+import { getStrDictOptions, DICT_TYPE } from '@/utils/dict'
 import * as ReceiveDocApi from '@/api/bpm/receivedoc'
-import { addComment } from '@/api/bpm/task'
 import { dateUtil } from '@/utils/dateUtil'
 import { Base64 } from 'js-base64'
 import { propTypes } from '@/utils/propTypes'
 import { useUserStore } from '@/store/modules/user'
 import * as ConfigApi from '@/api/infra/config'
+import { useRouter } from 'vue-router'
 
 defineOptions({ name: 'BpmReceiveDocDetail' })
 const userStore = useUserStore()
@@ -378,6 +380,7 @@ const props = defineProps({
 })
 
 const { query } = useRoute()
+const router = useRouter()
 const message = useMessage()
 
 const detailLoading = ref(false)
@@ -399,6 +402,8 @@ const detailData = ref({
 const fileList = ref<any[]>([])
 const currentOpinion = ref('') // 当前正在填写的办理意见
 const fileViewBaseUrl = ref('')
+const RECEIVE_REGISTER_TASK_ID = 'Activity_04ykbd0'
+const AUTO_REGISTER_REASON = '系统自动完成来文登记'
 
 // 审批意见分类
 const nibanList = ref<any[]>([]) // 拟办
@@ -416,8 +421,35 @@ const isEditable = (keyword: string) => {
   return nodeName.indexOf(keyword) !== -1
 }
 
+const isReceiveRegisterNode = computed(() => {
+  const nodeName = props.currentNode?.name || ''
+  return (
+    props.currentNode?.id === RECEIVE_REGISTER_TASK_ID ||
+    nodeName.includes('收文登记') ||
+    nodeName.includes('来文登记')
+  )
+})
+
+const canEditReceiveInfo = computed(() => Boolean(props.taskId && isReceiveRegisterNode.value))
+
+const handleEditReceiveInfo = () => {
+  const queryId = props.id || query.id
+  if (!queryId) return
+  router.push({
+    name: 'OAReceiveDocCreate',
+    query: {
+      id: queryId,
+      returnProcessInstanceId: query.id,
+      returnTaskId: props.taskId
+    }
+  })
+}
+
 /** 暴露给父组件的方法：获取当前填写的意见 */
 const getOpinion = () => {
+  if (isReceiveRegisterNode.value) {
+    return undefined
+  }
   return currentOpinion.value
 }
 
@@ -447,7 +479,7 @@ const getInfo = async () => {
     fileViewBaseUrl.value = await ConfigApi.getConfigKey('url.fileview.address')
     externalPrefix.value = await ConfigApi.getConfigKey('url.external.prefix')
     internalPrefix.value = await ConfigApi.getConfigKey('url.internal.prefix')
-    const data = await ReceiveDocApi.ReceiveDocApi.getReceiveDoc(queryId)
+    const data = await ReceiveDocApi.ReceiveDocApi.getReceiveDoc(Number(queryId))
     if (!data) {
       message.error('未找到相关收文详情')
       detailLoading.value = false
@@ -456,7 +488,7 @@ const getInfo = async () => {
     detailData.value = data
 
     // 从子表加载附件（流程前后都能正确获取）
-    const attachList = await ReceiveDocApi.ReceiveDocApi.getReceiveDocXmGuid(queryId)
+    const attachList = await ReceiveDocApi.ReceiveDocApi.getReceiveDocXmGuid(Number(queryId))
     if (attachList && attachList.length > 0) {
       fileList.value = attachList.map((item) => ({
         name: item.attachFileName,
@@ -504,6 +536,12 @@ const processActivityNodes = () => {
         if (task.reason) {
           // 只要有 reason 就展示
           const name = node.name || ''
+          if (
+            (name.includes('收文登记') || name.includes('来文登记')) &&
+            task.reason === AUTO_REGISTER_REASON
+          ) {
+            return
+          }
           const info = {
             name: name,
             comment: task.reason,
@@ -567,21 +605,6 @@ const formatSendDocNumber = (val: any) => {
 const formatDate = (val: any) => {
   if (!val) return ''
   return dateUtil(val).format('YYYY-MM-DD HH:mm')
-}
-
-const formatCommaData = (val: any) => {
-  if (Array.isArray(val)) return val
-  if (typeof val === 'string' && val.indexOf(',') !== -1) {
-    const arr = val.split(',')
-    if (arr.every((i) => !isNaN(Number(i)))) {
-      return arr.map(Number)
-    }
-    return arr
-  }
-  if (typeof val === 'string' && !isNaN(Number(val))) {
-    return Number(val)
-  }
-  return val
 }
 
 const DIRECT_RENDER_EXTENSIONS = [
@@ -721,6 +744,13 @@ onMounted(() => {
   letter-spacing: 2px;
   color: #d71920;
   text-align: center;
+}
+
+/* stylelint-disable-next-line selector-id-pattern */
+#printDivTag .edit-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */

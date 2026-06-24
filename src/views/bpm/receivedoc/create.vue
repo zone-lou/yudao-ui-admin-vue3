@@ -368,7 +368,7 @@
     title="发送收文记录"
     :show-reason="false"
     :process-definition-id="processDefinitionId"
-    :activity-id="startUserNodeId"
+    :activity-id="receiveRegisterTaskId"
     @submit="submitProcess"
   />
 </template>
@@ -381,18 +381,15 @@ import { useTagsViewStore } from '@/store/modules/tagsView'
 import { useMessage } from '@/hooks/web/useMessage'
 import * as DefinitionApi from '@/api/bpm/definition'
 import { ReceiveDocApi } from '@/api/bpm/receivedoc'
-import { useUserStore } from '@/store/modules/user'
 import { getUserProfile } from '@/api/system/user/profile'
 import { dateUtil } from '@/utils/dateUtil'
 import { uploadReturnInfo } from '@/api/infra/file'
 
 // 引入弹窗组件及常量
 import ProcessSendDialog from '@/components/ProcessSendDialog/index.vue'
-import { NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
 
 defineOptions({ name: 'BpmReceiveDocCreate' })
 
-const userStore = useUserStore()
 const deptName = ref('')
 const message = useMessage()
 const { delView } = useTagsViewStore()
@@ -401,7 +398,7 @@ const route = useRoute()
 
 // ===== 弹窗控制 =====
 const sendDialogRef = ref()
-const startUserNodeId = NodeId.START_USER_NODE_ID
+const receiveRegisterTaskId = 'Activity_04ykbd0'
 const processDefinitionId = ref('')
 const processDefineKey = 'receice_doc_v2_copy_copy' // 流程 Key
 
@@ -412,7 +409,7 @@ const initializingExistingRecord = ref(false)
 let receiveDocNumberRequestId = 0
 
 // 去除了写死的节点变量
-const formData = ref({
+const formData = ref<Record<string, any>>({
   id: undefined,
   processInstanceId: undefined,
   docClass: undefined,
@@ -484,6 +481,19 @@ const buildRequestData = () => {
   return data
 }
 
+const getReturnProcessInstanceRoute = () => {
+  const processInstanceId = route.query.returnProcessInstanceId
+  if (!processInstanceId) return undefined
+  const query: Record<string, any> = { id: String(processInstanceId) }
+  if (route.query.returnTaskId) {
+    query.taskId = String(route.query.returnTaskId)
+  }
+  return {
+    name: 'BpmProcessInstanceDetail',
+    query
+  }
+}
+
 /** 点击发送，校验表单后唤起弹窗 */
 const handleOpenDialog = async () => {
   const rawFileList = uploadFileRef.value?.fileList || []
@@ -516,12 +526,10 @@ const submitProcess = async (submitData: { nextNodeAssignees: any; variables: an
     }
 
     if (!data.id) {
-      // 纯新增发起
-      await ReceiveDocApi.createReceiveDoc(data)
-    } else {
-      // 已有草稿发起
-      await ReceiveDocApi.submitReceiveDoc(data)
+      data.id = await ReceiveDocApi.saveReceiveDoc(data)
+      formData.value.id = data.id
     }
+    await ReceiveDocApi.submitReceiveDoc(data)
 
     message.success('发送成功')
 
@@ -569,7 +577,7 @@ const handleSave = async () => {
     message.success('保存成功')
     setTimeout(() => {
       delView(unref(currentRoute))
-      push('/bpm/OAdoc/receive-doc')
+      push(getReturnProcessInstanceRoute() || '/bpm/OAdoc/receive-doc')
     }, 200)
   } finally {
     formLoading.value = false

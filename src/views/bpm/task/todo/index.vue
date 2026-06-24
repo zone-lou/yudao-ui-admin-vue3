@@ -558,7 +558,8 @@ const resetQuery = () => {
 }
 
 /** 处理审批按钮 */
-const handleAudit = (row: any) => {
+const handleAudit = async (row: any) => {
+  await TaskApi.claimTask(row.id)
   push({
     name: 'BpmProcessInstanceDetail',
     query: {

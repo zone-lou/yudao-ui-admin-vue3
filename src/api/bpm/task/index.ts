@@ -68,6 +68,10 @@ export const getTaskManagerPage = async (params: any) => {
   return await request.get({ url: '/bpm/task/manager-page', params })
 }
 
+export const claimTask = async (id: string) => {
+  return await request.put({ url: '/bpm/task/claim', params: { id } })
+}
+
 export const approveTask = async (data: any) => {
   return await request.put({ url: '/bpm/task/approve', data })
 }

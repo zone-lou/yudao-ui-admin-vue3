@@ -317,7 +317,6 @@ import { CategoryApi, CategoryVO } from '@/api/bpm/category'
 import * as DefinitionApi from '@/api/bpm/definition'
 import dayjs from 'dayjs'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
-import { Clock } from '@element-plus/icons-vue'
 import BpmColumnSetting from '@/views/bpm/components/BpmColumnSetting.vue'
 import { useBpmColumnSetting } from '@/hooks/bpm/useBpmColumnSetting'
 
@@ -325,23 +324,6 @@ defineOptions({ name: 'BpmDoneTask' })
 
 const { push } = useRouter()
 const message = useMessage()
-
-// --- 状态逻辑 ---
-const getTimeoutStatus = (row: any) => {
-  // 对于已办任务，这里可以展示该任务是否是在逾期后完成的
-  // 也可以仅展示办件整体是否超期
-  if (!row.dueDate && !row.endTime) {
-    return { label: '正常', type: 'primary', color: '#67C23A' }
-  }
-
-  // 简单示例：如果任务有截止时间，且完成时间晚于截止时间，显示红色
-  if (row.dueDate && row.endTime) {
-    if (dayjs(row.endTime).isAfter(dayjs(row.dueDate))) {
-      return { label: '逾期完成', type: 'danger', color: '#F56C6C' }
-    }
-  }
-  return { label: '正常', type: 'primary', color: '#67C23A' }
-}
 
 const getProcessDeadline = (row: any) => {
   if (row.deadlineDate) {
@@ -469,6 +451,12 @@ const handleWithdraw = async (row: any) => {
     await TaskApi.withdrawTask(row.id)
     message.success('撤回成功')
     getList()
+    push({
+      name: 'BpmProcessInstanceDetail',
+      query: {
+        id: row.processInstance.id
+      }
+    })
   } catch {}
 }
 
