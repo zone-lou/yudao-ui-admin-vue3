@@ -276,7 +276,6 @@
           <el-button v-else link type="primary" @click="handleDetail(scope.row)"> 详情 </el-button>
 
           <el-button
-            v-if="!scope.row.processInstanceId"
             link
             type="warning"
             @click="handleEdit(scope.row.id)"

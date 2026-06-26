@@ -24,6 +24,11 @@ export interface ReceiveDocSign {
   docClass: string // 单位类别
   year: string | Dayjs // 收文年份
 }
+export interface ReceiveDocSaveResult {
+  id: number
+  processInstanceId?: string
+  taskId?: string
+}
 // 收文 API
 export const ReceiveDocApi = {
   // 查询收文分页
@@ -47,7 +52,7 @@ export const ReceiveDocApi = {
 
   //保存收文
   saveReceiveDoc: async (data: ReceiveDoc) => {
-    return await request.post({ url: `/bpm/receive-doc/save`, data })
+    return await request.post<ReceiveDocSaveResult>({ url: `/bpm/receive-doc/save`, data })
   },
 
   // 修改收文

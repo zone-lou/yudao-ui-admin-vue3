@@ -29,7 +29,11 @@
         <el-input v-model="formData.sendDocNumber" placeholder="请输入来文字号" />
       </el-form-item>
       <el-form-item label="收文编号" prop="receiveDocNumber">
-        <el-input v-model="formData.receiveDocNumber" placeholder="请输入收文编号" />
+        <el-input
+          v-model="formData.receiveDocNumber"
+          placeholder="请输入收文编号"
+          :disabled="formType === 'update'"
+        />
       </el-form-item>
       <el-form-item label="收文日期" prop="receiveTime">
         <el-date-picker

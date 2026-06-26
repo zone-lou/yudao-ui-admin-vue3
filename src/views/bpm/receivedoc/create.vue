@@ -17,7 +17,7 @@
             @click="handleSave"
             :loading="formLoading"
           >
-            <Icon icon="ep:document-checked" class="mr-5px" /> 保存草稿
+            <Icon icon="ep:document-checked" class="mr-5px" /> 保存
           </el-button>
           <el-button v-else type="primary" @click="handleSave" :loading="formLoading">
             <Icon icon="ep:document-checked" class="mr-5px" /> 保存修改
@@ -60,7 +60,11 @@
                   </div>
                   <div style="display: flex; width: 160px; align-items: center">
                     <el-form-item prop="receiveDocNumber" style="width: 100%; margin-bottom: 0">
-                      <el-input v-model="formData.receiveDocNumber" placeholder="根据类别生成" />
+                      <el-input
+                        v-model="formData.receiveDocNumber"
+                        placeholder="根据类别生成"
+                        :disabled="isUpdateMode"
+                      />
                     </el-form-item>
                   </div>
                 </div>
@@ -380,7 +384,7 @@ import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { useMessage } from '@/hooks/web/useMessage'
 import * as DefinitionApi from '@/api/bpm/definition'
-import { ReceiveDocApi } from '@/api/bpm/receivedoc'
+import { ReceiveDocApi, type ReceiveDocSaveResult } from '@/api/bpm/receivedoc'
 import { getUserProfile } from '@/api/system/user/profile'
 import { dateUtil } from '@/utils/dateUtil'
 import { uploadReturnInfo } from '@/api/infra/file'
@@ -427,6 +431,8 @@ const formData = ref<Record<string, any>>({
   issupervise: true,
   fileList: []
 })
+
+const isUpdateMode = computed(() => !!formData.value.id || !!formData.value.processInstanceId)
 
 // 去除了办理人的必填校验
 const formRules = reactive({
@@ -526,7 +532,8 @@ const submitProcess = async (submitData: { nextNodeAssignees: any; variables: an
     }
 
     if (!data.id) {
-      data.id = await ReceiveDocApi.saveReceiveDoc(data)
+      const saveResult = await ReceiveDocApi.saveReceiveDoc(data)
+      data.id = saveResult.id
       formData.value.id = data.id
     }
     await ReceiveDocApi.submitReceiveDoc(data)
@@ -551,7 +558,7 @@ const submitProcess = async (submitData: { nextNodeAssignees: any; variables: an
   }
 }
 
-/** 保存草稿/修改操作 (不启动流程) */
+/** 保存/修改操作 */
 const handleSave = async () => {
   const rawFileList = uploadFileRef.value?.fileList || []
   const isUploading = rawFileList.some(
@@ -569,15 +576,45 @@ const handleSave = async () => {
   formLoading.value = true
   try {
     const data = buildRequestData()
+    const isNewDraft = !data.id
+    let saveResult: ReceiveDocSaveResult | undefined
     if (data.id) {
       await ReceiveDocApi.updateReceiveDoc(data)
     } else {
-      await ReceiveDocApi.saveReceiveDoc(data)
+      saveResult = await ReceiveDocApi.saveReceiveDoc(data)
+      data.id = saveResult.id
+      formData.value.id = data.id
     }
-    message.success('保存成功')
+
+    if (isNewDraft) {
+      if (saveResult?.processInstanceId) {
+        formData.value.processInstanceId = saveResult.processInstanceId
+      }
+      message.success('保存成功，已生成来文登记待办')
+      if (saveResult?.processInstanceId) {
+        setTimeout(() => {
+          delView(unref(currentRoute))
+          const query: Record<string, any> = { id: saveResult.processInstanceId }
+          if (saveResult.taskId) {
+            query.taskId = saveResult.taskId
+          }
+          push({
+            name: 'BpmProcessInstanceDetail',
+            query
+          })
+        }, 200)
+      }
+      return
+    }
+
+    message.success('保存修改成功')
+    const returnRoute = getReturnProcessInstanceRoute()
+    if (!returnRoute) {
+      return
+    }
     setTimeout(() => {
       delView(unref(currentRoute))
-      push(getReturnProcessInstanceRoute() || '/bpm/OAdoc/receive-doc')
+      push(returnRoute)
     }, 200)
   } finally {
     formLoading.value = false

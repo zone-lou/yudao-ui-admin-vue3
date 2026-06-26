@@ -10,7 +10,7 @@ import { onMounted, onBeforeUnmount, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { getConfigKey } from '@/api/infra/config'
-import { ElMessage } from 'element-plus'
+
 
 defineOptions({ name: 'BpmOnlyOfficeEditor' })
 

@@ -1,5 +1,5 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible" width="400">
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="520">
     <el-form
       ref="formRef"
       :model="formData"
@@ -13,6 +13,7 @@
           type="date"
           value-format="x"
           placeholder="选择值班日期"
+          class="!w-full"
         />
       </el-form-item>
       <el-form-item label="人员类型" prop="staffType">
@@ -29,16 +30,23 @@
         <el-select
           v-model="formData.userId"
           clearable
+          filterable
           placeholder="请输入人员"
           @change="handleUserChange"
-          class="!w-240px"
+          class="!w-full"
         >
-          <el-option
-            v-for="item in userList"
-            :key="item.id"
-            :label="item.nickname"
-            :value="item.id"
-          />
+          <el-option-group
+            v-for="group in groupedUserList"
+            :key="group.deptName"
+            :label="group.deptName"
+          >
+            <el-option
+              v-for="item in group.users"
+              :key="item.id"
+              :label="formatUserLabel(item)"
+              :value="item.id"
+            />
+          </el-option-group>
         </el-select>
       </el-form-item>
       <!--      <el-form-item label="人员姓名" prop="staffName">-->
@@ -56,8 +64,12 @@ import { getStrDictOptions, DICT_TYPE } from '@/utils/dict'
 import { StaffApi, Staff } from '@/api/system/dutystaff'
 
 import * as UserApi from '@/api/system/user'
-import { UserVO } from '@/api/login/types'
-const userList = ref<UserVO[]>([])
+
+type DutyUser = UserApi.UserVO & {
+  deptName?: string
+}
+
+const userList = ref<DutyUser[]>([])
 
 /** 值班 表单 */
 defineOptions({ name: 'StaffForm' })
@@ -135,6 +147,27 @@ const handleUserChange = (userId: number) => {
   }
 }
 
+const formatUserLabel = (user: DutyUser) => {
+  return user.deptName ? `${user.nickname}(${user.deptName})` : user.nickname
+}
+
+const groupedUserList = computed(() => {
+  const deptMap = new Map<string, DutyUser[]>()
+  userList.value.forEach((user) => {
+    const deptName = user.deptName || '无部门'
+    const users = deptMap.get(deptName) || []
+    users.push(user)
+    deptMap.set(deptName, users)
+  })
+
+  return Array.from(deptMap.entries())
+    .sort(([deptNameA], [deptNameB]) => deptNameA.localeCompare(deptNameB, 'zh-CN'))
+    .map(([deptName, users]) => ({
+      deptName,
+      users: users.sort((userA, userB) => userA.nickname.localeCompare(userB.nickname, 'zh-CN'))
+    }))
+})
+
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
@@ -151,6 +184,7 @@ const resetForm = () => {
 /** 初始化 **/
 onMounted(async () => {
   // 加载用户列表
-  userList.value = await UserApi.getSimpleUserList()
+  const users = await UserApi.getSimpleUserList()
+  userList.value = users.filter((user) => user.status === 0)
 })
 </script>
