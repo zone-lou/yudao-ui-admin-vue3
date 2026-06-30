@@ -62,7 +62,7 @@
                     <el-form-item prop="receiveDocNumber" style="width: 100%; margin-bottom: 0">
                       <el-input
                         v-model="formData.receiveDocNumber"
-                        placeholder="根据类别生成"
+                        placeholder="根据单位类别生成"
                         :disabled="isUpdateMode"
                       />
                     </el-form-item>
@@ -437,7 +437,7 @@ const isUpdateMode = computed(() => !!formData.value.id || !!formData.value.proc
 // 去除了办理人的必填校验
 const formRules = reactive({
   subject: [{ required: true, message: '标题不能为空', trigger: 'blur' }],
-  receiveDocNumber: [{ required: true, message: '收文编号不能为空', trigger: 'blur' }]
+  receiveDocNumber: [{ required: true, message: '选择单位类别后自动生成', trigger: 'blur' }]
 })
 
 // 监听并接收首位有效文件名称回填
