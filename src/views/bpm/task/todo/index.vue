@@ -239,6 +239,20 @@
         resizable
       />
 
+      <el-table-column
+        v-if="visibleColumn('source')"
+        align="center"
+        label="来源"
+        prop="source"
+        width="140"
+        show-overflow-tooltip
+        resizable
+      >
+        <template #default="scope">
+          {{ scope.row.source || '--' }}
+        </template>
+      </el-table-column>
+
       <!-- 7. 开始日期 (流程发起时间) -->
       <el-table-column
         v-if="visibleColumn('createTime')"
@@ -456,14 +470,16 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 const categoryList = ref<CategoryVO[]>([]) // 流程分类列表
 const showPopover = ref(false) // 高级筛选是否展示
+const todoColumnStorageKey = 'bpm:task:todo:columns'
 const { columnOptions, checkedColumnKeys, visibleColumn, resetColumns } = useBpmColumnSetting(
-  'bpm:task:todo:columns',
+  todoColumnStorageKey,
   [
     { key: 'timeout', label: '状态标识' },
     { key: 'urgencyDegree', label: '紧急程度' },
     { key: 'processInstanceName', label: '办件名称' },
     { key: 'name', label: '当前环节' },
     { key: 'taskName', label: '办件类型' },
+    { key: 'source', label: '来源' },
     { key: 'createTime', label: '开始日期' },
     { key: 'deadlineDate', label: '办结时限' },
     { key: 'dueDate', label: '环节时限' },
@@ -478,12 +494,20 @@ const { columnOptions, checkedColumnKeys, visibleColumn, resetColumns } = useBpm
     'processInstanceName',
     'name',
     'taskName',
+    'source',
     'createTime',
     'deadlineDate',
     'dueDate',
     'status'
   ]
 )
+const sourceColumnMigrationKey = `${todoColumnStorageKey}:source:migrated`
+if (!localStorage.getItem(sourceColumnMigrationKey)) {
+  if (!checkedColumnKeys.value.includes('source')) {
+    checkedColumnKeys.value.push('source')
+  }
+  localStorage.setItem(sourceColumnMigrationKey, 'true')
+}
 
 const getProcessDeadline = (row: any) => {
   const createTime = row.processInstance?.createTime

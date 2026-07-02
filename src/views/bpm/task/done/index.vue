@@ -135,7 +135,13 @@
         @reset="resetColumns"
       />
     </div>
-    <el-table v-loading="loading" :data="list" border @sort-change="handleSortChange">
+    <el-table
+      v-loading="loading"
+      :data="list"
+      border
+      :default-sort="{ prop: 'processInstance.createTime', order: 'descending' }"
+      @sort-change="handleSortChange"
+    >
       <el-table-column type="index" label="序号" width="60" align="center" fixed="left" resizable />
       <!--      <el-table-column v-if="visibleColumn('timeout')" label="状态" width="80" align="center" resizable>-->
       <!--        <template #header>-->
@@ -291,7 +297,7 @@
         <template #default="scope">
           <el-button link type="primary" @click="handleDetail(scope.row)">详情</el-button>
           <el-button
-            v-if="scope.row.status === 2"
+            v-if="scope.row.status === 2 && !scope.row.isHistory"
             link
             type="warning"
             @click="handleWithdraw(scope.row)"
@@ -349,6 +355,32 @@ const list = ref([])
 const processDefinitionList = ref<any[]>([])
 const categoryList = ref<CategoryVO[]>([])
 const showPopover = ref(false)
+const historyProcessDefinitionList = [
+  { key: 'receive_doc', name: '收文', keywords: ['receive_doc', '收文'] },
+  { key: 'leave', name: '请假管理', keywords: ['leave', 'oa_leave', '请假'] },
+  { key: 'time_explain', name: '因公外出', keywords: ['time_explain', '公出', '外出'] },
+  { key: 'confflow', name: '会议报告单', keywords: ['confflow', '会议'] },
+  { key: 'xzfy', name: '行政复议', keywords: ['xzfy', '复议'] },
+  { key: 'xzss', name: '行政诉讼', keywords: ['xzss', '诉讼'] }
+]
+
+const isSameBusinessDefinition = (definition: any, historyDefinition: any) => {
+  const text = `${definition.key || ''}${definition.name || ''}`.toLowerCase()
+  return historyDefinition.keywords.some((keyword: string) => text.includes(keyword.toLowerCase()))
+}
+
+const mergeProcessDefinitionList = (definitions: any[]) => {
+  const nonHistoryDefinitions = definitions.filter(
+    (definition) =>
+      !historyProcessDefinitionList.some((historyDefinition) =>
+        isSameBusinessDefinition(definition, historyDefinition)
+      )
+  )
+  return [
+    ...nonHistoryDefinitions,
+    ...historyProcessDefinitionList.map(({ key, name }) => ({ key, name }))
+  ]
+}
 
 // 查询参数 (保持与 Todo 一致的参数结构，用于后端 Filter)
 const queryParams = reactive({
@@ -364,8 +396,8 @@ const queryParams = reactive({
   createTime: [],
   dueDate: [],
   processDeadline: [],
-  orderField: undefined as string | undefined,
-  orderDirection: undefined as string | undefined
+  orderField: 'processInstance.createTime' as string | undefined,
+  orderDirection: 'desc' as string | undefined
 })
 const queryFormRef = ref()
 const { columnOptions, checkedColumnKeys, visibleColumn, resetColumns } = useBpmColumnSetting(
@@ -428,13 +460,23 @@ const handleSortChange = ({ prop, order }: any) => {
 /** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
-  queryParams.orderField = undefined
-  queryParams.orderDirection = undefined
+  queryParams.orderField = 'processInstance.createTime'
+  queryParams.orderDirection = 'desc'
   handleQuery()
 }
 
 /** 查看详情 (历史/流转记录) */
 const handleDetail = (row: any) => {
+  if (row.isHistory) {
+    push({
+      name: 'BpmHistoryWorkflowDetail',
+      query: {
+        processInstanceId: row.processInstance?.id || row.processInstanceId,
+        projectId: row.projectId || row.processInstance?.projectId
+      }
+    })
+    return
+  }
   push({
     name: 'BpmProcessInstanceDetail',
     query: {
@@ -467,6 +509,7 @@ onActivated(() => {
 onMounted(async () => {
   await getList()
   categoryList.value = await CategoryApi.getCategorySimpleList()
-  processDefinitionList.value = await DefinitionApi.getSimpleProcessDefinitionList()
+  const definitions = await DefinitionApi.getSimpleProcessDefinitionList()
+  processDefinitionList.value = mergeProcessDefinitionList(definitions)
 })
 </script>

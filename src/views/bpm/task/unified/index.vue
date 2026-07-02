@@ -291,6 +291,32 @@ const loading = ref(false)
 const list = ref([])
 const total = ref(0)
 const processDefinitionList = ref<any[]>([])
+const historyProcessDefinitionList = [
+  { key: 'receive_doc', name: '收文', keywords: ['receive_doc', '收文'] },
+  { key: 'leave', name: '请假管理', keywords: ['leave', 'oa_leave', '请假'] },
+  { key: 'time_explain', name: '因公外出', keywords: ['time_explain', '公出', '外出'] },
+  { key: 'confflow', name: '会议报告单', keywords: ['confflow', '会议'] },
+  { key: 'xzfy', name: '行政复议', keywords: ['xzfy', '复议'] },
+  { key: 'xzss', name: '行政诉讼', keywords: ['xzss', '诉讼'] }
+]
+
+const isSameBusinessDefinition = (definition: any, historyDefinition: any) => {
+  const text = `${definition.key || ''}${definition.name || ''}`.toLowerCase()
+  return historyDefinition.keywords.some((keyword: string) => text.includes(keyword.toLowerCase()))
+}
+
+const mergeProcessDefinitionList = (definitions: any[]) => {
+  const nonHistoryDefinitions = definitions.filter(
+    (definition) =>
+      !historyProcessDefinitionList.some((historyDefinition) =>
+        isSameBusinessDefinition(definition, historyDefinition)
+      )
+  )
+  return [
+    ...nonHistoryDefinitions,
+    ...historyProcessDefinitionList.map(({ key, name }) => ({ key, name }))
+  ]
+}
 
 const queryParams = reactive({
   pageNo: 1,
@@ -367,12 +393,20 @@ const resetQuery = () => {
 }
 
 const handleDetail = (row: any) => {
+  if (row.isHistory) {
+    router.push({
+      name: 'BpmHistoryWorkflowDetail',
+      query: { processInstanceId: row.id, projectId: row.projectId }
+    })
+    return
+  }
   router.push({ path: '/bpm/process-instance/detail', query: { id: row.id } })
 }
 
 onMounted(async () => {
   await getList()
-  processDefinitionList.value = await DefinitionApi.getSimpleProcessDefinitionList()
+  const definitions = await DefinitionApi.getSimpleProcessDefinitionList()
+  processDefinitionList.value = mergeProcessDefinitionList(definitions)
 })
 
 onActivated(async () => {
