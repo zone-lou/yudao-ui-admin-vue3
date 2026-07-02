@@ -3,11 +3,24 @@
     <el-col :span="24">
       <ContentWrap title="会议报告单申请信息">
         <template #header>
-          <el-button @click="handleSaveDraft" :loading="formLoading">
-            <Icon icon="ep:document-checked" class="mr-5px" /> 保存草稿
-          </el-button>
-          <el-button type="primary" @click="handleOpenDialog" :loading="formLoading">
+          <el-button
+            v-if="!formData.projectId"
+            type="primary"
+            @click="handleOpenDialog"
+            :loading="formLoading"
+          >
             <Icon icon="ep:promotion" class="mr-5px" /> 发送
+          </el-button>
+          <el-button
+            v-if="!formData.processInstanceId"
+            type="success"
+            @click="handleSaveDraft"
+            :loading="formLoading"
+          >
+            <Icon icon="ep:document-checked" class="mr-5px" /> 保存
+          </el-button>
+          <el-button v-else type="primary" @click="handleSaveDraft" :loading="formLoading">
+            <Icon icon="ep:document-checked" class="mr-5px" /> 保存修改
           </el-button>
         </template>
 
@@ -310,7 +323,7 @@ const handleSaveDraft = async () => {
       const id = await ConfflowApi.saveConfflow(data)
       formData.value.id = id
     }
-    message.success('草稿保存成功')
+    message.success(data.processInstanceId ? '保存修改成功' : '保存成功')
   } catch (error) {
     console.error(error)
   } finally {

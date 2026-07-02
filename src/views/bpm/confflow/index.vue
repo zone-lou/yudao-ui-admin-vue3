@@ -37,7 +37,7 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_TASK_STATUS)"
+            v-for="dict in confflowStatusOptions"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -126,7 +126,7 @@
       <el-table-column v-if="visibleColumn('status')" label="办理状态" align="center" prop="status" width="110" sortable="custom" resizable>
         <template #default="scope">
           <div class="flex items-center justify-center">
-            <el-tag v-if="scope.row.status === 0 || !scope.row.processInstanceId" type="info">
+            <el-tag v-if="scope.row.status === 0 && !scope.row.processInstanceId && !(scope.row as any).projectId" type="info">
               草稿
             </el-tag>
             <dict-tag
@@ -148,20 +148,10 @@
       <el-table-column v-if="visibleColumn('offerPerson')" label="我局参会人员" prop="offerPerson" min-width="180" show-overflow-tooltip sortable="custom" resizable />
       <el-table-column label="操作" align="center" width="180" fixed="right" resizable>
         <template #default="scope">
-          <el-button
-            v-if="!scope.row.processInstanceId"
-            link
-            type="primary"
-            @click="handleEdit(scope.row.id)"
-            v-hasPermi="['bpm:confflow:update']"
-          >
-            编辑
-          </el-button>
-          <el-button v-else link type="primary" @click="handleDetail(scope.row)">
+          <el-button link type="primary" @click="handleDetail(scope.row)">
             详情
           </el-button>
           <el-button
-            v-if="scope.row.processInstanceId"
             link
             type="warning"
             @click="handleEdit(scope.row.id)"
@@ -230,6 +220,23 @@ const queryParams = reactive({
   orderDirection: undefined as string | undefined
 })
 const queryFormRef = ref() // 搜索的表单
+const confflowStatusOptions = computed(() =>
+  getIntDictOptions(DICT_TYPE.BPM_TASK_STATUS)
+    .filter((dict) => [1, 2, 3, 4, 5].includes(Number(dict.value)))
+    .map((dict) => {
+      const labelMap: Record<number, string> = {
+        1: '待办',
+        2: '办理完成',
+        3: '办理不通过',
+        4: '已取消',
+        5: '已退回'
+      }
+      return {
+        ...dict,
+        label: labelMap[Number(dict.value)] || dict.label
+      }
+    })
+)
 const { columnOptions, checkedColumnKeys, visibleColumn, resetColumns } = useBpmColumnSetting(
   'bpm:confflow:columns',
   [
@@ -286,6 +293,17 @@ const handleEdit = (id: number) => {
 
 /** 办理中、已办结记录进入流程详情 */
 const handleDetail = (row: Confflow) => {
+  if ((row as any).projectId) {
+    push({
+      name: 'BpmHistoryWorkflowDetail',
+      query: { processInstanceId: row.processInstanceId, projectId: (row as any).projectId }
+    })
+    return
+  }
+  if (!row.processInstanceId) {
+    handleEdit(row.id)
+    return
+  }
   push({
     name: 'BpmProcessInstanceDetail',
     query: { id: row.processInstanceId }
@@ -294,7 +312,7 @@ const handleDetail = (row: Confflow) => {
 
 /** 点击会议名称时，根据是否发起流程进入对应页面 */
 const handleRecord = (row: Confflow) => {
-  if (row.processInstanceId) {
+  if (row.processInstanceId || (row as any).projectId) {
     handleDetail(row)
     return
   }

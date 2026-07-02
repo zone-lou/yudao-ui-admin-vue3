@@ -1,5 +1,15 @@
 <template>
-  <ContentWrap :bodyStyle="{ padding: '10px 20px 0' }" class="position-relative !mb-0px">
+  <HistoryWorkflowDetail
+    v-if="isHistoryMode"
+    :process-instance-id="id"
+    :project-id="historyProjectId"
+  />
+
+  <ContentWrap
+    v-else
+    :bodyStyle="{ padding: '10px 20px 0' }"
+    class="position-relative !mb-0px"
+  >
     <div class="processInstance-wrap-main">
       <el-scrollbar>
         <!-- 办理状态图标（盖章效果） -->
@@ -191,6 +201,8 @@ import approveSvg from '@/assets/svgs/bpm/approve.svg'
 import rejectSvg from '@/assets/svgs/bpm/reject.svg'
 import cancelSvg from '@/assets/svgs/bpm/cancel.svg'
 import PrintDialog from './PrintDialog.vue'
+import HistoryWorkflowDetail from '@/views/bpm/historyWorkflow/detail/index.vue'
+import { HistoryWorkflowApi } from '@/api/bpm/historyWorkflow'
 
 defineOptions({ name: 'BpmProcessInstanceDetail' })
 const props = defineProps<{
@@ -205,6 +217,8 @@ const message = useMessage() // 消息弹窗
 const processInstanceLoading = ref(false) // 流程实例的加载中
 const processInstance = ref<any>({}) // 流程实例
 const processDefinition = ref<any>({}) // 流程定义
+const isHistoryMode = ref(false) // 是否为迁移历史流程
+const historyProjectId = ref<string | undefined>(undefined)
 const isFullWidth = ref(false) // 是否全宽显示（隐藏右侧流程条）
 const processModelView = ref<any>({}) // 流程模型视图
 const operationButtonRef = ref() // 操作按钮组件 ref
@@ -228,9 +242,28 @@ const writableFields: Array<string> = [] // 表单可以编辑的字段
 /** 获得详情 */
 const getDetail = async () => {
   // 必须先获得审批详情以确保拿到最实时的待办 todoTask 数据
-  await getApprovalDetail()
+  const loaded = await getApprovalDetail()
+  if (!loaded) {
+    await tryLoadHistoryDetail()
+    return
+  }
   // 再获取依赖于前者的流程模型视图补丁
   await getProcessModelView()
+}
+
+const tryLoadHistoryDetail = async () => {
+  try {
+    const data = await HistoryWorkflowApi.getDetail({ processInstanceId: props.id })
+    if (data?.processInstance || data?.business) {
+      historyProjectId.value = data.processInstance?.projectId
+      isHistoryMode.value = true
+      return true
+    }
+  } catch (error) {
+    console.error(error)
+  }
+  message.error('查询不到流程信息！')
+  return false
 }
 
 /** 加载流程实例 */
@@ -265,13 +298,12 @@ const getApprovalDetail = async () => {
     }
     const data = await ProcessInstanceApi.getApprovalDetail(param)
     if (!data) {
-      message.error('查询不到办理详情信息！')
-      return
+      return false
     }
     if (!data.processDefinition || !data.processInstance) {
-      message.error('查询不到流程信息！')
-      return
+      return false
     }
+    isHistoryMode.value = false
     processInstance.value = data.processInstance
     processDefinition.value = data.processDefinition
 
@@ -333,6 +365,10 @@ const getApprovalDetail = async () => {
     } else {
       currentNode.value = undefined
     }
+    return true
+  } catch (error) {
+    console.error(error)
+    return false
   } finally {
     processInstanceLoading.value = false
   }

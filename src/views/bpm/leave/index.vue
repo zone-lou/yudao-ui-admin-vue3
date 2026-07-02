@@ -170,7 +170,7 @@
             @click="openForm('update', scope.row.id)"
             v-hasPermi="['bpm:leave:update']"
           >
-            编辑
+            修改
           </el-button>
           <el-button
             link
@@ -313,6 +313,13 @@ const handleExport = async () => {
 
 /** 详情跳转 */
 const handleDetail = (row: any) => {
+  if (row.projectId) {
+    router.push({
+      name: 'BpmHistoryWorkflowDetail',
+      query: { processInstanceId: row.processInstanceId, projectId: row.projectId }
+    })
+    return
+  }
   router.push({
     name: 'BpmProcessInstanceDetail',
     query: { id: row.processInstanceId }

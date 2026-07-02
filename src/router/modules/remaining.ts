@@ -313,6 +313,22 @@ const remainingRouter: AppRouteRecordRaw[] = [
         })
       },
       {
+        path: 'history-workflow/detail',
+        component: () => import('@/views/bpm/historyWorkflow/detail/index.vue'),
+        name: 'BpmHistoryWorkflowDetail',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '历史流程详情',
+          activeMenu: '/bpm/done'
+        },
+        props: (route) => ({
+          processInstanceId: route.query.processInstanceId || route.query.id,
+          projectId: route.query.projectId
+        })
+      },
+      {
         path: 'process-instance/record',
         component: () => import('@/views/bpm/processInstance/record/index.vue'),
         name: 'BpmProcessInstanceRecord',

@@ -31,7 +31,7 @@
       <el-form-item label="办理状态" prop="status">
         <el-select v-model="queryParams.status" clearable class="!w-240px" placeholder="请选择办理状态">
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_TASK_STATUS)"
+            v-for="dict in receiveDocStatusOptions"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -174,7 +174,12 @@
       <el-table-column type="index" label="序号" width="60" align="center" fixed="left" resizable />
       <el-table-column v-if="visibleColumn('subject')" label="标题" align="center" prop="subject" show-overflow-tooltip width="355" sortable="custom" resizable>
         <template #default="scope">
-          <span class="link-type" @click="handleEdit(scope.row.id)">{{ scope.row.subject }}</span>
+          <span
+            class="link-type"
+            @click="scope.row.projectId ? handleDetail(scope.row) : handleEdit(scope.row.id)"
+          >
+            {{ scope.row.subject }}
+          </span>
         </template>
       </el-table-column>
 
@@ -335,13 +340,30 @@ const queryParams = reactive({
   subject: undefined,
   urgencyDegree: undefined,
   docSecondClass: undefined,
-  status: 0,
+  status: undefined,
   source: undefined,
   orderField: undefined as string | undefined,
   orderDirection: undefined as string | undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const showMore = ref(false)
+const receiveDocStatusOptions = computed(() =>
+  getIntDictOptions(DICT_TYPE.BPM_TASK_STATUS)
+    .filter((dict) => [1, 2, 3, 4, 5].includes(Number(dict.value)))
+    .map((dict) => {
+      const labelMap: Record<number, string> = {
+        1: '待办',
+        2: '办理完成',
+        3: '办理不通过',
+        4: '已取消',
+        5: '已退回'
+      }
+      return {
+        ...dict,
+        label: labelMap[Number(dict.value)] || dict.label
+      }
+    })
+)
 const { columnOptions, checkedColumnKeys, visibleColumn, resetColumns } = useBpmColumnSetting(
   'bpm:receivedoc:columns',
   [
@@ -514,6 +536,13 @@ const handleEdit = (id: number) => {
 }
 
 const handleDetail = (row: any) => {
+  if (row.projectId) {
+    router.push({
+      name: 'BpmHistoryWorkflowDetail',
+      query: { processInstanceId: row.processInstanceId, projectId: row.projectId }
+    })
+    return
+  }
   if (!row.processInstanceId) {
     router.push({
       name: 'OAReceiveDocDetail',

@@ -263,14 +263,14 @@
                       <div
                         class="absolute whitespace-nowrap"
                         style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
-                        v-if="info.taskId && getAttachCount(info.taskId) > 0"
+                        v-if="getInfoAttachCount(info) > 0"
                       >
                         <el-button
                           type="primary"
                           size="small"
-                          @click="showAttachments(info.taskId)"
+                          @click="showInfoAttachments(info)"
                         >
-                          附件({{ getAttachCount(info.taskId) }})
+                          附件({{ getInfoAttachCount(info) }})
                         </el-button>
                       </div>
                     </div>
@@ -338,14 +338,14 @@
                       <div
                         class="absolute whitespace-nowrap"
                         style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
-                        v-if="info.taskId && getAttachCount(info.taskId) > 0"
+                        v-if="getInfoAttachCount(info) > 0"
                       >
                         <el-button
                           type="primary"
                           size="small"
-                          @click="showAttachments(info.taskId)"
+                          @click="showInfoAttachments(info)"
                         >
-                          附件({{ getAttachCount(info.taskId) }})
+                          附件({{ getInfoAttachCount(info) }})
                         </el-button>
                       </div>
                     </div>
@@ -428,14 +428,14 @@
                       <div
                         class="absolute whitespace-nowrap"
                         style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
-                        v-if="info.taskId && getAttachCount(info.taskId) > 0"
+                        v-if="getInfoAttachCount(info) > 0"
                       >
                         <el-button
                           type="primary"
                           size="small"
-                          @click="showAttachments(info.taskId)"
+                          @click="showInfoAttachments(info)"
                         >
-                          附件({{ getAttachCount(info.taskId) }})
+                          附件({{ getInfoAttachCount(info) }})
                         </el-button>
                       </div>
                     </div>
@@ -504,14 +504,14 @@
                       <div
                         class="absolute whitespace-nowrap"
                         style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
-                        v-if="info.taskId && getAttachCount(info.taskId) > 0"
+                        v-if="getInfoAttachCount(info) > 0"
                       >
                         <el-button
                           type="primary"
                           size="small"
-                          @click="showAttachments(info.taskId)"
+                          @click="showInfoAttachments(info)"
                         >
-                          附件({{ getAttachCount(info.taskId) }})
+                          附件({{ getInfoAttachCount(info) }})
                         </el-button>
                       </div>
                     </div>
@@ -555,7 +555,7 @@
                 >下载</el-button
               >
               <el-button
-                v-if="row.taskId === props.taskId && props.taskId"
+                v-if="normalizeTaskId(row.taskId) === normalizeTaskId(props.taskId) && props.taskId"
                 link
                 type="danger"
                 size="small"
@@ -594,7 +594,8 @@ const props = defineProps({
   activityNodes: propTypes.array.def([]),
   viewType: propTypes.string.def(''),
   taskId: propTypes.string.def(undefined),
-  currentNode: propTypes.object.def({})
+  currentNode: propTypes.object.def({}),
+  attachments: propTypes.array.def([])
 })
 
 const { query } = useRoute()
@@ -609,9 +610,17 @@ const currentAttachments = ref<any[]>([])
 const fileViewBaseUrl = ref('')
 const externalPrefix = ref('') // 外网地址前缀
 const internalPrefix = ref('') // 内网地址前缀
+const normalizeTaskId = (value: any) =>
+  value === undefined || value === null || value === '' ? '' : String(value)
+const normalizeTaskIds = (values: any[]) =>
+  Array.from(new Set(values.map(normalizeTaskId).filter(Boolean)))
 
 // 获取本单据的所有评论附件
 const getDocAttachments = async () => {
+  if (props.attachments?.length) {
+    allDocAttachments.value = props.attachments.map(normalizeAttachment)
+    return
+  }
   const docId = String(detailData.value.xmGuid)
   if (!docId || docId === 'undefined' || docId === 'null') return
   try {
@@ -619,25 +628,63 @@ const getDocAttachments = async () => {
       docId,
       docType: 'XZFY'
     })
-    allDocAttachments.value = res || []
+    allDocAttachments.value = (res || []).map(normalizeAttachment)
   } catch (error) {
     console.error('获取关联附件失败:', error)
   }
 }
 
+const normalizeAttachment = (item: any) => ({
+  ...item,
+  taskId: normalizeTaskId(item.taskId ?? item.task_id),
+  filepath: item.filepath || item.filePath,
+  filename: item.filename || item.fileName,
+  fileextension: item.fileextension || item.fileExtension
+})
+
+const getInfoAttachmentTaskIds = (info: any) =>
+  normalizeTaskIds([info?.taskId, ...(info?.attachmentTaskIds || [])])
+
+const getInfoAttachCount = (info: any) => {
+  const taskIds = getInfoAttachmentTaskIds(info)
+  if (!taskIds.length) return 0
+  return allDocAttachments.value.filter((a) => taskIds.includes(normalizeTaskId(a.taskId))).length
+}
+
+const showInfoAttachments = (info: any) => {
+  const taskIds = getInfoAttachmentTaskIds(info)
+  if (!taskIds.length) return
+  currentAttachments.value = allDocAttachments.value.filter((a) =>
+    taskIds.includes(normalizeTaskId(a.taskId))
+  )
+  attachDialogVisible.value = true
+}
+
 // 辅助方法：判断是否为复议本身附件（taskId为空/null/undefined）
 const isBaseAttach = (taskId: any) => {
-  if (!taskId || taskId === 'null' || taskId === 'undefined') return true
+  const normalizedTaskId = normalizeTaskId(taskId)
+  if (!normalizedTaskId || normalizedTaskId === 'null' || normalizedTaskId === 'undefined') return true
 
   const opinionKeys = [
     '拟办', '法规科交办', '局长', '分管局长', '相关单位', 
-    '法规科办理', '科室', '法规科审核', '分管领导', '协助人员'
+    '局领导', '法规科办理', '科室', '科室单位', '法规科审核', '分管领导', '协助人员'
   ]
 
   // 1. 当前正在办理的任务
-  if (taskId === props.taskId) {
+  if (normalizedTaskId === normalizeTaskId(props.taskId)) {
     const hasOpinionBox = opinionKeys.some((key) => isEditable(key))
     if (!hasOpinionBox) return true // 没有意见框的环节，附件放主列表
+    return false
+  }
+
+  // 已经展示在阅办单意见行里的任务，附件跟随意见展示
+  const displayedTaskIds = [
+    ...(nibanList?.value || []),
+    ...(juzhangList?.value || []),
+    ...(lingdaoList?.value || []),
+    ...(keshiList?.value || [])
+  ].flatMap((item) => getInfoAttachmentTaskIds(item))
+  if (displayedTaskIds.includes(normalizedTaskId)) {
     return false
   }
 
@@ -646,7 +693,7 @@ const isBaseAttach = (taskId: any) => {
   for (const node of (props.activityNodes || [])) {
     if (node.tasks) {
       for (const task of node.tasks) {
-        if (task.id === taskId) {
+        if (normalizeTaskId(task.id) === normalizedTaskId) {
           taskName = task.name || node.name || ''
           break
         }
@@ -663,15 +710,8 @@ const isBaseAttach = (taskId: any) => {
     }
   }
 
-  // 3. 兜底逻辑：即使是意见环节，如果没在表格展示出来，也放主列表
-  const displayedTaskIds = [
-    ...(nibanList?.value || []),
-    ...(juzhangList?.value || []),
-    ...(lingdaoList?.value || []),
-    ...(keshiList?.value || [])
-  ].map((item) => item.taskId)
-  
-  return !displayedTaskIds.includes(taskId)
+  // 3. 兜底逻辑：没在表格展示出来的任务附件放主列表
+  return true
 }
 
 // 统计复议本身的附件数量
@@ -681,14 +721,18 @@ const getBaseAttachCount = () => {
 
 // 统计特定 taskId 的附件数量
 const getAttachCount = (taskId?: string) => {
-  if (!taskId) return 0
-  return allDocAttachments.value.filter((a) => a.taskId === taskId).length
+  const normalizedTaskId = normalizeTaskId(taskId)
+  if (!normalizedTaskId) return 0
+  return allDocAttachments.value.filter((a) => normalizeTaskId(a.taskId) === normalizedTaskId).length
 }
 
 // 弹出展示某 taskId 下的附件
 const showAttachments = (taskId?: string) => {
-  if (!taskId) return
-  currentAttachments.value = allDocAttachments.value.filter((a) => a.taskId === taskId)
+  const normalizedTaskId = normalizeTaskId(taskId)
+  if (!normalizedTaskId) return
+  currentAttachments.value = allDocAttachments.value.filter(
+    (a) => normalizeTaskId(a.taskId) === normalizedTaskId
+  )
   attachDialogVisible.value = true
 }
 
@@ -745,7 +789,9 @@ const handleDeleteAttach = async (row: any) => {
     if (isBaseAttach(row.taskId)) {
       currentAttachments.value = allDocAttachments.value.filter((a) => isBaseAttach(a.taskId))
     } else {
-      currentAttachments.value = allDocAttachments.value.filter((a) => a.taskId === row.taskId)
+      currentAttachments.value = allDocAttachments.value.filter(
+        (a) => normalizeTaskId(a.taskId) === normalizeTaskId(row.taskId)
+      )
     }
 
     // 如果全删完了，直接关掉弹窗
@@ -935,7 +981,13 @@ const processActivityNodes = () => {
             assigneeUser: task.assigneeUser,
             endTime: node.endTime || task.endTime,
             taskName: task.name,
-            taskId: task.id
+            taskId: normalizeTaskId(task.id),
+            attachmentTaskIds: normalizeTaskIds([
+              task.id,
+              task.commentId,
+              task.closed,
+              ...(task.attachmentTaskIds || [])
+            ])
           }
           const taskName = task.name || node.name || ''
 
@@ -975,6 +1027,16 @@ watch(
     processActivityNodes()
   },
   { immediate: true }
+)
+
+watch(
+  () => props.attachments,
+  () => {
+    if (props.attachments?.length) {
+      allDocAttachments.value = props.attachments.map(normalizeAttachment)
+    }
+  },
+  { immediate: true, deep: true }
 )
 
 const ensureMinRows = (list: any[], min: number) => {

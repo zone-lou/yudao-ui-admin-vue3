@@ -178,20 +178,9 @@
       </el-table-column>
       <el-table-column label="操作" align="center" fixed="right" width="180px" resizable>
         <template #default="scope">
-          <el-button
-            v-if="!scope.row.processInstanceId"
-            link
-            type="primary"
-            @click="openForm('update', scope.row.id)"
-            v-hasPermi="['bpm:xzfy:update']"
-          >
-            编辑
-          </el-button>
-
-          <el-button v-else link type="primary" @click="handleDetail(scope.row)"> 详情 </el-button>
+          <el-button link type="primary" @click="handleDetail(scope.row)"> 详情 </el-button>
 
           <el-button
-            v-if="scope.row.processInstanceId"
             link
             type="warning"
             @click="openForm('update', scope.row.id)"
@@ -320,6 +309,17 @@ const openForm = (type: string, id?: number) => {
 
 /** 详情跳转逻辑 - 跳转到流程详情页 */
 const handleDetail = (row: any) => {
+  if (row.projectId) {
+    router.push({
+      name: 'BpmHistoryWorkflowDetail',
+      query: { processInstanceId: row.processInstanceId, projectId: row.projectId }
+    })
+    return
+  }
+  if (!row.processInstanceId) {
+    openForm('update', row.id)
+    return
+  }
   router.push({
     name: 'BpmProcessInstanceDetail',
     query: { id: row.processInstanceId }

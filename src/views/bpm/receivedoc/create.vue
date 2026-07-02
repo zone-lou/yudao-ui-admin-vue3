@@ -4,7 +4,7 @@
       <ContentWrap title="申请信息">
         <template #header>
           <el-button
-            v-if="!formData.processInstanceId"
+            v-if="!formData.processInstanceId && !formData.projectId"
             type="primary"
             @click="handleOpenDialog"
             :loading="formLoading"

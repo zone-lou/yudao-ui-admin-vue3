@@ -113,7 +113,10 @@
                           下载
                         </el-button>
                         <el-button
-                          v-if="file.taskId === props.taskId && props.taskId"
+                          v-if="
+                            normalizeTaskId(file.taskId) === normalizeTaskId(props.taskId) &&
+                            props.taskId
+                          "
                           link
                           type="danger"
                           size="small"
@@ -167,14 +170,14 @@
                       <div
                         class="absolute whitespace-nowrap"
                         style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
-                        v-if="item.taskId && getAttachCount(item.taskId) > 0"
+                        v-if="getInfoAttachCount(item) > 0"
                       >
                         <el-button
                           type="primary"
                           size="small"
-                          @click="showAttachments(item.taskId)"
+                          @click="showInfoAttachments(item)"
                         >
-                          附件({{ getAttachCount(item.taskId) }})
+                          附件({{ getInfoAttachCount(item) }})
                         </el-button>
                       </div>
                     </div>
@@ -251,14 +254,14 @@
                       <div
                         class="absolute whitespace-nowrap"
                         style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
-                        v-if="item.taskId && getAttachCount(item.taskId) > 0"
+                        v-if="getInfoAttachCount(item) > 0"
                       >
                         <el-button
                           type="primary"
                           size="small"
-                          @click="showAttachments(item.taskId)"
+                          @click="showInfoAttachments(item)"
                         >
-                          附件({{ getAttachCount(item.taskId) }})
+                          附件({{ getInfoAttachCount(item) }})
                         </el-button>
                       </div>
                     </div>
@@ -350,14 +353,14 @@
                       <div
                         class="absolute whitespace-nowrap"
                         style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
-                        v-if="item.taskId && getAttachCount(item.taskId) > 0"
+                        v-if="getInfoAttachCount(item) > 0"
                       >
                         <el-button
                           type="primary"
                           size="small"
-                          @click="showAttachments(item.taskId)"
+                          @click="showInfoAttachments(item)"
                         >
-                          附件({{ getAttachCount(item.taskId) }})
+                          附件({{ getInfoAttachCount(item) }})
                         </el-button>
                       </div>
                     </div>
@@ -425,14 +428,14 @@
                       <div
                         class="absolute whitespace-nowrap"
                         style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
-                        v-if="item.taskId && getAttachCount(item.taskId) > 0"
+                        v-if="getInfoAttachCount(item) > 0"
                       >
                         <el-button
                           type="primary"
                           size="small"
-                          @click="showAttachments(item.taskId)"
+                          @click="showInfoAttachments(item)"
                         >
-                          附件({{ getAttachCount(item.taskId) }})
+                          附件({{ getInfoAttachCount(item) }})
                         </el-button>
                       </div>
                     </div>
@@ -628,7 +631,7 @@
                 >下载</el-button
               >
               <el-button
-                v-if="row.taskId === props.taskId && props.taskId"
+                v-if="normalizeTaskId(row.taskId) === normalizeTaskId(props.taskId) && props.taskId"
                 link
                 type="danger"
                 size="small"
@@ -672,7 +675,8 @@ const props = defineProps({
     type: Object as PropType<any>,
     default: () => ({})
   },
-  taskId: propTypes.string.def('')
+  taskId: propTypes.string.def(''),
+  attachments: propTypes.array.def([])
 })
 
 const userStore = useUserStore()
@@ -688,9 +692,17 @@ const currentAttachments = ref<any[]>([])
 const fileViewBaseUrl = ref('')
 const externalPrefix = ref('') // 外网地址前缀
 const internalPrefix = ref('') // 内网地址前缀
+const normalizeTaskId = (value: any) =>
+  value === undefined || value === null || value === '' ? '' : String(value)
+const normalizeTaskIds = (values: any[]) =>
+  Array.from(new Set(values.map(normalizeTaskId).filter(Boolean)))
 
 // 获取本单据的所有评论附件
 const getDocAttachments = async () => {
+  if (props.attachments?.length) {
+    allDocAttachments.value = props.attachments.map(normalizeAttachment)
+    return
+  }
   const docId = String(detailData.value.xmGuid)
   if (!docId || docId === 'undefined' || docId === 'null') return
   try {
@@ -698,21 +710,48 @@ const getDocAttachments = async () => {
       docId,
       docType: 'XZSS' // 确保类型为XZSS
     })
-    allDocAttachments.value = res || []
+    allDocAttachments.value = (res || []).map(normalizeAttachment)
   } catch (error) {
     console.error('获取关联附件失败:', error)
   }
 }
 
+const normalizeAttachment = (item: any) => ({
+  ...item,
+  taskId: normalizeTaskId(item.taskId ?? item.task_id),
+  filepath: item.filepath || item.filePath,
+  filename: item.filename || item.fileName,
+  fileextension: item.fileextension || item.fileExtension
+})
+
+const getInfoAttachmentTaskIds = (info: any) =>
+  normalizeTaskIds([info?.taskId, ...(info?.attachmentTaskIds || [])])
+
+const getInfoAttachCount = (info: any) => {
+  const taskIds = getInfoAttachmentTaskIds(info)
+  if (!taskIds.length) return 0
+  return allDocAttachments.value.filter((a) => taskIds.includes(normalizeTaskId(a.taskId))).length
+}
+
+const showInfoAttachments = (info: any) => {
+  const taskIds = getInfoAttachmentTaskIds(info)
+  if (!taskIds.length) return
+  currentAttachments.value = allDocAttachments.value.filter((a) =>
+    taskIds.includes(normalizeTaskId(a.taskId))
+  )
+  attachDialogVisible.value = true
+}
+
 // 辅助方法：判断是否为诉讼本身附件（taskId为空/null/undefined）
 const isBaseAttach = (taskId: any) => {
   // 1. 无 taskId 的情况（直接上传的诉讼本身附件）
-  if (!taskId || taskId === 'null' || taskId === 'undefined') {
+  const normalizedTaskId = normalizeTaskId(taskId)
+  if (!normalizedTaskId || normalizedTaskId === 'null' || normalizedTaskId === 'undefined') {
     return true
   }
 
   // 2. 如果是当前正在办理的任务节点
-  if (taskId === props.taskId) {
+  if (normalizedTaskId === normalizeTaskId(props.taskId)) {
     const nodeName = props.currentNode?.name || ''
 
     // 排除掉不展示在办理单中的特定节点（如上诉、结果录入），强制将它们的附件整合到顶部
@@ -743,7 +782,7 @@ const isBaseAttach = (taskId: any) => {
     ...juzhangList.value,
     ...lingdaoList.value,
     ...keshiList.value
-  ].some((item) => item.taskId === taskId)
+  ].some((item) => getInfoAttachmentTaskIds(item).includes(normalizedTaskId))
 
   // 如果不在四大分类列表中，则整合到顶部
   return !isHistoricalCategorized
@@ -756,14 +795,18 @@ const getBaseAttachCount = () => {
 
 // 统计特定 taskId 的附件数量
 const getAttachCount = (taskId?: string) => {
-  if (!taskId) return 0
-  return allDocAttachments.value.filter((a) => a.taskId === taskId).length
+  const normalizedTaskId = normalizeTaskId(taskId)
+  if (!normalizedTaskId) return 0
+  return allDocAttachments.value.filter((a) => normalizeTaskId(a.taskId) === normalizedTaskId).length
 }
 
 // 弹出展示某 taskId 下的附件
 const showAttachments = (taskId?: string) => {
-  if (!taskId) return
-  currentAttachments.value = allDocAttachments.value.filter((a) => a.taskId === taskId)
+  const normalizedTaskId = normalizeTaskId(taskId)
+  if (!normalizedTaskId) return
+  currentAttachments.value = allDocAttachments.value.filter(
+    (a) => normalizeTaskId(a.taskId) === normalizedTaskId
+  )
   attachDialogVisible.value = true
 }
 
@@ -820,7 +863,9 @@ const handleDeleteAttach = async (row: any) => {
     if (isBaseAttach(row.taskId)) {
       currentAttachments.value = allDocAttachments.value.filter((a) => isBaseAttach(a.taskId))
     } else {
-      currentAttachments.value = allDocAttachments.value.filter((a) => a.taskId === row.taskId)
+      currentAttachments.value = allDocAttachments.value.filter(
+        (a) => normalizeTaskId(a.taskId) === normalizeTaskId(row.taskId)
+      )
     }
 
     // 如果全删完了，直接关掉弹窗
@@ -1026,7 +1071,13 @@ const processActivityNodes = () => {
             assigneeUser: task.assigneeUser,
             endTime: node.endTime || task.endTime,
             taskName: task.name,
-            taskId: task.id
+            taskId: normalizeTaskId(task.id),
+            attachmentTaskIds: normalizeTaskIds([
+              task.id,
+              task.commentId,
+              task.closed,
+              ...(task.attachmentTaskIds || [])
+            ])
           }
           const taskName = task.name || node.name || ''
 
@@ -1077,6 +1128,16 @@ watch(
     processActivityNodes()
   },
   { immediate: true }
+)
+
+watch(
+  () => props.attachments,
+  () => {
+    if (props.attachments?.length) {
+      allDocAttachments.value = props.attachments.map(normalizeAttachment)
+    }
+  },
+  { immediate: true, deep: true }
 )
 
 defineExpose({ open: getInfo, getOpinion })
