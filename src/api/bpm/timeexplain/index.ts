@@ -18,6 +18,12 @@ export interface TimeExplain {
 
 }
 
+export interface TimeExplainSaveResult {
+  id: number
+  processInstanceId?: string
+  taskId?: string
+}
+
 // 外出请假补假 API
 export const TimeExplainApi = {
   // 查询外出请假补假分页
@@ -37,6 +43,14 @@ export const TimeExplainApi = {
   //新增公出请假
   createTimeExplain: async (data: TimeExplain) => {
     return await request.post({ url: `/bpm/time-explain/createout`, data })
+  },
+
+  saveOut: async (data: TimeExplain) => {
+    return await request.post<TimeExplainSaveResult>({ url: `/bpm/time-explain/save-out`, data })
+  },
+
+  createFlowOut: async (data: TimeExplain) => {
+    return await request.post({ url: `/bpm/time-explain/create-flow-out`, data })
   },
 
   // 修改外出请假补假

@@ -4,7 +4,7 @@
       <ContentWrap title="会议报告单申请信息">
         <template #header>
           <el-button
-            v-if="!formData.projectId"
+            v-if="!isManagementEdit && !formData.projectId"
             type="primary"
             @click="handleOpenDialog"
             :loading="formLoading"
@@ -207,7 +207,7 @@
     title="发送会议报告单"
     :show-reason="false"
     :process-definition-id="processDefinitionId"
-    :activity-id="startUserNodeId"
+    :activity-id="registerTaskId"
     @submit="submitProcess"
   />
 </template>
@@ -224,7 +224,6 @@ import { dateUtil } from '@/utils/dateUtil'
 import { uploadReturnInfo } from '@/api/infra/file'
 
 import ProcessSendDialog from '@/components/ProcessSendDialog/index.vue'
-import { NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
 
 defineOptions({ name: 'BpmConfflowCreate' })
 
@@ -233,10 +232,13 @@ const { delView } = useTagsViewStore()
 const userStore = useUserStore()
 const { push } = useRouter()
 const route = useRoute()
+// 从会议报告单管理列表进入时仅编辑业务数据，流程发送统一在待办任务中办理
+const isManagementEdit = computed(() => Boolean(route.query.id))
 
 // ===== 弹窗控制 =====
 const sendDialogRef = ref()
-const startUserNodeId = NodeId.START_USER_NODE_ID
+// BPMN 中的“科室登记”节点；发送时从该节点计算后续可选办理人
+const registerTaskId = 'Activity_02rawmy'
 const processDefinitionId = ref('')
 const processDefineKey = 'conference_report'
 
@@ -319,11 +321,23 @@ const handleSaveDraft = async () => {
     const data = buildRequestData()
     if (data.id) {
       await ConfflowApi.updateConfflow(data)
+      message.success('保存修改成功')
     } else {
-      const id = await ConfflowApi.saveConfflow(data)
-      formData.value.id = id
+      const saveResult = await ConfflowApi.saveConfflow(data)
+      formData.value.id = saveResult.id
+      formData.value.processInstanceId = saveResult.processInstanceId
+      message.success('保存成功，已生成科室登记待办')
+      if (saveResult.processInstanceId) {
+        setTimeout(() => {
+          delView(route)
+          const query: Record<string, any> = { id: saveResult.processInstanceId }
+          if (saveResult.taskId) {
+            query.taskId = saveResult.taskId
+          }
+          push({ name: 'BpmProcessInstanceDetail', query })
+        }, 200)
+      }
     }
-    message.success(data.processInstanceId ? '保存修改成功' : '保存成功')
   } catch (error) {
     console.error(error)
   } finally {
@@ -369,7 +383,11 @@ const submitProcess = async (submitData: { nextNodeAssignees: any; variables: an
     if (data.id) {
       await ConfflowApi.createFlowConfflow(data)
     } else {
-      await ConfflowApi.createConfflow(data)
+      // 创建流程和完成登记分成两个事务，避免 Flowable 与业务 SQL 共用连接时互相影响
+      const saveResult = await ConfflowApi.saveConfflow(data)
+      data.id = saveResult.id
+      data.processInstanceId = saveResult.processInstanceId
+      await ConfflowApi.createFlowConfflow(data)
     }
     message.success('会议报告单发起成功')
 

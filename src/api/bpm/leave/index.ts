@@ -24,6 +24,12 @@ export interface LeaveSummaryVO {
   qxjType?: number
 }
 
+export interface LeaveSaveResult {
+  id: number
+  processInstanceId?: string
+  taskId?: string
+}
+
 // 假期申请审批 API
 export const leaveApi = {
   // 查询假期申请审批分页
@@ -39,6 +45,16 @@ export const leaveApi = {
   // 新增假期申请审批
   createleave: async (data: leave) => {
     return await request.post({ url: `/bpm/leave/create`, data })
+  },
+
+  // 保存请假并生成登记待办
+  saveleave: async (data: leave) => {
+    return await request.post<LeaveSaveResult>({ url: `/bpm/leave/save`, data })
+  },
+
+  // 提交已保存的请假登记
+  createFlowLeave: async (data: leave) => {
+    return await request.post({ url: `/bpm/leave/create-flow`, data })
   },
 
   // 修改假期申请审批

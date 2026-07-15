@@ -6,8 +6,17 @@
         :bodyStyle="{ background: '#ffffff', minHeight: 'calc(100vh - 120px)' }"
       >
         <template #header>
-          <el-button type="primary" @click="handleSendClick" :loading="formLoading">
+          <el-button
+            v-if="!isManagementEdit"
+            type="primary"
+            @click="handleSendClick"
+            :loading="formLoading"
+          >
             <Icon icon="ep:promotion" class="mr-5px" /> 发送
+          </el-button>
+          <el-button type="success" @click="handleSave" :loading="formLoading">
+            <Icon icon="ep:document-checked" class="mr-5px" />
+            {{ isManagementEdit ? '保存修改' : '保存' }}
           </el-button>
         </template>
 
@@ -284,7 +293,7 @@
     title="发送请假申请"
     :show-reason="false"
     :process-definition-id="processDefinitionId"
-    :activity-id="startUserNodeId"
+    :activity-id="registerTaskId"
     @submit="submitForm"
   />
 </template>
@@ -303,9 +312,7 @@ import { getUserProfile } from '@/api/system/user/profile'
 import { useMessage } from '@/hooks/web/useMessage'
 import * as DictDataApi from '@/api/system/dict/dict.data'
 import { uploadReturnInfo } from '@/api/infra/file'
-// 新增引入弹窗组件及节点常量
 import ProcessSendDialog from '@/components/ProcessSendDialog/index.vue'
-import { NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
 
 defineOptions({ name: 'BpmLeaveCreate' })
 
@@ -317,10 +324,11 @@ const message = useMessage()
 const { delView } = useTagsViewStore()
 const { push, currentRoute } = useRouter()
 const route = useRoute()
+const isManagementEdit = computed(() => Boolean(route.query.id))
 
 // ===== 弹窗控制 =====
 const sendDialogRef = ref()
-const startUserNodeId = NodeId.START_USER_NODE_ID
+const registerTaskId = 'Activity_0nd3hub'
 
 // ===== 标签页控制 =====
 const activeTab = ref('apply')
@@ -836,6 +844,51 @@ const handleSendClick = async () => {
   sendDialogRef.value.open(variables)
 }
 
+const validateBeforeSubmit = async (action: '保存' | '发送') => {
+  if (!formRef.value) return false
+  const rawFileList = uploadFileRef.value?.fileList || []
+  const isUploading = rawFileList.some(
+    (file: any) => file.status === 'ready' || file.status === 'uploading'
+  )
+  if (isUploading) {
+    message.warning(`还有文件正在上传中，请稍后${action}`)
+    return false
+  }
+  await calculateDuration()
+  return await formRef.value.validate().catch(() => false)
+}
+
+/** 保存请假：首次保存生成登记待办；管理页面只保存修改 */
+const handleSave = async () => {
+  if (!(await validateBeforeSubmit('保存'))) return
+  formLoading.value = true
+  try {
+    const data = buildRequestData()
+    if (data.id) {
+      await leaveApi.updateleave(data)
+      message.success('保存修改成功')
+      return
+    }
+
+    const saveResult = await leaveApi.saveleave(data)
+    formData.value.id = saveResult.id
+    formData.value.processInstanceId = saveResult.processInstanceId
+    message.success('保存成功，已生成请假登记待办')
+    if (saveResult.processInstanceId) {
+      setTimeout(() => {
+        delView(unref(currentRoute))
+        const query: Record<string, any> = { id: saveResult.processInstanceId }
+        if (saveResult.taskId) query.taskId = saveResult.taskId
+        push({ name: 'BpmProcessInstanceDetail', query })
+      }, 200)
+    }
+  } catch (error) {
+    console.error(error)
+  } finally {
+    formLoading.value = false
+  }
+}
+
 // 接收弹窗返回的 assignees 和 variables
 const submitForm = async (submitData: { nextNodeAssignees: any; variables: any }) => {
   formLoading.value = true
@@ -854,9 +907,13 @@ const submitForm = async (submitData: { nextNodeAssignees: any; variables: any }
     data.nextNodeAssignees = submitData.nextNodeAssignees
 
     if (data.id) {
-      await leaveApi.updateleave(data)
+      await leaveApi.createFlowLeave(data)
     } else {
-      await leaveApi.createleave(data)
+      // 创建流程和完成登记分成两个事务，避免 Flowable 与业务 SQL 共用连接时互相影响
+      const saveResult = await leaveApi.saveleave(data)
+      data.id = saveResult.id
+      data.processInstanceId = saveResult.processInstanceId
+      await leaveApi.createFlowLeave(data)
     }
     message.success('请假申请发起成功')
 

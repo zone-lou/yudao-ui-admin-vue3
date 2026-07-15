@@ -78,6 +78,16 @@ export const XzssApi = {
     return await request.post({ url: `/bpm/xzss/create`, data })
   },
 
+  saveXzss: async (data: Xzss) => {
+    return await request.post<{ id: number; processInstanceId?: string; taskId?: string }>({
+      url: `/bpm/xzss/save`, data
+    })
+  },
+
+  createFlowXzss: async (data: Xzss) => {
+    return await request.post({ url: `/bpm/xzss/create-flow`, data })
+  },
+
   // 修改行政诉讼
   updateXzss: async (data: Xzss) => {
     return await request.put({ url: `/bpm/xzss/update`, data })

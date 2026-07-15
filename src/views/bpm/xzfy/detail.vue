@@ -1,7 +1,13 @@
 <template>
   <div v-loading="detailLoading">
     <div v-if="viewType === 'basic'">
-      <el-descriptions title="基本信息" :column="3" border size="large" class="mb-20px">
+      <el-descriptions
+        title="基本信息"
+        :column="3"
+        border
+        size="large"
+        class="info-section mb-20px"
+      >
         <el-descriptions-item label="来文号" label-align="center" align="center">
           {{ detailData.swWh }}
         </el-descriptions-item>
@@ -43,14 +49,28 @@
         </el-descriptions-item>
       </el-descriptions>
 
-      <el-descriptions
-        title="其他相关信息"
-        :column="3"
-        border
-        size="large"
-        class="mb-20px"
-        v-if="detailData.xzfyKz || detailData.xzfykz"
-      >
+      <div class="info-section mb-20px">
+        <h4 class="related-title">诉讼信息</h4>
+        <el-table :data="detailData.xzssList || []" border empty-text="暂无诉讼信息">
+          <el-table-column label="序号" type="index" width="60" align="center" />
+          <el-table-column label="诉讼文号" prop="swWh" min-width="150" align="center" />
+          <el-table-column label="申请人" prop="sqr" min-width="130" align="center" />
+          <el-table-column label="收文日期" min-width="150" align="center">
+            <template #default="{ row }">{{ formatDate(row.swRq) }}</template>
+          </el-table-column>
+          <el-table-column label="收文机关" prop="swJg" min-width="160" align="center" />
+        </el-table>
+      </div>
+
+      <div class="info-section mb-20px">
+        <h4 class="related-title">其他信息</h4>
+        <el-descriptions
+          v-if="detailData.xzfyKz || detailData.xzfykz"
+          :column="3"
+          border
+          size="large"
+          class="mb-20px"
+        >
         <el-descriptions-item label="复议决定日期" label-align="center" align="center">
           {{ formatDate(getKzData().fyjdRq) }}
         </el-descriptions-item>
@@ -86,10 +106,9 @@
         <el-descriptions-item label="备注" label-align="center" align="center" :span="3">
           {{ getKzData().bz }}
         </el-descriptions-item>
-      </el-descriptions>
+        </el-descriptions>
 
-      <div class="mt-20px">
-        <h4 style="margin-bottom: 10px; font-weight: bold; color: #303133">相关文书列表</h4>
+        <h4 class="related-title">相关文书列表</h4>
         <el-table :data="docList" border style="width: 100%">
           <el-table-column label="序号" type="index" width="60" align="center" />
           <el-table-column label="文书名称" prop="docName" align="center" />
@@ -595,7 +614,8 @@ const props = defineProps({
   viewType: propTypes.string.def(''),
   taskId: propTypes.string.def(undefined),
   currentNode: propTypes.object.def({}),
-  attachments: propTypes.array.def([])
+  attachments: propTypes.array.def([]),
+  initialData: propTypes.object.def(undefined)
 })
 
 const { query } = useRoute()
@@ -1047,15 +1067,36 @@ const ensureMinRows = (list: any[], min: number) => {
   return result
 }
 
-defineExpose({ open: getInfo, getOpinion })
+const getDetailData = () => detailData.value
+
+defineExpose({ open: getInfo, getOpinion, getDetailData })
 
 onMounted(() => {
+  if (props.initialData !== undefined) {
+    detailData.value = props.initialData
+    return
+  }
   getInfo()
 })
 </script>
 
 <style scoped>
 /* stylelint-disable selector-id-pattern */
+
+.related-title {
+  margin: 0 0 10px;
+  font-weight: 700;
+  color: #303133;
+}
+
+.info-section {
+  box-sizing: border-box;
+  padding: 18px 20px 20px;
+  background: #fff;
+  border: 1px solid #dcdfe6;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 4%);
+}
 
 :deep(.el-descriptions__label) {
   width: 15%;

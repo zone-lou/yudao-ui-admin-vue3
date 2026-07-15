@@ -14,14 +14,16 @@
       <el-scrollbar>
         <!-- 办理状态图标（盖章效果） -->
         <img
-          class="position-absolute right-20px z-3"
+          class="audit-status-icon position-absolute right-20px z-3"
           width="120"
           :src="auditIconsMap[processInstance.status]"
           alt=""
         />
-        <div class="flex items-center items-center">
-          <div class="text-26px font-bold mb-5px mr-10px">{{ processInstance.name }}</div>
-          <div class="flex items-center gap-5 mr-10px text-13px h-35px">
+        <div class="process-detail-header">
+          <div class="process-detail-title" :title="processInstance.name">
+            {{ processInstance.name }}
+          </div>
+          <div class="process-detail-meta">
             <div
               class="bg-gray-100 h-35px rounded-3xl flex items-center p-8px gap-2 dark:color-gray-600"
             >
@@ -45,7 +47,12 @@
           />
           <!-- <Icon icon="ep:printer" class="ml-15px cursor-pointer" @click="handlePrint" /> -->
 
-          <el-button size="small" type="success" class="ml-15px" @click="handleOnlyOffice">
+          <el-button
+            size="small"
+            type="success"
+            class="process-print-button"
+            @click="handleOnlyOffice"
+          >
             <Icon icon="ep:printer" class="mr-5px" /> 打印
           </el-button>
         </div>
@@ -76,7 +83,7 @@
           <div class="text-#878c93"> {{ formatDate(processInstance.startTime) }} 提交 </div>
         </div> -->
 
-        <el-tabs v-model="activeTab">
+        <el-tabs v-model="activeTab" @tab-change="handleTabChange">
           <el-tab-pane label="办理单" name="form">
             <div class="form-scroll-area">
               <el-scrollbar>
@@ -97,7 +104,25 @@
                         />
                       </el-col>
                       <!-- 情况二：业务表单 -->
-                      <div v-if="processDefinition?.formType === BpmModelFormType.CUSTOM">
+                      <div v-if="businessProcessKey === 'oa_review'">
+                        <XzfyDetail
+                          :id="processInstance.businessKey"
+                          :taskId="taskId"
+                          :currentNode="currentNode"
+                          :activityNodes="activityNodes"
+                          ref="businessFormComponentRef"
+                        />
+                      </div>
+                      <div v-else-if="businessProcessKey === 'oa_lawsuit'">
+                        <XzssDetail
+                          :id="processInstance.businessKey"
+                          :taskId="taskId"
+                          :currentNode="currentNode"
+                          :activityNodes="activityNodes"
+                          ref="businessFormComponentRef"
+                        />
+                      </div>
+                      <div v-else-if="BusinessFormComponent">
                         <BusinessFormComponent
                           :id="processInstance.businessKey"
                           :taskId="taskId"
@@ -113,6 +138,48 @@
                     <ProcessInstanceTimeline :activity-nodes="activityNodes" />
                   </el-col>
                 </el-row>
+              </el-scrollbar>
+            </div>
+          </el-tab-pane>
+
+          <!-- 行政复议、行政诉讼业务表单信息 -->
+          <el-tab-pane
+            v-if="businessProcessKey === 'oa_review' || businessProcessKey === 'oa_lawsuit'"
+            label="表单"
+            name="businessForm"
+            lazy
+          >
+            <div class="form-scroll-area">
+              <el-scrollbar>
+                <div v-if="isRegisterTask" class="mb-12px text-left">
+                  <el-button type="primary" :loading="registerSaving" @click="saveRegisterForm">
+                    修改
+                  </el-button>
+                </div>
+                <XzfyCreate
+                  v-if="businessProcessKey === 'oa_review' && isRegisterTask"
+                  ref="editableBusinessFormRef"
+                  embedded
+                  :business-id="processInstance.businessKey"
+                />
+                <XzssCreate
+                  v-else-if="businessProcessKey === 'oa_lawsuit' && isRegisterTask"
+                  ref="editableBusinessFormRef"
+                  embedded
+                  :business-id="processInstance.businessKey"
+                />
+                <XzfyDetail
+                  v-else-if="businessProcessKey === 'oa_review'"
+                  :id="processInstance.businessKey"
+                  viewType="basic"
+                  :initialData="sharedBusinessDetail"
+                />
+                <XzssDetail
+                  v-else
+                  :id="processInstance.businessKey"
+                  viewType="basic"
+                  :initialData="sharedBusinessDetail"
+                />
               </el-scrollbar>
             </div>
           </el-tab-pane>
@@ -203,6 +270,10 @@ import cancelSvg from '@/assets/svgs/bpm/cancel.svg'
 import PrintDialog from './PrintDialog.vue'
 import HistoryWorkflowDetail from '@/views/bpm/historyWorkflow/detail/index.vue'
 import { HistoryWorkflowApi } from '@/api/bpm/historyWorkflow'
+import XzfyDetail from '@/views/bpm/xzfy/detail.vue'
+import XzssDetail from '@/views/bpm/xzss/detail.vue'
+import XzfyCreate from '@/views/bpm/xzfy/create.vue'
+import XzssCreate from '@/views/bpm/xzss/create.vue'
 
 defineOptions({ name: 'BpmProcessInstanceDetail' })
 const props = defineProps<{
@@ -269,6 +340,41 @@ const tryLoadHistoryDetail = async () => {
 /** 加载流程实例 */
 const BusinessFormComponent = shallowRef<any>(null) // 异步组件（使用 shallowRef 避免过重深层响应）
 const businessFormComponentRef = ref<any>(null) // 业务表单组件实例
+const editableBusinessFormRef = ref<any>(null)
+const registerSaving = ref(false)
+const isRegisterTask = computed(
+  () => Boolean(props.taskId) && (currentNode.value?.name || '').includes('登记')
+)
+const saveRegisterForm = async () => {
+  if (!editableBusinessFormRef.value?.getFormValues) return
+  registerSaving.value = true
+  try {
+    await editableBusinessFormRef.value.getFormValues()
+    message.success('登记信息修改成功')
+  } catch {
+    // 表单组件已提示具体校验信息
+  } finally {
+    registerSaving.value = false
+  }
+}
+const businessProcessKey = ref('')
+const sharedBusinessDetail = ref<Record<string, any>>({})
+const businessFormComponentMap: Record<string, any> = {
+  oa_review: XzfyDetail,
+  oa_lawsuit: XzssDetail
+}
+const businessFormPathMap: Record<string, any> = {
+  '/bpm/xzfy/detail': XzfyDetail,
+  '/bpm/xzss/detail': XzssDetail
+}
+
+const handleTabChange = (tabName: string | number) => {
+  if (tabName !== 'businessForm') return
+  const loadedDetail = businessFormComponentRef.value?.getDetailData?.()
+  if (loadedDetail) {
+    sharedBusinessDetail.value = loadedDetail
+  }
+}
 /** 获取办理详情 */
 const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])
 
@@ -306,6 +412,11 @@ const getApprovalDetail = async () => {
     isHistoryMode.value = false
     processInstance.value = data.processInstance
     processDefinition.value = data.processDefinition
+    businessProcessKey.value =
+      processDefinition.value.key ||
+      processDefinition.value.processDefinitionKey ||
+      processInstance.value.processDefinitionKey ||
+      String(processDefinition.value.id || processInstance.value.processDefinitionId || '').split(':')[0]
 
     // 强制开启全宽模式，以全局隐藏右侧流程条 (根据客户需求)
     isFullWidth.value = true
@@ -340,8 +451,12 @@ const getApprovalDetail = async () => {
         }
       })
     } else {
-      // 注意：data.processDefinition.formCustomViewPath 是组件的全路径
-      BusinessFormComponent.value = registerComponent(data.processDefinition.formCustomViewPath)
+      const customViewPath = data.processDefinition.formCustomViewPath || ''
+      // 行政复议、行政诉讼兼容已部署流程中未配置/配置错误的查看路径。
+      BusinessFormComponent.value =
+        businessFormComponentMap[businessProcessKey.value] ||
+        businessFormPathMap[customViewPath] ||
+        registerComponent(customViewPath)
     }
 
     // 获取办理节点，显示 Timeline 的数据
@@ -490,6 +605,9 @@ const getBusinessFormReason = computed(() => {
 
 /** 获取业务表单的额外数据 */
 const getBusinessFormValues = computed(() => {
+  if (isRegisterTask.value && editableBusinessFormRef.value?.getFormValues) {
+    return async () => editableBusinessFormRef.value.getFormValues()
+  }
   if (businessFormComponentRef.value?.getFormValues) {
     return async () => businessFormComponentRef.value.getFormValues()
   }
@@ -561,6 +679,45 @@ $process-header-height: 73px;
       }
     }
   }
+}
+
+.audit-status-icon {
+  pointer-events: none;
+}
+
+.process-detail-header {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding-right: 130px;
+}
+
+.process-detail-title {
+  min-width: 0;
+  margin-right: 10px;
+  margin-bottom: 5px;
+  overflow: hidden;
+  font-size: 26px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.process-detail-meta {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  height: 35px;
+  margin-right: 10px;
+  font-size: 13px;
+  gap: 20px;
+}
+
+.process-print-button {
+  flex-shrink: 0;
+  margin-left: 15px;
 }
 
 .form-box {

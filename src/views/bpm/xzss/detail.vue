@@ -458,7 +458,13 @@
     </template>
 
     <template v-if="viewType === 'basic'">
-      <el-descriptions title="基本信息" :column="3" border size="large" class="mb-20px">
+      <el-descriptions
+        title="基本信息"
+        :column="3"
+        border
+        size="large"
+        class="info-section mb-20px"
+      >
         <el-descriptions-item label="来文号" label-align="center" align="center">
           {{ detailData.swWh }}
         </el-descriptions-item>
@@ -531,14 +537,45 @@
         </el-descriptions-item>
       </el-descriptions>
 
-      <el-descriptions
-        title="行政诉讼拓展信息"
-        :column="3"
-        border
-        size="large"
-        class="mb-20px"
-        v-if="detailData.xzssKz || detailData.xzsskz"
-      >
+      <div class="info-section mb-20px">
+        <h4 class="related-title">历史复议信息</h4>
+        <el-table :data="detailData.xzfyList || []" border empty-text="暂无历史复议信息">
+          <el-table-column label="序号" type="index" width="60" align="center" />
+          <el-table-column label="复议文号" prop="swWh" min-width="150" align="center" />
+          <el-table-column label="申请人" prop="sqr" min-width="130" align="center" />
+          <el-table-column label="收文日期" min-width="150" align="center">
+            <template #default="{ row }">{{ formatDate(row.swRq) }}</template>
+          </el-table-column>
+          <el-table-column label="收文机关" prop="swJg" min-width="160" align="center" />
+        </el-table>
+      </div>
+
+      <div class="info-section mb-20px">
+        <h4 class="related-title">历史诉讼信息</h4>
+        <el-table
+          :data="detailData.historyXzssList || []"
+          border
+          empty-text="暂无历史诉讼信息"
+        >
+          <el-table-column label="序号" type="index" width="60" align="center" />
+          <el-table-column label="诉讼文号" prop="swWh" min-width="150" align="center" />
+          <el-table-column label="申请人" prop="sqr" min-width="130" align="center" />
+          <el-table-column label="收文日期" min-width="150" align="center">
+            <template #default="{ row }">{{ formatDate(row.swRq) }}</template>
+          </el-table-column>
+          <el-table-column label="收文机关" prop="swJg" min-width="160" align="center" />
+        </el-table>
+      </div>
+
+      <div class="info-section mb-20px">
+        <h4 class="related-title">其他信息</h4>
+        <el-descriptions
+          v-if="detailData.xzssKz || detailData.xzsskz"
+          :column="3"
+          border
+          size="large"
+          class="mb-20px"
+        >
         <el-descriptions-item label="承办人" label-align="center" align="center">
           {{ detailData.cbr }}
         </el-descriptions-item>
@@ -587,10 +624,9 @@
         <el-descriptions-item label="备注" label-align="center" align="center" :span="3">
           {{ getKzData().bz }}
         </el-descriptions-item>
-      </el-descriptions>
+        </el-descriptions>
 
-      <div class="mt-20px">
-        <h4 style="margin-bottom: 10px; font-weight: bold; color: #303133">相关文书列表</h4>
+        <h4 class="related-title">相关文书列表</h4>
         <el-table :data="docList" border style="width: 100%">
           <el-table-column label="序号" type="index" width="60" align="center" />
           <el-table-column label="文书名称" prop="docName" align="center" />
@@ -676,7 +712,8 @@ const props = defineProps({
     default: () => ({})
   },
   taskId: propTypes.string.def(''),
-  attachments: propTypes.array.def([])
+  attachments: propTypes.array.def([]),
+  initialData: propTypes.object.def(undefined)
 })
 
 const userStore = useUserStore()
@@ -1140,15 +1177,36 @@ watch(
   { immediate: true, deep: true }
 )
 
-defineExpose({ open: getInfo, getOpinion })
+const getDetailData = () => detailData.value
+
+defineExpose({ open: getInfo, getOpinion, getDetailData })
 
 onMounted(() => {
+  if (props.initialData !== undefined) {
+    detailData.value = props.initialData
+    return
+  }
   getInfo()
 })
 </script>
 
 <style scoped>
 /* stylelint-disable selector-id-pattern */
+
+.related-title {
+  margin: 0 0 10px;
+  font-weight: 700;
+  color: #303133;
+}
+
+.info-section {
+  box-sizing: border-box;
+  padding: 18px 20px 20px;
+  background: #fff;
+  border: 1px solid #dcdfe6;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 4%);
+}
 
 :deep(.el-descriptions__label) {
   width: 15%; /* 建议使用百分比(如12%到15%)或固定像素(如120px)，根据你的UI需求调整 */

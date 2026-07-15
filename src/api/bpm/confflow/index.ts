@@ -28,6 +28,12 @@ export interface Confflow {
           processVariablesStr?: string; // 流程变量
   }
 
+export interface ConfflowSaveResult {
+  id: number
+  processInstanceId?: string
+  taskId?: string
+}
+
 // 会议报告单 API
 export const ConfflowApi = {
   // 查询会议报告单分页
@@ -47,7 +53,7 @@ export const ConfflowApi = {
 
   // 保存会议报告单草稿
   saveConfflow: async (data: Confflow) => {
-    return await request.post({ url: `/bpm/confflow/save`, data })
+    return await request.post<ConfflowSaveResult>({ url: `/bpm/confflow/save`, data })
   },
 
   // 草稿发起会议报告单流程

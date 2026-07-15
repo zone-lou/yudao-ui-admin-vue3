@@ -72,6 +72,16 @@ export const XzfyApi = {
     return await request.post({ url: `/bpm/xzfy/create`, data })
   },
 
+  saveXzfy: async (data: Xzfy) => {
+    return await request.post<{ id: number; processInstanceId?: string; taskId?: string }>({
+      url: `/bpm/xzfy/save`, data
+    })
+  },
+
+  createFlowXzfy: async (data: Xzfy) => {
+    return await request.post({ url: `/bpm/xzfy/create-flow`, data })
+  },
+
   // 修改行政复议
   updateXzfy: async (data: Xzfy) => {
     return await request.put({ url: `/bpm/xzfy/update`, data })

@@ -455,20 +455,23 @@ const approveReasonRule = computed(() => {
 })
 
 const RECEIVE_REGISTER_TASK_ID = 'Activity_04ykbd0'
-const DEFAULT_RECEIVE_REGISTER_REASON = '发送'
+const DEFAULT_REGISTER_REASON = '发送'
 
-const isReceiveRegisterTask = () => {
+const isRegisterTask = () => {
   const taskName = runningTask.value?.name || props.currentNode?.name || ''
+  const extensionProperties = props.currentNode?.extensionProperties || {}
   return (
+    runningTask.value?.registerTask === true ||
+    extensionProperties.business_node_type === 'register' ||
     runningTask.value?.taskDefinitionKey === RECEIVE_REGISTER_TASK_ID ||
     taskName.includes('收文登记') ||
     taskName.includes('来文登记')
   )
 }
 
-const ensureReceiveRegisterReason = () => {
-  if (isReceiveRegisterTask() && !approveReasonForm.reason) {
-    approveReasonForm.reason = DEFAULT_RECEIVE_REGISTER_REASON
+const ensureRegisterReason = () => {
+  if (isRegisterTask() && !approveReasonForm.reason) {
+    approveReasonForm.reason = DEFAULT_REGISTER_REASON
   }
 }
 
@@ -607,7 +610,7 @@ const handleDirectFinish = async () => {
 
   // 2. 获取业务表单意见
   let reason = approveReasonForm.reason
-  if (props.getBusinessFormReason) {
+  if (!isRegisterTask() && props.getBusinessFormReason) {
     const opinion = await props.getBusinessFormReason()
     if (opinion !== undefined) {
       if (!opinion || opinion.trim() === '') {
@@ -617,7 +620,7 @@ const handleDirectFinish = async () => {
       reason = opinion
     }
   }
-  ensureReceiveRegisterReason()
+  ensureRegisterReason()
   reason = approveReasonForm.reason || reason
 
   if (!reason || reason.trim() === '') {
@@ -676,8 +679,8 @@ const openApproveDialog = async () => {
   }
 
   // 获取意见
-  requireDialogReasonInput.value = !props.getBusinessFormReason
-  if (props.getBusinessFormReason) {
+  requireDialogReasonInput.value = !props.getBusinessFormReason && !isRegisterTask()
+  if (!isRegisterTask() && props.getBusinessFormReason) {
     const opinion = await props.getBusinessFormReason()
     if (opinion !== undefined) {
       if (!opinion || opinion.trim() === '') {
@@ -693,8 +696,8 @@ const openApproveDialog = async () => {
       requireDialogReasonInput.value = true
     }
   }
-  ensureReceiveRegisterReason()
-  if (isReceiveRegisterTask()) {
+  ensureRegisterReason()
+  if (isRegisterTask()) {
     requireDialogReasonInput.value = false
   }
 
@@ -1015,7 +1018,7 @@ const handleApproveConfirm = async () => {
   if (!valid) return
 
   // 防御：如果是来自内置审批栏，由于 el-form-item v-if 会导致其必填失效，故追加硬校验
-  ensureReceiveRegisterReason()
+  ensureRegisterReason()
   if (!approveReasonForm.reason || approveReasonForm.reason.trim() === '') {
     message.warning('办理意见不能为空')
     return

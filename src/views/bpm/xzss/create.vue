@@ -1,10 +1,22 @@
 <template>
-  <el-row :gutter="20">
+  <el-row :gutter="embedded ? 0 : 20" :class="{ 'embedded-create': embedded }">
     <el-col :span="24">
-      <ContentWrap title="行政诉讼申请信息" v-loading="formLoading">
-        <template #header>
-          <el-button type="primary" @click="handleSendClick" :loading="formLoading">
+      <ContentWrap
+        :title="embedded ? '' : isEditMode ? '修改行政诉讼' : '行政诉讼申请信息'"
+        v-loading="formLoading"
+      >
+        <template v-if="!embedded" #header>
+          <el-button
+            v-if="!isEditMode"
+            type="primary"
+            @click="handleSendClick"
+            :loading="formLoading"
+          >
             <Icon icon="ep:promotion" class="mr-5px" /> 发送
+          </el-button>
+          <el-button type="success" @click="handleSave" :loading="formLoading">
+            <Icon icon="ep:document-checked" class="mr-5px" />
+            {{ isEditMode ? '保存修改' : '保存' }}
           </el-button>
         </template>
 
@@ -14,10 +26,11 @@
               ref="formRef"
               :model="formData"
               :rules="formRules"
-              label-width="140px"
+              label-width="120px"
               v-loading="formLoading"
             >
-              <h3 class="section-title">基本信息</h3>
+              <div class="form-section">
+                <h3 class="section-title">基本信息</h3>
               <el-row>
                 <el-col :span="8">
                   <el-form-item label="文号" prop="swWh">
@@ -249,7 +262,10 @@
                 />
               </el-form-item>
 
-              <h3 class="section-title" style="margin-top: 20px">其他相关信息</h3>
+              </div>
+
+              <div class="form-section">
+                <h3 class="section-title">其他信息</h3>
 
               <el-row>
                 <el-col :span="8">
@@ -393,15 +409,15 @@
                 <el-input v-model="formData.xzssKz.bz" type="textarea" placeholder="请输入备注" />
               </el-form-item>
 
-              <h3 class="section-title" style="margin-top: 20px">相关文书列表</h3>
+              <h3 class="section-title">相关文书列表</h3>
 
-              <div style="margin-bottom: 10px; text-align: right">
+              <div class="document-actions">
                 <el-button type="primary" plain size="small" @click="addDocRow">
                   <Icon icon="ep:plus" class="mr-5px" /> 添加行
                 </el-button>
               </div>
 
-              <el-table :data="docList" border style="width: 100%; margin-bottom: 18px">
+              <el-table :data="docList" border class="document-table">
                 <el-table-column label="序号" type="index" width="60" align="center" />
                 <el-table-column label="文书名称" align="center">
                   <template #default="{ row }">
@@ -430,6 +446,7 @@
                   </template>
                 </el-table-column>
               </el-table>
+              </div>
             </el-form>
           </el-tab-pane>
 
@@ -550,7 +567,7 @@
     title="发送诉讼申请"
     :show-reason="false"
     :process-definition-id="processDefinitionId"
-    :activity-id="startUserNodeId"
+    activity-id="Activity_108der5"
     @submit="submitForm"
   />
 
@@ -640,10 +657,9 @@ import ProcessSendDialog from '@/components/ProcessSendDialog/index.vue'
 
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as DefinitionApi from '@/api/bpm/definition'
-import { NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { XzssApi } from '@/api/bpm/xzss'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 import { XzfyApi } from '@/api/bpm/xzfy'
 import { dateUtil } from '@/utils/dateUtil'
@@ -651,9 +667,16 @@ import { uploadReturnInfo } from '@/api/infra/file'
 
 defineOptions({ name: 'BpmXzssCreate' })
 
+const props = defineProps({
+  embedded: { type: Boolean, default: false },
+  businessId: { type: [Number, String], default: undefined }
+})
+
 const message = useMessage()
 const { delView } = useTagsViewStore()
 const { push, currentRoute } = useRouter()
+const route = useRoute()
+const isEditMode = computed(() => Boolean(props.businessId || route.query.businessId))
 
 const activeTab = ref('form')
 
@@ -694,7 +717,6 @@ const totalSs = ref(0)
 // 流程相关
 const processDefineKey = 'oa_lawsuit' // 流程 Key
 const processDefinitionId = ref('')
-const startUserNodeId = NodeId.START_USER_NODE_ID
 
 const tdZlPart1 = ref('')
 const tdZlPart2 = ref('')
@@ -853,15 +875,34 @@ const handleSendClick = async () => {
 const submitForm = async (submitData: { nextNodeAssignees: any; variables: any }) => {
   formLoading.value = true
   try {
-    const data = { ...formData.value } as any
-
-    // 1. 处理动态表格数据
-    data.otherRelatedInfo = JSON.stringify(docList.value)
-
-    // 2. 处理下一步流程审批人分配情况
+    const data = buildRequestData()
     data.nextNodeAssignees = submitData.nextNodeAssignees
+    data.processVariablesStr = JSON.stringify(submitData.variables || {})
 
-    // 3. 附件处理逻辑
+    if (!data.id) {
+      const result = await XzssApi.saveXzss(data)
+      data.id = result.id
+      data.processInstanceId = result.processInstanceId
+    }
+    await XzssApi.createFlowXzss(data)
+    message.success('行政诉讼申请发起成功')
+
+    sendDialogRef.value.close()
+
+    setTimeout(() => {
+      delView(unref(currentRoute))
+      push('/bpm/unified')
+    }, 200)
+  } catch (error) {
+    sendDialogRef.value.submitLoading = false
+  } finally {
+    formLoading.value = false
+  }
+}
+
+const buildRequestData = () => {
+    const data = { ...formData.value } as any
+    data.otherRelatedInfo = JSON.stringify(docList.value)
     const rawFileList = uploadFileRef.value?.fileList || []
     data.fileList = rawFileList
       .filter((item: any) => item.status === 'success' || item.id)
@@ -902,18 +943,29 @@ const submitForm = async (submitData: { nextNodeAssignees: any; variables: any }
         }
       })
       .filter((item: any) => item.filepath)
+    return data
+}
 
-    await XzssApi.createXzss(data)
-    message.success('行政诉讼申请发起成功')
-
-    sendDialogRef.value.close()
-
-    setTimeout(() => {
-      delView(unref(currentRoute))
-      push('/bpm/unified')
-    }, 200)
-  } catch (error) {
-    sendDialogRef.value.submitLoading = false
+const handleSave = async () => {
+  if (!formRef.value || !(await formRef.value.validate().catch(() => false))) return
+  formLoading.value = true
+  try {
+    if (formData.value.id) {
+      await XzssApi.updateXzss(buildRequestData())
+      message.success('登记信息修改成功')
+      return
+    }
+    const result = await XzssApi.saveXzss(buildRequestData())
+    formData.value.id = result.id as any
+    message.success('保存成功，已生成法规科登记待办')
+    if (result.processInstanceId) {
+      setTimeout(() => {
+        delView(unref(currentRoute))
+        const query: Record<string, any> = { id: result.processInstanceId }
+        if (result.taskId) query.taskId = result.taskId
+        push({ name: 'BpmProcessInstanceDetail', query })
+      }, 200)
+    }
   } finally {
     formLoading.value = false
   }
@@ -961,7 +1013,40 @@ onMounted(async () => {
     return
   }
   processDefinitionId.value = processDefinitionDetail.id
+
+  const businessId = Number(props.businessId || route.query.businessId)
+  if (businessId) {
+    formLoading.value = true
+    try {
+      const detail: any = await XzssApi.getXzss(businessId)
+      formData.value = {
+        ...formData.value,
+        ...detail,
+        xzssKz: detail.xzssKz || detail.xzsskz || formData.value.xzssKz
+      }
+      tdZlPart2.value = detail.tdZl || ''
+      docList.value = Array.isArray(detail.otherRelatedInfo)
+        ? detail.otherRelatedInfo
+        : JSON.parse(detail.otherRelatedInfo || '[]')
+      if (!docList.value.length) docList.value = [{ docName: '', docDate: '', docContent: '' }]
+    } finally {
+      formLoading.value = false
+    }
+  }
 })
+
+const getFormValues = async () => {
+  if (!props.embedded) return {}
+  const valid = await formRef.value?.validate().catch(() => false)
+  if (!valid) {
+    message.warning('请检查并完善登记信息必填项')
+    throw new Error('登记信息校验不通过')
+  }
+  await XzssApi.updateXzss(buildRequestData())
+  return {}
+}
+
+defineExpose({ getFormValues })
 </script>
 
 <style scoped>
@@ -973,8 +1058,57 @@ onMounted(async () => {
   border-left: 4px solid #409eff;
 }
 
+.form-section {
+  box-sizing: border-box;
+  padding: 18px 8px 4px;
+  margin-bottom: 20px;
+  background: #fff;
+  border: 1px solid #dcdfe6;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 4%);
+}
+
+.form-section :deep(.el-form-item__label) {
+  padding-right: 6px;
+  white-space: nowrap;
+}
+
+.document-actions,
+.document-table {
+  width: calc(100% - 60px);
+  margin-left: 60px;
+}
+
+.document-actions {
+  margin-bottom: 10px;
+  text-align: right;
+}
+
+.document-table {
+  margin-bottom: 18px;
+}
+
 .custom-tabs {
   margin-top: -10px;
+}
+
+.embedded-create :deep(.el-tabs__header),
+.embedded-create :deep(.el-card__header) {
+  display: none;
+}
+
+.embedded-create :deep(.el-card__body) {
+  padding: 0;
+}
+
+.embedded-create :deep(.el-card) {
+  border: 0;
+  box-shadow: none;
+}
+
+.embedded-create {
+  width: 100%;
+  overflow-x: hidden;
 }
 
 #printDivTag {

@@ -183,7 +183,7 @@
           <el-button
             link
             type="warning"
-            @click="openForm('update', scope.row.id)"
+            @click="handleUpdate(scope.row)"
             v-hasPermi="['bpm:xzfy:update']"
           >
             修改
@@ -305,6 +305,10 @@ const resetQuery = () => {
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
+}
+
+const handleUpdate = (row: any) => {
+  router.push({ name: 'OAxzfyCreate', query: { businessId: row.id } })
 }
 
 /** 详情跳转逻辑 - 跳转到流程详情页 */

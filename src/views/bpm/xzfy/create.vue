@@ -1,10 +1,19 @@
 <template>
-  <el-row :gutter="20">
+  <el-row :gutter="embedded ? 0 : 20" :class="{ 'embedded-create': embedded }">
     <el-col :span="24">
-      <ContentWrap title="创建行政复议">
-        <template #header>
-          <el-button type="primary" @click="handleSendClick" :loading="formLoading">
+      <ContentWrap :title="embedded ? '' : isEditMode ? '修改行政复议' : '创建行政复议'">
+        <template v-if="!embedded" #header>
+          <el-button
+            v-if="!isEditMode"
+            type="primary"
+            @click="handleSendClick"
+            :loading="formLoading"
+          >
             <Icon icon="ep:promotion" class="mr-5px" /> 发送
+          </el-button>
+          <el-button type="success" @click="handleSave" :loading="formLoading">
+            <Icon icon="ep:document-checked" class="mr-5px" />
+            {{ isEditMode ? '保存修改' : '保存' }}
           </el-button>
         </template>
 
@@ -14,10 +23,11 @@
               ref="formRef"
               :model="formData"
               :rules="formRules"
-              label-width="140px"
+              label-width="120px"
               v-loading="formLoading"
             >
-              <h3 class="section-title">基本信息</h3>
+              <div class="form-section">
+                <h3 class="section-title">基本信息</h3>
               <el-row>
                 <el-col :span="8">
                   <el-form-item label="来文号" prop="swWh">
@@ -190,7 +200,10 @@
                 />
               </el-form-item>
 
-              <h3 class="section-title" style="margin-top: 20px">其他相关信息</h3>
+              </div>
+
+              <div class="form-section">
+                <h3 class="section-title">其他信息</h3>
 
               <el-row>
                 <el-col :span="8">
@@ -229,7 +242,7 @@
                 </el-col>
               </el-row>
 
-              <el-table :data="docList" border style="width: 100%; margin-bottom: 18px">
+              <el-table :data="docList" border class="document-table">
                 <el-table-column label="序号" type="index" width="60" align="center" />
                 <el-table-column label="文书名称" align="center">
                   <template #default="{ row }">
@@ -338,6 +351,7 @@
               <el-form-item label="备注" prop="xzfyKz.bz">
                 <el-input v-model="formData.xzfyKz.bz" type="textarea" placeholder="请输入备注" />
               </el-form-item>
+              </div>
             </el-form>
           </el-tab-pane>
 
@@ -462,7 +476,7 @@
     title="发送复议申请"
     :show-reason="false"
     :process-definition-id="processDefinitionId"
-    :activity-id="startUserNodeId"
+    activity-id="Activity_1wapc8a"
     @submit="submitForm"
   />
 </template>
@@ -472,7 +486,6 @@ import ProcessSendDialog from '@/components/ProcessSendDialog/index.vue'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as DefinitionApi from '@/api/bpm/definition'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
-import { NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { XzfyApi } from '@/api/bpm/xzfy'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import { useRouter, useRoute } from 'vue-router'
@@ -482,10 +495,16 @@ import { uploadReturnInfo } from '@/api/infra/file'
 
 defineOptions({ name: 'BpmXzfyCreate' })
 
+const props = defineProps({
+  embedded: { type: Boolean, default: false },
+  businessId: { type: [Number, String], default: undefined }
+})
+
 const message = useMessage()
 const { delView } = useTagsViewStore()
 const { push, currentRoute } = useRouter()
 const route = useRoute()
+const isEditMode = computed(() => Boolean(props.businessId || route.query.businessId))
 const userStore = useUserStore()
 
 const activeTab = ref('basic')
@@ -506,7 +525,6 @@ const processDefinitionId = ref('')
 const nextNodeOptions = ref([])
 const selectUserOptions = ref([])
 const multipleFlag = ref(false)
-const startUserNodeId = NodeId.START_USER_NODE_ID
 
 const tdZlPart1 = ref('')
 const tdZlPart2 = ref('')
@@ -617,7 +635,7 @@ const getNextApprovalNodes = async () => {
 
   const data = await ProcessInstanceApi.getNextSelectNodes({
     processDefinitionId: processDefinitionId.value,
-    activityId: NodeId.START_USER_NODE_ID
+    activityId: 'Activity_1wapc8a'
   })
 
   nextNodeOptions.value = data
@@ -652,16 +670,9 @@ const handleSendClick = async () => {
   sendDialogRef.value.open(variables)
 }
 
-// 弹窗确认提交
-const submitForm = async (submitData: { nextNodeAssignees: any; variables: any }) => {
-  formLoading.value = true
-  try {
+const buildRequestData = () => {
     const data = { ...formData.value } as any
-
     data.otherRelatedInfo = JSON.stringify(docList.value)
-    data.nextNodeAssignees = submitData.nextNodeAssignees
-
-    // 附件处理逻辑
     const rawFileList = uploadFileRef.value?.fileList || []
     data.fileList = rawFileList
       .filter((item: any) => item.status === 'success' || item.id)
@@ -702,8 +713,48 @@ const submitForm = async (submitData: { nextNodeAssignees: any; variables: any }
         }
       })
       .filter((item: any) => item.filepath)
+    return data
+}
 
-    await XzfyApi.createXzfy(data)
+const handleSave = async () => {
+  if (!formRef.value || !(await formRef.value.validate().catch(() => false))) return
+  formLoading.value = true
+  try {
+    if (formData.value.id) {
+      await XzfyApi.updateXzfy(buildRequestData())
+      message.success('登记信息修改成功')
+      return
+    }
+    const result = await XzfyApi.saveXzfy(buildRequestData())
+    formData.value.id = result.id as any
+    message.success('保存成功，已生成法规科登记待办')
+    if (result.processInstanceId) {
+      setTimeout(() => {
+        delView(unref(currentRoute))
+        const query: Record<string, any> = { id: result.processInstanceId }
+        if (result.taskId) query.taskId = result.taskId
+        push({ name: 'BpmProcessInstanceDetail', query })
+      }, 200)
+    }
+  } finally {
+    formLoading.value = false
+  }
+}
+
+// 弹窗确认提交
+const submitForm = async (submitData: { nextNodeAssignees: any; variables: any }) => {
+  formLoading.value = true
+  try {
+    const data = buildRequestData()
+    data.nextNodeAssignees = submitData.nextNodeAssignees
+    data.processVariablesStr = JSON.stringify(submitData.variables || {})
+
+    if (!data.id) {
+      const result = await XzfyApi.saveXzfy(data)
+      data.id = result.id
+      data.processInstanceId = result.processInstanceId
+    }
+    await XzfyApi.createFlowXzfy(data)
     message.success('行政复议申请发起成功')
     sendDialogRef.value.close()
     // dialogVisible.value = false
@@ -731,7 +782,40 @@ onMounted(async () => {
   }
   processDefinitionId.value = processDefinitionDetail.id
 
+  const businessId = Number(props.businessId || route.query.businessId)
+  if (businessId) {
+    formLoading.value = true
+    try {
+      const detail: any = await XzfyApi.getXzfy(businessId)
+      formData.value = {
+        ...formData.value,
+        ...detail,
+        xzfyKz: detail.xzfyKz || detail.xzfykz || formData.value.xzfyKz
+      }
+      tdZlPart2.value = detail.tdZl || ''
+      docList.value = Array.isArray(detail.otherRelatedInfo)
+        ? detail.otherRelatedInfo
+        : JSON.parse(detail.otherRelatedInfo || '[]')
+      if (!docList.value.length) docList.value = [{ docName: '', docDate: '', docContent: '' }]
+    } finally {
+      formLoading.value = false
+    }
+  }
+
 })
+
+const getFormValues = async () => {
+  if (!props.embedded) return {}
+  const valid = await formRef.value?.validate().catch(() => false)
+  if (!valid) {
+    message.warning('请检查并完善登记信息必填项')
+    throw new Error('登记信息校验不通过')
+  }
+  await XzfyApi.updateXzfy(buildRequestData())
+  return {}
+}
+
+defineExpose({ getFormValues })
 </script>
 
 <style scoped>
@@ -743,8 +827,47 @@ onMounted(async () => {
   border-left: 4px solid #409eff;
 }
 
+.form-section {
+  box-sizing: border-box;
+  padding: 18px 8px 4px;
+  margin-bottom: 20px;
+  background: #fff;
+  border: 1px solid #dcdfe6;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 4%);
+}
+
+.form-section :deep(.el-form-item__label) {
+  padding-right: 6px;
+  white-space: nowrap;
+}
+
+.document-table {
+  width: calc(100% - 60px);
+  margin: 0 0 18px 60px;
+}
+
 .custom-tabs {
   margin-top: -10px;
+}
+
+.embedded-create :deep(.el-tabs__header),
+.embedded-create :deep(.el-card__header) {
+  display: none;
+}
+
+.embedded-create :deep(.el-card__body) {
+  padding: 0;
+}
+
+.embedded-create :deep(.el-card) {
+  border: 0;
+  box-shadow: none;
+}
+
+.embedded-create {
+  width: 100%;
+  overflow-x: hidden;
 }
 
 #printDivTag {

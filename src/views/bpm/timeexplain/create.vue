@@ -6,8 +6,12 @@
         :bodyStyle="{ background: '#ffffff', minHeight: 'calc(100vh - 120px)' }"
       >
         <template #header>
-          <el-button type="primary" @click="handleSendClick" :loading="formLoading">
+          <el-button v-if="!isManagementEdit" type="primary" @click="handleSendClick" :loading="formLoading">
             <Icon icon="ep:promotion" class="mr-5px" /> 发送
+          </el-button>
+          <el-button type="success" @click="handleSave" :loading="formLoading">
+            <Icon icon="ep:document-checked" class="mr-5px" />
+            {{ isManagementEdit ? '保存修改' : '保存' }}
           </el-button>
         </template>
 
@@ -214,6 +218,7 @@
   <ProcessSendDialog
     ref="processSendDialogRef"
     :process-definition-id="processDefinitionId"
+    activity-id="Activity_1q86xnt"
     title="发送"
     @submit="submitForm"
   />
@@ -242,6 +247,7 @@ const message = useMessage()
 const { delView } = useTagsViewStore()
 const { push, currentRoute } = useRouter()
 const route = useRoute()
+const isManagementEdit = computed(() => Boolean(route.query.id))
 
 const formLoading = ref(false)
 
@@ -398,6 +404,35 @@ const handleSendClick = async () => {
   processSendDialogRef.value.open(variables)
 }
 
+const handleSave = async () => {
+  if (!formRef.value) return
+  calculateDuration()
+  if (!(await formRef.value.validate().catch(() => false))) return
+  formLoading.value = true
+  try {
+    const data = buildRequestData()
+    if (data.id) {
+      await TimeExplainApi.updateTimeExplain(data)
+      message.success('保存修改成功')
+      return
+    }
+    const result = await TimeExplainApi.saveOut(data)
+    formData.value.id = result.id
+    formData.value.processInstanceId = result.processInstanceId
+    message.success('保存成功，已生成公出登记待办')
+    if (result.processInstanceId) {
+      setTimeout(() => {
+        delView(unref(currentRoute))
+        const query: Record<string, any> = { id: result.processInstanceId }
+        if (result.taskId) query.taskId = result.taskId
+        push({ name: 'BpmProcessInstanceDetail', query })
+      }, 200)
+    }
+  } finally {
+    formLoading.value = false
+  }
+}
+
 const submitForm = async (submitData: { nextNodeAssignees: any; variables: any }) => {
   formLoading.value = true
   try {
@@ -411,9 +446,13 @@ const submitForm = async (submitData: { nextNodeAssignees: any; variables: any }
     data.nextNodeAssignees = submitData.nextNodeAssignees
 
     if (data.id) {
-      await TimeExplainApi.updateTimeExplain(data)
+      await TimeExplainApi.createFlowOut(data)
     } else {
-      await TimeExplainApi.createTimeExplain(data)
+      // 创建流程和完成登记分成两个事务，避免 Flowable 与业务 SQL 共用连接时互相影响
+      const saveResult = await TimeExplainApi.saveOut(data)
+      data.id = saveResult.id
+      data.processInstanceId = saveResult.processInstanceId
+      await TimeExplainApi.createFlowOut(data)
     }
     message.success('公出申请发起成功')
     setTimeout(() => {
