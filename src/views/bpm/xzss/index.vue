@@ -89,7 +89,7 @@
       <el-form-item label="办理状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="请选择办理状态" clearable>
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_TASK_STATUS)"
+            v-for="dict in getBusinessStatusOptions()"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -279,7 +279,7 @@
             <span>{{ scope.row.swWh }}</span>
             <dict-tag
               class="ml-2"
-              :type="DICT_TYPE.BPM_TASK_STATUS"
+              :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS"
               :value="scope.row.status !== null ? scope.row.status : 0"
             />
           </div>
@@ -410,6 +410,7 @@
 
 <script setup lang="ts">
 import { getDictOptions, getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import { getBusinessStatusOptions } from '@/utils/businessStatus'
 import { dateUtil } from '@/utils/dateUtil'
 import { defaultShortcuts } from '@/utils/formatTime'
 import { XzssApi, Xzss } from '@/api/bpm/xzss'

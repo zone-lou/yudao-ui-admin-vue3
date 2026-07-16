@@ -81,12 +81,18 @@
         min-width="120"
       />
       <el-table-column
-        label="用户昵称"
+        label="用户名称"
         align="center"
         prop="nickname"
         fixed="left"
         min-width="100"
-      />
+      >
+        <template #default="scope">
+          <el-link type="primary" :underline="true" @click="openDetail(scope.row)">
+            {{ scope.row.nickname }}
+          </el-link>
+        </template>
+      </el-table-column>
 
       <el-table-column
         v-for="dict in showLeaveDicts"
@@ -117,6 +123,34 @@
               style="color: #e6a23c; font-size: 0.85em; text-decoration: none"
             >
               ({{ scope.row['running_' + dict.value] }})
+            </span>
+          </div>
+          <span v-else class="text-gray-400">-</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="总计" align="center" fixed="right" min-width="120">
+        <template #default="scope">
+          <div
+            v-if="scope.row.totalAll > 0 || scope.row.runningAll > 0"
+            class="cursor-pointer flex items-center justify-center gap-1"
+            @click="openDetail(scope.row, undefined, true)"
+          >
+            <span
+              :class="scope.row.totalAll > 0 ? 'font-bold' : ''"
+              :style="
+                scope.row.totalAll > 0
+                  ? 'color: var(--el-color-primary); text-decoration: underline;'
+                  : 'color: #909399;'
+              "
+            >
+              {{ scope.row.totalAll || 0 }}
+            </span>
+            <span
+              v-if="scope.row.runningAll > 0"
+              style="color: #e6a23c; font-size: 0.85em; text-decoration: none"
+            >
+              ({{ scope.row.runningAll }})
             </span>
           </div>
           <span v-else class="text-gray-400">-</span>
@@ -154,6 +188,11 @@
         </template>
       </el-table-column>
       <el-table-column label="天数" align="center" prop="totalTs" width="80" />
+      <el-table-column label="请假类型" align="center" prop="qxjType" width="110">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.BPM_LEAVE_TYPE" :value="scope.row.qxjType" />
+        </template>
+      </el-table-column>
       <el-table-column label="请假原因" align="center" prop="sjReason" show-overflow-tooltip />
       <el-table-column
         label="当前环节"
@@ -259,7 +298,7 @@ const pivotTableData = computed(() => {
 })
 // === 方法 ===
 
-const openDetail = async (row: any, typeValue: number) => {
+const openDetail = async (row: any, typeValue?: number, useCurrentPeriod = false) => {
   detailVisible.value = true
   detailLoading.value = true
   detailList.value = []
@@ -269,14 +308,16 @@ const openDetail = async (row: any, typeValue: number) => {
   detailNickname.value = row.nickname
 
   try {
-    const params = {
-      year: queryParams.year ? parseInt(queryParams.year) : undefined,
-      month: queryParams.month,
-      userId: row.userId,
-      qxjType: typeValue
+    const params: LeaveApi.LeaveSummaryVO = { userId: row.userId }
+    if (typeValue !== undefined || useCurrentPeriod) {
+      params.year = queryParams.year ? parseInt(queryParams.year) : undefined
+      params.month = queryParams.month
+      params.qxjType = typeValue ?? queryParams.qxjType
     }
     const data = await LeaveApi.leaveApi.getLeaveDetailList(params)
-    detailList.value = data
+    detailList.value = [...data].sort(
+      (a, b) => new Date(b.qxjStartDate).getTime() - new Date(a.qxjStartDate).getTime()
+    )
   } finally {
     detailLoading.value = false
   }

@@ -37,7 +37,7 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in confflowStatusOptions"
+            v-for="dict in getBusinessStatusOptions()"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -132,7 +132,7 @@
             <dict-tag
               v-else
               class="ml-2"
-              :type="DICT_TYPE.BPM_TASK_STATUS"
+              :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS"
               :value="scope.row.status !== null ? scope.row.status : 0"
             />
           </div>
@@ -186,6 +186,7 @@ import { dateUtil } from '@/utils/dateUtil'
 import { ConfflowApi, Confflow } from '@/api/bpm/confflow'
 import { useBpmInvalidate } from '@/hooks/bpm/useBpmInvalidate'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { getBusinessStatusOptions } from '@/utils/businessStatus'
 import { defaultShortcuts } from '@/utils/formatTime'
 import { useRouter } from 'vue-router'
 import BpmColumnSetting from '@/views/bpm/components/BpmColumnSetting.vue'
@@ -220,23 +221,6 @@ const queryParams = reactive({
   orderDirection: undefined as string | undefined
 })
 const queryFormRef = ref() // 搜索的表单
-const confflowStatusOptions = computed(() =>
-  getIntDictOptions(DICT_TYPE.BPM_TASK_STATUS)
-    .filter((dict) => [1, 2, 3, 4, 5].includes(Number(dict.value)))
-    .map((dict) => {
-      const labelMap: Record<number, string> = {
-        1: '待办',
-        2: '办理完成',
-        3: '办理不通过',
-        4: '已取消',
-        5: '已退回'
-      }
-      return {
-        ...dict,
-        label: labelMap[Number(dict.value)] || dict.label
-      }
-    })
-)
 const { columnOptions, checkedColumnKeys, visibleColumn, resetColumns } = useBpmColumnSetting(
   'bpm:confflow:columns',
   [

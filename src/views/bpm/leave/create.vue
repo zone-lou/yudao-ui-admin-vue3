@@ -360,17 +360,17 @@ const leaveLimitHint = computed(() => {
   const stat = yearlyStatsMap.value[typeStr] || { leaveCount: 0, totalDays: 0 }
   switch (typeStr) {
     case '3':
-      return `登记结婚之日起一年内可请休婚假.至多18天,可至多分2次请假,剩余${Math.max(0, 18 - stat.totalDays)}天`
+      return `登记结婚之日起一年内可请休婚假，最多13天，原则上可至多分2次请假，剩余${Math.max(0, 13 - stat.totalDays)}天`
     case '4':
       return '一孩158天产假，二孩、三孩188天产假，生育双胞胎、三胞胎的可以享受188天产假'
     case '6':
-      return '直系亲属及公婆去世时，给予丧假1－3天'
-    case '7':
-      return `探亲假每年至多分2次休假，总时长20天，剩余${Math.max(0, 20 - stat.totalDays)}天`
+      return '直系亲属（祖父母、外祖父母、父母、配偶和子女）、岳父母及公婆去世时，给予丧假1－3天'
+    case '8':
+      return '至多请2次，每次至少2天'
     case '11':
       return `独生子女陪护假每年享受5天，剩余${Math.max(0, 5 - stat.totalDays)}天`
     case '12':
-      return `育儿假每年享受10天，剩余${Math.max(0, 10 - stat.totalDays)}天`
+      return `子女三周岁内，从子女出生之日起按周年计算，每年10天，剩余${Math.max(0, 10 - stat.totalDays)}天`
     case '9':
       return `护理假享受15天，剩余${Math.max(0, 15 - stat.totalDays)}天`
   }
@@ -380,21 +380,19 @@ const leaveLimitHint = computed(() => {
 const leaveFileHint = computed(() => {
   const typeStr = String(formData.value.qxjType)
   if (typeStr === '2') {
-    return formData.value.totalTs >= 3
-      ? '3天及以上的病假必需提供本市二甲及以上医院出具的证明材料'
-      : '建议提供医学诊断证明、病假单、医嘱或住院证明等其中一项证明材料'
+    return '建议提供三乙及以上医院诊断证明、病假单、医嘱或住院证明等证明材料'
   }
   if (typeStr === '3') return '需提供结婚证明'
   if (typeStr === '5') return '需提供医院诊断证明或婴儿出生证明'
-  if (typeStr === '9') return '需提供独生子女证明等相关证明材料'
-  if (typeStr === '12') return '需提供婴儿出生证明等材料'
+  if (typeStr === '9') return '提供小孩出生证明'
+  if (typeStr === '11') return '必须上传父母至少一方年满60周岁证明'
+  if (typeStr === '12') return '上传出生证明'
   return ''
 })
 
 const isUploadRequired = computed(() => {
   const typeStr = String(formData.value.qxjType)
-  if (typeStr === '2' && formData.value.totalTs >= 3) return true
-  if (['3', '5', '9', '12'].includes(typeStr)) return true
+  if (['2', '3', '5', '9', '11', '12'].includes(typeStr)) return true
   return false
 })
 
@@ -403,11 +401,11 @@ const validateFilepath = (_rule: any, value: any, callback: any) => {
   const isValueEmpty =
     !value || (Array.isArray(value) && value.length === 0) || String(value).trim() === ''
 
-  if (typeStr === '2' && formData.value.totalTs >= 3 && isValueEmpty) {
-    callback(new Error('3天及以上的病假必需提供证明材料'))
+  if (typeStr === '2' && isValueEmpty) {
+    callback(new Error('病假必须提供证明材料'))
     return
   }
-  if (['3', '5', '9', '12'].includes(typeStr) && isValueEmpty) {
+  if (['3', '5', '9', '11', '12'].includes(typeStr) && isValueEmpty) {
     callback(new Error('该请假类型必需提供证明材料'))
     return
   }
@@ -424,16 +422,6 @@ const validateLeaveLimits = (_rule: any, _value: any, callback: any) => {
   }
   if (typeStr === '4' && dts > 188) {
     return callback(new Error('产假最长限制为 188 天，申请超限'))
-  }
-  if (typeStr === '3') {
-    if (stat.leaveCount >= 2) return callback(new Error('婚假只能请2次，目前的已请次数到达上限'))
-    if (stat.totalDays + dts > 18)
-      return callback(new Error(`最多还能请 ${Math.max(0, 18 - stat.totalDays)}天婚假，申请超限`))
-  }
-  if (typeStr === '7') {
-    if (stat.leaveCount >= 2) return callback(new Error('探亲假每年至多分2次休假，已达上限'))
-    if (stat.totalDays + dts > 20)
-      return callback(new Error(`最多还能请 ${Math.max(0, 20 - stat.totalDays)}天探亲假，申请超限`))
   }
   if (typeStr === '11') {
     if (stat.totalDays + dts > 5)
@@ -577,9 +565,6 @@ watch(
         break
       case '3':
         maxDays = Math.max(0, 18 - stat.totalDays)
-        break
-      case '7':
-        maxDays = Math.max(0, 20 - stat.totalDays)
         break
       case '11':
         maxDays = Math.max(0, 5 - stat.totalDays)

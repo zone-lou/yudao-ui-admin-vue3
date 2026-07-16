@@ -403,7 +403,6 @@ const fileList = ref<any[]>([])
 const currentOpinion = ref('') // 当前正在填写的办理意见
 const fileViewBaseUrl = ref('')
 const RECEIVE_REGISTER_TASK_ID = 'Activity_04ykbd0'
-const AUTO_REGISTER_REASON = '系统自动完成来文登记'
 
 // 审批意见分类
 const nibanList = ref<any[]>([]) // 拟办
@@ -536,10 +535,7 @@ const processActivityNodes = () => {
         if (task.reason) {
           // 只要有 reason 就展示
           const name = node.name || ''
-          if (
-            (name.includes('收文登记') || name.includes('来文登记')) &&
-            task.reason === AUTO_REGISTER_REASON
-          ) {
+          if (name.includes('收文登记') || name.includes('来文登记')) {
             return
           }
           const info = {

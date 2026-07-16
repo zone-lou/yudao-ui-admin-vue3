@@ -37,7 +37,7 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS)"
+            v-for="dict in getBusinessStatusOptions()"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -187,6 +187,7 @@
 
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import { getBusinessStatusOptions } from '@/utils/businessStatus'
 import { defaultShortcuts, formatDate } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { TimeExplainApi, TimeExplain } from '@/api/bpm/timeexplain'
