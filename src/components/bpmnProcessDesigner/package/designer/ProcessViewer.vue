@@ -39,7 +39,7 @@
     <el-dialog :title="dialogTitle || '审批记录'" v-model="dialogVisible" width="1000px">
       <el-row>
         <el-table
-          :data="selectTasks"
+          :data="displaySelectTasks"
           size="small"
           border
           header-cell-class-name="table-header-gray"
@@ -169,6 +169,10 @@ const dialogVisible = ref(false) // 弹窗可见性
 const dialogTitle = ref<string | undefined>(undefined) // 弹窗标题
 const selectActivityType = ref<string | undefined>(undefined) // 选中 Task 的活动编号
 const selectTasks = ref<any[]>([]) // 选中的任务数组
+const AUTO_REGISTER_REASONS = new Set(['系统自动完成来文登记', '提交业务表单并完成登记'])
+const displaySelectTasks = computed(() => {
+  return selectTasks.value.filter((task: any) => !AUTO_REGISTER_REASONS.has(task.reason))
+})
 
 /** Zoom：恢复 */
 const processReZoom = () => {
