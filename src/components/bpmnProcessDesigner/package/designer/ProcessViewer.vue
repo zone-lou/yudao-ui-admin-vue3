@@ -39,7 +39,7 @@
     <el-dialog :title="dialogTitle || '审批记录'" v-model="dialogVisible" width="1000px">
       <el-row>
         <el-table
-          :data="displaySelectTasks"
+          :data="selectTasks"
           size="small"
           border
           header-cell-class-name="table-header-gray"
@@ -98,7 +98,11 @@
             prop="reason"
             min-width="120"
             v-if="selectActivityType === 'bpmn:UserTask'"
-          />
+          >
+            <template #default="scope">
+              {{ shouldHideTaskReason(scope.row) ? '' : scope.row.reason }}
+            </template>
+          </el-table-column>
           <el-table-column align="center" label="耗时" prop="durationInMillis" width="100">
             <template #default="scope">
               {{ formatPast2(scope.row.durationInMillis) }}
@@ -170,9 +174,13 @@ const dialogTitle = ref<string | undefined>(undefined) // 弹窗标题
 const selectActivityType = ref<string | undefined>(undefined) // 选中 Task 的活动编号
 const selectTasks = ref<any[]>([]) // 选中的任务数组
 const AUTO_REGISTER_REASONS = new Set(['系统自动完成来文登记', '提交业务表单并完成登记'])
-const displaySelectTasks = computed(() => {
-  return selectTasks.value.filter((task: any) => !AUTO_REGISTER_REASONS.has(task.reason))
+const isRegisterActivity = computed(() => {
+  return (dialogTitle.value || '').includes('登记') || selectTasks.value.some((task: any) => task.registerTask)
 })
+const shouldHideTaskReason = (task: any) => {
+  if (AUTO_REGISTER_REASONS.has(task.reason)) return true
+  return isRegisterActivity.value && task.reason === '发送'
+}
 
 /** Zoom：恢复 */
 const processReZoom = () => {
