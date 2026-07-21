@@ -223,7 +223,10 @@
                 >
                   <template #label>
                     <span
-                      v-if="(group.tabLabel || '').includes('法规科办理人')"
+                      v-if="
+                        (group.tabLabel || '').includes('法规科办理人') ||
+                        (group.tabLabel || '').includes('转相关单位')
+                      "
                       style="margin-right: 4px; color: red"
                       >*</span
                     >
@@ -1041,7 +1044,7 @@ const handleApproveConfirm = async () => {
     return
   }
 
-  // 针对“法规科办理人”节点的特殊必填校验
+  // 针对“法规科办理人”与“转相关单位”节点的特殊必填校验
   const fgkNode = approvalNodes.value.find(
     (n) =>
       (n.flowName || n.name || '').includes('法规科办理人') ||
@@ -1049,6 +1052,16 @@ const handleApproveConfirm = async () => {
   )
   if (fgkNode && !fgkNode.checked) {
     message.warning('【法规科办理人】为必填项，请勾选并选择办理人员')
+    return
+  }
+
+  const xgdwNode = approvalNodes.value.find(
+    (n) =>
+      (n.flowName || n.name || '').includes('转相关单位') ||
+      (n.taskName || '').includes('转相关单位')
+  )
+  if (xgdwNode && !xgdwNode.checked) {
+    message.warning('【转相关单位】为必填项，请勾选并选择办理人员')
     return
   }
 

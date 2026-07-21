@@ -15,7 +15,7 @@
                   class="flex-1"
                 >
                   <template #label>
-                    <span v-if="(group.tabLabel || '').includes('法规科办理人')" style="color: red; margin-right: 4px;">*</span>
+                    <span v-if="(group.tabLabel || '').includes('法规科办理人') || (group.tabLabel || '').includes('转相关单位')" style="color: red; margin-right: 4px;">*</span>
                     <span>{{ group.tabLabel }}</span>
                   </template>
                   <div
@@ -36,7 +36,7 @@
                           @change="(val) => handleNodeCheckboxChange(val, node)"
                         >
                           <span class="inline-flex items-center">
-                            <span v-if="(node.flowName || node.name || node.taskName || '').includes('法规科办理人')" style="color: red; margin-right: 4px;">*</span>
+                            <span v-if="(node.flowName || node.name || node.taskName || '').includes('法规科办理人') || (node.flowName || node.name || node.taskName || '').includes('转相关单位')" style="color: red; margin-right: 4px;">*</span>
                             <span>{{ node.name || node.taskName }}</span>
                           </span>
                         </el-checkbox>
@@ -406,10 +406,16 @@ const handleConfirm = async () => {
     return
   }
 
-  // 针对“法规科办理人”节点的特殊必填校验
-  const fgkNode = approvalNodes.value.find((n) => (n.name || '').includes('法规科办理人') || (n.taskName || '').includes('法规科办理人'))
+  // 针对“法规科办理人”与“转相关单位”节点的特殊必填校验
+  const fgkNode = approvalNodes.value.find((n) => (n.name || '').includes('法规科办理人') || (n.taskName || '').includes('法规科办理人') || (n.flowName || '').includes('法规科办理人'))
   if (fgkNode && !fgkNode.checked) {
     message.warning('【法规科办理人】为必填项，请勾选并选择办理人员')
+    return
+  }
+
+  const xgdwNode = approvalNodes.value.find((n) => (n.name || '').includes('转相关单位') || (n.taskName || '').includes('转相关单位') || (n.flowName || '').includes('转相关单位'))
+  if (xgdwNode && !xgdwNode.checked) {
+    message.warning('【转相关单位】为必填项，请勾选并选择办理人员')
     return
   }
 
