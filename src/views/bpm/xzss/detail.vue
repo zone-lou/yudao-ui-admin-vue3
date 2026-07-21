@@ -21,7 +21,7 @@
             </el-upload>
           </div>
 
-          <div class="doc-title">义乌市国土资源局行政诉讼审批表</div>
+          <div class="doc-title">义乌市自然资源和规划局行政诉讼审批表</div>
 
           <div class="meta-info">
             <div class="meta-left">
@@ -172,11 +172,7 @@
                         style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
                         v-if="getInfoAttachCount(item) > 0"
                       >
-                        <el-button
-                          type="primary"
-                          size="small"
-                          @click="showInfoAttachments(item)"
-                        >
+                        <el-button type="primary" size="small" @click="showInfoAttachments(item)">
                           附件({{ getInfoAttachCount(item) }})
                         </el-button>
                       </div>
@@ -256,11 +252,7 @@
                         style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
                         v-if="getInfoAttachCount(item) > 0"
                       >
-                        <el-button
-                          type="primary"
-                          size="small"
-                          @click="showInfoAttachments(item)"
-                        >
+                        <el-button type="primary" size="small" @click="showInfoAttachments(item)">
                           附件({{ getInfoAttachCount(item) }})
                         </el-button>
                       </div>
@@ -355,11 +347,7 @@
                         style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
                         v-if="getInfoAttachCount(item) > 0"
                       >
-                        <el-button
-                          type="primary"
-                          size="small"
-                          @click="showInfoAttachments(item)"
-                        >
+                        <el-button type="primary" size="small" @click="showInfoAttachments(item)">
                           附件({{ getInfoAttachCount(item) }})
                         </el-button>
                       </div>
@@ -430,11 +418,7 @@
                         style="top: 50%; left: calc(100% + 20px); transform: translateY(-50%)"
                         v-if="getInfoAttachCount(item) > 0"
                       >
-                        <el-button
-                          type="primary"
-                          size="small"
-                          @click="showInfoAttachments(item)"
-                        >
+                        <el-button type="primary" size="small" @click="showInfoAttachments(item)">
                           附件({{ getInfoAttachCount(item) }})
                         </el-button>
                       </div>
@@ -552,11 +536,7 @@
 
       <div class="info-section mb-20px">
         <h4 class="related-title">历史诉讼信息</h4>
-        <el-table
-          :data="detailData.historyXzssList || []"
-          border
-          empty-text="暂无历史诉讼信息"
-        >
+        <el-table :data="detailData.historyXzssList || []" border empty-text="暂无历史诉讼信息">
           <el-table-column label="序号" type="index" width="60" align="center" />
           <el-table-column label="诉讼文号" prop="swWh" min-width="150" align="center" />
           <el-table-column label="申请人" prop="sqr" min-width="130" align="center" />
@@ -576,54 +556,54 @@
           size="large"
           class="mb-20px"
         >
-        <el-descriptions-item label="承办人" label-align="center" align="center">
-          {{ detailData.cbr }}
-        </el-descriptions-item>
-        <el-descriptions-item label="承办日期" label-align="center" align="center">
-          {{ formatDate(getKzData().cbRq) }}
-        </el-descriptions-item>
-        <el-descriptions-item label="送法院机关日期" label-align="center" align="center">
-          {{ formatDate(getKzData().sfyjgRq) }}
-        </el-descriptions-item>
-        <el-descriptions-item label="开庭日期" label-align="center" align="center">
-          {{ formatDate(getKzData().ktRq) }}
-        </el-descriptions-item>
-        <el-descriptions-item label="判决结果" label-align="center" align="center">
-          {{ getKzData().pjJg }}
-        </el-descriptions-item>
-        <el-descriptions-item label="裁定结果" label-align="center" align="center">
-          {{ getKzData().cdJg }}
-        </el-descriptions-item>
-        <el-descriptions-item label="裁定判决日期" label-align="center" align="center">
-          {{ formatDate(getKzData().cdpjRq) }}
-        </el-descriptions-item>
-        <el-descriptions-item label="裁定判决日期" label-align="center" align="center">
-          {{ formatDate(getKzData().cdpjRq) }}
-        </el-descriptions-item>
-        <el-descriptions-item label="执行情况" label-align="center" align="center" :span="3">
-          {{ getKzData().zxQk }}
-        </el-descriptions-item>
-        <el-descriptions-item label="是否装订" label-align="center" align="center">
-          {{ getKzData().zdQk }}
-        </el-descriptions-item>
-        <el-descriptions-item label="装订人" label-align="center" align="center">
-          {{ getKzData().zdr }}
-        </el-descriptions-item>
-        <el-descriptions-item label="装订日期" label-align="center" align="center">
-          {{ formatDate(getKzData().zdRq) }}
-        </el-descriptions-item>
-        <el-descriptions-item label="是否移交" label-align="center" align="center">
-          {{ getKzData().yjQk }}
-        </el-descriptions-item>
-        <el-descriptions-item label="移交人" label-align="center" align="center">
-          {{ getKzData().yjr }}
-        </el-descriptions-item>
-        <el-descriptions-item label="移交日期" label-align="center" align="center">
-          {{ formatDate(getKzData().yjRq) }}
-        </el-descriptions-item>
-        <el-descriptions-item label="备注" label-align="center" align="center" :span="3">
-          {{ getKzData().bz }}
-        </el-descriptions-item>
+          <el-descriptions-item label="承办人" label-align="center" align="center">
+            {{ detailData.cbr }}
+          </el-descriptions-item>
+          <el-descriptions-item label="承办日期" label-align="center" align="center">
+            {{ formatDate(getKzData().cbRq) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="送法院机关日期" label-align="center" align="center">
+            {{ formatDate(getKzData().sfyjgRq) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="开庭日期" label-align="center" align="center">
+            {{ formatDate(getKzData().ktRq) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="判决结果" label-align="center" align="center">
+            {{ getKzData().pjJg }}
+          </el-descriptions-item>
+          <el-descriptions-item label="裁定结果" label-align="center" align="center">
+            {{ getKzData().cdJg }}
+          </el-descriptions-item>
+          <el-descriptions-item label="裁定判决日期" label-align="center" align="center">
+            {{ formatDate(getKzData().cdpjRq) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="裁定判决日期" label-align="center" align="center">
+            {{ formatDate(getKzData().cdpjRq) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="执行情况" label-align="center" align="center" :span="3">
+            {{ getKzData().zxQk }}
+          </el-descriptions-item>
+          <el-descriptions-item label="是否装订" label-align="center" align="center">
+            {{ getKzData().zdQk }}
+          </el-descriptions-item>
+          <el-descriptions-item label="装订人" label-align="center" align="center">
+            {{ getKzData().zdr }}
+          </el-descriptions-item>
+          <el-descriptions-item label="装订日期" label-align="center" align="center">
+            {{ formatDate(getKzData().zdRq) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="是否移交" label-align="center" align="center">
+            {{ getKzData().yjQk }}
+          </el-descriptions-item>
+          <el-descriptions-item label="移交人" label-align="center" align="center">
+            {{ getKzData().yjr }}
+          </el-descriptions-item>
+          <el-descriptions-item label="移交日期" label-align="center" align="center">
+            {{ formatDate(getKzData().yjRq) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="备注" label-align="center" align="center" :span="3">
+            {{ getKzData().bz }}
+          </el-descriptions-item>
         </el-descriptions>
 
         <h4 class="related-title">相关文书列表</h4>
@@ -834,7 +814,8 @@ const getBaseAttachCount = () => {
 const getAttachCount = (taskId?: string) => {
   const normalizedTaskId = normalizeTaskId(taskId)
   if (!normalizedTaskId) return 0
-  return allDocAttachments.value.filter((a) => normalizeTaskId(a.taskId) === normalizedTaskId).length
+  return allDocAttachments.value.filter((a) => normalizeTaskId(a.taskId) === normalizedTaskId)
+    .length
 }
 
 // 弹出展示某 taskId 下的附件
@@ -1200,12 +1181,12 @@ onMounted(() => {
 }
 
 .info-section {
-  box-sizing: border-box;
   padding: 18px 20px 20px;
   background: #fff;
   border: 1px solid #dcdfe6;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgb(0 0 0 / 4%);
+  box-sizing: border-box;
 }
 
 :deep(.el-descriptions__label) {
@@ -1224,7 +1205,6 @@ onMounted(() => {
 }
 
 #printDivTag .oa-container {
-  box-sizing: border-box !important;
   width: 994px !important;
   max-width: 100% !important;
   min-height: 1123px !important;
@@ -1233,6 +1213,7 @@ onMounted(() => {
   overflow: visible; /* 必须加上这个以便绝对定位元素超出表格显示 */
   background-color: #fff;
   box-shadow: 0 4px 16px rgb(0 0 0 / 15%) !important;
+  box-sizing: border-box !important;
 }
 
 #printDivTag .doc-title {
