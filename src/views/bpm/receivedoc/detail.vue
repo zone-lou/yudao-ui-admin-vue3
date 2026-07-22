@@ -510,6 +510,8 @@ const getInfo = async () => {
   }
 }
 
+const AUTO_REGISTER_REASONS = new Set(['系统自动完成来文登记', '提交业务表单并完成登记'])
+
 /** 分类处理办理节点意见 */
 const processActivityNodes = () => {
   if (!props.activityNodes || props.activityNodes.length === 0) return
@@ -527,6 +529,9 @@ const processActivityNodes = () => {
     // 遍历任务
     if (node.tasks && node.tasks.length > 0) {
       node.tasks.forEach((task: any) => {
+        if (AUTO_REGISTER_REASONS.has(task.reason)) {
+          return
+        }
         // 状态 1 为处理中，2 为通过/结束
         if (task.status === 1) {
           // 如果是当前用户的待办任务，则将草稿意见赋值给 currentOpinion

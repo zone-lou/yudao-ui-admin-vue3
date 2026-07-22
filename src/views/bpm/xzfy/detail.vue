@@ -993,6 +993,7 @@ const nibanList = ref<any[]>([])
 const juzhangList = ref<any[]>([])
 const lingdaoList = ref<any[]>([])
 const keshiList = ref<any[]>([])
+const AUTO_REGISTER_REASONS = new Set(['系统自动完成来文登记', '提交业务表单并完成登记'])
 
 const processActivityNodes = () => {
   if (!props.activityNodes || props.activityNodes.length === 0) return
@@ -1005,6 +1006,9 @@ const processActivityNodes = () => {
   props.activityNodes.forEach((node: any) => {
     if (node.tasks && node.tasks.length > 0) {
       node.tasks.forEach((task: any) => {
+        if (AUTO_REGISTER_REASONS.has(task.reason)) {
+          return
+        }
         if (task.reason) {
           const info = {
             comment: task.reason,

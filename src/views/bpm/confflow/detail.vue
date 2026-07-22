@@ -339,6 +339,8 @@ const isEditable = (keyword: string) => {
   return nodeName.indexOf(keyword) !== -1
 }
 
+const AUTO_REGISTER_REASONS = new Set(['系统自动完成来文登记', '提交业务表单并完成登记'])
+
 /** 分类处理办理节点意见 */
 const processActivityNodes = () => {
   if (!props.activityNodes || props.activityNodes.length === 0) return
@@ -350,6 +352,9 @@ const processActivityNodes = () => {
   props.activityNodes.forEach((node: any) => {
     if (node.tasks && node.tasks.length > 0) {
       node.tasks.forEach((task: any) => {
+        if (AUTO_REGISTER_REASONS.has(task.reason)) {
+          return
+        }
         // 遇到进行中的自己节点，如果是草稿，就给 currentOpinion
         if (task.status === 1) {
           if (task.assigneeUser?.id === userId && task.reason) {

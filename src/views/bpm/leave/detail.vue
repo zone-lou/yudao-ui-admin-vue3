@@ -350,6 +350,7 @@ const deptHeadList = ref<any[]>([]) // 科室(单位)负责人意见
 const officeList = ref<any[]>([]) // 办公室意见
 const deputyLeaderList = ref<any[]>([]) // 局分管领导意见
 const mainLeaderList = ref<any[]>([]) // 局主要领导意见
+const AUTO_REGISTER_REASONS = new Set(['系统自动完成来文登记', '提交业务表单并完成登记'])
 
 /** 判断当前节点是否可编辑 */
 const isEditable = (keyword: string) => {
@@ -395,6 +396,10 @@ const processActivityNodes = () => {
 
     if (node.tasks && node.tasks.length > 0) {
       node.tasks.forEach((task: any) => {
+        // 登记节点由申请人自动完成，不属于任何审批意见，不能兜底显示到科室负责人意见中。
+        if (AUTO_REGISTER_REASONS.has(task.reason)) {
+          return
+        }
         // 状态 1 为处理中，2 为通过/结束
         if (task.status === 1) {
           if (task.assigneeUser?.id === userId && task.reason) {
