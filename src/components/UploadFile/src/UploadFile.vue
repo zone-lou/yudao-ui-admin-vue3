@@ -9,8 +9,8 @@
       :disabled="disabled"
       :drag="drag"
       :http-request="httpRequest"
-      :limit="props.limit"
-      :multiple="props.limit > 1"
+      :limit="props.limit && props.limit > 0 ? props.limit : undefined"
+      :multiple="!props.limit || props.limit > 1"
       :on-error="excelUploadError"
       :on-exceed="handleExceed"
       :on-preview="handlePreview"
@@ -89,7 +89,7 @@ const emitFirstFileName = (fileName: string, forceUpdate = false) => {
 
 const props = defineProps({
   modelValue: propTypes.oneOfType<string | string[]>([String, Array<String>]).isRequired,
-  limit: propTypes.number.def(5), // 仅保留了文件数量限制，按需调整
+  limit: propTypes.number.def(undefined), // 默认解除文件数量限制
   autoUpload: propTypes.bool.def(true),
   drag: propTypes.bool.def(false),
   disabled: propTypes.bool.def(false),
@@ -113,13 +113,11 @@ const httpRequest = async (options: UploadRequestOptions) => {
 }
 
 const beforeUpload: UploadProps['beforeUpload'] = (file: UploadRawFile) => {
-  // 仅保留数量限制校验
-  if (fileList.value.length >= props.limit) {
+  // 只有当显式设置了数量限制(>0)时才进行数量限制校验
+  if (props.limit && props.limit > 0 && fileList.value.length >= props.limit) {
     message.error(`上传文件数量不能超过${props.limit}个!`)
     return false
   }
-
-  // 删除了 fileType 和 fileSize 的判断逻辑
 
   message.success('正在上传文件，请稍候...')
   uploadNumber.value++
@@ -162,7 +160,9 @@ const handleFileSuccess: UploadProps['onSuccess'] = (res: any, uploadFile: Uploa
   }
 }
 const handleExceed: UploadProps['onExceed'] = (): void => {
-  message.error(`上传文件数量不能超过${props.limit}个!`)
+  if (props.limit && props.limit > 0) {
+    message.error(`上传文件数量不能超过${props.limit}个!`)
+  }
 }
 
 const excelUploadError: UploadProps['onError'] = (err: any, uploadFile: UploadFile): void => {

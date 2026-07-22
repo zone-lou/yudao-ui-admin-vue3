@@ -64,8 +64,8 @@ export const useUploadFileRule = () => {
         {
           type: 'inputNumber',
           field: 'limit',
-          title: '数量限制',
-          value: 5,
+          title: '数量限制(0为不限制)',
+          value: 0,
           props: { min: 0 }
         },
         {

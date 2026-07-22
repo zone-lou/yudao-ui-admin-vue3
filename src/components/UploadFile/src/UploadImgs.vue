@@ -9,7 +9,7 @@
       :disabled="disabled"
       :drag="drag"
       :http-request="httpRequest"
-      :limit="limit"
+      :limit="limit && limit > 0 ? limit : undefined"
       :multiple="true"
       :on-error="uploadError"
       :on-exceed="handleExceed"
@@ -76,7 +76,7 @@ const props = defineProps({
   modelValue: propTypes.oneOfType<string | string[]>([String, Array<String>]).isRequired,
   drag: propTypes.bool.def(true), // 是否支持拖拽上传 ==> 非必传（默认为 true）
   disabled: propTypes.bool.def(false), // 是否禁用上传组件 ==> 非必传（默认为 false）
-  limit: propTypes.number.def(5), // 最大图片上传数 ==> 非必传（默认为 5张）
+  limit: propTypes.number.def(undefined), // 最大图片上传数 ==> 非必传（默认无限制）
   fileSize: propTypes.number.def(5), // 图片大小限制 ==> 非必传（默认为 5M）
   fileType: propTypes.array.def(['image/jpeg', 'image/png', 'image/gif']), // 图片类型限制 ==> 非必传（默认为 ["image/jpeg", "image/png", "image/gif"]）
   height: propTypes.string.def('150px'), // 组件高度 ==> 非必传（默认为 150px）
