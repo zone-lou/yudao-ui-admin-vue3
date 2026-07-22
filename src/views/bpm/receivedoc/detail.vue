@@ -366,6 +366,7 @@ import { propTypes } from '@/utils/propTypes'
 import { useUserStore } from '@/store/modules/user'
 import * as ConfigApi from '@/api/infra/config'
 import { useRouter } from 'vue-router'
+import { downloadFileByUrl } from '@/utils/fileDownload'
 
 defineOptions({ name: 'BpmReceiveDocDetail' })
 const userStore = useUserStore()
@@ -375,6 +376,8 @@ const props = defineProps({
   id: propTypes.oneOfType([Number, String]).def(undefined),
   processInstance: propTypes.object.def({}),
   activityNodes: propTypes.array.def([]),
+  attachments: propTypes.array.def([]),
+  historyMode: propTypes.bool.def(false),
   taskId: propTypes.string.def(undefined), // 当前任务ID
   currentNode: propTypes.object.def({}) // 当前节点信息
 })
@@ -487,11 +490,13 @@ const getInfo = async () => {
     detailData.value = data
 
     // 从子表加载附件（流程前后都能正确获取）
-    const attachList = await ReceiveDocApi.ReceiveDocApi.getReceiveDocXmGuid(Number(queryId))
+    const attachList = props.historyMode
+      ? props.attachments
+      : await ReceiveDocApi.ReceiveDocApi.getReceiveDocXmGuid(Number(queryId))
     if (attachList && attachList.length > 0) {
       fileList.value = attachList.map((item) => ({
-        name: item.attachFileName,
-        url: item.fileUrl,
+        name: item.attachFileName || item.fileName || item.filename,
+        url: item.fileUrl || item.filePath || item.filepath,
         id: item.attachFileId
       }))
     } else {
@@ -667,14 +672,14 @@ const handlePreview = (file: any) => {
   window.open(previewUrl, '_blank')
 }
 
-const handleDownload = (file: any) => {
-  const link = document.createElement('a')
-  link.style.display = 'none'
-  link.href = file.url
-  link.setAttribute('download', file.name)
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
+const handleDownload = async (file: any) => {
+  if (!file?.url) return message.error('文件路径为空，无法下载')
+  try {
+    await downloadFileByUrl(file.url, file.name || '附件')
+  } catch (error) {
+    console.error('收文附件下载失败:', error)
+    message.error('附件下载失败，请稍后重试')
+  }
 }
 
 const isSubmitted = ref(false) // Whether the task has been submitted

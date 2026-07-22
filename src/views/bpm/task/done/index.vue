@@ -355,6 +355,8 @@ const list = ref([])
 const processDefinitionList = ref<any[]>([])
 const categoryList = ref<CategoryVO[]>([])
 const showPopover = ref(false)
+// KeepAlive 组件首次挂载时也会触发 activated，避免首屏重复请求 done-page。
+const mounted = ref(false)
 const historyProcessDefinitionList = [
   { key: 'receive_doc', name: '收文', keywords: ['receive_doc', '收文'] },
   { key: 'leave', name: '请假管理', keywords: ['leave', 'oa_leave', '请假'] },
@@ -503,11 +505,14 @@ const handleWithdraw = async (row: any) => {
 }
 
 onActivated(() => {
-  getList()
+  if (mounted.value) {
+    getList()
+  }
 })
 
 onMounted(async () => {
   await getList()
+  mounted.value = true
   categoryList.value = await CategoryApi.getCategorySimpleList()
   const definitions = await DefinitionApi.getSimpleProcessDefinitionList()
   processDefinitionList.value = mergeProcessDefinitionList(definitions)

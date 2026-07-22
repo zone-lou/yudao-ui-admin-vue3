@@ -37,6 +37,7 @@
                         :process-instance="processInfo"
                         :activity-nodes="activityNodesWithComments"
                         :attachments="historyAttachments"
+                        :history-mode="true"
                       />
 
                       <el-empty

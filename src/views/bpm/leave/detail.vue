@@ -274,6 +274,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import * as ConfigApi from '@/api/infra/config'
+import { downloadFileByUrl } from '@/utils/fileDownload'
 import { Base64 } from 'js-base64'
 
 defineOptions({ name: 'LeaveDetail' })
@@ -333,6 +334,8 @@ const props = defineProps({
   id: propTypes.oneOfType([Number, String]).def(undefined),
   processInstance: propTypes.object.def({}),
   activityNodes: propTypes.array.def([]),
+  attachments: propTypes.array.def([]),
+  historyMode: propTypes.bool.def(false),
   taskId: propTypes.string.def(undefined), // 当前任务ID
   currentNode: propTypes.object.def({}) // 当前节点信息
 })
@@ -441,6 +444,12 @@ const fileViewBaseUrl = ref('')
 
 // 处理文件列表
 const fileList = computed(() => {
+  if (props.historyMode) {
+    return props.attachments.map((item: any) => ({
+      name: item.fileName || item.filename || '',
+      url: item.fileUrl || item.filePath || item.filepath || ''
+    }))
+  }
   // 优先使用后端返回的结构化附件列表
   if (detailData.value.fileList && detailData.value.fileList.length > 0) {
     return detailData.value.fileList.map((item: any) => ({
@@ -538,14 +547,22 @@ const previewFile = (file: any) => {
 }
 
 /** 处理下载 */
-const handleDownload = (file: any) => {
-  const link = document.createElement('a')
-  link.style.display = 'none'
-  link.href = file.url
-  link.setAttribute('download', file.name)
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
+const handleDownload = async (file: any) => {
+  if (!file?.url) {
+    ElMessage.error('文件路径为空，无法下载')
+    return
+  }
+  console.info('[请假附件下载]', {
+    fileName: file?.name,
+    rawUrl: file?.url,
+    actualDownloadUrl: new URL(file.url, window.location.href).href
+  })
+  try {
+    await downloadFileByUrl(file.url, file.name || '附件')
+  } catch (error) {
+    console.error('请假附件下载失败:', error)
+    ElMessage.error('附件下载失败，请稍后重试')
+  }
 }
 
 const externalPrefix = ref('') // 外网地址前缀

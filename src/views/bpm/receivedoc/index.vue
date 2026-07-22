@@ -327,6 +327,8 @@ defineOptions({ name: 'ReceiveDoc' })
 const router = useRouter()
 
 const loading = ref(true) // 列表的加载中
+// KeepAlive 组件首次挂载时也会触发 activated，避免首屏重复请求。
+const mounted = ref(false)
 const list = ref<ReceiveDoc[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const queryParams = reactive({
@@ -573,12 +575,15 @@ const formatSendDocNumber = (val: any) => {
 
 /** 激活时 **/
 onActivated(() => {
-  getList()
+  if (mounted.value) {
+    getList()
+  }
 })
 
 /** 初始化 **/
-onMounted(() => {
-  getList()
+onMounted(async () => {
+  await getList()
+  mounted.value = true
 })
 </script>
 

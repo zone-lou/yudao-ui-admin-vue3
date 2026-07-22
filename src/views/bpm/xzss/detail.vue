@@ -677,6 +677,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Base64 } from 'js-base64'
 import * as ConfigApi from '@/api/infra/config'
 import type { PropType } from 'vue'
+import { downloadFileByUrl } from '@/utils/fileDownload'
 
 defineOptions({ name: 'BpmXzssDetail' })
 
@@ -736,7 +737,7 @@ const getDocAttachments = async () => {
 const normalizeAttachment = (item: any) => ({
   ...item,
   taskId: normalizeTaskId(item.taskId ?? item.task_id),
-  filepath: item.filepath || item.filePath,
+  filepath: item.fileUrl || item.filepath || item.filePath,
   filename: item.filename || item.fileName,
   fileextension: item.fileextension || item.fileExtension
 })
@@ -836,6 +837,10 @@ const handlePreview = (file: any) => {
   const kkBaseUrl = fileViewBaseUrl.value || 'http://192.168.50.239:8012'
   let fullUrl = filepath
 
+  if (fullUrl.startsWith('/')) {
+    fullUrl = window.location.origin + fullUrl
+  }
+
   // 内外网预览地址转换
   if (externalPrefix.value && internalPrefix.value && fullUrl.includes(externalPrefix.value)) {
     fullUrl = fullUrl.replace(externalPrefix.value, internalPrefix.value)
@@ -847,19 +852,24 @@ const handlePreview = (file: any) => {
 }
 
 // 下载附件
-const handleDownload = (file: any) => {
+const handleDownload = async (file: any) => {
   const filepath = typeof file === 'string' ? file : file.filepath
   const filename = typeof file === 'string' ? filepath.split('/').pop() : file.filename
 
   if (!filepath) return ElMessage.warning('文件路径不存在')
 
-  const link = document.createElement('a')
-  link.style.display = 'none'
-  link.href = filepath
-  link.setAttribute('download', filename || '下载文件')
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
+  console.info('[行政诉讼附件下载]', {
+    fileName: filename,
+    rawUrl: filepath,
+    resolvedUrl: new URL(filepath, window.location.href).href
+  })
+
+  try {
+    await downloadFileByUrl(filepath, filename || '下载文件')
+  } catch (error) {
+    console.error('行政诉讼附件下载失败:', error)
+    ElMessage.error('附件下载失败，请稍后重试')
+  }
 }
 
 // 删除附件弹窗操作

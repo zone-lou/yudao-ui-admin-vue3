@@ -230,12 +230,15 @@ import { propTypes } from '@/utils/propTypes'
 import { Base64 } from 'js-base64'
 import * as ConfigApi from '@/api/infra/config'
 import { ElMessage } from 'element-plus'
+import { downloadFileByUrl } from '@/utils/fileDownload'
 
 defineOptions({ name: 'BpmConfflowDetail' })
 
 const props = defineProps({
   id: propTypes.oneOfType([Number, String]).def(undefined),
   activityNodes: propTypes.array.def([]),
+  attachments: propTypes.array.def([]),
+  historyMode: propTypes.bool.def(false),
   taskId: propTypes.string.def(undefined), // 当前任务ID
   currentNode: propTypes.object.def({}) // 当前节点信息
 })
@@ -297,7 +300,12 @@ const getInfo = async () => {
     }
     detailData.value = res || {}
     // 优先使用后端返回的结构化附件列表
-    if (res.fileList && res.fileList.length > 0) {
+    if (props.historyMode) {
+      fileList.value = props.attachments.map((item: any) => ({
+        name: item.fileName || item.filename || '',
+        url: item.fileUrl || item.filePath || item.filepath || ''
+      }))
+    } else if (res.fileList && res.fileList.length > 0) {
       fileList.value = res.fileList.map((item: any) => ({
         name: item.fileName || '',
         url: item.fileUrl || item.filePath || ''
@@ -489,14 +497,14 @@ const handlePreview = (file: any) => {
 }
 
 /** 处理下载 */
-const handleDownload = (file: any) => {
-  const link = document.createElement('a')
-  link.style.display = 'none'
-  link.href = file.url
-  link.setAttribute('download', file.name)
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
+const handleDownload = async (file: any) => {
+  if (!file?.url) return ElMessage.error('文件路径为空，无法下载')
+  try {
+    await downloadFileByUrl(file.url, file.name || '附件')
+  } catch (error) {
+    console.error('会议报告单附件下载失败:', error)
+    ElMessage.error('附件下载失败，请稍后重试')
+  }
 }
 
 defineExpose({ open: getInfo, getOpinion })

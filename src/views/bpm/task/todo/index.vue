@@ -470,6 +470,8 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 const categoryList = ref<CategoryVO[]>([]) // 流程分类列表
 const showPopover = ref(false) // 高级筛选是否展示
+// KeepAlive 组件首次挂载时也会触发 activated，避免首屏重复请求 todo-page。
+const mounted = ref(false)
 const todoColumnStorageKey = 'bpm:task:todo:columns'
 const { columnOptions, checkedColumnKeys, visibleColumn, resetColumns } = useBpmColumnSetting(
   todoColumnStorageKey,
@@ -595,12 +597,15 @@ const handleAudit = async (row: any) => {
 }
 
 onActivated(() => {
-  getList()
+  if (mounted.value) {
+    getList()
+  }
 })
 
 /** 初始化 **/
 onMounted(async () => {
   await getList()
+  mounted.value = true
   categoryList.value = await CategoryApi.getCategorySimpleList()
   // 获取流程定义列表
   processDefinitionList.value = await DefinitionApi.getSimpleProcessDefinitionList()
