@@ -15,7 +15,7 @@
                   class="flex-1"
                 >
                   <template #label>
-                    <span v-if="(group.tabLabel || '').includes('法规科办理人') || (group.tabLabel || '').includes('转相关单位')" style="color: red; margin-right: 4px;">*</span>
+                    <span v-if="group.nodes.some(n => isSpecifiedNode(n))" style="color: red; margin-right: 4px;">*</span>
                     <span>{{ group.tabLabel }}</span>
                   </template>
                   <div
@@ -36,7 +36,7 @@
                           @change="(val) => handleNodeCheckboxChange(val, node)"
                         >
                           <span class="inline-flex items-center">
-                            <span v-if="(node.flowName || node.name || node.taskName || '').includes('法规科办理人') || (node.flowName || node.name || node.taskName || '').includes('转相关单位')" style="color: red; margin-right: 4px;">*</span>
+                            <span v-if="isSpecifiedNode(node)" style="color: red; margin-right: 4px;">*</span>
                             <span>{{ node.name || node.taskName }}</span>
                           </span>
                         </el-checkbox>
@@ -139,6 +139,24 @@ defineOptions({ name: 'ProcessSendDialog' })
 
 const message = useMessage()
 const userId = useUserStoreWithOut().getUser.id
+
+const isSpecifiedNode = (n: any) => {
+  return (
+    n?.extensionProperties?.specified_flag === '1' ||
+    n?.specified_flag === '1' ||
+    (n?.flowName || n?.name || n?.taskName || '').includes('法规科办理人')
+  )
+}
+
+const getSpecifiedName = (n: any) => {
+  return (
+    n?.extensionProperties?.specified_name ||
+    n?.specified_name ||
+    n?.taskName ||
+    n?.name ||
+    '必填节点'
+  )
+}
 
 const props = defineProps({
   title: { type: String, default: '发送' },
@@ -400,24 +418,26 @@ const handleConfirm = async () => {
     if (!valid) return
   }
 
-  const selectedNodes = approvalNodes.value.filter((n) => n.checked)
-  if (approvalNodes.value.length > 0 && selectedNodes.length === 0) {
+  // 1. 针对 specified_flag === '1' 指定必填节点（如法规科办理人）的动态名称校验
+  const unCheckedSpecifiedNode = approvalNodes.value.find(
+    (n) => isSpecifiedNode(n) && !n.checked
+  )
+  if (unCheckedSpecifiedNode) {
+    const specifiedName = getSpecifiedName(unCheckedSpecifiedNode)
+    message.warning(`【${specifiedName}】为必填项，请勾选并选择办理人员`)
+    return
+  }
+
+  // 2. 必须选中至少一个流程节点（排除法规科办理人等指定非流程节点）
+  const realFlowNodes = approvalNodes.value.filter((n) => !isSpecifiedNode(n))
+  const selectedFlowNodes = realFlowNodes.filter((n) => n.checked)
+  if (realFlowNodes.length > 0 && selectedFlowNodes.length === 0) {
     message.warning('请至少选择一个流程节点')
     return
   }
 
-  // 针对“法规科办理人”与“转相关单位”节点的特殊必填校验
-  const fgkNode = approvalNodes.value.find((n) => (n.name || '').includes('法规科办理人') || (n.taskName || '').includes('法规科办理人') || (n.flowName || '').includes('法规科办理人'))
-  if (fgkNode && !fgkNode.checked) {
-    message.warning('【法规科办理人】为必填项，请勾选并选择办理人员')
-    return
-  }
-
-  const xgdwNode = approvalNodes.value.find((n) => (n.name || '').includes('转相关单位') || (n.taskName || '').includes('转相关单位') || (n.flowName || '').includes('转相关单位'))
-  if (xgdwNode && !xgdwNode.checked) {
-    message.warning('【转相关单位】为必填项，请勾选并选择办理人员')
-    return
-  }
+  // 选中的所有节点（包含指定节点和流程节点，用于后续选人校验与指派数据组装）
+  const selectedNodes = approvalNodes.value.filter((n) => n.checked)
 
   const nextNodeAssignees: Record<string, number[]> = {}
   const variables: Record<string, any> = {}

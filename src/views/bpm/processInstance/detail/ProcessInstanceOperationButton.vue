@@ -223,10 +223,7 @@
                 >
                   <template #label>
                     <span
-                      v-if="
-                        (group.tabLabel || '').includes('法规科办理人') ||
-                        (group.tabLabel || '').includes('转相关单位')
-                      "
+                      v-if="group.nodes.some((n) => isSpecifiedNode(n))"
                       style="margin-right: 4px; color: red"
                       >*</span
                     >
@@ -251,7 +248,9 @@
                           @change="(val) => handleNodeCheckboxChange(val, node)"
                         >
                           <span class="inline-flex items-center">
-                            <!-- <span v-if="(node.flowName || node.name || node.taskName || '').includes('法规科办理人')" style="color: red; margin-right: 4px;">*</span> -->
+                            <span v-if="isSpecifiedNode(node)" style="margin-right: 4px; color: red"
+                              >*</span
+                            >
                             <span>{{ node.name || node.taskName }}</span>
                           </span>
                         </el-checkbox>
@@ -408,6 +407,24 @@ const message = useMessage() // 消息弹窗
 
 const userId = useUserStoreWithOut().getUser.id // 当前登录的编号
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
+
+const isSpecifiedNode = (n: any) => {
+  return (
+    n?.extensionProperties?.specified_flag === '1' ||
+    n?.specified_flag === '1' ||
+    (n?.flowName || n?.name || n?.taskName || '').includes('法规科办理人')
+  )
+}
+
+const getSpecifiedName = (n: any) => {
+  return (
+    n?.extensionProperties?.specified_name ||
+    n?.specified_name ||
+    n?.taskName ||
+    n?.name ||
+    '必填节点'
+  )
+}
 
 const props = defineProps<{
   processInstance: any // 流程实例信息
@@ -721,7 +738,6 @@ const loadApprovalNodes = async () => {
       taskId: runningTask.value.id,
       processVariablesStr: JSON.stringify(variables)
     })
-    console.log('NextSelectNodes:', data)
 
     // 分类逻辑已在 categorizedNodes computed 属性中处理
 
@@ -1027,43 +1043,24 @@ const handleApproveConfirm = async () => {
     return
   }
 
-  const unCheckedSpecifiedNode = approvalNodes.value.find(
-    (n) => n.extensionProperties?.specified_flag === '1' && !n.checked
-  )
+  // 1. 针对 specified_flag === '1' 指定必填节点（如法规科办理人）的动态名称校验
+  const unCheckedSpecifiedNode = approvalNodes.value.find((n) => isSpecifiedNode(n) && !n.checked)
   if (unCheckedSpecifiedNode) {
-    message.warning(
-      `节点【${unCheckedSpecifiedNode.taskName || unCheckedSpecifiedNode.name}】为必填项，请勾选并选择办理人！`
-    )
+    const specifiedName = getSpecifiedName(unCheckedSpecifiedNode)
+    message.warning(`【${specifiedName}】为必填项，请勾选并选择办理人员`)
     return
   }
 
-  // 必须选中至少一个节点
-  const selectedNodes = approvalNodes.value.filter((n) => n.checked)
-  if (approvalNodes.value.length > 0 && selectedNodes.length === 0) {
+  // 2. 必须选中至少一个流程节点（排除法规科办理人等指定非流程节点）
+  const realFlowNodes = approvalNodes.value.filter((n) => !isSpecifiedNode(n))
+  const selectedFlowNodes = realFlowNodes.filter((n) => n.checked)
+  if (realFlowNodes.length > 0 && selectedFlowNodes.length === 0) {
     message.warning('请至少选择一个流程节点')
     return
   }
 
-  // 针对“法规科办理人”与“转相关单位”节点的特殊必填校验
-  const fgkNode = approvalNodes.value.find(
-    (n) =>
-      (n.flowName || n.name || '').includes('法规科办理人') ||
-      (n.taskName || '').includes('法规科办理人')
-  )
-  if (fgkNode && !fgkNode.checked) {
-    message.warning('【法规科办理人】为必填项，请勾选并选择办理人员')
-    return
-  }
-
-  const xgdwNode = approvalNodes.value.find(
-    (n) =>
-      (n.flowName || n.name || '').includes('转相关单位') ||
-      (n.taskName || '').includes('转相关单位')
-  )
-  if (xgdwNode && !xgdwNode.checked) {
-    message.warning('【转相关单位】为必填项，请勾选并选择办理人员')
-    return
-  }
+  // 选中的所有节点（包含指定节点和流程节点，用于后续选人校验与指派数据组装）
+  const selectedNodes = approvalNodes.value.filter((n) => n.checked)
 
   // 校验节点下的人员
   // 遍历 selectedNodes
