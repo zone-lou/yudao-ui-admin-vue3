@@ -291,8 +291,11 @@ const pivotTableData = computed(() => {
     row[typeKey] = item.totalDays || 0
     row[runningKey] = item.runningDays || 0 // 新增接收审批中天数
 
-    row.totalAll += Number(item.totalDays || 0)
-    row.runningAll += Number(item.runningDays || 0) // 累加审批中天数
+    // 哺乳假（5）保留独立类型统计，但不计入右侧请假总计。
+    if (String(item.qxjType) !== '5') {
+      row.totalAll += Number(item.totalDays || 0)
+      row.runningAll += Number(item.runningDays || 0)
+    }
   })
   return Array.from(userMap.values())
 })
@@ -315,7 +318,11 @@ const openDetail = async (row: any, typeValue?: number, useCurrentPeriod = false
       params.qxjType = typeValue ?? queryParams.qxjType
     }
     const data = await LeaveApi.leaveApi.getLeaveDetailList(params)
-    detailList.value = [...data].sort(
+    // 点击“总计”查看明细时，同样排除哺乳假，保证明细与总计数字一致。
+    const totalDetail = typeValue === undefined && useCurrentPeriod
+      ? data.filter((item: any) => String(item.qxjType) !== '5')
+      : data
+    detailList.value = [...totalDetail].sort(
       (a, b) => new Date(b.qxjStartDate).getTime() - new Date(a.qxjStartDate).getTime()
     )
   } finally {

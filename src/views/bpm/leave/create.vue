@@ -54,7 +54,6 @@
                           <el-select
                             v-model="formData.qxjType"
                             placeholder="请选择"
-                            @change="calculateDuration"
                             style="width: 100%"
                           >
                             <el-option
@@ -91,7 +90,6 @@
                             type="date"
                             value-format="x"
                             placeholder="选择日期"
-                            @change="calculateDuration"
                             style="width: 100%"
                           />
                         </el-form-item>
@@ -102,7 +100,6 @@
                           <el-select
                             v-model="formData.startPeriod"
                             placeholder="时段"
-                            @change="calculateDuration"
                             style="width: 100%"
                           >
                             <el-option label="上午" :value="1" />
@@ -119,7 +116,7 @@
                       <td class="input-cell">
                         <el-form-item prop="qxjEndDate" class="mb-0">
                           <el-date-picker
-                            :key="`picker-${formData.qxjType}-${endDateShortcuts.length}`"
+                            ref="endDatePickerRef"
                             v-model="formData.qxjEndDate"
                             type="date"
                             value-format="x"
@@ -127,6 +124,7 @@
                             :shortcuts="endDateShortcuts"
                             popper-class="leave-date-picker-popper"
                             @change="calculateDuration"
+                            @visible-change="handleEndDatePickerVisibleChange"
                             style="width: 100%"
                           />
                         </el-form-item>
@@ -360,12 +358,12 @@ const leaveLimitHint = computed(() => {
   const stat = yearlyStatsMap.value[typeStr] || { leaveCount: 0, totalDays: 0 }
   switch (typeStr) {
     case '3':
-      return `登记结婚之日起一年内可请休婚假，最多13天，原则上可至多分2次请假，剩余${Math.max(0, 13 - stat.totalDays)}天`
+      return '登记结婚之日起一年内可请休婚假，最多13天，原则上可至多分2次请假'
     case '4':
       return '一孩158天产假，二孩、三孩188天产假，生育双胞胎、三胞胎的可以享受188天产假'
     case '6':
       return '直系亲属（祖父母、外祖父母、父母、配偶和子女）、岳父母及公婆去世时，给予丧假1－3天'
-    case '8':
+    case '10':
       return '至多请2次，每次至少2天'
     case '11':
       return `独生子女陪护假每年享受5天，剩余${Math.max(0, 5 - stat.totalDays)}天`
@@ -458,6 +456,7 @@ const formRules = reactive({
 })
 const formRef = ref()
 const uploadFileRef = ref()
+const endDatePickerRef = ref()
 
 const processDefineKey = 'oa_leave'
 const processDefinitionId = ref('')
@@ -539,9 +538,11 @@ const days_condition3 = computed(() => {
   return ''
 })
 
-const holidayCache = ref<Record<string, { workDay: string; restDay: string }>>({})
-const fullLeaveDictList = ref<any[]>([])
+type HolidaySummary = { year?: string; workDay: string; restDay: string }
+const holidayCache = ref<Record<string, HolidaySummary>>({})
+const calendarDayLeaveTypeValues = ref<Set<number>>(new Set())
 const endDateShortcuts = ref<any[]>([])
+const requestedDays = ref<number>()
 
 watch(
   () => [formData.value.qxjStartDate, formData.value.qxjType, yearlyStatsMap.value],
@@ -564,7 +565,7 @@ watch(
         maxDays = 158
         break
       case '3':
-        maxDays = Math.max(0, 18 - stat.totalDays)
+        maxDays = Math.max(0, 13 - stat.totalDays)
         break
       case '11':
         maxDays = Math.max(0, 5 - stat.totalDays)
@@ -594,52 +595,26 @@ watch(
             return new Date()
           }
 
-          let isCalendarDayMode = false
-          if (fullLeaveDictList.value && fullLeaveDictList.value.length > 0) {
-            const currentFullDict = fullLeaveDictList.value.find(
-              (i) => i.value == formData.value.qxjType
-            )
-            isCalendarDayMode = currentFullDict?.remark?.includes('包含节假日') || false
-          } else {
-            const dictOptions = getIntDictOptions(DICT_TYPE.BPM_LEAVE_TYPE)
-            const currentDict = dictOptions.find((i) => i.value === formData.value.qxjType)
-            // @ts-ignore
-            isCalendarDayMode = currentDict?.remark?.includes('包含节假日') || false
-          }
+          const isCalendarDayMode = calendarDayLeaveTypeValues.value.has(
+            Number(formData.value.qxjType)
+          )
 
           const start = dayjs(formData.value.qxjStartDate).startOf('day')
-          const year = start.format('YYYY')
-
-          let holidayInfo: any = null
-          if (!isCalendarDayMode) {
-            const res = holidayCache.value[year] // Use cached
-            if (Array.isArray(res) && res.length > 0) {
-              holidayInfo = res[0]
-            } else {
-              holidayInfo = res
-            }
-          }
-
-          const isWorkDay = (date: dayjs.Dayjs) => {
-            const dateStr = date.format('YYYY-MM-DD')
-            if (isCalendarDayMode) return true
-            const isForceWork =
-              holidayInfo?.workDay?.includes && holidayInfo.workDay.includes(dateStr)
-            const isForceRest =
-              holidayInfo?.restDay?.includes && holidayInfo.restDay.includes(dateStr)
-            if (isForceWork) return true
-            if (isForceRest) return false
-            const day = date.day()
-            if (day === 0 || day === 6) return false
-            return true
-          }
-
           let currentDate = start.clone()
           let count = 0
           let totalSoFar = 0
 
           while (true) {
-            if (isWorkDay(currentDate)) {
+            const dateStr = currentDate.format('YYYY-MM-DD')
+            const holidayInfo = holidayCache.value[currentDate.format('YYYY')]
+            const isWorkDay = isCalendarDayMode
+              ? true
+              : holidayInfo?.workDay?.includes?.(dateStr)
+                ? true
+                : holidayInfo?.restDay?.includes?.(dateStr)
+                  ? false
+                  : currentDate.day() !== 0 && currentDate.day() !== 6
+            if (isWorkDay) {
               let hitValue = 1
               if (currentDate.isSame(start)) {
                 if (formData.value.startPeriod === PM) hitValue = 0.5
@@ -670,24 +645,178 @@ watch(
 const getHolidayData = async (year: string) => {
   if (holidayCache.value[year]) return holidayCache.value[year]
   try {
-    const res = await HolidayApi.getHolidaySummary(year)
-    if (res) {
-      holidayCache.value[year] = res
-      return res
+    const res: any = await HolidayApi.getHolidaySummary(year)
+    if (Array.isArray(res)) {
+      res.forEach((item: HolidaySummary) => {
+        if (item?.year) holidayCache.value[String(item.year)] = item
+      })
     }
+    const summary: HolidaySummary | undefined = Array.isArray(res)
+      ? holidayCache.value[year]
+      : res
+    if (summary) {
+      holidayCache.value[year] = summary
+      return summary
+    }
+    console.warn(`未获取到 ${year} 年节假日配置`)
   } catch (e) {
     console.error('获取节假日失败', e)
   }
   return null
 }
 
+/** 当前请假类型是否按自然日计算（包含节假日）。 */
+const isCalendarDayLeaveType = () => {
+  return calendarDayLeaveTypeValues.value.has(Number(formData.value.qxjType))
+}
+
+/** 判断某天是否计入请假天数，跨年时按对应年份读取节假日配置。 */
+const isLeaveWorkDay = async (date: dayjs.Dayjs, isCalendarDayMode: boolean) => {
+  if (isCalendarDayMode) return true
+  const holidayInfo = await getHolidayData(date.format('YYYY'))
+  const dateStr = date.format('YYYY-MM-DD')
+  if (holidayInfo?.workDay?.includes?.(dateStr)) return true
+  if (holidayInfo?.restDay?.includes?.(dateStr)) return false
+  return date.day() !== 0 && date.day() !== 6
+}
+
+let endDateCalculationVersion = 0
+let durationCalculationVersion = 0
+
+/** 根据用户输入天数和请假类型的节假日规则自动生成结束日期、结束时段。 */
+const calculateEndDateByRequestedDays = async () => {
+  const version = ++endDateCalculationVersion
+  const days = Number(requestedDays.value)
+  if (!formData.value.qxjStartDate) {
+    message.warning('请先选择请假开始日期')
+    return
+  }
+  if (!formData.value.qxjType) {
+    message.warning('请先选择请假类型')
+    return
+  }
+  if (!days || days <= 0) {
+    message.warning('请输入需要生成的请假天数')
+    return
+  }
+
+  const start = dayjs(formData.value.qxjStartDate).startOf('day')
+  const isCalendarDayMode = isCalendarDayLeaveType()
+  let currentDate = start.clone()
+  let remaining = days
+
+  for (let count = 0; count <= 4000; count++) {
+    const counted = await isLeaveWorkDay(currentDate, isCalendarDayMode)
+    if (version !== endDateCalculationVersion) return
+    if (counted) {
+      const isFirstDate = currentDate.isSame(start, 'day')
+      const capacity = isFirstDate && formData.value.startPeriod === PM ? 0.5 : 1
+      if (remaining <= capacity) {
+        formData.value.qxjEndDate = currentDate.valueOf()
+        formData.value.endPeriod = capacity === 0.5 || remaining === 1 ? PM : AM
+        await calculateDuration()
+        return
+      }
+      remaining -= capacity
+    }
+    currentDate = currentDate.add(1, 'day')
+  }
+  message.error('自动计算结束日期失败，请检查节假日配置')
+}
+
+/** 在日期选择器左侧快捷栏中直接加入天数输入框和生成按钮。 */
+const handleEndDatePickerVisibleChange = async (visible: boolean) => {
+  if (!visible) return
+  await nextTick()
+  const sidebar = document.querySelector(
+    '.leave-date-picker-popper .el-picker-panel__sidebar'
+  ) as HTMLElement | null
+  if (!sidebar) return
+
+  // 该占位快捷项仅用于让 Element Plus 渲染左侧栏，页面上无需展示。
+  sidebar.querySelectorAll('.el-picker-panel__shortcut').forEach((shortcut) => {
+    if (shortcut.textContent?.trim() === '__CUSTOM_DAYS__') {
+      const shortcutElement = shortcut as HTMLElement
+      shortcutElement.style.display = 'none'
+    }
+  })
+
+  let generator = sidebar.querySelector('.leave-days-generator') as HTMLElement | null
+  if (!generator) {
+    generator = document.createElement('div')
+    generator.className = 'leave-days-generator'
+
+    const title = document.createElement('div')
+    title.className = 'leave-days-generator__title'
+    title.textContent = '按天数跳转'
+
+    const input = document.createElement('input')
+    input.className = 'leave-days-generator__input'
+    input.type = 'number'
+    input.min = '0.5'
+    input.step = '0.5'
+    input.placeholder = '输入天数'
+
+    const button = document.createElement('button')
+    button.className = 'leave-days-generator__button'
+    button.type = 'button'
+    button.textContent = '生成日期'
+    button.onclick = async (event) => {
+      event.preventDefault()
+      event.stopPropagation()
+      const days = Number(input.value)
+      if (!Number.isFinite(days) || days <= 0 || days * 2 % 1 !== 0) {
+        message.warning('请输入大于0且以0.5天递增的天数')
+        return
+      }
+      if (!formData.value.qxjStartDate) {
+        message.warning('请先选择请假开始日期')
+        return
+      }
+      if (!formData.value.qxjType) {
+        message.warning('请先选择请假类型')
+        return
+      }
+      requestedDays.value = days
+      await calculateEndDateByRequestedDays()
+      endDatePickerRef.value?.handleClose?.()
+    }
+
+    generator.append(title, input, button)
+    sidebar.appendChild(generator)
+  }
+
+  const input = generator.querySelector('.leave-days-generator__input') as HTMLInputElement | null
+  if (input) input.value = requestedDays.value ? String(requestedDays.value) : ''
+}
+
+watch(
+  () => [formData.value.qxjStartDate, formData.value.qxjType, yearlyStatsMap.value],
+  () => {
+    const typeShortcuts = endDateShortcuts.value.filter(
+      (item: any) => item.text !== '__CUSTOM_DAYS__'
+    )
+    endDateShortcuts.value = [
+      ...typeShortcuts,
+      {
+        text: '__CUSTOM_DAYS__',
+        value: () => {
+          const fallback = formData.value.qxjEndDate || formData.value.qxjStartDate || Date.now()
+          return new Date(Number(fallback))
+        }
+      }
+    ]
+  },
+  { deep: true, immediate: true }
+)
+
 const calculateDuration = async () => {
+  const version = ++durationCalculationVersion
   formData.value.totalTs = 0
   if (!formData.value.qxjStartDate || !formData.value.qxjEndDate || !formData.value.qxjType) return
 
   const start = dayjs(formData.value.qxjStartDate).startOf('day')
   const end = dayjs(formData.value.qxjEndDate).startOf('day')
-  const year = start.format('YYYY')
 
   if (end.isBefore(start)) {
     message.error('结束日期不能早于开始日期')
@@ -698,45 +827,12 @@ const calculateDuration = async () => {
     return
   }
 
-  const dictOptions = getIntDictOptions(DICT_TYPE.BPM_LEAVE_TYPE)
-  const currentDict = dictOptions.find((i) => i.value === formData.value.qxjType)
-
-  // 优先提取从后台新鲜拉取的含 remark 的完整字典
-  let isCalendarDayMode = false
-  if (fullLeaveDictList.value && fullLeaveDictList.value.length > 0) {
-    const currentFullDict = fullLeaveDictList.value.find((i) => i.value == formData.value.qxjType)
-    isCalendarDayMode = currentFullDict?.remark?.includes('包含节假日') || false
-  } else {
-    // @ts-ignore
-    isCalendarDayMode = currentDict?.remark?.includes('包含节假日') || false
-  }
-
-  let holidayInfo: any = null
-  if (!isCalendarDayMode) {
-    const res = await getHolidayData(year)
-    if (Array.isArray(res) && res.length > 0) {
-      holidayInfo = res[0]
-    } else {
-      holidayInfo = res
-    }
-  }
-
-  const isWorkDay = (date: dayjs.Dayjs) => {
-    const dateStr = date.format('YYYY-MM-DD')
-    if (isCalendarDayMode) return true
-    const isForceWork = holidayInfo?.workDay?.includes && holidayInfo.workDay.includes(dateStr)
-    const isForceRest = holidayInfo?.restDay?.includes && holidayInfo.restDay.includes(dateStr)
-    if (isForceWork) return true
-    if (isForceRest) return false
-    const day = date.day()
-    if (day === 0 || day === 6) return false
-    return true
-  }
+  const isCalendarDayMode = isCalendarDayLeaveType()
 
   let totalDays = 0
   let currentDate = start.clone()
   while (currentDate.isBefore(end) || currentDate.isSame(end)) {
-    if (isWorkDay(currentDate)) {
+    if (await isLeaveWorkDay(currentDate, isCalendarDayMode)) {
       if (currentDate.isSame(start) && currentDate.isSame(end)) {
         if (formData.value.startPeriod === AM && formData.value.endPeriod === AM) totalDays += 0.5
         else if (formData.value.startPeriod === PM && formData.value.endPeriod === PM)
@@ -752,6 +848,7 @@ const calculateDuration = async () => {
     }
     currentDate = currentDate.add(1, 'day')
   }
+  if (version !== durationCalculationVersion) return
   duration.value = totalDays
   formData.value.totalTs = totalDays
 }
@@ -926,6 +1023,20 @@ const submitForm = async (submitData: { nextNodeAssignees: any; variables: any }
 watch(
   () => [
     formData.value.qxjStartDate,
+    formData.value.startPeriod,
+    formData.value.qxjType,
+    calendarDayLeaveTypeValues.value.size
+  ],
+  async () => {
+    if (requestedDays.value && formData.value.qxjStartDate && formData.value.qxjType) {
+      await calculateEndDateByRequestedDays()
+    }
+  }
+)
+
+watch(
+  () => [
+    formData.value.qxjStartDate,
     formData.value.qxjEndDate,
     formData.value.startPeriod,
     formData.value.endPeriod,
@@ -956,16 +1067,18 @@ onMounted(async () => {
   if (userRes.dept) deptName.value = userRes.dept.name
   else if (userRes.users && userRes.users.dept) deptName.value = userRes.users.dept.name
 
-  // 获取最完整的字典(含remark)用于计算包含节假日的判断逻辑
+  // 独立字典中配置的请假类型按自然日计算
   try {
     const dictRes = await DictDataApi.getDictDataPage({
-      dictType: DICT_TYPE.BPM_LEAVE_TYPE,
+      dictType: DICT_TYPE.BPM_LEAVE_CALENDAR_DAY_TYPE,
       pageNo: 1,
       pageSize: 50
     } as any)
-    fullLeaveDictList.value = dictRes.list
+    calendarDayLeaveTypeValues.value = new Set(
+      (dictRes.list || []).map((item: any) => Number(item.value))
+    )
   } catch (e) {
-    console.error('获取完整请假字典失败', e)
+    console.error('获取自然日请假类型字典失败', e)
   }
 
   const yearlyStat = await leaveApi.getYearlyStat({})
@@ -993,7 +1106,6 @@ onMounted(async () => {
       const detail = await leaveApi.getleave(Number(queryId))
       if (detail) {
         Object.assign(formData.value, detail)
-
         const attachList = await leaveApi.getLeaveAttachList(Number(queryId))
         if (attachList && attachList.length > 0) {
           const files = attachList.map((item: any) => ({
@@ -1177,6 +1289,18 @@ onMounted(async () => {
 <style lang="scss">
 /* 专门美化弹出层里的右侧（或下侧）快捷按钮，使其脱离单纯的文字链接样式，具备实体按钮的立体感和反馈感 */
 .el-popper.leave-date-picker-popper {
+  .el-picker-panel.el-date-picker.has-sidebar {
+    width: 478px !important;
+  }
+
+  .el-picker-panel__sidebar {
+    width: 150px !important;
+  }
+
+  .el-picker-panel__body {
+    margin-left: 150px !important;
+  }
+
   .el-picker-panel__shortcut {
     width: 86% !important;
     height: auto !important;
@@ -1203,6 +1327,43 @@ onMounted(async () => {
       transform: translateY(1px) !important;
       box-shadow: none !important;
     }
+  }
+
+  .leave-days-generator {
+    padding: 10px 10px 12px;
+    margin: 8px;
+    border-top: 1px solid var(--el-border-color-light);
+  }
+
+  .leave-days-generator__title {
+    margin-bottom: 7px;
+    font-size: 13px;
+    color: var(--el-text-color-regular);
+  }
+
+  .leave-days-generator__input {
+    box-sizing: border-box;
+    width: 100%;
+    height: 30px;
+    padding: 0 8px;
+    margin-bottom: 8px;
+    border: 1px solid var(--el-border-color);
+    border-radius: 4px;
+    outline: none;
+
+    &:focus {
+      border-color: var(--el-color-primary);
+    }
+  }
+
+  .leave-days-generator__button {
+    width: 100%;
+    height: 30px;
+    color: #fff;
+    cursor: pointer;
+    background: var(--el-color-primary);
+    border: 0;
+    border-radius: 4px;
   }
 }
 </style>
