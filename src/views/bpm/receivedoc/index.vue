@@ -502,7 +502,10 @@ const getList = async () => {
       orderDirection: queryParams.orderDirection
     }
     const data = await ReceiveDocApi.getReceiveDocPage(params)
-    list.value = data.list
+    list.value = data.list.map((item) => ({
+      ...item,
+      docSecondClass: String(item.docSecondClass ?? '').trim() === '0' ? '' : item.docSecondClass
+    }))
     total.value = data.total
   } finally {
     loading.value = false
