@@ -155,6 +155,7 @@ export enum DICT_TYPE {
   BPM_PROCESS_LISTENER_TYPE = 'bpm_process_listener_type',
   BPM_PROCESS_LISTENER_VALUE_TYPE = 'bpm_process_listener_value_type',
   BPM_LEAVE_TYPE = 'leave_type',
+  BPM_LEAVE_CALENDAR_DAY_TYPE = 'bpm_leave_calendar_day_type',
   BPM_RECEICE_CLASS = 'receive_class',
   BPM_RECEICE_DOC_UNIT = 'receive_doc_unit',
   BPM_DOC_NUM_TYPE = 'doc_num_type',
