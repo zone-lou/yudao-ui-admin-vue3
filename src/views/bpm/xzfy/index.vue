@@ -134,7 +134,11 @@
         </template>
       </el-table-column>
       <el-table-column v-if="visibleColumn('sqr')" label="申请人" align="center" prop="sqr" width="150px" sortable="custom" resizable />
-      <el-table-column v-if="visibleColumn('bsqr')" label="被申请人" align="center" prop="bsqr" width="150px" sortable="custom" resizable />
+      <el-table-column v-if="visibleColumn('bsqr')" label="被申请人" align="center" prop="bsqr" width="150px" sortable="custom" resizable>
+        <template #default="scope">
+          {{ formatDictOrStr(scope.row.bsqr, DICT_TYPE.BPM_APPLIED_RESPONDENT) }}
+        </template>
+      </el-table-column>
       <el-table-column v-if="visibleColumn('dsr')" label="第三人" align="center" prop="dsr" width="150px" sortable="custom" resizable />
       <el-table-column v-if="visibleColumn('tdZl')" label="土地坐落" align="center" prop="tdZl" width="200px" sortable="custom" resizable />
       <el-table-column v-if="visibleColumn('lb1')" label="案件分类" align="center" prop="lb1" width="120px" sortable="custom" resizable>

@@ -150,6 +150,7 @@
       />
     </div>
     <el-table
+      class="bpm-task-single-line-table"
       v-loading="loading"
       :data="list"
       border
@@ -213,6 +214,7 @@
         prop="processInstance.name"
         width="250"
         sortable="custom"
+        show-overflow-tooltip
         resizable
       />
 
@@ -226,6 +228,7 @@
         prop="name"
         width="150"
         sortable="custom"
+        show-overflow-tooltip
         resizable
       />
 
@@ -236,6 +239,7 @@
         label="办件类型"
         prop="taskName"
         width="120"
+        show-overflow-tooltip
         resizable
       />
 
@@ -611,3 +615,11 @@ onMounted(async () => {
   processDefinitionList.value = await DefinitionApi.getSimpleProcessDefinitionList()
 })
 </script>
+
+<style scoped>
+:deep(.bpm-task-single-line-table .cell) {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+</style>

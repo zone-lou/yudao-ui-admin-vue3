@@ -21,7 +21,7 @@
           {{ detailData.sqr }}
         </el-descriptions-item>
         <el-descriptions-item label="被申请人" label-align="center" align="center">
-          {{ detailData.bsqr }}
+          {{ formatDictOrStr(detailData.bsqr, DICT_TYPE.BPM_APPLIED_RESPONDENT) }}
         </el-descriptions-item>
         <el-descriptions-item label="第三人" label-align="center" align="center">
           {{ detailData.dsr }}
@@ -31,7 +31,7 @@
         </el-descriptions-item>
 
         <el-descriptions-item label="诉讼案号" label-align="center" align="center">
-          {{ detailData.tdZl }}
+          {{ getLitigationCaseNumbers() }}
         </el-descriptions-item>
 
         <el-descriptions-item label="案件分类" label-align="center" align="center">
@@ -599,7 +599,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Base64 } from 'js-base64'
 import * as ConfigApi from '@/api/infra/config'
 import { propTypes } from '@/utils/propTypes'
-import { DICT_TYPE } from '@/utils/dict'
+import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import { ref, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/store/modules/user'
@@ -623,6 +623,20 @@ const { query } = useRoute()
 const detailLoading = ref(false)
 const detailData = ref<any>({})
 const docList = ref<any[]>([])
+
+const formatDictOrStr = (value: unknown, dictType: string) => {
+  if (value === undefined || value === null || value === '') return ''
+  const stringValue = String(value)
+  const dict = getDictOptions(dictType).find((item) => String(item.value) === stringValue)
+  return dict?.label || stringValue
+}
+
+const getLitigationCaseNumbers = () => {
+  const caseNumbers = (detailData.value.xzssList || [])
+    .map((item: any) => item.swWh)
+    .filter(Boolean)
+  return Array.from(new Set(caseNumbers)).join('、')
+}
 
 // ================= 附件相关逻辑开始 =================
 const allDocAttachments = ref<any[]>([])

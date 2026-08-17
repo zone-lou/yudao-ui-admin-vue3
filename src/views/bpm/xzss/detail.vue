@@ -479,21 +479,20 @@
         <el-descriptions-item label="再审被申请人" label-align="center" align="center">
           {{ detailData.zsbsqr }}
         </el-descriptions-item>
-        <el-descriptions-item label="诉讼阶段" label-align="center" align="center">
-          {{ formatSsLx(detailData.ssLx) }}
-        </el-descriptions-item>
-
         <el-descriptions-item label="土地坐落" label-align="center" align="center" :span="2">
           {{ detailData.tdZl }}
         </el-descriptions-item>
 
+        <el-descriptions-item label="诉讼阶段" label-align="center" align="center">
+          {{ formatSsLx(detailData.ssLx) }}
+        </el-descriptions-item>
         <el-descriptions-item label="复议案号" label-align="center" align="center">
           {{ detailData.fyAh }}
         </el-descriptions-item>
         <el-descriptions-item label="前一审案号" label-align="center" align="center">
           {{ detailData.ssAh }}
         </el-descriptions-item>
-        <el-descriptions-item label="后一审案号" label-align="center" align="center" :span="2">
+        <el-descriptions-item label="后一审案号" label-align="center" align="center">
           {{ detailData.hysAh }}
         </el-descriptions-item>
 
@@ -513,11 +512,8 @@
           <dict-tag :type="DICT_TYPE.BPM_XZSS_CLASS5" :value="detailData.lb5" />
         </el-descriptions-item>
 
-        <el-descriptions-item label="诉讼请求" label-align="center" align="center" :span="3">
+        <el-descriptions-item label="诉讼请求" label-align="center" align="left" :span="3">
           {{ detailData.ssNr }}
-        </el-descriptions-item>
-        <el-descriptions-item label="诉讼内容" label-align="center" align="center" :span="3">
-          {{ detailData.ssnr }}
         </el-descriptions-item>
       </el-descriptions>
 

@@ -40,6 +40,7 @@ export interface Xzss {
   fyAh: string // 复议案号
   ssGuid: string // 上一审项目主键
   ssAh: string // 上一审案号
+  hysAh?: string // 后一审案号（详情接口反向查询）
   lb1: string // 类别一
   lb2: string // 类别二
   lb3: string // 类别三

@@ -528,7 +528,7 @@ const tdZlPart2 = ref('')
 const formData = ref({
   id: undefined,
   sqr: '',
-  bsqr: '义乌市国土资规局',
+  bsqr: '',
   dsr: undefined,
   tdZl: undefined,
   swWh: undefined,

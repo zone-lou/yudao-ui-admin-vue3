@@ -136,10 +136,11 @@
       />
     </div>
     <el-table
+      class="bpm-task-single-line-table"
       v-loading="loading"
       :data="list"
       border
-      :default-sort="{ prop: 'processInstance.createTime', order: 'descending' }"
+      :default-sort="{ prop: 'endTime', order: 'descending' }"
       @sort-change="handleSortChange"
     >
       <el-table-column type="index" label="序号" width="60" align="center" fixed="left" resizable />
@@ -170,6 +171,7 @@
         prop="processInstance.name"
         width="250"
         sortable="custom"
+        show-overflow-tooltip
         resizable
       />
 
@@ -182,6 +184,7 @@
         prop="name"
         width="150"
         sortable="custom"
+        show-overflow-tooltip
         resizable
       />
 
@@ -191,6 +194,7 @@
         label="办件类型"
         prop="taskName"
         width="180"
+        show-overflow-tooltip
         resizable
       />
       <el-table-column
@@ -285,13 +289,21 @@
       />
       <el-table-column
         v-if="visibleColumn('durationInMillis')"
-        label="耗时(ms)"
+        label="耗时"
         align="center"
         prop="durationInMillis"
-        width="120"
+        width="160"
         sortable="custom"
         resizable
-      />
+      >
+        <template #default="scope">
+          {{
+            scope.row.durationInMillis != null && scope.row.durationInMillis >= 0
+              ? formatPast2(scope.row.durationInMillis)
+              : '--'
+          }}
+        </template>
+      </el-table-column>
 
       <el-table-column align="center" label="操作" fixed="right" width="150" resizable>
         <template #default="scope">
@@ -317,7 +329,7 @@
 </template>
 
 <script lang="ts" setup>
-import { dateFormatter } from '@/utils/formatTime'
+import { dateFormatter, formatPast2 } from '@/utils/formatTime'
 import * as TaskApi from '@/api/bpm/task'
 import { CategoryApi, CategoryVO } from '@/api/bpm/category'
 import * as DefinitionApi from '@/api/bpm/definition'
@@ -398,7 +410,7 @@ const queryParams = reactive({
   createTime: [],
   dueDate: [],
   processDeadline: [],
-  orderField: 'processInstance.createTime' as string | undefined,
+  orderField: 'endTime' as string | undefined,
   orderDirection: 'desc' as string | undefined
 })
 const queryFormRef = ref()
@@ -417,7 +429,7 @@ const { columnOptions, checkedColumnKeys, visibleColumn, resetColumns } = useBpm
     { key: 'id', label: '任务编号' },
     { key: 'startUser', label: '发起人' },
     { key: 'assigneeUser', label: '办理人' },
-    { key: 'durationInMillis', label: '耗时(ms)' }
+    { key: 'durationInMillis', label: '耗时' }
   ],
   [
     'timeout',
@@ -462,7 +474,7 @@ const handleSortChange = ({ prop, order }: any) => {
 /** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
-  queryParams.orderField = 'processInstance.createTime'
+  queryParams.orderField = 'endTime'
   queryParams.orderDirection = 'desc'
   handleQuery()
 }
@@ -518,3 +530,11 @@ onMounted(async () => {
   processDefinitionList.value = mergeProcessDefinitionList(definitions)
 })
 </script>
+
+<style scoped>
+:deep(.bpm-task-single-line-table .cell) {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+</style>
