@@ -788,7 +788,6 @@ const formRules = reactive({
   bsqr: [{ required: true, message: '被告不能为空', trigger: 'blur' }],
   swRq: [{ required: true, message: '收文日期不能为空', trigger: 'change' }],
   tdZl: [{ required: true, message: '土地坐落不能为空', trigger: 'blur' }],
-  fyAh: [{ required: true, message: '复议案号不能为空', trigger: 'blur' }],
   lb1: [{ required: true, message: '案件类别不能为空', trigger: 'change' }],
   lb2: [{ required: true, message: '案件分类不能为空', trigger: 'change' }],
   lb3: [{ required: true, message: '涉及事项不能为空', trigger: 'change' }],
