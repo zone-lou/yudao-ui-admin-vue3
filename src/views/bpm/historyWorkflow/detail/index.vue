@@ -2,21 +2,24 @@
   <ContentWrap :bodyStyle="{ padding: '10px 20px 0' }" class="position-relative !mb-0px">
     <div class="history-detail-main" v-loading="loading">
       <el-scrollbar>
-        <div class="flex items-center items-center">
-          <div class="text-26px font-bold mb-5px mr-10px">
+        <div class="history-detail-header">
+          <div
+            class="history-detail-title"
+            :title="processInfo.name || processInfo.proinstName || '历史流程详情'"
+          >
             {{ processInfo.name || processInfo.proinstName || '历史流程详情' }}
           </div>
-          <div class="flex items-center gap-5 mr-10px text-13px h-35px">
+          <div class="history-detail-meta">
             <div
               v-if="submitterName"
-              class="bg-gray-100 h-35px rounded-3xl flex items-center p-8px gap-2 dark:color-gray-600"
+              class="history-detail-submitter bg-gray-100 h-35px rounded-3xl flex items-center p-8px gap-2 dark:color-gray-600"
             >
               <el-avatar :size="28">
                 {{ String(submitterName).substring(0, 1) }}
               </el-avatar>
               {{ submitterName }}
             </div>
-            <div class="text-#878c93">
+            <div class="history-detail-time text-#878c93">
               {{ formatDate(processInfo.startTime || processInfo.startDate) }} 提交
             </div>
           </div>
@@ -541,6 +544,38 @@ $process-header-height: 73px;
     overflow: auto;
     flex-direction: column;
   }
+}
+
+.history-detail-header {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.history-detail-title {
+  min-width: 0;
+  margin-right: 10px;
+  margin-bottom: 5px;
+  overflow: hidden;
+  font-size: 26px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-detail-meta {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  height: 35px;
+  margin-right: 10px;
+  font-size: 13px;
+  gap: 20px;
+}
+
+.history-detail-submitter,
+.history-detail-time {
+  white-space: nowrap;
 }
 
 .form-box {

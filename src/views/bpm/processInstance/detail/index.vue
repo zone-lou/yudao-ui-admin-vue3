@@ -14,6 +14,7 @@
       <el-scrollbar>
         <!-- 办理状态图标（盖章效果） -->
         <img
+          v-if="hasTodoTask"
           class="audit-status-icon position-absolute right-20px z-3"
           width="120"
           :src="auditIconsMap[processInstance.status]"
@@ -287,6 +288,7 @@ const { delView } = useTagsViewStore()
 const message = useMessage() // 消息弹窗
 const processInstanceLoading = ref(false) // 流程实例的加载中
 const processInstance = ref<any>({}) // 流程实例
+const hasTodoTask = ref(false) // 仅能确认当前用户存在待办任务时显示待办图标
 const processDefinition = ref<any>({}) // 流程定义
 const isHistoryMode = ref(false) // 是否为迁移历史流程
 const historyProjectId = ref<string | undefined>(undefined)
@@ -396,6 +398,7 @@ const getNextApprovalNodes = async () => {
 
 const getApprovalDetail = async () => {
   processInstanceLoading.value = true
+  hasTodoTask.value = false
   try {
     const param = {
       processInstanceId: props.id,
@@ -411,6 +414,7 @@ const getApprovalDetail = async () => {
     }
     isHistoryMode.value = false
     processInstance.value = data.processInstance
+    hasTodoTask.value = Boolean(data.todoTask)
     processDefinition.value = data.processDefinition
     businessProcessKey.value =
       processDefinition.value.key ||

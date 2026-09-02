@@ -4,7 +4,8 @@ export interface UserVO {
   id: number
   username: string
   nickname: string
-  deptId: number
+  deptId: number | null
+  deptIds: number[]
   postIds: string[]
   email: string
   mobile: string
@@ -12,6 +13,7 @@ export interface UserVO {
   avatar: string
   loginIp: string
   status: number
+  sort: number | null
   remark: string
   loginDate: Date
   createTime: Date
@@ -75,11 +77,18 @@ export const updateUserStatus = (id: number, status: number) => {
   return request.put({ url: '/system/user/update-status', data: data })
 }
 
+// 调整指定实际所属部门中的用户排序
+export const updateDeptUserSort = (deptId: number, userIds: number[]) => {
+  return request.put({
+    url: '/system/user/update-dept-sort',
+    data: { deptId, userIds }
+  })
+}
+
 // 获取用户精简信息列表
 export const getSimpleUserList = (): Promise<UserVO[]> => {
   return request.get({ url: '/system/user/simple-list' })
 }
-
 
 export const getUserDeptIds = async (userId: number) => {
   return await request.get({ url: '/system/user-dept/get-dept-ids', params: { userId } })

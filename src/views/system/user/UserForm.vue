@@ -14,7 +14,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="归属部门" prop="deptId">
+          <el-form-item label="主部门" prop="deptId">
             <el-tree-select
               v-model="formData.deptId"
               :data="deptList"
@@ -22,6 +22,24 @@
               check-strictly
               node-key="id"
               placeholder="请选择归属部门"
+              @change="handlePrimaryDeptChange"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="24">
+          <el-form-item label="实际所属部门" prop="deptIds">
+            <el-tree-select
+              v-model="formData.deptIds"
+              :data="deptList"
+              :props="defaultProps"
+              multiple
+              show-checkbox
+              check-strictly
+              node-key="id"
+              placeholder="请选择一个或多个实际所属部门"
+              class="!w-100%"
             />
           </el-form-item>
         </el-col>
@@ -116,6 +134,7 @@ const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   nickname: '',
   deptId: '',
+  deptIds: [] as number[],
   mobile: '',
   email: '',
   id: undefined,
@@ -179,6 +198,10 @@ const submitForm = async () => {
   if (!formRef) return
   const valid = await formRef.value.validate()
   if (!valid) return
+  if (formData.value.deptId && !formData.value.deptIds.includes(Number(formData.value.deptId))) {
+    message.warning('实际所属部门必须包含主部门')
+    return
+  }
   // 提交请求
   formLoading.value = true
   try {
@@ -198,11 +221,19 @@ const submitForm = async () => {
   }
 }
 
+/** 主部门必须同时属于实际所属部门 */
+const handlePrimaryDeptChange = (deptId?: number) => {
+  if (deptId && !formData.value.deptIds.includes(deptId)) {
+    formData.value.deptIds.push(deptId)
+  }
+}
+
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
     nickname: '',
     deptId: '',
+    deptIds: [] as number[],
     mobile: '',
     email: '',
     id: undefined,

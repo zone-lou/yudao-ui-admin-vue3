@@ -100,11 +100,40 @@
             >
               <Icon icon="ep:delete" />批量删除
             </el-button>
+            <el-button
+              v-if="!isSorting"
+              type="info"
+              plain
+              :disabled="queryParams.deptId === undefined || list.length < 2"
+              @click="handleSortStart"
+              v-hasPermi="['system:user:update']"
+            >
+              <Icon icon="fa:sort-amount-desc" />调整部门内排序
+            </el-button>
+            <template v-else>
+              <el-button type="primary" @click="handleSortSave">保存排序</el-button>
+              <el-button @click="handleSortCancel">取消排序</el-button>
+            </template>
           </el-form-item>
         </el-form>
       </ContentWrap>
       <ContentWrap>
-        <el-table v-loading="loading" :data="list" @selection-change="handleRowCheckboxChange">
+        <el-table
+          ref="tableRef"
+          v-loading="loading"
+          :data="list"
+          row-key="id"
+          @selection-change="handleRowCheckboxChange"
+        >
+          <el-table-column width="45" align="center">
+            <template #default>
+              <Icon
+                v-if="isSorting"
+                icon="ic:round-drag-indicator"
+                class="user-drag-handle cursor-move text-#8a909c"
+              />
+            </template>
+          </el-table-column>
           <el-table-column type="selection" width="55" />
           <el-table-column label="用户编号" align="center" key="id" prop="id" />
           <el-table-column
@@ -120,7 +149,7 @@
             :show-overflow-tooltip="true"
           />
           <el-table-column
-            label="部门"
+            label="主部门"
             align="center"
             key="deptName"
             prop="deptName"
@@ -134,7 +163,7 @@
                 :active-value="0"
                 :inactive-value="1"
                 @change="handleStatusChange(scope.row)"
-                :disabled="!checkPermi(['system:user:update'])"
+                :disabled="isSorting || !checkPermi(['system:user:update'])"
               />
             </template>
           </el-table-column>
@@ -185,9 +214,7 @@
                       >
                         <Icon icon="ep:circle-check" />分配角色
                       </el-dropdown-item>
-                      <el-dropdown-item
-                        command="handleDept"
-                      >
+                      <el-dropdown-item command="handleDept">
                         <Icon icon="ep:circle-check" />关联部门
                       </el-dropdown-item>
                     </el-dropdown-menu>
@@ -222,6 +249,7 @@ import { checkPermi } from '@/utils/permission'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { CommonStatusEnum } from '@/utils/constants'
+import Sortable from 'sortablejs'
 import * as UserApi from '@/api/system/user'
 import UserForm from './UserForm.vue'
 import UserImportForm from './UserImportForm.vue'
@@ -235,20 +263,27 @@ const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
-const list = ref([]) // 列表的数
+const list = ref<UserApi.UserVO[]>([]) // 列表的数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   username: undefined,
   mobile: undefined,
-  status: undefined,
+  status: CommonStatusEnum.ENABLE,
   deptId: undefined,
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
+const tableRef = ref()
+const isSorting = ref(false)
+const originalList = ref<UserApi.UserVO[]>([])
+let sortableInstance: Sortable | undefined
 
 /** 查询列表 */
 const getList = async () => {
+  if (isSorting.value) {
+    handleSortCancel()
+  }
   loading.value = true
   try {
     const data = await UserApi.getUserPage(queryParams)
@@ -257,6 +292,61 @@ const getList = async () => {
   } finally {
     loading.value = false
   }
+}
+
+/** 开始调整当前选中部门的人员顺序 */
+const handleSortStart = async () => {
+  if (queryParams.deptId === undefined) {
+    message.warning('请先在左侧选择一个部门')
+    return
+  }
+  originalList.value = list.value.map((item) => ({ ...item }))
+  isSorting.value = true
+  await nextTick()
+  const tbody = tableRef.value?.$el?.querySelector('.el-table__body-wrapper tbody')
+  if (!tbody) {
+    handleSortCancel()
+    return
+  }
+  sortableInstance = Sortable.create(tbody, {
+    animation: 150,
+    draggable: '.el-table__row',
+    handle: '.user-drag-handle',
+    onEnd: ({ oldDraggableIndex, newDraggableIndex }) => {
+      if (
+        oldDraggableIndex == null ||
+        newDraggableIndex == null ||
+        oldDraggableIndex === newDraggableIndex
+      ) {
+        return
+      }
+      list.value.splice(newDraggableIndex, 0, list.value.splice(oldDraggableIndex, 1)[0])
+    }
+  })
+}
+
+/** 保存当前部门的人员顺序 */
+const handleSortSave = async () => {
+  if (queryParams.deptId === undefined) return
+  await UserApi.updateDeptUserSort(
+    queryParams.deptId,
+    list.value.map((user) => user.id)
+  )
+  sortableInstance?.destroy()
+  sortableInstance = undefined
+  isSorting.value = false
+  message.success('部门内人员排序保存成功')
+  await getList()
+}
+
+/** 取消本次排序 */
+const handleSortCancel = () => {
+  sortableInstance?.destroy()
+  sortableInstance = undefined
+  if (originalList.value.length > 0) {
+    list.value = originalList.value.map((item) => ({ ...item }))
+  }
+  isSorting.value = false
 }
 
 /** 搜索按钮操作 */
@@ -273,6 +363,7 @@ const resetQuery = () => {
 
 /** 处理部门被点击 */
 const handleDeptNodeClick = async (row: any) => {
+  queryParams.pageNo = 1
   if (row === undefined) {
     queryParams.deptId = undefined
     await getList()
@@ -408,4 +499,6 @@ const handleDept = (row: UserApi.UserVO) => {
 onMounted(() => {
   getList()
 })
+
+onBeforeUnmount(() => sortableInstance?.destroy())
 </script>
