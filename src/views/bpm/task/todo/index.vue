@@ -136,6 +136,9 @@
             </el-form-item>
           </el-popover>
         </el-form-item>
+        <el-form-item>
+          <BpmOperationGuide :scene-keys="['list.todo']" />
+        </el-form-item>
       </el-form>
     </div>
   </ContentWrap>
@@ -369,6 +372,7 @@ import { Clock } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import BpmColumnSetting from '@/views/bpm/components/BpmColumnSetting.vue'
 import { useBpmColumnSetting } from '@/hooks/bpm/useBpmColumnSetting'
+import BpmOperationGuide from '@/components/BpmOperationGuide/index.vue'
 
 defineOptions({ name: 'BpmTodoTask' })
 const selectionList = ref<any[]>([])

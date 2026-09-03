@@ -2,6 +2,8 @@
   <div
     class="h-50px bottom-10 text-14px flex items-center color-#32373c dark:color-#fff font-bold btn-container"
   >
+    <BpmOperationGuide :scene-keys="handleGuideSceneKeys" button-text="办理说明" />
+
     <!-- 【保存草稿】按钮 -->
     <el-button
       v-if="runningTask && isHandleTaskStatus() && getBusinessFormReason"
@@ -399,6 +401,7 @@ import {
 import { BpmModelFormType, BpmProcessInstanceStatus } from '@/utils/constants'
 import type { FormInstance, FormRules } from 'element-plus'
 import SignDialog from './SignDialog.vue'
+import BpmOperationGuide from '@/components/BpmOperationGuide/index.vue'
 
 defineOptions({ name: 'ProcessInstanceBtnContainer' })
 
@@ -453,6 +456,17 @@ const popOverVisible = ref({
 }) // 气泡卡是否展示
 const returnList = ref([] as any) // 退回节点
 const runningTask = ref<any>() // 运行中的任务
+const handleGuideSceneKeys = computed(() => {
+  const processDefinitionKey = props.processDefinition?.key
+  const taskDefinitionKey = runningTask.value?.taskDefinitionKey
+  return [
+    processDefinitionKey && taskDefinitionKey
+      ? `process.${processDefinitionKey}.task.${taskDefinitionKey}`
+      : '',
+    processDefinitionKey ? `process.${processDefinitionKey}.handle` : '',
+    'process.default.handle'
+  ]
+})
 const nodeTypeName = ref('办理') // 节点类型名称
 const approveForm = ref<any>({}) // 审批通过时，额外的补充信息
 const approveFormFApi = ref<any>({}) // approveForms 的 fAPi

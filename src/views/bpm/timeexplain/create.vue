@@ -13,6 +13,10 @@
             <Icon icon="ep:document-checked" class="mr-5px" />
             {{ isManagementEdit ? '保存修改' : '保存' }}
           </el-button>
+          <BpmOperationGuide
+            :scene-keys="[`process.${processDefineKey}.create`, 'process.default.create']"
+            button-text="新建操作说明"
+          />
         </template>
 
         <div class="oa-container">
@@ -229,6 +233,7 @@ import { ref, reactive, computed, unref, onMounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as DefinitionApi from '@/api/bpm/definition'
+import BpmOperationGuide from '@/components/BpmOperationGuide/index.vue'
 import { TimeExplainApi } from '@/api/bpm/timeexplain'
 import { uploadReturnInfo } from '@/api/infra/file'
 import ProcessSendDialog from '@/components/ProcessSendDialog/index.vue'

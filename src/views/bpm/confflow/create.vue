@@ -22,6 +22,10 @@
           <el-button v-else type="primary" @click="handleSaveDraft" :loading="formLoading">
             <Icon icon="ep:document-checked" class="mr-5px" /> 保存修改
           </el-button>
+          <BpmOperationGuide
+            :scene-keys="[`process.${processDefineKey}.create`, 'process.default.create']"
+            button-text="新建操作说明"
+          />
         </template>
 
         <el-form
@@ -219,6 +223,7 @@ import { useTagsViewStore } from '@/store/modules/tagsView'
 import { useUserStore } from '@/store/modules/user'
 import { useMessage } from '@/hooks/web/useMessage'
 import * as DefinitionApi from '@/api/bpm/definition'
+import BpmOperationGuide from '@/components/BpmOperationGuide/index.vue'
 import { ConfflowApi } from '@/api/bpm/confflow'
 import { dateUtil } from '@/utils/dateUtil'
 import { uploadReturnInfo } from '@/api/infra/file'

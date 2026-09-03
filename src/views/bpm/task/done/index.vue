@@ -123,6 +123,9 @@
             </el-form-item>
           </el-popover>
         </el-form-item>
+        <el-form-item>
+          <BpmOperationGuide :scene-keys="['list.done']" />
+        </el-form-item>
       </el-form>
     </div>
   </ContentWrap>
@@ -337,6 +340,7 @@ import dayjs from 'dayjs'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import BpmColumnSetting from '@/views/bpm/components/BpmColumnSetting.vue'
 import { useBpmColumnSetting } from '@/hooks/bpm/useBpmColumnSetting'
+import BpmOperationGuide from '@/components/BpmOperationGuide/index.vue'
 
 defineOptions({ name: 'BpmDoneTask' })
 

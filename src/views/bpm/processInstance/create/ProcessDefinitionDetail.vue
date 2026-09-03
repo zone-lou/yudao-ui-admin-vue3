@@ -2,7 +2,10 @@
   <ContentWrap :bodyStyle="{ padding: '10px 20px 0' }">
     <div class="processInstance-wrap-main">
       <el-scrollbar>
-        <div class="text-#878c93 h-15px">流程：{{ selectProcessDefinition.name }}</div>
+        <div class="flex items-center justify-between">
+          <div class="text-#878c93 h-15px">流程：{{ selectProcessDefinition.name }}</div>
+          <BpmOperationGuide :scene-keys="createGuideSceneKeys" button-text="新建操作说明" />
+        </div>
         <el-divider class="!my-8px" />
 
         <!-- 中间主要内容 tab 栏 -->
@@ -89,6 +92,7 @@ import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import * as DefinitionApi from '@/api/bpm/definition'
 import { ApprovalNodeInfo } from '@/api/bpm/processInstance'
 import formCreate from '@form-create/element-ui'
+import BpmOperationGuide from '@/components/BpmOperationGuide/index.vue'
 
 defineOptions({ name: 'ProcessDefinitionDetail' })
 const props = defineProps<{
@@ -106,6 +110,13 @@ const detailForm: any = ref({
   value: {}
 }) // 流程表单详情
 const fApi = ref<ApiAttrs>()
+const createGuideSceneKeys = computed(() => {
+  const processDefinitionKey = props.selectProcessDefinition?.key
+  return [
+    processDefinitionKey ? `process.${processDefinitionKey}.create` : '',
+    'process.default.create'
+  ]
+})
 // 指定办理人
 const startUserSelectTasks: any = ref([]) // 发起人需要选择审批人或抄送人的任务列表
 const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据

@@ -109,6 +109,7 @@
         <el-col :span="24" class="text-right">
           <el-button type="primary" @click="handleQuery"><Icon icon="ep:search" />查询</el-button>
           <el-button @click="resetQuery"><Icon icon="ep:refresh" />重置</el-button>
+          <BpmOperationGuide :scene-keys="['list.unified']" />
         </el-col>
       </el-row>
     </el-form>
@@ -271,6 +272,7 @@ import * as DefinitionApi from '@/api/bpm/definition'
 import { DICT_TYPE } from '@/utils/dict'
 import BpmColumnSetting from '@/views/bpm/components/BpmColumnSetting.vue'
 import { useBpmColumnSetting } from '@/hooks/bpm/useBpmColumnSetting'
+import BpmOperationGuide from '@/components/BpmOperationGuide/index.vue'
 
 defineOptions({ name: 'BpmProcessInstanceList' })
 const router = useRouter()

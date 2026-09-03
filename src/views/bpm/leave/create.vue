@@ -18,6 +18,10 @@
             <Icon icon="ep:document-checked" class="mr-5px" />
             {{ isManagementEdit ? '保存修改' : '保存' }}
           </el-button>
+          <BpmOperationGuide
+            :scene-keys="[`process.${processDefineKey}.create`, 'process.default.create']"
+            button-text="新建操作说明"
+          />
         </template>
 
         <el-tabs v-model="activeTab" class="custom-tabs" @tab-change="handleTabChange">
@@ -301,6 +305,7 @@ import { ref, reactive, computed, watch, unref, onMounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as DefinitionApi from '@/api/bpm/definition'
+import BpmOperationGuide from '@/components/BpmOperationGuide/index.vue'
 import { leaveApi } from '@/api/bpm/leave'
 import { HolidayApi } from '@/api/system/holiday'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
