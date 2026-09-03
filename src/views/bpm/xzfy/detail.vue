@@ -12,7 +12,7 @@
           {{ detailData.swWh }}
         </el-descriptions-item>
         <el-descriptions-item label="来文机关" label-align="center" align="center">
-          {{ detailData.swJg }}
+          {{ formatDictOrStr(detailData.swJg, DICT_TYPE.BPM_INCOMING_AUTHORITY) }}
         </el-descriptions-item>
         <el-descriptions-item label="来文日期" label-align="center" align="center">
           {{ formatDate(detailData.swRq) }}

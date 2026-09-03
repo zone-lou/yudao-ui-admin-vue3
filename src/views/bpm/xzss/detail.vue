@@ -453,7 +453,7 @@
           {{ detailData.swWh }}
         </el-descriptions-item>
         <el-descriptions-item label="来文机关" label-align="center" align="center">
-          {{ detailData.swJg }}
+          {{ formatDictOrStr(detailData.swJg, DICT_TYPE.BPM_INCOMING_AUTHORITY_XZSS) }}
         </el-descriptions-item>
         <el-descriptions-item label="收文日期" label-align="center" align="center">
           {{ formatDate(detailData.swRq) }}
@@ -667,7 +667,7 @@ import { XzssApi } from '@/api/bpm/xzss'
 import { CommentAttachApi } from '@/api/bpm/commentattach'
 import { uploadReturnInfo } from '@/api/infra/file'
 import { propTypes } from '@/utils/propTypes'
-import { DICT_TYPE } from '@/utils/dict'
+import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import { useUserStore } from '@/store/modules/user'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Base64 } from 'js-base64'
@@ -698,6 +698,13 @@ const { query } = useRoute()
 const detailLoading = ref(false)
 const detailData = ref<any>({})
 const docList = ref<any[]>([])
+
+const formatDictOrStr = (value: unknown, dictType: string) => {
+  if (value === undefined || value === null || value === '') return ''
+  const stringValue = String(value)
+  const dict = getDictOptions(dictType).find((item) => String(item.value) === stringValue)
+  return dict?.label || stringValue
+}
 
 // ================= 附件相关逻辑开始 =================
 const allDocAttachments = ref<any[]>([])
