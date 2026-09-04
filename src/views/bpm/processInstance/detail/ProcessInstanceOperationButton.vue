@@ -607,7 +607,7 @@ const approvalNodes = ref<any[]>([])
 type SendSelectionMemory = {
   updatedAt: number
   processInstanceId: string
-  nodes: Record<string, { userIds: Array<string | number> }>
+  nodes: Record<string, { checked?: boolean; userIds: Array<string | number> }>
 }
 
 const SEND_SELECTION_MEMORY_PREFIX = 'bpm:send-selection'
@@ -629,7 +629,12 @@ const saveSendSelectionMemory = () => {
     approvalNodes.value.forEach((node) => {
       if (!node.checked || !node.taskDefKey) return
       const treeRef = userTreeRefs.value[node.taskDefKey]
-      if (!treeRef) return
+      if (!treeRef) {
+        if (!node.candidateUsers || node.candidateUsers.length === 0) {
+          nodes[node.taskDefKey] = { checked: true, userIds: [] }
+        }
+        return
+      }
       const userIds = treeRef
         .getCheckedNodes(true, false)
         .filter((item: any) => item.id && item.nickname)
@@ -696,8 +701,13 @@ const restoreSendSelectionMemory = () => {
 
     approvalNodes.value.forEach((node) => {
       const remembered = memory.nodes?.[node.taskDefKey]
+      if (!remembered) return
       const treeRef = userTreeRefs.value[node.taskDefKey]
-      if (!remembered?.userIds?.length || !treeRef) return
+      if (!treeRef && remembered.checked && (!node.candidateUsers || node.candidateUsers.length === 0)) {
+        node.checked = true
+        return
+      }
+      if (!remembered.userIds?.length || !treeRef) return
 
       const rememberedIds = new Set(remembered.userIds.map(String))
       let validUserIds = getCandidateUserIds(node.candidateUsers || []).filter((id) =>
@@ -1138,7 +1148,11 @@ const handleTreeCheck = (node: any, data: any, checkedKeys: any[]) => {
 /** 节点级别的全选/反选处理 */
 const handleNodeCheckboxChange = (val: boolean | string | number, node: any) => {
   const treeRef = userTreeRefs.value[node.taskDefKey]
-  if (!treeRef) return
+  if (!treeRef) {
+    node.checked = Boolean(val)
+    saveSendSelectionMemory()
+    return
+  }
 
   if (val) {
     // 全选：如果有多选限制（multiple_flag === '0'），则不应当随意全选，给出提示或选第一个
