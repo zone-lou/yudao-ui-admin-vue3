@@ -402,6 +402,7 @@ import { BpmModelFormType, BpmProcessInstanceStatus } from '@/utils/constants'
 import type { FormInstance, FormRules } from 'element-plus'
 import SignDialog from './SignDialog.vue'
 import BpmOperationGuide from '@/components/BpmOperationGuide/index.vue'
+import { getTenantId } from '@/utils/auth'
 
 defineOptions({ name: 'ProcessInstanceBtnContainer' })
 
@@ -603,6 +604,123 @@ const activeTab = ref('')
 const approveDialogVisible = ref(false)
 const approvalNodes = ref<any[]>([])
 
+type SendSelectionMemory = {
+  updatedAt: number
+  processInstanceId: string
+  nodes: Record<string, { userIds: Array<string | number> }>
+}
+
+const SEND_SELECTION_MEMORY_PREFIX = 'bpm:send-selection'
+const SEND_SELECTION_MEMORY_EXPIRE_MS = 90 * 24 * 60 * 60 * 1000
+
+const getSendSelectionMemoryKey = () => {
+  const taskId = runningTask.value?.id
+  if (!taskId) return undefined
+  return `${SEND_SELECTION_MEMORY_PREFIX}:${getTenantId() || 'default'}:${userId}:${taskId}`
+}
+
+/** 静默保存当前具体待办的选人草稿，不影响原有操作流程 */
+const saveSendSelectionMemory = () => {
+  const storageKey = getSendSelectionMemoryKey()
+  if (!storageKey) return
+
+  try {
+    const nodes: SendSelectionMemory['nodes'] = {}
+    approvalNodes.value.forEach((node) => {
+      if (!node.checked || !node.taskDefKey) return
+      const treeRef = userTreeRefs.value[node.taskDefKey]
+      if (!treeRef) return
+      const userIds = treeRef
+        .getCheckedNodes(true, false)
+        .filter((item: any) => item.id && item.nickname)
+        .map((item: any) => item.id)
+      if (userIds.length > 0) {
+        nodes[node.taskDefKey] = { userIds }
+      }
+    })
+
+    if (Object.keys(nodes).length === 0) {
+      localStorage.removeItem(storageKey)
+      return
+    }
+    localStorage.setItem(
+      storageKey,
+      JSON.stringify({
+        updatedAt: Date.now(),
+        processInstanceId: String(props.processInstance?.id || ''),
+        nodes
+      } satisfies SendSelectionMemory)
+    )
+  } catch {
+    // 本地存储不可用时保持原有选人流程，不向用户展示额外错误
+  }
+}
+
+const clearSendSelectionMemory = () => {
+  const storageKey = getSendSelectionMemoryKey()
+  if (!storageKey) return
+  try {
+    localStorage.removeItem(storageKey)
+  } catch {
+    // 清理失败不影响发送结果
+  }
+}
+
+const getCandidateUserIds = (nodes: any[]): Array<string | number> => {
+  const result: Array<string | number> = []
+  nodes.forEach((node) => {
+    if (node.children?.length) {
+      result.push(...getCandidateUserIds(node.children))
+    } else if (node.id && node.nickname) {
+      result.push(node.id)
+    }
+  })
+  return result
+}
+
+/** 候选人加载完成后，静默恢复当前 taskId 对应的有效人员 */
+const restoreSendSelectionMemory = () => {
+  const storageKey = getSendSelectionMemoryKey()
+  if (!storageKey) return
+
+  try {
+    const memory = JSON.parse(localStorage.getItem(storageKey) || 'null') as SendSelectionMemory | null
+    if (
+      !memory ||
+      memory.processInstanceId !== String(props.processInstance?.id || '') ||
+      Date.now() - memory.updatedAt > SEND_SELECTION_MEMORY_EXPIRE_MS
+    ) {
+      localStorage.removeItem(storageKey)
+      return
+    }
+
+    approvalNodes.value.forEach((node) => {
+      const remembered = memory.nodes?.[node.taskDefKey]
+      const treeRef = userTreeRefs.value[node.taskDefKey]
+      if (!remembered?.userIds?.length || !treeRef) return
+
+      const rememberedIds = new Set(remembered.userIds.map(String))
+      let validUserIds = getCandidateUserIds(node.candidateUsers || []).filter((id) =>
+        rememberedIds.has(String(id))
+      )
+      if (node.extensionProperties?.multiple_flag === '0') {
+        validUserIds = validUserIds.slice(0, 1)
+      }
+      if (validUserIds.length > 0) {
+        treeRef.setCheckedKeys(validUserIds)
+        node.checked = true
+      }
+    })
+    refreshCurrentSelectedUsers()
+  } catch {
+    try {
+      localStorage.removeItem(storageKey)
+    } catch {
+      // 本地存储不可用时不影响弹窗打开
+    }
+  }
+}
+
 /** 判断是否只有结束节点 */
 const isOnlyEndNode = computed(() => {
   if (props.nextNodes && props.nextNodes.length === 1) {
@@ -695,6 +813,7 @@ const handleDirectFinish = async () => {
   formLoading.value = true
   try {
     await TaskApi.approveTask(data)
+    clearSendSelectionMemory()
     message.success('提交操作成功')
     approveDialogVisible.value = false
     reload()
@@ -745,6 +864,8 @@ const openApproveDialog = async () => {
 /** 加载可选节点数据 */
 const loadApprovalNodes = async () => {
   formLoading.value = true
+  userTreeRefs.value = {}
+  currentSelectedUsers.value = []
   try {
     const variables = getUpdatedProcessInstanceVariables()
     const data = await ProcessInstanceApi.getNextSelectNodes({
@@ -822,6 +943,8 @@ const loadApprovalNodes = async () => {
     if (groupedApprovalNodes.value.length > 0) {
       activeTab.value = groupedApprovalNodes.value[0].tabKey
     }
+    await nextTick()
+    restoreSendSelectionMemory()
   } finally {
     formLoading.value = false
   }
@@ -996,6 +1119,7 @@ const handleTreeCheck = (node: any, data: any, checkedKeys: any[]) => {
       // 更新右侧实时准备发送人员展示列
       nextTick(() => {
         refreshCurrentSelectedUsers()
+        saveSendSelectionMemory()
       })
       return
     }
@@ -1007,6 +1131,7 @@ const handleTreeCheck = (node: any, data: any, checkedKeys: any[]) => {
   // 更新右侧实时准备发送人员展示列
   nextTick(() => {
     refreshCurrentSelectedUsers()
+    saveSendSelectionMemory()
   })
 }
 
@@ -1041,6 +1166,10 @@ const handleNodeCheckboxChange = (val: boolean | string | number, node: any) => 
     // 反选：清空树木里的勾选状态
     treeRef.setCheckedKeys([])
   }
+  nextTick(() => {
+    refreshCurrentSelectedUsers()
+    saveSendSelectionMemory()
+  })
 }
 
 /** 提交办理 */
@@ -1195,6 +1324,7 @@ const handleApproveConfirm = async () => {
   formLoading.value = true
   try {
     await TaskApi.approveTask(data)
+    clearSendSelectionMemory()
     message.success('发送成功')
     approveDialogVisible.value = false
     reload()

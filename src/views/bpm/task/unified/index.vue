@@ -424,7 +424,7 @@ onActivated(async () => {
 }
 .link-type {
   color: #337ab7;
-  text-decoration: underline;
+  text-decoration: none;
   cursor: pointer;
 }
 .link-type:hover {

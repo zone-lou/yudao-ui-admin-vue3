@@ -592,8 +592,8 @@ onMounted(async () => {
 
 <style scoped>
 .link-type {
-  color: #303133;
-  text-decoration: underline;
+  color: #337ab7;
+  text-decoration: none;
   cursor: pointer;
 }
 
