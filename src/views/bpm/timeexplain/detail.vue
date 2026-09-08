@@ -302,7 +302,7 @@ import { dateUtil } from '@/utils/dateUtil'
 import { TimeExplainApi } from '@/api/bpm/timeexplain'
 import { propTypes } from '@/utils/propTypes'
 import { useUserStore } from '@/store/modules/user'
-import { Base64 } from 'js-base64'
+import { buildFilePreviewUrl } from '@/utils/filePreview'
 import * as ConfigApi from '@/api/infra/config'
 import { ElMessage } from 'element-plus'
 import { downloadFileByUrl } from '@/utils/fileDownload'
@@ -588,11 +588,12 @@ const handlePreview = (file: any) => {
   }
 
   // 2. Base64 编码
-  const encodedUrl = Base64.encode(fullUrl)
-
-  // 3. 拼接并打开
-  const previewUrl = `${kkBaseUrl}${encodeURIComponent(encodedUrl)}`
-  window.open(previewUrl, '_blank')
+  try {
+    const previewUrl = buildFilePreviewUrl(fullUrl, kkBaseUrl, ext)
+    window.open(previewUrl, '_blank')
+  } catch {
+    ElMessage.error('文件预览地址格式错误，请联系管理员')
+  }
 }
 
 /** 处理下载 */

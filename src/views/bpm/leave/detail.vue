@@ -275,7 +275,7 @@ import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import * as ConfigApi from '@/api/infra/config'
 import { downloadFileByUrl } from '@/utils/fileDownload'
-import { Base64 } from 'js-base64'
+import { buildFilePreviewUrl } from '@/utils/filePreview'
 
 defineOptions({ name: 'LeaveDetail' })
 
@@ -546,9 +546,12 @@ const previewFile = (file: any) => {
   }
 
   const kkBaseUrl = fileViewBaseUrl.value || 'http://192.168.50.239:8012/onlinePreview?url='
-  const encodedUrl = Base64.encode(fullUrl)
-  const previewUrl = `${kkBaseUrl}${encodeURIComponent(encodedUrl)}`
-  window.open(previewUrl, '_blank')
+  try {
+    const previewUrl = buildFilePreviewUrl(fullUrl, kkBaseUrl, ext)
+    window.open(previewUrl, '_blank')
+  } catch {
+    ElMessage.error('文件预览地址格式错误，请联系管理员')
+  }
 }
 
 /** 处理下载 */

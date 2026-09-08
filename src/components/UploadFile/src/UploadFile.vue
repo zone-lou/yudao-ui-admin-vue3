@@ -75,7 +75,7 @@ import { isString } from '@/utils/is'
 import { useUpload } from '@/components/UploadFile/src/useUpload'
 import Sortable from 'sortablejs' // 引入排序拖拽核心
 import * as ConfigApi from '@/api/infra/config'
-import { Base64 } from 'js-base64'
+import { buildFilePreviewUrl } from '@/utils/filePreview'
 
 defineOptions({ name: 'UploadFile' })
 
@@ -264,10 +264,12 @@ const handlePreview = (uploadFile: any) => {
   }
 
   const kkBaseUrl = fileViewBaseUrl.value || 'http://192.168.50.239:8012/onlinePreview?url='
-  const encodedUrl = Base64.encode(fullUrl)
-  const previewUrl = `${kkBaseUrl}${encodeURIComponent(encodedUrl)}`
-
-  window.open(previewUrl, '_blank')
+  try {
+    const previewUrl = buildFilePreviewUrl(fullUrl, kkBaseUrl, ext)
+    window.open(previewUrl, '_blank')
+  } catch {
+    message.error('文件预览地址格式错误，请联系管理员')
+  }
 }
 
 const handleDownload = (file: any) => {

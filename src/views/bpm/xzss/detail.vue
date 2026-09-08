@@ -670,7 +670,7 @@ import { propTypes } from '@/utils/propTypes'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import { useUserStore } from '@/store/modules/user'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Base64 } from 'js-base64'
+import { buildFilePreviewUrl } from '@/utils/filePreview'
 import * as ConfigApi from '@/api/infra/config'
 import type { PropType } from 'vue'
 import { downloadFileByUrl } from '@/utils/fileDownload'
@@ -849,9 +849,12 @@ const handlePreview = (file: any) => {
     fullUrl = fullUrl.replace(externalPrefix.value, internalPrefix.value)
   }
 
-  const encodedUrl = Base64.encode(fullUrl)
-  const previewUrl = `${kkBaseUrl}${encodeURIComponent(encodedUrl)}`
-  window.open(previewUrl, '_blank')
+  try {
+    const previewUrl = buildFilePreviewUrl(fullUrl, kkBaseUrl)
+    window.open(previewUrl, '_blank')
+  } catch {
+    ElMessage.error('文件预览地址格式错误，请联系管理员')
+  }
 }
 
 // 下载附件

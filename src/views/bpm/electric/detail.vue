@@ -80,7 +80,7 @@ import { DICT_TYPE } from '@/utils/dict'
 import { dateUtil } from '@/utils/dateUtil'
 import { ReceiveDocApi, ReceiveDoc } from '@/api/bpm/receivedoc'
 import { propTypes } from '@/utils/propTypes'
-import { Base64 } from 'js-base64' // 关键：需要安装 npm install js-base64
+import { buildFilePreviewUrl } from '@/utils/filePreview'
 import * as ConfigApi from '@/api/infra/config'
 
 defineOptions({ name: 'BpmReceiveDocDetail' })
@@ -203,14 +203,12 @@ const handlePreview = (file: any) => {
   }
 
   // 2. 将文件链接进行 Base64 编码 (使用 js-base64 库处理，支持中文更友好)
-  const encodedUrl = Base64.encode(fullUrl)
-
-  // 3. 拼接最终预览地址
-  // 格式: http://kk-ip:8012base64_string
-  const previewUrl = `${kkBaseUrl}${encodeURIComponent(encodedUrl)}`
-
-  // 4. 打开新窗口预览
-  window.open(previewUrl, '_blank')
+  try {
+    const previewUrl = buildFilePreviewUrl(fullUrl, kkBaseUrl, ext)
+    window.open(previewUrl, '_blank')
+  } catch {
+    ElMessage.error('文件预览地址格式错误，请联系管理员')
+  }
 }
 
 /** 处理下载 */

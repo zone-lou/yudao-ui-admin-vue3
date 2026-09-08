@@ -361,7 +361,7 @@
 import { getStrDictOptions, DICT_TYPE } from '@/utils/dict'
 import * as ReceiveDocApi from '@/api/bpm/receivedoc'
 import { dateUtil } from '@/utils/dateUtil'
-import { Base64 } from 'js-base64'
+import { buildFilePreviewUrl } from '@/utils/filePreview'
 import { propTypes } from '@/utils/propTypes'
 import { useUserStore } from '@/store/modules/user'
 import * as ConfigApi from '@/api/infra/config'
@@ -657,8 +657,9 @@ const handlePreview = (file: any) => {
     fullUrl = window.location.origin + fullUrl
   }
 
-  const fileName = file.name || fullUrl
-  const ext = fileName.split('.').pop().toLowerCase()
+  const fileName = file.name || fullUrl.split(/[?#]/)[0]
+  const ext = fileName.split('.').pop()?.toLowerCase() || ''
+
 
   if (DIRECT_RENDER_EXTENSIONS.includes(ext)) {
     // 规定格式：走外网地址
@@ -672,9 +673,12 @@ const handlePreview = (file: any) => {
     }
   }
 
-  const encodedUrl = Base64.encode(fullUrl)
-  const previewUrl = `${kkBaseUrl}${encodeURIComponent(encodedUrl)}`
-  window.open(previewUrl, '_blank')
+  try {
+    const previewUrl = buildFilePreviewUrl(fullUrl, kkBaseUrl, ext)
+    window.open(previewUrl, '_blank')
+  } catch {
+    message.error('文件预览地址格式错误，请联系管理员')
+  }
 }
 
 const handleDownload = async (file: any) => {
