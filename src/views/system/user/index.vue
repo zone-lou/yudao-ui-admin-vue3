@@ -190,7 +190,8 @@
                   v-hasPermi="[
                     'system:user:delete',
                     'system:user:update-password',
-                    'system:permission:assign-user-role'
+                    'system:permission:assign-user-role',
+                    'system:user:query'
                   ]"
                 >
                   <el-button type="primary" link><Icon icon="ep:d-arrow-right" /> 更多</el-button>
@@ -213,6 +214,12 @@
                         v-if="checkPermi(['system:permission:assign-user-role'])"
                       >
                         <Icon icon="ep:circle-check" />分配角色
+                      </el-dropdown-item>
+                      <el-dropdown-item
+                        command="handleMembership"
+                        v-if="checkPermi(['system:user:query'])"
+                      >
+                        <Icon icon="ep:user" />角色与用户组
                       </el-dropdown-item>
                       <el-dropdown-item command="handleDept">
                         <Icon icon="ep:circle-check" />关联部门
@@ -240,6 +247,7 @@
   <UserImportForm ref="importFormRef" @success="getList" />
   <!-- 分配角色 -->
   <UserAssignRoleForm ref="assignRoleFormRef" @success="getList" />
+  <UserMembershipForm ref="membershipFormRef" />
 
   <UserAssignDeptForm ref="assignDeptFormRef" />
 </template>
@@ -254,6 +262,7 @@ import * as UserApi from '@/api/system/user'
 import UserForm from './UserForm.vue'
 import UserImportForm from './UserImportForm.vue'
 import UserAssignRoleForm from './UserAssignRoleForm.vue'
+import UserMembershipForm from './UserMembershipForm.vue'
 import DeptTree from './DeptTree.vue'
 import UserAssignDeptForm from './UserAssignDeptForm.vue'
 defineOptions({ name: 'SystemUser' })
@@ -430,6 +439,9 @@ const handleCommand = (command: string, row: UserApi.UserVO) => {
     case 'handleRole':
       handleRole(row)
       break
+    case 'handleMembership':
+      openMembership(row)
+      break
     case 'handleDept':
       handleDept(row)
       break
@@ -489,6 +501,10 @@ const handleResetPwd = async (row: UserApi.UserVO) => {
 const assignRoleFormRef = ref()
 const handleRole = (row: UserApi.UserVO) => {
   assignRoleFormRef.value.open(row)
+}
+const membershipFormRef = ref()
+const openMembership = (row: UserApi.UserVO) => {
+  membershipFormRef.value.open(row)
 }
 const assignDeptFormRef = ref()
 const handleDept = (row: UserApi.UserVO) => {

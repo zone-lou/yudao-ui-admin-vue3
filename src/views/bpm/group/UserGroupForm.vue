@@ -14,7 +14,7 @@
         <el-input v-model="formData.description" placeholder="请输入描述" type="textarea" />
       </el-form-item>
 
-      <el-form-item label="成员" prop="userIds">
+      <el-form-item label="手动成员" prop="userIds">
         <div class="custom-tree-transfer">
           <div class="transfer-panel left-panel">
             <div class="panel-header">可选成员</div>
@@ -52,7 +52,7 @@
           </div>
 
           <div class="transfer-panel right-panel">
-            <div class="panel-header">已选成员 ({{ formData.userIds.length }})</div>
+            <div class="panel-header">手动成员 ({{ formData.userIds.length }})</div>
             <div class="panel-body">
               <div v-if="selectedTreeData.length === 0" class="empty-text">暂无数据</div>
               <el-tree
@@ -133,7 +133,6 @@ const formData = ref({
 const formRules = reactive({
   name: [{ required: true, message: '组名不能为空', trigger: 'blur' }],
   description: [{ required: true, message: '描述不能为空', trigger: 'blur' }],
-  userIds: [{ required: true, message: '成员不能为空', trigger: 'change' }],
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref()

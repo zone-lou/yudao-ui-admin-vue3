@@ -20,7 +20,7 @@
       v-if="runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.APPROVE)"
       plain
       type="success"
-      @click="isOnlyEndNode ? handleDirectFinish() : openApproveDialog()"
+      @click="handleSendClick"
     >
       <Icon icon="ep:select" />&nbsp;
       {{ getButtonDisplayName(OperationButtonType.APPROVE) }}
@@ -740,6 +740,16 @@ const isOnlyEndNode = computed(() => {
   }
   return false
 })
+
+/** 非表单意见节点统一在发送弹窗填写，即使下一节点只有结束节点。 */
+const handleSendClick = async () => {
+  if (!isOnlyEndNode.value) return openApproveDialog()
+  if (props.getBusinessFormReason) {
+    const opinion = await props.getBusinessFormReason()
+    if (opinion === undefined) return openApproveDialog()
+  }
+  return handleDirectFinish()
+}
 
 /** 一键直接办结节点（跳过弹窗选择） */
 const handleDirectFinish = async () => {

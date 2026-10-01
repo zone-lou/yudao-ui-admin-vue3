@@ -128,11 +128,20 @@
           >
             编辑
           </el-button>
+          <el-button
+            v-hasPermi="['system:role:delete']"
+            link
+            type="danger"
+            @click="handleDelete(scope.row.id)"
+          >
+            删除
+          </el-button>
           <el-dropdown
             v-hasPermi="[
               'system:permission:assign-role-menu',
               'system:permission:assign-role-data-scope',
-              'bpm:category:update'
+              'bpm:category:update',
+              'bpm:user-group:update'
             ]"
             @command="(command) => handleMoreCommand(command, scope.row)"
           >
@@ -154,17 +163,12 @@
                 <el-dropdown-item v-if="checkPermi(['bpm:category:update'])" command="processView">
                   办件查看范围
                 </el-dropdown-item>
+                <el-dropdown-item v-if="checkPermi(['bpm:user-group:update'])" command="groups">
+                  关联用户组
+                </el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
-          <el-button
-            v-hasPermi="['system:role:delete']"
-            link
-            type="danger"
-            @click="handleDelete(scope.row.id)"
-          >
-            删除
-          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -184,6 +188,7 @@
   <!-- 表单弹窗：数据权限 -->
   <RoleDataPermissionForm ref="dataPermissionFormRef" @success="getList" />
   <RoleProcessViewForm ref="processViewFormRef" />
+  <RoleGroupMappingForm ref="roleGroupMappingFormRef" />
 </template>
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
@@ -195,6 +200,7 @@ import RoleForm from './RoleForm.vue'
 import RoleAssignMenuForm from './RoleAssignMenuForm.vue'
 import RoleDataPermissionForm from './RoleDataPermissionForm.vue'
 import RoleProcessViewForm from './RoleProcessViewForm.vue'
+import RoleGroupMappingForm from './RoleGroupMappingForm.vue'
 
 defineOptions({ name: 'SystemRole' })
 
@@ -256,6 +262,11 @@ const openProcessViewForm = (row: RoleApi.RoleVO) => {
   processViewFormRef.value.open(row)
 }
 
+const roleGroupMappingFormRef = ref()
+const openRoleGroupMappingForm = (row: RoleApi.RoleVO) => {
+  roleGroupMappingFormRef.value.open(row)
+}
+
 /** 菜单权限操作 */
 const assignMenuFormRef = ref()
 const openAssignMenuForm = async (row: RoleApi.RoleVO) => {
@@ -272,6 +283,9 @@ const handleMoreCommand = (command: string, row: RoleApi.RoleVO) => {
       break
     case 'processView':
       openProcessViewForm(row)
+      break
+    case 'groups':
+      openRoleGroupMappingForm(row)
       break
   }
 }

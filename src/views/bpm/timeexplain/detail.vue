@@ -112,7 +112,7 @@
             style="padding: 10px; text-align: left; vertical-align: top"
           >
             <div
-              v-if="isEditable('科室') || isEditable('负责人')"
+              v-if="isEditable('deptHead')"
               class="w-full h-full print-hide-row"
             >
               <el-input
@@ -157,7 +157,7 @@
             colspan="3"
             style="padding: 10px; text-align: left; vertical-align: top"
           >
-            <div v-if="isEditable('办公室')" class="w-full h-full print-hide-row">
+            <div v-if="isEditable('office')" class="w-full h-full print-hide-row">
               <el-input
                 v-model="currentOpinion"
                 type="textarea"
@@ -202,7 +202,7 @@
             style="padding: 10px; text-align: left; vertical-align: top"
           >
             <div
-              v-if="isEditable('分管') || isEditable('局领导')"
+              v-if="isEditable('deputyLeader')"
               class="w-full h-full print-hide-row"
             >
               <el-input
@@ -251,7 +251,7 @@
             style="padding: 10px; text-align: left; vertical-align: top"
           >
             <div
-              v-if="isEditable('主要领导') || isEditable('局长')"
+              v-if="isEditable('mainLeader')"
               class="w-full h-full print-hide-row"
             >
               <el-input
@@ -378,16 +378,31 @@ const officeList = ref<any[]>([]) // 办公室意见
 const deputyLeaderList = ref<any[]>([]) // 局分管领导意见
 const mainLeaderList = ref<any[]>([]) // 局主要领导意见
 const currentOpinion = ref('') // 当前正在填写的办理意见
+// 与移动端公出详情的节点 ID 保持一致；登记节点不属于审批意见。
+const OPINION_NODE_IDS: Record<string, string> = {
+  Activity_0578ggz: 'deptHead',
+  Activity_0j6zjr4: 'deputyLeader',
+  Activity_0nnqstj: 'mainLeader'
+}
+const currentTaskNode = computed(() =>
+  props.activityNodes.find((node: any) =>
+    node.tasks?.some((task: any) => String(task.id) === String(props.taskId))
+  ) || props.currentNode
+)
+const currentTaskNodeId = computed(() => String(currentTaskNode.value?.id || ''))
+const isFilingTask = computed(() => String(currentTaskNode.value?.name || '').includes('备案'))
 
 /** 判断当前节点是否可编辑 */
-const isEditable = (keyword: string) => {
-  if (!props.taskId) return false
-  const nodeName = props.currentNode?.name || ''
-  return nodeName.indexOf(keyword) !== -1
+const isEditable = (category: string) => {
+  if (!props.taskId || isFilingTask.value) return false
+  return OPINION_NODE_IDS[currentTaskNodeId.value] === category
 }
 
 /** 暴露给父组件的方法：获取当前填写的意见 */
 const getOpinion = () => {
+  if (!props.taskId || isFilingTask.value || !OPINION_NODE_IDS[currentTaskNodeId.value]) {
+    return undefined
+  }
   return currentOpinion.value
 }
 
@@ -496,6 +511,19 @@ const processActivityNodes = () => {
 
         if (task.reason) {
           const name = node.name || ''
+          const nodeId = String(task.taskDefinitionKey || node.id || '')
+          // 旧历史数据使用迁移节点编号，只在历史模式下按节点名称兼容。
+          const category = props.historyMode
+            ? name.includes('负责人')
+              ? 'deptHead'
+              : name.includes('办公室')
+                ? 'office'
+                : name.includes('分管') || name.includes('局领导')
+                  ? 'deputyLeader'
+                  : name.includes('主要领导') || name.includes('局长')
+                    ? 'mainLeader'
+                    : undefined
+            : OPINION_NODE_IDS[nodeId]
           const info = {
             name: name,
             comment: task.reason,
@@ -503,17 +531,14 @@ const processActivityNodes = () => {
             endTime: node.endTime || task.endTime
           }
 
-          if (name.includes('科室') || name.includes('负责人')) {
+          if (category === 'deptHead') {
             deptHeadList.value.push(info)
-          } else if (name.includes('办公室')) {
+          } else if (category === 'office') {
             officeList.value.push(info)
-          } else if (name.includes('分管') || name.includes('局领导')) {
+          } else if (category === 'deputyLeader') {
             deputyLeaderList.value.push(info)
-          } else if (name.includes('主要领导') || name.includes('局长')) {
+          } else if (category === 'mainLeader') {
             mainLeaderList.value.push(info)
-          } else {
-            // 没有精准命中的就放入主要的里面兜底
-            deptHeadList.value.push(info)
           }
         }
       })
