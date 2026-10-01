@@ -277,6 +277,7 @@ import BpmOperationGuide from '@/components/BpmOperationGuide/index.vue'
 defineOptions({ name: 'BpmProcessInstanceList' })
 const router = useRouter()
 const loading = ref(false)
+const mounted = ref(false)
 const list = ref([])
 const total = ref(0)
 const processDefinitionList = ref<any[]>([])
@@ -405,12 +406,15 @@ const handleDetail = (row: any) => {
 
 onMounted(async () => {
   await getList()
+  mounted.value = true
   const definitions = await DefinitionApi.getSimpleProcessDefinitionList()
   processDefinitionList.value = mergeProcessDefinitionList(definitions)
 })
 
-onActivated(async () => {
-  await getList()
+onActivated(() => {
+  if (mounted.value) {
+    getList()
+  }
 })
 </script>
 

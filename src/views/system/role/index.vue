@@ -128,26 +128,35 @@
           >
             编辑
           </el-button>
-          <el-button
-            v-hasPermi="['system:permission:assign-role-menu']"
-            link
-            preIcon="ep:basketball"
-            title="菜单权限"
-            type="primary"
-            @click="openAssignMenuForm(scope.row)"
+          <el-dropdown
+            v-hasPermi="[
+              'system:permission:assign-role-menu',
+              'system:permission:assign-role-data-scope',
+              'bpm:category:update'
+            ]"
+            @command="(command) => handleMoreCommand(command, scope.row)"
           >
-            菜单权限
-          </el-button>
-          <el-button
-            v-hasPermi="['system:permission:assign-role-data-scope']"
-            link
-            preIcon="ep:coin"
-            title="数据权限"
-            type="primary"
-            @click="openDataPermissionForm(scope.row)"
-          >
-            数据权限
-          </el-button>
+            <el-button type="primary" link><Icon icon="ep:d-arrow-right" /> 更多</el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item
+                  v-if="checkPermi(['system:permission:assign-role-menu'])"
+                  command="menu"
+                >
+                  菜单权限
+                </el-dropdown-item>
+                <el-dropdown-item
+                  v-if="checkPermi(['system:permission:assign-role-data-scope'])"
+                  command="data"
+                >
+                  数据权限
+                </el-dropdown-item>
+                <el-dropdown-item v-if="checkPermi(['bpm:category:update'])" command="processView">
+                  办件查看范围
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
           <el-button
             v-hasPermi="['system:role:delete']"
             link
@@ -174,15 +183,18 @@
   <RoleAssignMenuForm ref="assignMenuFormRef" @success="getList" />
   <!-- 表单弹窗：数据权限 -->
   <RoleDataPermissionForm ref="dataPermissionFormRef" @success="getList" />
+  <RoleProcessViewForm ref="processViewFormRef" />
 </template>
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { checkPermi } from '@/utils/permission'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as RoleApi from '@/api/system/role'
 import RoleForm from './RoleForm.vue'
 import RoleAssignMenuForm from './RoleAssignMenuForm.vue'
 import RoleDataPermissionForm from './RoleDataPermissionForm.vue'
+import RoleProcessViewForm from './RoleProcessViewForm.vue'
 
 defineOptions({ name: 'SystemRole' })
 
@@ -239,10 +251,29 @@ const openDataPermissionForm = async (row: RoleApi.RoleVO) => {
   dataPermissionFormRef.value.open(row)
 }
 
+const processViewFormRef = ref()
+const openProcessViewForm = (row: RoleApi.RoleVO) => {
+  processViewFormRef.value.open(row)
+}
+
 /** 菜单权限操作 */
 const assignMenuFormRef = ref()
 const openAssignMenuForm = async (row: RoleApi.RoleVO) => {
   assignMenuFormRef.value.open(row)
+}
+
+const handleMoreCommand = (command: string, row: RoleApi.RoleVO) => {
+  switch (command) {
+    case 'menu':
+      openAssignMenuForm(row)
+      break
+    case 'data':
+      openDataPermissionForm(row)
+      break
+    case 'processView':
+      openProcessViewForm(row)
+      break
+  }
 }
 
 /** 删除按钮操作 */
