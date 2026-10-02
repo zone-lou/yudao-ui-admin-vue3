@@ -965,6 +965,20 @@ const loadApprovalNodes = async () => {
     }
     await nextTick()
     restoreSendSelectionMemory()
+    approvalNodes.value.forEach((node) => {
+      if (node.extensionProperties?.same_dept_candidate_filter !== '1') return
+      if (node.checked) return
+      const treeRef = userTreeRefs.value[node.taskDefKey]
+      if (!treeRef || treeRef.getCheckedKeys().length > 0) return
+      const candidateIds = getCandidateUserIds(node.candidateUsers || [])
+      const selectedId = candidateIds.find((id) =>
+        node.assignedUserIds?.some((assignedId: string | number) => String(assignedId) === String(id))
+      ) ?? candidateIds[0]
+      if (selectedId == null) return
+      treeRef.setCheckedKeys([selectedId])
+      node.checked = true
+    })
+    refreshCurrentSelectedUsers()
   } finally {
     formLoading.value = false
   }

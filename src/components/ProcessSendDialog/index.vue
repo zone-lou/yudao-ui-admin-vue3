@@ -258,11 +258,14 @@ const loadApprovalNodes = async (variables: Record<string, any>) => {
     await nextTick()
     approvalNodes.value.forEach((node) => {
       if (node.extensionProperties?.same_dept_candidate_filter !== '1') return
-      if (node.assignedUserIds?.length) return
-      const firstUserId = getFirstCandidateUserId(node.candidateUsers || [])
       const treeRef = userTreeRefs.value[node.taskDefKey]
-      if (firstUserId == null || !treeRef) return
-      treeRef.setCheckedKeys([firstUserId])
+      if (!treeRef || treeRef.getCheckedKeys().length > 0) return
+      const candidateIds = getCandidateUserIds(node.candidateUsers || [])
+      const selectedId = candidateIds.find((id) =>
+        node.assignedUserIds?.some((assignedId: string | number) => String(assignedId) === String(id))
+      ) ?? candidateIds[0]
+      if (selectedId == null) return
+      treeRef.setCheckedKeys([selectedId])
       node.checked = true
     })
     refreshCurrentSelectedUsers()
@@ -271,16 +274,16 @@ const loadApprovalNodes = async (variables: Record<string, any>) => {
   }
 }
 
-const getFirstCandidateUserId = (nodes: any[]): string | number | undefined => {
+const getCandidateUserIds = (nodes: any[]): Array<string | number> => {
+  const result: Array<string | number> = []
   for (const node of nodes) {
     if (node.children?.length) {
-      const firstChildId = getFirstCandidateUserId(node.children)
-      if (firstChildId != null) return firstChildId
+      result.push(...getCandidateUserIds(node.children))
     } else if (node.id != null && node.nickname) {
-      return node.id
+      result.push(node.id)
     }
   }
-  return undefined
+  return result
 }
 
 /** 构建部门树 */
