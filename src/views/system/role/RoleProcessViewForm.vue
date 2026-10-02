@@ -22,7 +22,6 @@
           />
         </el-select>
       </el-form-item>
-      <el-alert type="info" :closable="false" title="这里只授予查看范围，审批、撤回等操作仍由原有权限控制。" />
     </el-form>
     <template #footer>
       <el-button type="primary" :loading="loading" @click="save">保存</el-button>

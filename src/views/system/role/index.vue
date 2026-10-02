@@ -120,55 +120,57 @@
       />
       <el-table-column :width="300" align="center" label="操作">
         <template #default="scope">
-          <el-button
-            v-hasPermi="['system:role:update']"
-            link
-            type="primary"
-            @click="openForm('update', scope.row.id)"
-          >
-            编辑
-          </el-button>
-          <el-button
-            v-hasPermi="['system:role:delete']"
-            link
-            type="danger"
-            @click="handleDelete(scope.row.id)"
-          >
-            删除
-          </el-button>
-          <el-dropdown
-            v-hasPermi="[
-              'system:permission:assign-role-menu',
-              'system:permission:assign-role-data-scope',
-              'bpm:category:update',
-              'bpm:user-group:update'
-            ]"
-            @command="(command) => handleMoreCommand(command, scope.row)"
-          >
-            <el-button type="primary" link><Icon icon="ep:d-arrow-right" /> 更多</el-button>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item
-                  v-if="checkPermi(['system:permission:assign-role-menu'])"
-                  command="menu"
-                >
-                  菜单权限
-                </el-dropdown-item>
-                <el-dropdown-item
-                  v-if="checkPermi(['system:permission:assign-role-data-scope'])"
-                  command="data"
-                >
-                  数据权限
-                </el-dropdown-item>
-                <el-dropdown-item v-if="checkPermi(['bpm:category:update'])" command="processView">
-                  办件查看范围
-                </el-dropdown-item>
-                <el-dropdown-item v-if="checkPermi(['bpm:user-group:update'])" command="groups">
-                  关联用户组
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
+          <div class="flex items-center justify-center">
+            <el-button
+              v-hasPermi="['system:role:update']"
+              link
+              type="primary"
+              @click="openForm('update', scope.row.id)"
+            >
+              编辑
+            </el-button>
+            <el-button
+              v-hasPermi="['system:role:delete']"
+              link
+              type="danger"
+              @click="handleDelete(scope.row.id)"
+            >
+              删除
+            </el-button>
+            <el-dropdown
+              v-hasPermi="[
+                'system:permission:assign-role-menu',
+                'system:permission:assign-role-data-scope',
+                'bpm:category:update',
+                'bpm:user-group:update'
+              ]"
+              @command="(command) => handleMoreCommand(command, scope.row)"
+            >
+              <el-button type="primary" link><Icon icon="ep:d-arrow-right" /> 更多</el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item
+                    v-if="checkPermi(['system:permission:assign-role-menu'])"
+                    command="menu"
+                  >
+                    菜单权限
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    v-if="checkPermi(['system:permission:assign-role-data-scope'])"
+                    command="data"
+                  >
+                    数据权限
+                  </el-dropdown-item>
+                  <el-dropdown-item v-if="checkPermi(['bpm:category:update'])" command="processView">
+                    办件查看范围
+                  </el-dropdown-item>
+                  <el-dropdown-item v-if="checkPermi(['bpm:user-group:update'])" command="groups">
+                    关联用户组
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
         </template>
       </el-table-column>
     </el-table>
