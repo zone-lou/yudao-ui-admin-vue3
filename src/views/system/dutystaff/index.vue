@@ -84,6 +84,9 @@
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
+        <el-button plain @click="openTemplateDialog" v-hasPermi="['duty:staff:query']">
+          <Icon icon="ep:message" class="mr-5px" /> 提醒模板
+        </el-button>
         <el-button
           type="danger"
           plain
@@ -156,16 +159,48 @@
   <!-- 表单弹窗：添加/修改 -->
   <StaffForm ref="formRef" @success="getList" />
   <SystemDutyImportForm ref="importFormRef" @success="getList" />
+  <Dialog v-model="templateDialogVisible" title="值班提醒模板" width="800px">
+<!--    <el-alert type="info" :closable="false" class="mb-4">-->
+<!--      日常只需编辑消息文案。日期和变量值由系统自动填入，渠道等技术配置沿用现有模板。-->
+<!--    </el-alert>-->
+    <el-table v-loading="templateLoading" :data="templateRows">
+      <el-table-column label="渠道名称 · 模板名称" prop="label" min-width="220" />
+      <el-table-column label="当前文案" prop="content" min-width="250" show-overflow-tooltip>
+        <template #default="scope">{{ scope.row.content || '未配置' }}</template>
+      </el-table-column>
+      <el-table-column label="状态" min-width="100">
+        <template #default="scope">
+          <dict-tag v-if="scope.row.configured" :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+          <span v-else>未配置</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" width="120">
+        <template #default="scope">
+          <el-button
+            v-if="scope.row.configured"
+            link
+            type="primary"
+            v-hasPermi="['duty:staff:update']"
+            @click="templateEditorRef.open(scope.row.code, scope.row.label)"
+          >编辑文案</el-button>
+          <span v-else>请管理员配置</span>
+        </template>
+      </el-table-column>
+    </el-table>
+  </Dialog>
+  <DutyTemplateEditor ref="templateEditorRef" @success="loadTemplates" />
 </template>
 
 <script setup lang="ts">
-import { getStrDictOptions, DICT_TYPE } from '@/utils/dict'
+import { getStrDictOptions, getDictLabel, DICT_TYPE } from '@/utils/dict'
 import { isEmpty } from '@/utils/is'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { StaffApi, Staff } from '@/api/system/dutystaff'
 import StaffForm from './StaffForm.vue'
 import SystemDutyImportForm from '@/views/system/dutystaff/DutyImportForm.vue'
+import * as DutyMessageApi from '@/api/system/dutystaff/message'
+import DutyTemplateEditor from './DutyTemplateEditor.vue'
 
 /** 值班 列表 */
 defineOptions({ name: 'DutyStaff' })
@@ -187,6 +222,36 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+
+type DutyTemplateRow = DutyMessageApi.DutyTemplateVO & { label: string }
+const templateDialogVisible = ref(false)
+const templateLoading = ref(false)
+const templateRows = ref<DutyTemplateRow[]>([])
+const templateEditorRef = ref()
+
+const loadTemplates = async () => {
+  templateLoading.value = true
+  try {
+    const templates = await DutyMessageApi.getDutyTemplates()
+    templateRows.value = templates.map((template) => {
+      const channelName = template.channelCode
+        ? getDictLabel(DICT_TYPE.SYSTEM_SMS_CHANNEL_CODE, template.channelCode) || template.channelCode
+        : ''
+      const label = template.configured
+        ? [channelName, template.name].filter(Boolean).join(' · ') || template.code
+        : template.code
+      return { ...template, label }
+    })
+  } finally {
+    templateLoading.value = false
+  }
+}
+
+const openTemplateDialog = async () => {
+  templateDialogVisible.value = true
+  templateRows.value = []
+  await loadTemplates()
+}
 
 /** 查询列表 */
 const getList = async () => {

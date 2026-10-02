@@ -207,6 +207,7 @@ const setTreeRef = (el: any, key: string) => {
 /** 加载可选节点数据 */
 const loadApprovalNodes = async (variables: Record<string, any>) => {
   loading.value = true
+  userTreeRefs.value = {}
   try {
     const data = await ProcessInstanceApi.getNextSelectNodes({
       processDefinitionId: props.processDefinitionId,
@@ -254,9 +255,32 @@ const loadApprovalNodes = async (variables: Record<string, any>) => {
     if (groupedApprovalNodes.value.length > 0) {
       activeTab.value = groupedApprovalNodes.value[0].tabKey
     }
+    await nextTick()
+    approvalNodes.value.forEach((node) => {
+      if (node.extensionProperties?.same_dept_candidate_filter !== '1') return
+      if (node.assignedUserIds?.length) return
+      const firstUserId = getFirstCandidateUserId(node.candidateUsers || [])
+      const treeRef = userTreeRefs.value[node.taskDefKey]
+      if (firstUserId == null || !treeRef) return
+      treeRef.setCheckedKeys([firstUserId])
+      node.checked = true
+    })
+    refreshCurrentSelectedUsers()
   } finally {
     loading.value = false
   }
+}
+
+const getFirstCandidateUserId = (nodes: any[]): string | number | undefined => {
+  for (const node of nodes) {
+    if (node.children?.length) {
+      const firstChildId = getFirstCandidateUserId(node.children)
+      if (firstChildId != null) return firstChildId
+    } else if (node.id != null && node.nickname) {
+      return node.id
+    }
+  }
+  return undefined
 }
 
 /** 构建部门树 */
