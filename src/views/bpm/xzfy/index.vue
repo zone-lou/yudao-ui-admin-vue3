@@ -110,9 +110,9 @@
       <!--        </template>-->
       <!--      </el-table-column>-->
 
-      <el-table-column v-if="visibleColumn('swWh')" label="来文号" align="center" prop="swWh" min-width="180px" sortable="custom" resizable>
+      <el-table-column v-if="visibleColumn('swWh')" label="来文号" align="left" prop="swWh" min-width="180px" sortable="custom" resizable>
         <template #default="scope">
-          <div class="flex items-center justify-center">
+          <div class="flex items-center justify-start">
             <span>{{ scope.row.swWh }}</span>
             <dict-tag
               class="ml-2"

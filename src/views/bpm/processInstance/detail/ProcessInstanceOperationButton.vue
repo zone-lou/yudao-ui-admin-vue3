@@ -190,11 +190,45 @@
   <el-dialog
     v-model="approveDialogVisible"
     title="发送"
-    width="1020px"
+    :width="approveDialogCollapsed ? '360px' : 'min(1020px, calc(100vw - 32px))'"
+    class="approve-send-dialog"
+    :show-close="false"
+    :class="{ 'approve-send-dialog--collapsed': approveDialogCollapsed }"
+    draggable
+    :close-on-click-modal="false"
     append-to-body
     destroy-on-close
+    @closed="approveDialogCollapsed = false"
   >
+    <template #header="{ close, titleId, titleClass }">
+      <div class="approve-send-dialog__header">
+        <span :id="titleId" :class="titleClass">发送</span>
+        <div class="approve-send-dialog__actions" @mousedown.stop>
+          <button
+            type="button"
+            class="approve-send-dialog__action"
+            :title="approveDialogCollapsed ? '展开' : '收起'"
+            :aria-label="approveDialogCollapsed ? '展开' : '收起'"
+            @click.stop="approveDialogCollapsed = !approveDialogCollapsed"
+          >
+            <Icon
+              :icon="approveDialogCollapsed ? 'radix-icons:enter-full-screen' : 'radix-icons:exit-full-screen'"
+            />
+          </button>
+          <button
+            type="button"
+            class="approve-send-dialog__action"
+            title="关闭"
+            aria-label="关闭"
+            @click.stop="close"
+          >
+            <Icon icon="ep:close" />
+          </button>
+        </div>
+      </div>
+    </template>
     <el-form
+      v-show="!approveDialogCollapsed"
       ref="approveFormRef"
       :model="approveReasonForm"
       :rules="approveReasonRule"
@@ -377,7 +411,7 @@
         </div>
       </div>
     </el-form>
-    <template #footer>
+    <template #footer v-if="!approveDialogCollapsed">
       <el-button @click="approveDialogVisible = false">取消</el-button>
       <el-button type="success" @click="handleApproveConfirm" :loading="formLoading"
         >确认</el-button
@@ -602,6 +636,7 @@ const closePopover = (type: string, formRef: FormInstance | undefined) => {
 // 新增 Dialog 可见性控制
 const activeTab = ref('')
 const approveDialogVisible = ref(false)
+const approveDialogCollapsed = ref(false)
 const approvalNodes = ref<any[]>([])
 
 type SendSelectionMemory = {
@@ -1609,6 +1644,39 @@ const filterTreeMySelf = (treeData: any[], currentUserId: number) => {
 </script>
 
 <style lang="scss" scoped>
+.approve-send-dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.approve-send-dialog__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.approve-send-dialog__action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--el-color-info);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--el-color-primary);
+  }
+}
+
+.approve-send-dialog--collapsed :deep(.el-dialog__body) {
+  display: none;
+}
+
 :deep(.el-affix--fixed) {
   background-color: var(--el-bg-color);
 }

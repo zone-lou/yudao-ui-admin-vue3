@@ -159,15 +159,17 @@
       border
       @selection-change="handleSelectionChange"
       @sort-change="handleSortChange"
+      @header-dragend="handleHeaderDragend"
     >
-      <el-table-column type="selection" width="55" resizable />
-      <el-table-column type="index" label="序号" width="60" align="center" fixed="left" resizable />
+      <el-table-column column-key="selection" type="selection" :width="getColumnWidth('selection', 55)" resizable />
+      <el-table-column column-key="index" type="index" label="序号" :width="getColumnWidth('index', 60)" align="center" fixed="left" resizable />
 
       <!-- 1. 标签 (超时标识) -->
       <el-table-column
+        column-key="timeout"
         v-if="visibleColumn('timeout')"
         label="chaosh"
-        width="40"
+        :width="getColumnWidth('timeout', 40)"
         align="center"
         resizable
       >
@@ -192,11 +194,12 @@
 
       <!-- 2. 紧急程度 -->
       <el-table-column
+        column-key="urgencyDegree"
         v-if="visibleColumn('urgencyDegree')"
         label="紧急程度"
         align="center"
         prop="urgencyDegree"
-        width="120"
+        :width="getColumnWidth('urgencyDegree', 120)"
         sortable="custom"
         resizable
       >
@@ -211,25 +214,38 @@
 
       <!-- 3. 办件名称 (绑定 processInstance.name) -->
       <el-table-column
+        column-key="processInstanceName"
         v-if="visibleColumn('processInstanceName')"
-        align="center"
+        align="left"
         label="办件名称"
         prop="processInstance.name"
-        width="250"
+        :width="getColumnWidth('processInstanceName', 250)"
         sortable="custom"
         show-overflow-tooltip
         resizable
-      />
+      >
+        <template #default="scope">
+          <el-link
+            type="primary"
+            :underline="false"
+            class="process-instance-link"
+            @click="handleAudit(scope.row)"
+          >
+            {{ scope.row.processInstance?.name }}
+          </el-link>
+        </template>
+      </el-table-column>
 
       <!-- 4. 办件编号 (已移除) -->
       <!-- <el-table-column align="center" label="办件编号" prop="processInstanceId" width="250" /> -->
       <!-- 5. 当前环节 (任务名称) -->
       <el-table-column
+        column-key="name"
         v-if="visibleColumn('name')"
         align="center"
         label="当前环节"
         prop="name"
-        width="150"
+        :width="getColumnWidth('name', 150)"
         sortable="custom"
         show-overflow-tooltip
         resizable
@@ -237,21 +253,23 @@
 
       <!-- 6. 办件类型 (绑定 taskName) -->
       <el-table-column
+        column-key="taskName"
         v-if="visibleColumn('taskName')"
         align="center"
         label="办件类型"
         prop="taskName"
-        width="120"
+        :width="getColumnWidth('taskName', 120)"
         show-overflow-tooltip
         resizable
       />
 
       <el-table-column
+        column-key="source"
         v-if="visibleColumn('source')"
         align="center"
         label="来源"
         prop="source"
-        width="140"
+        :width="getColumnWidth('source', 140)"
         show-overflow-tooltip
         resizable
       >
@@ -262,22 +280,24 @@
 
       <!-- 7. 开始日期 (流程发起时间) -->
       <el-table-column
+        column-key="createTime"
         v-if="visibleColumn('createTime')"
         :formatter="dateFormatter"
         align="center"
         label="开始日期"
         prop="processInstance.createTime"
-        width="180"
+        :width="getColumnWidth('createTime', 180)"
         sortable="custom"
         resizable
       />
 
       <!-- 8. 办结时限 (流程截止时间 - 暂无字段，使用占位或 hidden) -->
       <el-table-column
+        column-key="deadlineDate"
         v-if="visibleColumn('deadlineDate')"
         label="办结时限"
         prop="deadlineDate"
-        width="180"
+        :width="getColumnWidth('deadlineDate', 180)"
         align="center"
         sortable="custom"
         resizable
@@ -289,22 +309,24 @@
 
       <!-- 9. 环节时限 (任务截止时间) -->
       <el-table-column
+        column-key="dueDate"
         v-if="visibleColumn('dueDate')"
         :formatter="dateFormatter"
         align="center"
         label="环节时限"
         prop="dueDate"
-        width="180"
+        :width="getColumnWidth('dueDate', 180)"
         sortable="custom"
         resizable
       />
 
       <!-- 10. 状态 -->
       <el-table-column
+        column-key="status"
         v-if="visibleColumn('status')"
         label="状态"
         align="center"
-        width="220"
+        :width="getColumnWidth('status', 220)"
         resizable
       >
         <template #default="scope">
@@ -320,32 +342,36 @@
         </template>
       </el-table-column>
       <el-table-column
+        column-key="id"
         v-if="visibleColumn('id')"
         label="任务编号"
         align="center"
         prop="id"
-        min-width="220"
+        :width="getColumnWidth('id')"
+        :min-width="getColumnWidth('id', 220)"
         show-overflow-tooltip
         resizable
       />
       <el-table-column
+        column-key="startUser"
         v-if="visibleColumn('startUser')"
         label="发起人"
         align="center"
         prop="processInstance.startUser.nickname"
-        width="120"
+        :width="getColumnWidth('startUser', 120)"
         resizable
       />
       <el-table-column
+        column-key="assigneeUser"
         v-if="visibleColumn('assigneeUser')"
         label="办理人"
         align="center"
         prop="assigneeUser.nickname"
-        width="120"
+        :width="getColumnWidth('assigneeUser', 120)"
         resizable
       />
 
-      <el-table-column align="center" label="操作" fixed="right" width="80" resizable>
+      <el-table-column column-key="operation" align="center" label="操作" fixed="right" :width="getColumnWidth('operation', 80)" resizable>
         <template #default="scope">
           <el-button link type="primary" @click="handleAudit(scope.row)">办理</el-button>
         </template>
@@ -481,7 +507,14 @@ const showPopover = ref(false) // 高级筛选是否展示
 // KeepAlive 组件首次挂载时也会触发 activated，避免首屏重复请求 todo-page。
 const mounted = ref(false)
 const todoColumnStorageKey = 'bpm:task:todo:columns'
-const { columnOptions, checkedColumnKeys, visibleColumn, resetColumns } = useBpmColumnSetting(
+const {
+  columnOptions,
+  checkedColumnKeys,
+  visibleColumn,
+  getColumnWidth,
+  handleHeaderDragend,
+  resetColumns
+} = useBpmColumnSetting(
   todoColumnStorageKey,
   [
     { key: 'timeout', label: '状态标识' },
@@ -594,6 +627,11 @@ const resetQuery = () => {
 /** 处理审批按钮 */
 const handleAudit = async (row: any) => {
   await TaskApi.claimTask(row.id)
+  handleDetail(row)
+}
+
+/** 查看办件详情 */
+const handleDetail = (row: any) => {
   push({
     name: 'BpmProcessInstanceDetail',
     query: {
@@ -624,6 +662,19 @@ onMounted(async () => {
 :deep(.bpm-task-single-line-table .cell) {
   overflow: hidden;
   white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.process-instance-link {
+  --el-link-text-color: #337ab7;
+  --el-link-hover-text-color: #20a0ff;
+  font: inherit;
+  max-width: 100%;
+}
+
+:deep(.process-instance-link .el-link__inner) {
+  display: block;
+  overflow: hidden;
   text-overflow: ellipsis;
 }
 </style>

@@ -88,7 +88,12 @@
         min-width="100"
       >
         <template #default="scope">
-          <el-link type="primary" :underline="true" @click="openDetail(scope.row)">
+          <el-link
+            type="primary"
+            :underline="false"
+            class="user-name-link"
+            @click="openDetail(scope.row)"
+          >
             {{ scope.row.nickname }}
           </el-link>
         </template>
@@ -378,3 +383,19 @@ onMounted(() => {
   getList()
 })
 </script>
+
+
+<style scoped>
+.user-name-link {
+  --el-link-text-color: #337ab7;
+  --el-link-hover-text-color: #20a0ff;
+  font: inherit;
+  max-width: 100%;
+}
+
+:deep(.user-name-link .el-link__inner) {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+</style>

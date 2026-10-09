@@ -145,8 +145,9 @@
       border
       :default-sort="{ prop: 'endTime', order: 'descending' }"
       @sort-change="handleSortChange"
+      @header-dragend="handleHeaderDragend"
     >
-      <el-table-column type="index" label="序号" width="60" align="center" fixed="left" resizable />
+      <el-table-column column-key="index" type="index" label="序号" :width="getColumnWidth('index', 60)" align="center" fixed="left" resizable />
       <!--      <el-table-column v-if="visibleColumn('timeout')" label="状态" width="80" align="center" resizable>-->
       <!--        <template #header>-->
       <!--          <el-icon><Clock /></el-icon>-->
@@ -168,44 +169,59 @@
       <!--      </el-table-column>-->
 
       <el-table-column
+        column-key="processInstanceName"
         v-if="visibleColumn('processInstanceName')"
-        align="center"
+        align="left"
         label="办件名称"
         prop="processInstance.name"
-        width="250"
+        :width="getColumnWidth('processInstanceName', 250)"
         sortable="custom"
         show-overflow-tooltip
         resizable
-      />
+      >
+        <template #default="scope">
+          <el-link
+            type="primary"
+            :underline="false"
+            class="process-instance-link"
+            @click="handleDetail(scope.row)"
+          >
+            {{ scope.row.processInstance?.name }}
+          </el-link>
+        </template>
+      </el-table-column>
 
       <!-- <el-table-column align="center" label="办件编号" prop="processInstanceId" width="250" /> -->
 
       <el-table-column
+        column-key="name"
         v-if="visibleColumn('name')"
         align="center"
         label="环节名称"
         prop="name"
-        width="150"
+        :width="getColumnWidth('name', 150)"
         sortable="custom"
         show-overflow-tooltip
         resizable
       />
 
       <el-table-column
+        column-key="taskName"
         v-if="visibleColumn('taskName')"
         align="center"
         label="办件类型"
         prop="taskName"
-        width="180"
+        :width="getColumnWidth('taskName', 180)"
         show-overflow-tooltip
         resizable
       />
       <el-table-column
+        column-key="urgencyDegree"
         v-if="visibleColumn('urgencyDegree')"
         label="紧急程度"
         align="center"
         prop="urgencyDegree"
-        width="120"
+        :width="getColumnWidth('urgencyDegree', 120)"
         sortable="custom"
         resizable
       >
@@ -218,21 +234,23 @@
         </template>
       </el-table-column>
       <el-table-column
+        column-key="createTime"
         v-if="visibleColumn('createTime')"
         :formatter="dateFormatter"
         align="center"
         label="发起时间"
         prop="processInstance.createTime"
-        width="180"
+        :width="getColumnWidth('createTime', 180)"
         sortable="custom"
         resizable
       />
 
       <el-table-column
+        column-key="deadlineDate"
         v-if="visibleColumn('deadlineDate')"
         label="办结时限"
         prop="deadlineDate"
-        width="180"
+        :width="getColumnWidth('deadlineDate', 180)"
         align="center"
         sortable="custom"
         resizable
@@ -243,22 +261,24 @@
       </el-table-column>
 
       <el-table-column
+        column-key="endTime"
         v-if="visibleColumn('endTime')"
         :formatter="dateFormatter"
         align="center"
         label="办理时间"
         prop="endTime"
-        width="180"
+        :width="getColumnWidth('endTime', 180)"
         sortable="custom"
         resizable
       />
 
       <el-table-column
+        column-key="status"
         v-if="visibleColumn('status')"
         align="center"
         label="办理状态"
         prop="status"
-        width="120"
+        :width="getColumnWidth('status', 120)"
         resizable
       >
         <template #default="scope">
@@ -266,36 +286,41 @@
         </template>
       </el-table-column>
       <el-table-column
+        column-key="id"
         v-if="visibleColumn('id')"
         label="任务编号"
         align="center"
         prop="id"
-        min-width="220"
+        :width="getColumnWidth('id')"
+        :min-width="getColumnWidth('id', 220)"
         show-overflow-tooltip
         resizable
       />
       <el-table-column
+        column-key="startUser"
         v-if="visibleColumn('startUser')"
         label="发起人"
         align="center"
         prop="processInstance.startUser.nickname"
-        width="120"
+        :width="getColumnWidth('startUser', 120)"
         resizable
       />
       <el-table-column
+        column-key="assigneeUser"
         v-if="visibleColumn('assigneeUser')"
         label="办理人"
         align="center"
         prop="assigneeUser.nickname"
-        width="120"
+        :width="getColumnWidth('assigneeUser', 120)"
         resizable
       />
       <el-table-column
+        column-key="durationInMillis"
         v-if="visibleColumn('durationInMillis')"
         label="耗时"
         align="center"
         prop="durationInMillis"
-        width="160"
+        :width="getColumnWidth('durationInMillis', 160)"
         sortable="custom"
         resizable
       >
@@ -308,7 +333,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="操作" fixed="right" width="150" resizable>
+      <el-table-column column-key="operation" align="center" label="操作" fixed="right" :width="getColumnWidth('operation', 150)" resizable>
         <template #default="scope">
           <el-button link type="primary" @click="handleDetail(scope.row)">详情</el-button>
           <el-button
@@ -418,7 +443,14 @@ const queryParams = reactive({
   orderDirection: 'desc' as string | undefined
 })
 const queryFormRef = ref()
-const { columnOptions, checkedColumnKeys, visibleColumn, resetColumns } = useBpmColumnSetting(
+const {
+  columnOptions,
+  checkedColumnKeys,
+  visibleColumn,
+  getColumnWidth,
+  handleHeaderDragend,
+  resetColumns
+} = useBpmColumnSetting(
   'bpm:task:done:columns',
   [
     { key: 'timeout', label: '状态标识' },
@@ -539,6 +571,19 @@ onMounted(async () => {
 :deep(.bpm-task-single-line-table .cell) {
   overflow: hidden;
   white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.process-instance-link {
+  --el-link-text-color: #337ab7;
+  --el-link-hover-text-color: #20a0ff;
+  font: inherit;
+  max-width: 100%;
+}
+
+:deep(.process-instance-link .el-link__inner) {
+  display: block;
+  overflow: hidden;
   text-overflow: ellipsis;
 }
 </style>

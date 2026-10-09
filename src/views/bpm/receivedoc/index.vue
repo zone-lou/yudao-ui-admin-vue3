@@ -172,7 +172,7 @@
       @sort-change="handleSortChange"
     >
       <el-table-column type="index" label="序号" width="60" align="center" fixed="left" resizable />
-      <el-table-column v-if="visibleColumn('subject')" label="标题" align="center" prop="subject" show-overflow-tooltip width="355" sortable="custom" resizable>
+      <el-table-column v-if="visibleColumn('subject')" label="标题" align="left" prop="subject" show-overflow-tooltip width="355" sortable="custom" resizable>
         <template #default="scope">
           <span
             class="link-type"

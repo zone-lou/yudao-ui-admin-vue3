@@ -132,15 +132,17 @@
       style="width: 100%"
       border
       @sort-change="handleSortChange"
+      @header-dragend="handleHeaderDragend"
     >
-      <el-table-column type="index" label="序号" width="55" align="center" fixed="left" resizable />
+      <el-table-column column-key="index" type="index" label="序号" :width="getColumnWidth('index', 55)" align="center" fixed="left" resizable />
 
       <el-table-column
+        column-key="name"
         v-if="visibleColumn('name')"
         label="办件名称"
         align="left"
         prop="name"
-        width="300"
+        :width="getColumnWidth('name', 300)"
         fixed="left"
         show-overflow-tooltip
         sortable="custom"
@@ -151,26 +153,27 @@
         </template>
       </el-table-column>
 
-      <el-table-column v-if="visibleColumn('category')" label="办件类型" align="center" prop="category" width="120" sortable="custom" resizable />
+      <el-table-column column-key="category" v-if="visibleColumn('category')" label="办件类型" align="center" prop="category" :width="getColumnWidth('category', 120)" sortable="custom" resizable />
       <el-table-column
+        column-key="sourceUnit"
         v-if="visibleColumn('sourceUnit')"
         label="来文单位"
         align="center"
         prop="sourceUnit"
-        width="150"
+        :width="getColumnWidth('sourceUnit', 150)"
         show-overflow-tooltip
         sortable="custom"
         resizable
       >
         <template #default="scope"> {{ scope.row.sourceUnit || '-' }} </template>
       </el-table-column>
-      <el-table-column v-if="visibleColumn('source')" label="来源" align="center" prop="source" width="130" sortable="custom" resizable>
+      <el-table-column column-key="source" v-if="visibleColumn('source')" label="来源" align="center" prop="source" :width="getColumnWidth('source', 130)" sortable="custom" resizable>
         <template #default="scope">
           <el-tag v-if="scope.row.source" effect="plain">{{ scope.row.source }}</el-tag>
           <span v-else>-</span>
         </template>
       </el-table-column>
-      <el-table-column v-if="visibleColumn('urgencyDegree')" label="紧急程度" align="center" prop="urgencyDegree" width="120" sortable="custom" resizable>
+      <el-table-column column-key="urgencyDegree" v-if="visibleColumn('urgencyDegree')" label="紧急程度" align="center" prop="urgencyDegree" :width="getColumnWidth('urgencyDegree', 120)" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag
             v-if="scope.row.urgencyDegree"
@@ -179,18 +182,18 @@
           />
         </template>
       </el-table-column>
-      <el-table-column v-if="visibleColumn('createTime')" label="开始日期" align="center" prop="createTime" width="160" sortable="custom" resizable>
+      <el-table-column column-key="createTime" v-if="visibleColumn('createTime')" label="开始日期" align="center" prop="createTime" :width="getColumnWidth('createTime', 160)" sortable="custom" resizable>
         <template #default="scope"
           ><span>{{ parseTime(scope.row.createTime, 'YYYY-MM-DD HH:mm') }}</span></template
         >
       </el-table-column>
-      <el-table-column v-if="visibleColumn('deadlineDate')" label="办结时限" align="center" prop="deadlineDate" width="160" sortable="custom" resizable>
+      <el-table-column column-key="deadlineDate" v-if="visibleColumn('deadlineDate')" label="办结时限" align="center" prop="deadlineDate" :width="getColumnWidth('deadlineDate', 160)" sortable="custom" resizable>
         <template #default="scope"
           ><span>{{ parseTime(scope.row.deadlineDate, 'YYYY-MM-DD HH:mm') || '-' }}</span></template
         >
       </el-table-column>
 
-      <el-table-column v-if="visibleColumn('status')" label="办件状态" align="center" prop="status" width="120" sortable="custom" resizable>
+      <el-table-column column-key="status" v-if="visibleColumn('status')" label="办件状态" align="center" prop="status" :width="getColumnWidth('status', 120)" sortable="custom" resizable>
         <template #default="scope">
           <el-tooltip
             :content="scope.row.processReason || '无详细原因'"
@@ -210,11 +213,12 @@
       </el-table-column>
 
       <el-table-column
+        column-key="currTaskName"
         v-if="visibleColumn('currTaskName')"
         label="在办环节"
         align="center"
         prop="currTaskName"
-        width="150"
+        :width="getColumnWidth('currTaskName', 150)"
         show-overflow-tooltip
         sortable="custom"
         resizable
@@ -227,11 +231,12 @@
         </template>
       </el-table-column>
       <el-table-column
+        column-key="currTaskAssignee"
         v-if="visibleColumn('currTaskAssignee')"
         label="在办人员"
         align="center"
         prop="currTaskAssignee"
-        width="120"
+        :width="getColumnWidth('currTaskAssignee', 120)"
         show-overflow-tooltip
         sortable="custom"
         resizable
@@ -241,7 +246,7 @@
           <span v-else>-</span>
         </template>
       </el-table-column>
-      <el-table-column v-if="visibleColumn('dataType')" label="数据类型" align="center" prop="dataType" width="130" sortable="custom" resizable>
+      <el-table-column column-key="dataType" v-if="visibleColumn('dataType')" label="数据类型" align="center" prop="dataType" :width="getColumnWidth('dataType', 130)" sortable="custom" resizable>
         <template #default="scope">
           <el-tag
             :type="scope.row.dataType === '现有数据' ? 'primary' : scope.row.dataType === '历史已办结' ? 'success' : 'warning'"
@@ -281,7 +286,14 @@ const mounted = ref(false)
 const list = ref([])
 const total = ref(0)
 const processDefinitionList = ref<any[]>([])
-const { columnOptions, checkedColumnKeys, visibleColumn, resetColumns } = useBpmColumnSetting(
+const {
+  columnOptions,
+  checkedColumnKeys,
+  visibleColumn,
+  getColumnWidth,
+  handleHeaderDragend,
+  resetColumns
+} = useBpmColumnSetting(
   'bpm:task:unified:columns',
   [
     { key: 'name', label: '办件名称' },
