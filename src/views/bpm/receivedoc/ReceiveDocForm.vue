@@ -45,7 +45,13 @@
         />
       </el-form-item>
       <el-form-item label="主题" prop="subject">
-        <el-input v-model="formData.subject" placeholder="请输入主题" />
+        <el-input
+          v-model="formData.subject"
+          type="textarea"
+          :autosize="{ minRows: 1 }"
+          resize="none"
+          placeholder="请输入主题"
+        />
       </el-form-item>
       <el-form-item label="紧急程度" prop="urgencyDegree">
         <el-select v-model="formData.urgencyDegree" placeholder="请选择紧急程度">

@@ -203,7 +203,13 @@
                     <td class="label-cell"><span class="text-red-500 mr-5px">*</span>标 题</td>
                     <td colspan="3" class="data-text input-cell">
                       <el-form-item prop="subject" class="mb-0 w-full h-full">
-                        <el-input v-model="formData.subject" placeholder="请输入标题" />
+                        <el-input
+                          v-model="formData.subject"
+                          type="textarea"
+                          :autosize="{ minRows: 1 }"
+                          resize="none"
+                          placeholder="请输入标题"
+                        />
                       </el-form-item>
                     </td>
                   </tr>

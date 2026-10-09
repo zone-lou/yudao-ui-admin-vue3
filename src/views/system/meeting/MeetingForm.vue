@@ -209,6 +209,7 @@ const open = (bookingInfo: any) => {
 
     formData.value.roomName = bookingInfo.roomName || '会议室' // 外层需要传入
     formData.value.subject = bookingInfo.meetingAbstract || bookingInfo.subject || ''
+    formData.value.attendNumber = bookingInfo.attendNumber
     formData.value.nickName = bookingInfo.nickName // 注意对应VO字段
     formData.value.department = bookingInfo.department || ''
     formData.value.telephone = bookingInfo.telephone || ''
