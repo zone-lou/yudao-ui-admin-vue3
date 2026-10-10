@@ -697,10 +697,8 @@ onMounted(() => {
   }
 }
 
-/* 输入框无边框样式适配（同 receiveDoc） */
+/* 输入框样式适配（保留边框与收文一致） */
 :deep(.el-textarea__inner) {
-  border: none;
-  box-shadow: none;
   resize: none;
 }
 </style>
