@@ -1,6 +1,9 @@
 <template>
   <div id="printDivTag" v-loading="detailLoading">
     <div class="oa-container">
+      <div class="print-hide-row" style="display: flex; justify-content: flex-end; margin-bottom: 8px">
+        <CommentTemplatePicker v-if="nodeBlocks.some((block) => isEditable(block.keywords))" v-model="currentOpinion" :task-id="props.taskId" />
+      </div>
       <div class="doc-title">义乌市自然资源和规划局发文拟稿单</div>
 
       <table class="oa-table">
@@ -216,6 +219,7 @@
 </template>
 
 <script setup lang="ts">
+import CommentTemplatePicker from '@/components/CommentTemplatePicker/index.vue'
 import { dateUtil } from '@/utils/dateUtil'
 import { SendDocApi } from '@/api/bpm/senddoc'
 import { propTypes } from '@/utils/propTypes'

@@ -1,8 +1,9 @@
 <template>
   <div id="printDivTag">
     <div class="oa-container">
-      <div v-if="canEditReceiveInfo" class="print-hide-row edit-toolbar">
-        <el-button type="primary" size="small" @click="handleEditReceiveInfo">修改收文信息</el-button>
+      <div v-if="canEditReceiveInfo || (['拟办', '发起', '局长', '主要领导', '领导意见', '分管领导', '局领导', '阅办', '全局阅', '科室', '办公室转发', '办公室确认', '主办', '协办'].some((key) => isEditable(key)))" class="print-hide-row edit-toolbar" style="gap: 12px">
+        <CommentTemplatePicker v-if="['拟办', '发起', '局长', '主要领导', '领导意见', '分管领导', '局领导', '阅办', '全局阅', '科室', '办公室转发', '办公室确认', '主办', '协办'].some((key) => isEditable(key))" v-model="currentOpinion" :task-id="props.taskId" />
+        <el-button v-if="canEditReceiveInfo" type="primary" size="small" @click="handleEditReceiveInfo">修改收文信息</el-button>
       </div>
       <div class="doc-title">义乌市自然资源和规划局收文阅办单</div>
 
@@ -358,6 +359,7 @@
 </template>
 
 <script setup lang="ts">
+import CommentTemplatePicker from '@/components/CommentTemplatePicker/index.vue'
 import { getStrDictOptions, DICT_TYPE } from '@/utils/dict'
 import * as ReceiveDocApi from '@/api/bpm/receivedoc'
 import { dateUtil } from '@/utils/dateUtil'

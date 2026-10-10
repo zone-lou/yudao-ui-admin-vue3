@@ -1,5 +1,8 @@
 <template>
   <div class="oa-container">
+    <div class="print-hide-row" style="display: flex; justify-content: flex-end; margin-bottom: 8px">
+      <CommentTemplatePicker v-if="['deptHead', 'office', 'deputyLeader', 'mainLeader'].some((key) => isEditable(key))" v-model="currentOpinion" :task-id="props.taskId" />
+    </div>
     <div class="doc-title">义乌市自然资源和规划局请假审批单</div>
 
     <table class="oa-table">
@@ -265,6 +268,7 @@
 </template>
 
 <script setup lang="ts">
+import CommentTemplatePicker from '@/components/CommentTemplatePicker/index.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 import { propTypes } from '@/utils/propTypes'

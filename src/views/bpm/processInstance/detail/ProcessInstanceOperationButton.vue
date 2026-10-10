@@ -235,6 +235,7 @@
       label-width="90px"
     >
       <el-form-item prop="reason" label="办理意见" v-if="requireDialogReasonInput">
+        <CommentTemplatePicker v-model="approveReasonForm.reason" :task-id="runningTask?.id" />
         <el-input
           v-model="approveReasonForm.reason"
           type="textarea"
@@ -423,6 +424,7 @@
   <SignDialog ref="signRef" @success="handleSignFinish" />
 </template>
 <script lang="ts" setup>
+import CommentTemplatePicker from '@/components/CommentTemplatePicker/index.vue'
 import { useUserStoreWithOut } from '@/store/modules/user'
 import { setConfAndFields2 } from '@/utils/formCreate'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
@@ -1005,7 +1007,13 @@ const loadApprovalNodes = async () => {
       if (node.checked) return
       const treeRef = userTreeRefs.value[node.taskDefKey]
       if (!treeRef || treeRef.getCheckedKeys().length > 0) return
-      const candidateIds = getCandidateUserIds(node.candidateUsers || [])
+      const availableIds = getCandidateUserIds(node.candidateUsers || [])
+      // 后端展示分组置顶后，仍按原候选顺序默认选人，且排除已过滤的人员。
+      const candidateIds = node.candidateUserOrderIds?.length
+        ? node.candidateUserOrderIds.filter((id: string | number) =>
+            availableIds.some((availableId) => String(availableId) === String(id))
+          )
+        : availableIds
       const selectedId = candidateIds.find((id) =>
         node.assignedUserIds?.some((assignedId: string | number) => String(assignedId) === String(id))
       ) ?? candidateIds[0]

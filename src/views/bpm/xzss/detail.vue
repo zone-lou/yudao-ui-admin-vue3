@@ -5,9 +5,10 @@
         <div class="oa-container" style="position: relative">
           <div
             v-if="props.taskId"
-            class="absolute print-hide-row flex items-center"
+            class="absolute print-hide-row flex items-center gap-3"
             style="top: 40px; right: 40px"
           >
+            <CommentTemplatePicker v-if="['拟办', '法规科交办', '局长', '主要领导', '分管领导', '分管局长', '相关单位', '法规科办理', '科室'].some((key) => isEditable(key))" v-model="currentOpinion" :task-id="props.taskId" />
             <el-upload
               action="#"
               :http-request="customUpload"
@@ -660,6 +661,7 @@
 </template>
 
 <script setup lang="ts">
+import CommentTemplatePicker from '@/components/CommentTemplatePicker/index.vue'
 import { ref, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { dateUtil } from '@/utils/dateUtil'
