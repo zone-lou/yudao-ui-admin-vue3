@@ -76,15 +76,42 @@
       </div>
 
       <table class="oa-table">
+        <colgroup>
+          <col style="width: 140px" />
+          <col />
+          <col style="width: 140px" />
+          <col style="width: 20%" />
+        </colgroup>
         <tbody>
           <tr>
-            <td class="label-cell">来文机关</td>
-            <td class="data-text">
-              <span>{{ detailData.sendDept }}</span>
-            </td>
-            <td class="label-cell" style="width: 90px">来文号</td>
-            <td class="data-text">
-              <span>{{ formatSendDocNumber(detailData.sendDocNumber) }}</span>
+            <td colspan="4" style="padding: 0 !important">
+              <div class="flex w-full" style="min-height: 53px">
+                <!-- 左侧 50%：来文机关 -->
+                <div class="flex items-stretch" style="width: 50%; border-right: 1px solid #d71920">
+                  <div
+                    class="label-cell flex items-center justify-center shrink-0"
+                    style="width: 140px; border-right: 1px solid #d71920"
+                  >
+                    来文机关
+                  </div>
+                  <div class="data-text flex items-center flex-1" style="padding: 16px 12px">
+                    <span>{{ detailData.sendDept }}</span>
+                  </div>
+                </div>
+
+                <!-- 右侧 50%：来文号 -->
+                <div class="flex items-stretch" style="width: 50%">
+                  <div
+                    class="label-cell flex items-center justify-center shrink-0"
+                    style="width: 140px; border-right: 1px solid #d71920"
+                  >
+                    来文号
+                  </div>
+                  <div class="data-text flex items-center flex-1" style="padding: 16px 12px">
+                    <span>{{ formatSendDocNumber(detailData.sendDocNumber) }}</span>
+                  </div>
+                </div>
+              </div>
             </td>
           </tr>
 
@@ -364,7 +391,6 @@
               {{ formatDate(info.endTime) }}
             </td>
           </tr>
-
           <!-- 领导意见 -->
           <tr>
             <td class="label-cell">领导意见</td>
@@ -870,7 +896,8 @@ onMounted(() => {
 #printDivTag .label-cell {
   width: 140px !important; /* 标签单元格稍微加宽以适配较大的留白和字体 */
   font-weight: bold;
-  color: #d71920;
+
+  /* color: #d71920; */
   text-align: center;
   white-space: nowrap;
   background-color: #fffbfc;
