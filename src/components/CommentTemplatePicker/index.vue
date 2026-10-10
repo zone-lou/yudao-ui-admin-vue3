@@ -396,8 +396,8 @@ watch(() => props.taskId, () => {
 .template-item {
   display: block;
   width: 100%;
-  margin-bottom: 4px;
-  padding: 9px 12px;
+  margin-bottom: 1px;
+  padding: 4px 10px;
   border: 1px solid transparent;
   border-radius: var(--el-border-radius-base);
   background: var(--el-fill-color-blank);
