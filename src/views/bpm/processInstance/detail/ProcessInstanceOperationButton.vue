@@ -251,7 +251,7 @@
             <div
               class="flex-1 flex flex-col min-w-0 pr-3 border-r border-gray-200 dark:border-gray-700"
             >
-              <el-tabs v-model="activeTab" class="w-full flex-1 flex flex-col">
+              <el-tabs v-model="activeTab" class="w-full flex-1 flex flex-col" @tab-click="handleTabClick">
                 <el-tab-pane
                   v-for="group in groupedApprovalNodes"
                   :key="group.tabKey"
@@ -278,7 +278,11 @@
                       <div
                         class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 flex-none p-2 pb-1"
                       >
+                        <span v-if="node.taskDefKey === 'end'" class="font-bold">
+                          {{ node.name || node.taskName }}
+                        </span>
                         <el-checkbox
+                          v-else
                           v-model="node.checked"
                           size="large"
                           class="!font-bold !text-gray-800 dark:!text-gray-200"
@@ -1254,7 +1258,42 @@ const handleNodeCheckboxChange = (val: boolean | string | number, node: any) => 
 }
 
 /** 提交办理 */
+const confirmSubmitting = ref(false)
+
+/** 只有手动点击结束 Tab 才提交，默认激活 Tab 不触发办理完成。 */
+const handleTabClick = async (tab: { paneName?: string | number }) => {
+  if (formLoading.value || confirmSubmitting.value) return
+  const group = groupedApprovalNodes.value.find((item) => item.tabKey === tab.paneName)
+  const endNode = group?.nodes.find((node: any) => node.taskDefKey === 'end')
+  if (!endNode) return
+
+  confirmSubmitting.value = true
+  try {
+    try {
+      await message.confirm('是否确认办理完成？已勾选的其他分支及人员将一并发送。', '办理完成')
+    } catch {
+      return
+    }
+    // 确认后选中结束节点，保留其他分支和人员的已有选择。
+    endNode.checked = true
+    refreshCurrentSelectedUsers()
+    await submitSelectedNodes()
+  } finally {
+    confirmSubmitting.value = false
+  }
+}
+
 const handleApproveConfirm = async () => {
+  if (formLoading.value || confirmSubmitting.value) return
+  confirmSubmitting.value = true
+  try {
+    await submitSelectedNodes()
+  } finally {
+    confirmSubmitting.value = false
+  }
+}
+
+const submitSelectedNodes = async () => {
   // 校验
   if (!approveFormRef.value) return
   const valid = await approveFormRef.value.validate()

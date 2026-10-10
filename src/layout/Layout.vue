@@ -7,14 +7,14 @@ import { useRenderLayout } from './components/useRenderLayout'
 import { useDesign } from '@/hooks/web/useDesign'
 import { useRoute } from 'vue-router'
 import { useBpmStore } from '@/store/modules/bpm/bpm'
+import { useUserStore } from '@/store/modules/user'
+import { useBadgePolling } from '@/hooks/web/useBadgePolling'
 
 const { getPrefixCls } = useDesign()
 
 const prefixCls = getPrefixCls('layout')
 
 const appStore = useAppStore()
-
-const bpmStore = useBpmStore()
 
 // 是否是移动端
 const mobile = computed(() => appStore.getMobile)
@@ -55,27 +55,12 @@ export default defineComponent({
   setup() {
     const route = useRoute()
     const bpmStore = useBpmStore()
-    let bpmTimer: ReturnType<typeof setInterval> | null = null
+    const userStore = useUserStore()
+    const canPoll = () => userStore.getIsSetUser
 
-    onMounted(() => {
-      // 页面加载时立即获取一次
-      bpmStore.updateTaskCount()
-      bpmStore.updateReceiveDocPendingCount()
+    useBadgePolling(() => bpmStore.updateTaskCount(), 3 * 60 * 1000, canPoll)
+    useBadgePolling(() => bpmStore.updateReceiveDocPendingCount(), 2 * 60 * 1000, canPoll)
 
-      // 开启轮询 (例如每 60 秒刷新一次)
-      bpmTimer = setInterval(() => {
-        bpmStore.updateTaskCount()
-        bpmStore.updateReceiveDocPendingCount()
-      }, 60000)
-    })
-
-    onUnmounted(() => {
-      // 页面销毁时清除定时器
-      if (bpmTimer) {
-        clearInterval(bpmTimer)
-        bpmTimer = null
-      }
-    })
     return () => (
       <section class={[prefixCls, `${prefixCls}__${layout.value}`, 'w-[100%] h-[100%] relative']}>
         {mobile.value && !collapse.value ? (

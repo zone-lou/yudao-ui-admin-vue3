@@ -1,9 +1,58 @@
 <template>
   <div id="printDivTag">
     <div class="oa-container">
-      <div v-if="canEditReceiveInfo || (['拟办', '发起', '局长', '主要领导', '领导意见', '分管领导', '局领导', '阅办', '全局阅', '科室', '办公室转发', '办公室确认', '主办', '协办'].some((key) => isEditable(key)))" class="print-hide-row edit-toolbar" style="gap: 12px">
-        <CommentTemplatePicker v-if="['拟办', '发起', '局长', '主要领导', '领导意见', '分管领导', '局领导', '阅办', '全局阅', '科室', '办公室转发', '办公室确认', '主办', '协办'].some((key) => isEditable(key))" v-model="currentOpinion" :task-id="props.taskId" />
-        <el-button v-if="canEditReceiveInfo" type="primary" size="small" @click="handleEditReceiveInfo">修改收文信息</el-button>
+      <div
+        v-if="
+          canEditReceiveInfo ||
+          [
+            '拟办',
+            '发起',
+            '局长',
+            '主要领导',
+            '领导意见',
+            '分管领导',
+            '局领导',
+            '阅办',
+            '全局阅',
+            '科室',
+            '办公室转发',
+            '办公室确认',
+            '主办',
+            '协办'
+          ].some((key) => isEditable(key))
+        "
+        class="print-hide-row edit-toolbar"
+        style="gap: 12px"
+      >
+        <CommentTemplatePicker
+          v-if="
+            [
+              '拟办',
+              '发起',
+              '局长',
+              '主要领导',
+              '领导意见',
+              '分管领导',
+              '局领导',
+              '阅办',
+              '全局阅',
+              '科室',
+              '办公室转发',
+              '办公室确认',
+              '主办',
+              '协办'
+            ].some((key) => isEditable(key))
+          "
+          v-model="currentOpinion"
+          :task-id="props.taskId"
+        />
+        <el-button
+          v-if="canEditReceiveInfo"
+          type="primary"
+          size="small"
+          @click="handleEditReceiveInfo"
+          >修改收文信息</el-button
+        >
       </div>
       <div class="doc-title">义乌市自然资源和规划局收文阅办单</div>
 
@@ -34,7 +83,7 @@
               <span>{{ detailData.sendDept }}</span>
             </td>
             <td class="label-cell" style="width: 90px">来文号</td>
-            <td class="data-text" style="width: 20%">
+            <td class="data-text">
               <span>{{ formatSendDocNumber(detailData.sendDocNumber) }}</span>
             </td>
           </tr>
@@ -52,7 +101,9 @@
             <td colspan="3" class="data-text">
               <div v-if="fileList.length > 0">
                 <div v-for="(file, index) in fileList" :key="index" style="margin-bottom: 5px">
-                  <span class="link-type cursor-pointer" @click="handlePreview(file)">{{ file.name }}</span>
+                  <span class="link-type cursor-pointer" @click="handlePreview(file)">{{
+                    file.name
+                  }}</span>
                   <el-button
                     link
                     type="primary"
@@ -210,45 +261,6 @@
               </div>
             </td>
           </tr>
-          <!-- 领导意见 -->
-          <tr>
-            <td class="label-cell">领导意见</td>
-            <td colspan="2" class="center-text label-cell" style="background: none">意 见</td>
-            <td class="center-text label-cell" style="background: none">日 期</td>
-          </tr>
-          <tr v-if="isEditable('领导意见')" class="print-hide-row">
-            <td class="center-text data-text" style="height: 50px">
-              {{ userStore.getUser.nickname }}
-            </td>
-            <td colspan="2" class="data-text" style="padding: 4px 8px; text-align: left">
-              <el-input
-                v-model="currentOpinion"
-                type="textarea"
-                :rows="2"
-                placeholder="请输入领导意见"
-              />
-            </td>
-            <td class="center-text data-text">
-              {{ formatDate(new Date()) }}
-            </td>
-          </tr>
-          <tr
-            v-for="(info, index) in ensureMinRows(
-              leaderOpinionList,
-              isEditable('领导意见') ? 0 : 3
-            )"
-            :key="'leader-' + index"
-          >
-            <td class="center-text data-text" style="height: 50px">
-              {{ info.assigneeUser?.nickname || info.name || '' }}
-            </td>
-            <td colspan="2" class="data-text" style="padding: 4px 8px; text-align: left">
-              {{ info.comment }}
-            </td>
-            <td class="center-text data-text">
-              {{ formatDate(info.endTime) }}
-            </td>
-          </tr>
           <!-- 分管领导批示 -->
           <tr>
             <td class="label-cell">分管领导批示</td>
@@ -343,6 +355,46 @@
                 style="margin-right: 4px; font-weight: bold; color: red"
                 >*</span
               >
+              {{ info.assigneeUser?.nickname || info.name || '' }}
+            </td>
+            <td colspan="2" class="data-text" style="padding: 4px 8px; text-align: left">
+              {{ info.comment }}
+            </td>
+            <td class="center-text data-text">
+              {{ formatDate(info.endTime) }}
+            </td>
+          </tr>
+
+          <!-- 领导意见 -->
+          <tr>
+            <td class="label-cell">领导意见</td>
+            <td colspan="2" class="center-text label-cell" style="background: none">意 见</td>
+            <td class="center-text label-cell" style="background: none">日 期</td>
+          </tr>
+          <tr v-if="isEditable('领导意见')" class="print-hide-row">
+            <td class="center-text data-text" style="height: 50px">
+              {{ userStore.getUser.nickname }}
+            </td>
+            <td colspan="2" class="data-text" style="padding: 4px 8px; text-align: left">
+              <el-input
+                v-model="currentOpinion"
+                type="textarea"
+                :rows="2"
+                placeholder="请输入领导意见"
+              />
+            </td>
+            <td class="center-text data-text">
+              {{ formatDate(new Date()) }}
+            </td>
+          </tr>
+          <tr
+            v-for="(info, index) in ensureMinRows(
+              leaderOpinionList,
+              isEditable('领导意见') ? 0 : 3
+            )"
+            :key="'leader-' + index"
+          >
+            <td class="center-text data-text" style="height: 50px">
               {{ info.assigneeUser?.nickname || info.name || '' }}
             </td>
             <td colspan="2" class="data-text" style="padding: 4px 8px; text-align: left">
@@ -661,7 +713,6 @@ const handlePreview = (file: any) => {
 
   const fileName = file.name || fullUrl.split(/[?#]/)[0]
   const ext = fileName.split('.').pop()?.toLowerCase() || ''
-
 
   if (DIRECT_RENDER_EXTENSIONS.includes(ext)) {
     // 规定格式：走外网地址

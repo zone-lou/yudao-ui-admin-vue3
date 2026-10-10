@@ -31,8 +31,10 @@ export const useBpmStore = defineStore('bpm', {
         if (res) {
           this.taskCount = res
         }
+        return true
       } catch (error) {
         console.error('获取BPM任务数量失败:', error)
+        return false
       }
     },
     async updateReceiveDocPendingCount() {
@@ -41,8 +43,10 @@ export const useBpmStore = defineStore('bpm', {
         if (res !== undefined && res !== null) {
           this.receiveDocPendingCount = res
         }
+        return true
       } catch (error) {
         console.error('获取待收文数量失败:', error)
+        return false
       }
     }
   }

@@ -3,6 +3,7 @@ import { formatDate } from '@/utils/formatTime'
 import * as NotifyMessageApi from '@/api/system/notify/message'
 import { useUserStoreWithOut } from '@/store/modules/user'
 import { propTypes } from '@/utils/propTypes'
+import { useBadgePolling } from '@/hooks/web/useBadgePolling'
 
 defineOptions({ name: 'Message' })
 
@@ -25,9 +26,10 @@ const getList = async () => {
 
 // 获得未读消息数
 const getUnreadCount = async () => {
-  NotifyMessageApi.getUnreadNotifyMessageCount().then((data) => {
-    unreadCount.value = data
-  })
+  const count = await NotifyMessageApi.getUnreadNotifyMessageCount()
+  if (userStore.getIsSetUser) {
+    unreadCount.value = count
+  }
 }
 
 // 跳转我的站内信
@@ -37,22 +39,17 @@ const goMyList = () => {
   })
 }
 
-// ========== 初始化 =========
-onMounted(() => {
-  // 首次加载小红点
-  getUnreadCount()
-  // 轮询刷新小红点
-  setInterval(
-    () => {
-      if (userStore.getIsSetUser) {
-        getUnreadCount()
-      } else {
-        unreadCount.value = 0
-      }
-    },
-    1000 * 60 * 2
-  )
-})
+useBadgePolling(getUnreadCount, 2 * 60 * 1000, () => userStore.getIsSetUser)
+
+watch(
+  () => userStore.getIsSetUser,
+  (isLoggedIn) => {
+    if (!isLoggedIn) {
+      unreadCount.value = 0
+      list.value = []
+    }
+  }
+)
 </script>
 <template>
   <div class="message">
