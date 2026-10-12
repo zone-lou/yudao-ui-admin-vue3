@@ -23,6 +23,19 @@ export const buildFilePreviewUrl = (sourceUrl: string, previewBase: string, exte
     if (!source.search) source.searchParams.set('kk', '1')
     source.searchParams.set('fullfilename', previewName)
     fullUrl = source.toString()
+  } else {
+    const source = new URL(fullUrl, window.location.origin)
+    // 转换类文件同样按路径段编码；额外编码括号等字符，避免 kkFileView 再次编码整个地址。
+    source.pathname = source.pathname
+      .split('/')
+      .map((segment) =>
+        encodeURIComponent(decodeURIComponent(segment)).replace(
+          /[!'()*]/g,
+          (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`
+        )
+      )
+      .join('/')
+    fullUrl = source.toString()
   }
   const preview = new URL(previewBase.trim(), window.location.origin)
   // 同时支持服务根地址与已有 /onlinePreview?url= 配置。

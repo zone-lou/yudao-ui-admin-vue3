@@ -462,6 +462,9 @@ const handleFirstFileNameUpdate = (fileName: string, forceUpdate: boolean = fals
 /** 构建请求数据 */
 const buildRequestData = () => {
   const data = { ...formData.value } as any
+  data.attachFilePath = Array.isArray(data.attachFilePath)
+    ? data.attachFilePath.join(',')
+    : data.attachFilePath ?? ''
   if (Array.isArray(data.sendDept)) {
     data.sendDept = data.sendDept.join(',')
   }
@@ -713,6 +716,9 @@ onMounted(async () => {
       const detail = await ReceiveDocApi.getReceiveDoc(Number(queryId))
       if (detail) {
         Object.assign(formData.value, detail)
+        formData.value.attachFilePath = Array.isArray(detail.attachFilePath)
+          ? detail.attachFilePath.join(',')
+          : detail.attachFilePath ?? ''
 
         if (formData.value.sendDocNumber && /^\d+$/.test(String(formData.value.sendDocNumber))) {
           const dicts = getStrDictOptions(DICT_TYPE.BPM_DOC_NUM_TYPE)
