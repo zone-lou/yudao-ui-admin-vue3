@@ -55,15 +55,6 @@
                 {{ t('login.remember') }}
               </el-checkbox>
             </el-col>
-            <el-col :offset="6" :span="12">
-              <el-link
-                class="float-right"
-                type="primary"
-                @click="setLoginState(LoginStateEnum.RESET_PASSWORD)"
-              >
-                {{ t('login.forgetPassword') }}
-              </el-link>
-            </el-col>
           </el-row>
         </el-form-item>
       </el-col>
@@ -75,6 +66,15 @@
             class="w-full"
             type="primary"
             @click="getCode()"
+          />
+        </el-form-item>
+      </el-col>
+      <el-col :span="24" class="px-10px">
+        <el-form-item>
+          <XButton
+            title="短信验证码登录"
+            class="w-full"
+            @click="setLoginState(LoginStateEnum.MOBILE)"
           />
         </el-form-item>
       </el-col>

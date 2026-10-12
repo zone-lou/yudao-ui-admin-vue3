@@ -2,12 +2,13 @@ import request from '@/config/axios'
 import type { RegisterVO, UserLoginVO } from './types'
 
 export interface SmsCodeVO {
-  mobile: string
+  username?: string
+  mobile?: string
   scene: number
 }
 
 export interface SmsLoginVO {
-  mobile: string
+  username: string
   code: string
 }
 
