@@ -531,7 +531,8 @@ const handleDetail = (row: any) => {
     name: 'BpmProcessInstanceDetail',
     query: {
       id: row.processInstance.id,
-      taskId: row.id // 传递 taskId 用于高亮当前节点或显示特定信息
+      taskId: row.id, // 保留历史任务信息
+      mode: 'view' // 已办入口统一只读
     }
   })
 }
