@@ -1316,6 +1316,10 @@ const submitSelectedNodes = async () => {
 
   // 2. 必须选中至少一个流程节点（排除法规科办理人等指定非流程节点）
   const realFlowNodes = approvalNodes.value.filter((n) => !isSpecifiedNode(n))
+  // 只剩办理完成时，点击确认即可办结，无需额外选择结束节点。
+  if (realFlowNodes.length === 1 && realFlowNodes[0].taskDefKey === 'end') {
+    realFlowNodes[0].checked = true
+  }
   const selectedFlowNodes = realFlowNodes.filter((n) => n.checked)
   if (realFlowNodes.length > 0 && selectedFlowNodes.length === 0) {
     message.warning('请至少选择一个流程节点')
