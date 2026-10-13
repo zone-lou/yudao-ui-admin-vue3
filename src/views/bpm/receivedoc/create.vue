@@ -43,26 +43,26 @@
                 class="meta-info"
                 style="
                   display: flex;
-                  height: 35px;
-                  margin-bottom: 12px;
+                  height: 38px;
+                  margin-bottom: 14px;
                   justify-content: space-between;
                   align-items: center;
                 "
               >
                 <div style="display: flex; align-items: center; height: 100%">
-                  <div style="display: flex; align-items: center; margin-right: 4px">
-                    <span style="margin-right: 2px; color: #f56c6c">*</span>
+                  <div style="display: flex; align-items: center; margin-right: 6px">
+                    <span style="margin-right: 3px; font-size: 16px; color: #f56c6c">*</span>
                     <span
                       style="
                         font-family: SimHei, sans-serif;
-                        font-size: 14px;
+                        font-size: 16px;
                         color: #333;
                         white-space: nowrap;
                       "
                       >收文号：</span
                     >
                   </div>
-                  <div style="display: flex; width: 160px; align-items: center">
+                  <div style="display: flex; width: 190px; align-items: center">
                     <el-form-item prop="receiveDocNumber" style="width: 100%; margin-bottom: 0">
                       <el-input
                         v-model="formData.receiveDocNumber"
@@ -74,19 +74,19 @@
                 </div>
 
                 <div style="display: flex; align-items: center; height: 100%">
-                  <div style="display: flex; align-items: center; margin-right: 4px">
-                    <span style="margin-right: 2px; color: #f56c6c">*</span>
+                  <div style="display: flex; align-items: center; margin-right: 6px">
+                    <span style="margin-right: 3px; font-size: 16px; color: #f56c6c">*</span>
                     <span
                       style="
                         font-family: SimHei, sans-serif;
-                        font-size: 14px;
+                        font-size: 16px;
                         color: #333;
                         white-space: nowrap;
                       "
                       >收文日期：</span
                     >
                   </div>
-                  <div style="display: flex; width: 185px; align-items: center">
+                  <div style="display: flex; width: 210px; align-items: center">
                     <el-form-item prop="receiveTime" style="width: 100%; margin-bottom: 0">
                       <el-date-picker
                         v-model="formData.receiveTime"
@@ -101,19 +101,19 @@
                 </div>
 
                 <div style="display: flex; align-items: center; height: 100%">
-                  <div style="display: flex; align-items: center; margin-right: 4px">
-                    <span style="margin-right: 2px; color: #f56c6c">*</span>
+                  <div style="display: flex; align-items: center; margin-right: 6px">
+                    <span style="margin-right: 3px; font-size: 16px; color: #f56c6c">*</span>
                     <span
                       style="
                         font-family: SimHei, sans-serif;
-                        font-size: 14px;
+                        font-size: 16px;
                         color: #333;
                         white-space: nowrap;
                       "
                       >紧急程度：</span
                     >
                   </div>
-                  <div style="display: flex; width: 120px; align-items: center">
+                  <div style="display: flex; width: 140px; align-items: center">
                     <el-form-item prop="urgencyDegree" style="width: 100%; margin-bottom: 0">
                       <el-select
                         v-model="formData.urgencyDegree"
@@ -134,9 +134,9 @@
 
               <table class="oa-table">
                 <colgroup>
-                  <col style="width: 110px" />
-                  <col style="width: 35%" />
-                  <col style="width: 110px" />
+                  <col style="width: 160px" />
+                  <col />
+                  <col style="width: 160px" />
                   <col />
                 </colgroup>
                 <tbody>
@@ -794,10 +794,10 @@ watch(
 
 #printDivTag {
   .oa-container {
-    width: 994px !important;
+    width: 1040px !important;
     max-width: 100% !important;
     min-height: 1123px !important;
-    padding: 40px 50px !important;
+    padding: 40px 45px !important;
     margin: 20px auto !important;
     font-family: SimSun, 'Songti SC', STSong, serif;
     background-color: #fff;
@@ -806,8 +806,8 @@ watch(
   }
 
   .doc-title {
-    margin-bottom: 20px;
-    font-size: 26px;
+    margin-bottom: 24px;
+    font-size: 30px;
     font-weight: bold;
     letter-spacing: 2px;
     color: #d71920;
@@ -818,9 +818,19 @@ watch(
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 5px;
-    font-size: 14px;
+    margin-bottom: 12px;
+    font-size: 16px;
     color: #333;
+
+    :deep(.el-input__wrapper),
+    :deep(.el-select__wrapper) {
+      height: 34px;
+      font-size: 15px;
+    }
+
+    :deep(.el-input__inner) {
+      font-size: 15px;
+    }
   }
 
   .meta-input {
@@ -828,7 +838,7 @@ watch(
     min-width: 80px;
     padding: 0 5px;
     font-family: SimHei, sans-serif;
-    font-size: 14px !important;
+    font-size: 16px !important;
     color: #000;
     text-align: left;
     text-decoration: none !important;
@@ -837,7 +847,7 @@ watch(
 
   .data-text {
     font-family: SimSun, 'Songti SC', STSong, serif;
-    font-size: 15px !important;
+    font-size: 17px !important;
     color: #000;
     word-break: break-all;
     border-bottom: none !important;
@@ -851,21 +861,24 @@ watch(
   }
 
   .oa-table td {
-    padding: 16px 12px !important;
-    font-size: 15px !important;
-    line-height: 1.5 !important;
+    padding: 18px 14px !important;
+    font-size: 17px !important;
+    line-height: 1.6 !important;
     color: #000;
     vertical-align: middle;
     border: 1px solid #d71920;
   }
 
   .label-cell {
-    width: 140px !important;
+    width: 160px !important;
+    font-size: 17px !important;
     font-weight: bold;
     color: #d71920;
     text-align: center;
     white-space: nowrap;
     background-color: #fffbfc;
+    padding: 16px 6px !important;
+    box-sizing: border-box !important;
   }
 
   .compact-row {
@@ -891,7 +904,7 @@ watch(
     width: 14px;
     height: 14px;
     margin-right: 4px;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: bold;
     line-height: 1;
     vertical-align: middle;
@@ -908,16 +921,16 @@ watch(
   }
 
   .h-80 {
-    height: 100px;
+    height: 120px;
     vertical-align: top;
   }
 
   .h-40 {
-    height: 50px;
+    height: 55px;
   }
 
   .h-35 {
-    height: 45px;
+    height: 50px;
   }
 
   .center-text {
@@ -925,13 +938,13 @@ watch(
   }
 
   .signature-row {
-    padding-top: 2px;
-    font-size: 13px;
+    padding-top: 4px;
+    font-size: 16px;
     color: #333;
   }
 
   .input-cell {
-    padding: 4px 8px !important;
+    padding: 6px 10px !important;
     overflow: visible; /* 防止 el-form-item__error 被截断 */
   }
 }
@@ -965,14 +978,14 @@ watch(
 
   .el-input__inner {
     font-family: inherit;
-    font-size: 14px;
+    font-size: 16px;
     color: #000;
     text-align: left;
   }
 
   .el-textarea__inner {
     font-family: inherit;
-    font-size: 14px;
+    font-size: 16px;
     color: #000;
     resize: none;
   }

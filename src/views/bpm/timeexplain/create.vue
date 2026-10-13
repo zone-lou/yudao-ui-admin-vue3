@@ -31,9 +31,9 @@
           >
             <table class="oa-table">
               <colgroup>
-                <col width="140px" />
-                <col width="35%" />
-                <col width="130px" />
+                <col style="width: 160px" />
+                <col style="width: 35%" />
+                <col style="width: 160px" />
                 <col />
               </colgroup>
               <tbody>
@@ -531,6 +531,8 @@ onMounted(async () => {
 :deep(.el-input__inner),
 :deep(.el-textarea__inner) {
   padding: 0 !important;
+  font-size: 16px !important;
+  color: #000;
 }
 
 :deep(.el-input-group__append) {
@@ -547,10 +549,10 @@ onMounted(async () => {
 
 .oa-container {
   box-sizing: border-box !important;
-  width: 994px !important;
+  width: 1040px !important;
   max-width: 100% !important;
   min-height: 1123px !important;
-  padding: 40px 50px !important;
+  padding: 40px 45px !important;
   margin: 20px auto !important;
   font-family: SimSun, 'Songti SC', STSong, serif;
   background-color: #fff;
@@ -587,8 +589,8 @@ onMounted(async () => {
 }
 
 .doc-title {
-  margin-bottom: 20px;
-  font-size: 26px;
+  margin-bottom: 24px;
+  font-size: 30px;
   font-weight: bold;
   letter-spacing: 1px;
   color: #b1351e;
@@ -597,26 +599,30 @@ onMounted(async () => {
 
 .oa-table {
   width: 100%;
-  font-size: 15px !important;
+  font-size: 17px !important;
   border: 1px solid #8cb4e0;
   border-collapse: collapse;
   table-layout: fixed;
 }
 
 .oa-table td {
-  padding: 16px 12px !important;
-  font-size: 15px !important;
-  line-height: 1.5 !important;
+  padding: 18px 14px !important;
+  font-size: 17px !important;
+  line-height: 1.6 !important;
   color: #333;
   vertical-align: middle;
   border: 1px solid #8cb4e0;
 }
 
 .label-cell {
+  width: 160px !important;
+  font-size: 17px !important;
   font-weight: bold;
   color: #333;
   text-align: center;
   background-color: #dbe9f8;
+  padding: 16px 6px !important;
+  box-sizing: border-box !important;
 }
 
 .input-cell {
@@ -627,21 +633,22 @@ onMounted(async () => {
 }
 
 .h-large {
-  height: 100px;
+  height: 140px;
   padding: 10px;
   text-align: left;
   vertical-align: top;
 }
 
 .h-reason {
-  height: 120px;
+  height: 140px;
   padding: 10px;
   text-align: left;
   vertical-align: top;
 }
 
 .signature-row {
-  padding: 5px 20px;
+  padding: 6px 20px;
+  font-size: 16px;
   color: #555;
   text-align: right;
   background-color: #fff;

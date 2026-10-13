@@ -8,7 +8,7 @@
 
       <table class="oa-table">
         <colgroup>
-          <col style="width: 120px" />
+          <col style="width: 160px" />
           <col style="width: auto" />
           <col style="width: 100px" />
           <col style="width: 120px" />
@@ -530,21 +530,21 @@ defineExpose({
 
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag {
-  width: 100%;
-  max-width: 994px;
-  min-height: 1123px;
-  padding: 50px 72px;
+  width: 1040px !important;
+  max-width: 100% !important;
+  min-height: 1123px !important;
+  padding: 40px 45px !important;
   margin: 0 auto 20px;
   background-color: #fff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  box-sizing: border-box;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+  box-sizing: border-box !important;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .doc-title {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   font-family: SimSun, 'Songti SC', STSong, serif;
-  font-size: 26px;
+  font-size: 30px;
   font-weight: bold;
   letter-spacing: 2px;
   color: #d71920;
@@ -555,7 +555,7 @@ defineExpose({
 #printDivTag .oa-table {
   width: 100%;
   font-family: SimSun, 'Songti SC', STSong, serif;
-  font-size: 15px;
+  font-size: 17px !important;
   border: 2px solid #d71920;
   border-collapse: collapse;
   table-layout: fixed;
@@ -563,22 +563,28 @@ defineExpose({
 
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .oa-table td {
-  padding: 16px 12px !important;
-  line-height: 1.5;
+  padding: 18px 14px !important;
+  font-size: 17px !important;
+  line-height: 1.6 !important;
   color: #000;
   border: 1px solid #d71920;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .label-cell {
+  width: 160px !important;
+  font-size: 17px !important;
   font-weight: bold;
   color: #d71920;
   text-align: center;
   white-space: nowrap;
+  padding: 16px 6px !important;
+  box-sizing: border-box !important;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .data-text {
+  font-size: 17px !important;
   color: #333;
 }
 
@@ -587,21 +593,22 @@ defineExpose({
 }
 
 #printDivTag .h-80 {
-  height: 80px;
+  height: 120px;
 }
 
 #printDivTag .h-60 {
-  height: 60px;
+  height: 70px;
 }
 
 #printDivTag .h-large {
-  height: 120px;
+  height: 140px;
   vertical-align: top;
 }
 
 #printDivTag .oa-table td.signature-row {
-  height: 35px;
-  padding: 5px 12px !important;
+  height: 36px;
+  padding: 6px 12px !important;
+  font-size: 16px;
 }
 
 #printDivTag .sig-container {
@@ -610,6 +617,7 @@ defineExpose({
   justify-content: space-around;
   height: 100%;
   color: #444;
+  font-size: 16px;
 }
 
 #printDivTag .sign-input {
@@ -618,8 +626,9 @@ defineExpose({
 }
 
 #printDivTag .oa-table td.sub-header {
-  height: 35px;
-  padding: 5px 12px !important;
+  height: 36px;
+  padding: 6px 12px !important;
+  font-size: 16px;
   font-weight: normal;
   text-align: center;
   background-color: transparent !important;
@@ -650,5 +659,13 @@ defineExpose({
   color: #000;
 }
 
+:deep(.el-textarea__inner) {
+  font-family: SimSun, 'Songti SC', STSong, serif !important;
+  font-size: 16px !important;
+}
 
+:deep(.el-input__inner) {
+  font-family: SimSun, 'Songti SC', STSong, serif !important;
+  font-size: 16px !important;
+}
 </style>

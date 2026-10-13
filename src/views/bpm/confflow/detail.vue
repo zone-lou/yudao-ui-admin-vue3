@@ -7,9 +7,9 @@
 
     <table class="oa-table">
       <colgroup>
-        <col style="width: 140px" />
+        <col style="width: 160px" />
         <col />
-        <col style="width: 140px" />
+        <col style="width: 160px" />
         <col />
       </colgroup>
 
@@ -528,10 +528,10 @@ onMounted(() => {
 
 <style scoped>
 .oa-container {
-  width: 994px !important;
+  width: 1040px !important;
   max-width: 100% !important;
   min-height: 1123px !important;
-  padding: 40px 50px !important;
+  padding: 40px 45px !important;
   margin: 20px auto !important;
   font-family: SimSun, 'Songti SC', STSong, serif;
   background-color: #fff;
@@ -541,8 +541,8 @@ onMounted(() => {
 
 /* 标题样式 */
 .doc-title {
-  margin-bottom: 20px;
-  font-size: 26px;
+  margin-bottom: 24px;
+  font-size: 30px;
   font-weight: bold;
   letter-spacing: 2px;
   color: #d71920;
@@ -552,16 +552,16 @@ onMounted(() => {
 /* 表格通用样式 */
 .oa-table {
   width: 100%;
-  font-size: 15px !important;
-  border: 1px solid #d71920;
+  font-size: 17px !important;
+  border: 2px solid #d71920;
   border-collapse: collapse;
   table-layout: fixed;
 }
 
 .oa-table td {
-  padding: 16px 12px !important;
-  font-size: 15px !important;
-  line-height: 1.5 !important;
+  padding: 18px 14px !important;
+  font-size: 17px !important;
+  line-height: 1.6 !important;
   color: #000;
   word-wrap: break-word;
   vertical-align: middle;
@@ -570,34 +570,37 @@ onMounted(() => {
 
 /* 左侧 Label 样式 */
 .label-cell {
-  width: 140px;
+  width: 160px !important;
+  font-size: 17px !important;
   font-weight: bold;
   color: #d71920;
   text-align: center;
   background-color: #fffbfc;
+  padding: 16px 6px !important;
+  box-sizing: border-box !important;
 }
 
 /* 高度辅助类 */
 .h-row {
-  height: 35px;
+  height: 45px;
 }
 
 .h-large {
-  height: 120px;
+  height: 140px;
   text-align: left;
   vertical-align: top;
 }
 
 .h-medium {
-  height: 80px;
+  height: 100px;
   text-align: left;
   vertical-align: top;
 }
 
 /* 底部签字区域 */
 .oa-table td.footer-row {
-  height: 35px;
-  padding: 5px 12px !important;
+  height: 36px;
+  padding: 6px 12px !important;
   vertical-align: middle;
 }
 
@@ -607,6 +610,7 @@ onMounted(() => {
   padding-right: 20px;
   gap: 20px;
   color: #444;
+  font-size: 16px;
 }
 
 .sign-input {
@@ -655,16 +659,15 @@ onMounted(() => {
 
 /* 子表头样式 */
 .sub-header {
-  height: 30px;
-
-  /* font-weight: bold; */
+  height: 36px;
+  font-size: 16px;
   color: #000;
   text-align: center;
   background-color: transparent;
 }
 
 .sub-content {
-  height: 50px;
+  height: 60px;
   vertical-align: top;
 }
 
@@ -699,6 +702,13 @@ onMounted(() => {
 
 /* 输入框样式适配（保留边框与收文一致） */
 :deep(.el-textarea__inner) {
+  font-family: SimSun, 'Songti SC', STSong, serif !important;
+  font-size: 16px !important;
   resize: none;
+}
+
+:deep(.el-input__inner) {
+  font-family: SimSun, 'Songti SC', STSong, serif !important;
+  font-size: 16px !important;
 }
 </style>

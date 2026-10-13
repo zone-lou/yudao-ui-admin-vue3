@@ -77,24 +77,24 @@
 
       <table class="oa-table">
         <colgroup>
-          <col style="width: 140px" />
+          <col style="width: 160px" />
           <col />
-          <col style="width: 140px" />
+          <col style="width: 160px" />
           <col style="width: 20%" />
         </colgroup>
         <tbody>
           <tr>
             <td colspan="4" style="padding: 0 !important">
-              <div class="flex w-full" style="min-height: 53px">
+              <div class="flex w-full" style="min-height: 58px">
                 <!-- 左侧 50%：来文机关 -->
                 <div class="flex items-stretch" style="width: 50%; border-right: 1px solid #d71920">
                   <div
                     class="label-cell flex items-center justify-center shrink-0"
-                    style="width: 140px; border-right: 1px solid #d71920"
+                    style="width: 160px; border-right: 1px solid #d71920"
                   >
                     来文机关
                   </div>
-                  <div class="data-text flex items-center flex-1" style="padding: 16px 12px">
+                  <div class="data-text flex items-center flex-1" style="padding: 18px 14px">
                     <span>{{ detailData.sendDept }}</span>
                   </div>
                 </div>
@@ -103,11 +103,11 @@
                 <div class="flex items-stretch" style="width: 50%">
                   <div
                     class="label-cell flex items-center justify-center shrink-0"
-                    style="width: 140px; border-right: 1px solid #d71920"
+                    style="width: 160px; border-right: 1px solid #d71920"
                   >
                     来文号
                   </div>
-                  <div class="data-text flex items-center flex-1" style="padding: 16px 12px">
+                  <div class="data-text flex items-center flex-1" style="padding: 18px 14px">
                     <span>{{ formatSendDocNumber(detailData.sendDocNumber) }}</span>
                   </div>
                 </div>
@@ -281,7 +281,7 @@
                   >
                   <span v-if="info.assigneeUser">{{ info.assigneeUser?.nickname }}:</span>
                   {{ info.comment }}
-                  <span class="text-xs text-gray-400 ml-2" v-if="info.endTime">{{
+                  <span class="text-sm text-gray-400 ml-2" v-if="info.endTime">{{
                     formatDate(info.endTime)
                   }}</span>
                 </div>
@@ -814,10 +814,10 @@ onMounted(() => {
 
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .oa-container {
-  width: 994px !important; /* 参照A4纸宽度 */
+  width: 1040px !important; /* 参照A4纸宽度微调放大 */
   max-width: 100% !important;
   min-height: 1123px !important; /* 参照A4高度比例 */
-  padding: 40px 50px !important; /* 适当减小左右留白 */
+  padding: 40px 45px !important; /* 适当减小左右留白，扩充表格实际可用宽度 */
   margin: 20px auto !important;
   font-family: SimSun, 'Songti SC', STSong, serif;
   background-color: #fff;
@@ -827,8 +827,8 @@ onMounted(() => {
 
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .doc-title {
-  margin-bottom: 20px;
-  font-size: 26px;
+  margin-bottom: 24px;
+  font-size: 30px;
   font-weight: bold;
   letter-spacing: 2px;
   color: #d71920;
@@ -846,8 +846,8 @@ onMounted(() => {
 #printDivTag .meta-info {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 5px;
-  font-size: 13px;
+  margin-bottom: 10px;
+  font-size: 16px;
   color: #333;
   align-items: center;
 }
@@ -858,7 +858,7 @@ onMounted(() => {
   min-width: 80px;
   padding: 0 5px;
   font-family: SimSun, 'Songti SC', STSong, serif;
-  font-size: 14px !important;
+  font-size: 17px !important;
   color: #000;
   text-align: left;
   text-decoration: none !important;
@@ -868,7 +868,7 @@ onMounted(() => {
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .data-text {
   font-family: SimSun, 'Songti SC', STSong, serif;
-  font-size: 15px !important; /* 稍微增大字体 */
+  font-size: 17px !important; /* 稍微增大字体 */
   color: #000;
   word-break: break-all;
   border-bottom: none !important;
@@ -884,9 +884,9 @@ onMounted(() => {
 
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .oa-table td {
-  padding: 16px 12px !important; /* 强制增大单元格上下内边距，使单行行高明显增高 */
-  font-size: 15px !important;
-  line-height: 1.5 !important;
+  padding: 18px 14px !important; /* 增大单元格上下左右内边距，使单行行高与留白更充裕 */
+  font-size: 17px !important;
+  line-height: 1.6 !important;
   color: #000;
   vertical-align: middle;
   border: 1px solid #d71920;
@@ -894,13 +894,16 @@ onMounted(() => {
 
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .label-cell {
-  width: 140px !important; /* 标签单元格稍微加宽以适配较大的留白和字体 */
+  width: 160px !important; /* 标签单元格加宽适配17px字体及长标题 */
+  font-size: 17px !important;
   font-weight: bold;
 
   /* color: #d71920; */
   text-align: center;
   white-space: nowrap;
   background-color: #fffbfc;
+  padding: 16px 6px !important;
+  box-sizing: border-box !important;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -928,7 +931,7 @@ onMounted(() => {
   width: 14px;
   height: 14px;
   margin-right: 4px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: bold;
   line-height: 1;
   vertical-align: middle;
@@ -949,18 +952,18 @@ onMounted(() => {
 
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .h-80 {
-  height: 100px; /* 从80增高到100 */
+  height: 120px; /* 从100增高到120 */
   vertical-align: top;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .h-40 {
-  height: 50px;
+  height: 55px;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .h-35 {
-  height: 45px;
+  height: 50px;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -970,11 +973,16 @@ onMounted(() => {
 
 /* stylelint-disable-next-line selector-id-pattern */
 #printDivTag .signature-row {
-  height: 30px;
-  padding-top: 2px;
-  font-size: 14px;
+  height: 36px;
+  padding-top: 4px;
+  font-size: 16px;
   color: #333;
   vertical-align: bottom;
+}
+
+:deep(.el-textarea__inner) {
+  font-family: SimSun, 'Songti SC', STSong, serif;
+  font-size: 16px;
 }
 
 /* --- 放入字典中的样式 (Style in Dictionary) --- */

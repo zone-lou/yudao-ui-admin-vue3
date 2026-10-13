@@ -475,7 +475,7 @@
 
                 <table class="oa-table">
                   <colgroup>
-                    <col style="width: 120px" />
+                    <col style="width: 160px" />
                     <col style="width: auto" />
                     <col style="width: 160px" />
                     <col style="width: 150px" />
@@ -1119,10 +1119,10 @@ defineExpose({ getFormValues })
 }
 
 #printDivTag .oa-container {
-  width: 994px !important;
+  width: 1040px !important;
   max-width: 100% !important;
   min-height: 1123px !important;
-  padding: 40px 50px !important;
+  padding: 40px 45px !important;
   margin: 20px auto !important;
   background-color: #fff;
   box-shadow: 0 4px 16px rgb(0 0 0 / 15%) !important;
@@ -1130,8 +1130,8 @@ defineExpose({ getFormValues })
 }
 
 #printDivTag .doc-title {
-  margin-bottom: 20px;
-  font-size: 26px;
+  margin-bottom: 24px;
+  font-size: 30px;
   font-weight: bold;
   letter-spacing: 2px;
   color: #d71920;
@@ -1141,8 +1141,8 @@ defineExpose({ getFormValues })
 #printDivTag .meta-info {
   display: flex;
   padding: 0 5px;
-  margin-bottom: 5px;
-  font-size: 15px;
+  margin-bottom: 12px;
+  font-size: 16px;
   color: #333;
 }
 
@@ -1163,16 +1163,16 @@ defineExpose({ getFormValues })
 
 #printDivTag .oa-table {
   width: 100%;
-  font-size: 15px !important;
+  font-size: 17px !important;
   border: 2px solid #d71920;
   border-collapse: collapse;
   table-layout: fixed;
 }
 
 #printDivTag .oa-table td {
-  padding: 16px 12px !important;
-  font-size: 15px !important;
-  line-height: 1.5 !important;
+  padding: 18px 14px !important;
+  font-size: 17px !important;
+  line-height: 1.6 !important;
   color: #000;
   word-wrap: break-word;
   vertical-align: middle;
@@ -1180,28 +1180,37 @@ defineExpose({ getFormValues })
 }
 
 #printDivTag .label-cell {
+  width: 160px !important;
+  font-size: 17px !important;
   font-weight: bold;
   color: #d71920;
   text-align: center;
   background-color: #fffbfc;
+  padding: 16px 6px !important;
+  box-sizing: border-box !important;
+}
+
+#printDivTag .data-text {
+  font-size: 17px !important;
 }
 
 #printDivTag .h-80 {
-  height: 80px;
+  height: 120px;
   vertical-align: top;
 }
 
 #printDivTag .h-60 {
-  height: 60px;
+  height: 70px;
 }
 
 #printDivTag .h-35 {
-  height: 35px;
+  height: 36px;
 }
 
 #printDivTag .oa-table td.signature-row {
-  height: 35px;
-  padding: 5px 12px !important;
+  height: 36px;
+  padding: 6px 12px !important;
+  font-size: 16px;
 }
 
 #printDivTag .sig-container {
@@ -1210,6 +1219,7 @@ defineExpose({ getFormValues })
   justify-content: space-around;
   height: 100%;
   color: #444;
+  font-size: 16px;
 }
 
 #printDivTag .sign-input {
@@ -1218,8 +1228,9 @@ defineExpose({ getFormValues })
 }
 
 #printDivTag .oa-table td.sub-header {
-  height: 35px;
-  padding: 5px 12px !important;
+  height: 36px;
+  padding: 6px 12px !important;
+  font-size: 16px;
   font-weight: normal;
   text-align: center;
 }
@@ -1254,5 +1265,15 @@ defineExpose({ getFormValues })
   width: 100%;
   padding-top: 10px;
   overflow: hidden;
+}
+
+:deep(.el-textarea__inner) {
+  font-family: SimSun, 'Songti SC', STSong, serif !important;
+  font-size: 16px !important;
+}
+
+:deep(.el-input__inner) {
+  font-family: SimSun, 'Songti SC', STSong, serif !important;
+  font-size: 16px !important;
 }
 </style>

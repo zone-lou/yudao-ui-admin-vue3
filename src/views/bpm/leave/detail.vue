@@ -7,9 +7,9 @@
 
     <table class="oa-table">
       <colgroup>
-        <col width="130px" />
-        <col width="35%" />
-        <col width="130px" />
+        <col style="width: 160px" />
+        <col style="width: 35%" />
+        <col style="width: 160px" />
         <col />
       </colgroup>
       <tbody>
@@ -92,7 +92,6 @@
                 :rows="1"
                 placeholder="请输入科室(单位)负责人意见"
                 class="w-full h-full"
-                style="border: none"
               />
             </div>
             <div v-else>
@@ -666,10 +665,10 @@ defineExpose({
 
 .oa-container {
   box-sizing: border-box !important;
-  width: 994px !important;
+  width: 1040px !important;
   max-width: 100% !important;
   min-height: 1123px !important;
-  padding: 40px 50px !important;
+  padding: 40px 45px !important;
   margin: 20px auto !important;
   font-family: SimSun, 'Songti SC', STSong, serif;
   background-color: #fff;
@@ -677,8 +676,8 @@ defineExpose({
 }
 
 .doc-title {
-  margin-bottom: 20px;
-  font-size: 26px;
+  margin-bottom: 24px;
+  font-size: 30px;
   font-weight: bold;
   letter-spacing: 1px;
   color: #b1351e;
@@ -687,26 +686,31 @@ defineExpose({
 
 .oa-table {
   width: 100%;
-  font-size: 15px !important;
+  font-size: 17px !important;
   border: 1px solid #8cb4e0;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .oa-table td {
-  padding: 16px 12px !important;
-  font-size: 15px !important;
-  line-height: 1.5 !important;
+  padding: 18px 14px !important;
+  font-size: 17px !important;
+  line-height: 1.6 !important;
   color: #333;
   vertical-align: middle;
   border: 1px solid #8cb4e0;
 }
 
 .label-cell {
+  width: 160px !important;
+  font-size: 17px !important;
   font-weight: bold;
   color: #333;
   text-align: center;
   white-space: nowrap;
   background-color: #dbe9f8;
+  padding: 16px 6px !important;
+  box-sizing: border-box !important;
 }
 
 .input-cell {
@@ -717,15 +721,16 @@ defineExpose({
 }
 
 .h-large {
-  height: 100px;
+  height: 140px;
 }
 
 .h-reason {
-  height: 120px;
+  height: 140px;
 }
 
 .signature-row {
-  padding: 5px 20px;
+  padding: 6px 20px;
+  font-size: 16px;
   color: #555;
   text-align: right;
   background-color: #fff;
@@ -755,6 +760,19 @@ defineExpose({
 
 :deep(.h-large .el-textarea__inner) {
   height: 100%;
+  font-family: SimSun, 'Songti SC', STSong, serif !important;
+  font-size: 16px !important;
   resize: none; /* 顺便去掉重置大小手柄以保持页面规整 */
+}
+
+:deep(.el-textarea__inner) {
+  font-family: SimSun, 'Songti SC', STSong, serif !important;
+  font-size: 16px !important;
+  resize: none;
+}
+
+:deep(.el-input__inner) {
+  font-family: SimSun, 'Songti SC', STSong, serif !important;
+  font-size: 16px !important;
 }
 </style>
