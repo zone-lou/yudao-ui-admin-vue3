@@ -66,26 +66,34 @@
   </ContentWrap>
 
   <ContentWrap>
+    <div class="mb-15px flex items-center justify-end gap-8px">
+      <BpmColumnSetting
+        v-model="checkedColumnKeys"
+        :columns="columnOptions"
+        @reset="resetColumns"
+      />
+    </div>
     <el-table
       v-loading="loading"
       :data="pivotTableData"
       :stripe="true"
       :show-overflow-tooltip="true"
       border
+      @header-dragend="handleHeaderDragend"
     >
-      <el-table-column
+      <el-table-column v-if="visibleColumn('deptName')" :width="getColumnWidth('deptName')" column-key="deptName"
         label="部门名称"
         align="center"
         prop="deptName"
         fixed="left"
-        min-width="120"
+        min-width="120" resizable
       />
-      <el-table-column
+      <el-table-column v-if="visibleColumn('nickname')" :width="getColumnWidth('nickname')" column-key="nickname"
         label="用户名称"
         align="center"
         prop="nickname"
         fixed="left"
-        min-width="100"
+        min-width="100" resizable
       >
         <template #default="scope">
           <el-link
@@ -99,7 +107,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column
+      <el-table-column :column-key="`type_${dict.value}`" :width="getColumnWidth(`type_${dict.value}`)" resizable
         v-for="dict in showLeaveDicts"
         :key="dict.value"
         :label="dict.label"
@@ -134,7 +142,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="总计" align="center" fixed="right" min-width="120">
+      <el-table-column v-if="visibleColumn('totalAll')" :width="getColumnWidth('totalAll')" column-key="totalAll" label="总计" align="center" fixed="right" min-width="120" resizable>
         <template #default="scope">
           <div
             v-if="scope.row.totalAll > 0 || scope.row.runningAll > 0"
@@ -170,8 +178,20 @@
     width="1500px"
     append-to-body
   >
-    <el-table v-loading="detailLoading" :data="pagedDetailList" border>
-      <el-table-column label="申请人员" align="center" width="100">
+    <div class="mb-15px flex items-center justify-end gap-8px">
+      <BpmColumnSetting
+        v-model="detailCheckedColumnKeys"
+        :columns="detailColumnOptions"
+        @reset="resetDetailColumns"
+      />
+    </div>
+    <el-table
+      v-loading="detailLoading"
+      :data="pagedDetailList"
+      border
+      @header-dragend="handleDetailHeaderDragend"
+    >
+      <el-table-column v-if="visibleDetailColumn('nickname')" column-key="nickname" label="申请人员" align="center" :width="getDetailColumnWidth('nickname', 100)" resizable>
         <template #default>
           {{ detailNickname }}
         </template>
@@ -182,30 +202,30 @@
       <!--          {{ formatDate(scope.row.applyDate) }}-->
       <!--        </template>-->
       <!--      </el-table-column>-->
-      <el-table-column label="开始时间" align="center" prop="qxjStartDate" width="160">
+      <el-table-column v-if="visibleDetailColumn('qxjStartDate')" column-key="qxjStartDate" label="开始时间" align="center" prop="qxjStartDate" :width="getDetailColumnWidth('qxjStartDate', 160)" resizable>
         <template #default="scope">
           {{ formatDateWithAmPm(scope.row.qxjStartDate) }}
         </template>
       </el-table-column>
-      <el-table-column label="结束时间" align="center" prop="qxjEndDate" width="160">
+      <el-table-column v-if="visibleDetailColumn('qxjEndDate')" column-key="qxjEndDate" label="结束时间" align="center" prop="qxjEndDate" :width="getDetailColumnWidth('qxjEndDate', 160)" resizable>
         <template #default="scope">
           {{ formatDateWithAmPm(scope.row.qxjEndDate) }}
         </template>
       </el-table-column>
-      <el-table-column label="天数" align="center" prop="totalTs" width="80" />
-      <el-table-column label="请假类型" align="center" prop="qxjType" width="110">
+      <el-table-column v-if="visibleDetailColumn('totalTs')" column-key="totalTs" label="天数" align="center" prop="totalTs" :width="getDetailColumnWidth('totalTs', 80)" resizable />
+      <el-table-column v-if="visibleDetailColumn('qxjType')" column-key="qxjType" label="请假类型" align="center" prop="qxjType" :width="getDetailColumnWidth('qxjType', 110)" resizable>
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.BPM_LEAVE_TYPE" :value="scope.row.qxjType" />
         </template>
       </el-table-column>
-      <el-table-column label="请假原因" align="center" prop="sjReason" show-overflow-tooltip />
-      <el-table-column
+      <el-table-column v-if="visibleDetailColumn('sjReason')" :width="getDetailColumnWidth('sjReason')" column-key="sjReason" label="请假原因" align="center" prop="sjReason" show-overflow-tooltip resizable />
+      <el-table-column v-if="visibleDetailColumn('currentNodeName')" :width="getDetailColumnWidth('currentNodeName')" column-key="currentNodeName"
         label="当前环节"
         align="center"
         prop="currentNodeName"
-        show-overflow-tooltip
+        show-overflow-tooltip resizable
       />
-      <el-table-column label="当前办理人" align="center" prop="currentAssigneeNames" />
+      <el-table-column v-if="visibleDetailColumn('currentAssigneeNames')" :width="getDetailColumnWidth('currentAssigneeNames')" column-key="currentAssigneeNames" label="当前办理人" align="center" prop="currentAssigneeNames" resizable />
     </el-table>
 
     <template #footer>
@@ -214,7 +234,8 @@
           v-model:current-page="currentPage"
           v-model:page-size="pageSize"
           :total="detailList.length"
-          :page-sizes="[5, 10, 20]"
+          :page-sizes="[5, 10, 20, 30, 50, 100]"
+          @size-change="currentPage = 1"
           layout="total, sizes, prev, pager, next, jumper"
         />
       </div>
@@ -223,10 +244,13 @@
 </template>
 
 <script setup lang="ts">
+import { useBpmPageSize } from '@/hooks/bpm/useBpmPageSize'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import { getSimpleDeptList } from '@/api/system/dept'
 import * as LeaveApi from '@/api/bpm/leave'
 import { defaultProps, handleTree } from '@/utils/tree'
+import BpmColumnSetting from '@/views/bpm/components/BpmColumnSetting.vue'
+import { useBpmColumnSetting } from '@/hooks/bpm/useBpmColumnSetting'
 
 defineOptions({ name: 'BpmLeaveSummary' })
 
@@ -237,6 +261,38 @@ const queryFormRef = ref()
 const deptOptions = ref([])
 const leaveDicts = getDictOptions(DICT_TYPE.BPM_LEAVE_TYPE)
 
+const {
+  columnOptions,
+  checkedColumnKeys,
+  visibleColumn,
+  getColumnWidth,
+  handleHeaderDragend,
+  resetColumns
+} = useBpmColumnSetting('bpm:leave:summary:columns', [
+  { key: 'deptName', label: '部门名称' },
+  { key: 'nickname', label: '用户名称' },
+  ...leaveDicts.map((dict) => ({ key: `type_${dict.value}`, label: dict.label })),
+  { key: 'totalAll', label: '总计' }
+])
+const {
+  columnOptions: detailColumnOptions,
+  checkedColumnKeys: detailCheckedColumnKeys,
+  visibleColumn: visibleDetailColumn,
+  getColumnWidth: getDetailColumnWidth,
+  handleHeaderDragend: handleDetailHeaderDragend,
+  resetColumns: resetDetailColumns
+} = useBpmColumnSetting('bpm:leave:summary:detail:columns', [
+  { key: 'nickname', label: '申请人员' },
+  { key: 'qxjStartDate', label: '开始时间' },
+  { key: 'qxjEndDate', label: '结束时间' },
+  { key: 'totalTs', label: '天数' },
+  { key: 'qxjType', label: '请假类型' },
+  { key: 'sjReason', label: '请假原因' },
+  { key: 'currentNodeName', label: '当前环节' },
+  { key: 'currentAssigneeNames', label: '当前办理人' }
+])
+
+
 // 详情相关状态
 const detailVisible = ref(false)
 const detailLoading = ref(false)
@@ -245,7 +301,7 @@ const detailNickname = ref('') // 【修改点 2】 存储当前详情对应的�
 
 // 前端分页状态
 const currentPage = ref(1)
-const pageSize = ref(10)
+const pageSize = useBpmPageSize('bpm:leave:summary:detail:pageSize', [5, 10, 20, 30, 50, 100])
 
 const queryParams = reactive({
   year: new Date().getFullYear().toString(),
@@ -264,10 +320,11 @@ const pagedDetailList = computed(() => {
 })
 
 const showLeaveDicts = computed(() => {
+  const visibleDicts = leaveDicts.filter((dict) => visibleColumn(`type_${dict.value}`))
   if (queryParams.qxjType) {
-    return leaveDicts.filter((d) => String(d.value) === String(queryParams.qxjType))
+    return visibleDicts.filter((d) => String(d.value) === String(queryParams.qxjType))
   }
-  return leaveDicts
+  return visibleDicts
 })
 
 const pivotTableData = computed(() => {

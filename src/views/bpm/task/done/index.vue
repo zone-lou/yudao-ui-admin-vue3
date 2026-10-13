@@ -357,6 +357,7 @@
 </template>
 
 <script lang="ts" setup>
+import { useBpmPageSize } from '@/hooks/bpm/useBpmPageSize'
 import { dateFormatter, formatPast2 } from '@/utils/formatTime'
 import * as TaskApi from '@/api/bpm/task'
 import { CategoryApi, CategoryVO } from '@/api/bpm/category'
@@ -426,9 +427,10 @@ const mergeProcessDefinitionList = (definitions: any[]) => {
 }
 
 // 查询参数 (保持与 Todo 一致的参数结构，用于后端 Filter)
+const pageSize = useBpmPageSize('bpm:task:done:pageSize')
 const queryParams = reactive({
   pageNo: 1,
-  pageSize: 10,
+  pageSize,
   name: '',
   category: undefined,
   processDefinitionKey: '',

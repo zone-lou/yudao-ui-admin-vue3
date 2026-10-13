@@ -170,9 +170,10 @@
       :show-overflow-tooltip="true"
       border
       @sort-change="handleSortChange"
+      @header-dragend="handleHeaderDragend"
     >
-      <el-table-column type="index" label="序号" width="60" align="center" fixed="left" resizable />
-      <el-table-column v-if="visibleColumn('subject')" label="标题" align="left" prop="subject" show-overflow-tooltip width="355" sortable="custom" resizable>
+      <el-table-column column-key="index" type="index" label="序号" :width="getColumnWidth('index', 60)" align="center" fixed="left" resizable />
+      <el-table-column column-key="subject" v-if="visibleColumn('subject')" label="标题" align="left" prop="subject" show-overflow-tooltip :width="getColumnWidth('subject', 355)" sortable="custom" resizable>
         <template #default="scope">
           <span
             class="link-type"
@@ -194,7 +195,7 @@
 <!--        </template>-->
 <!--      </el-table-column>-->
 
-      <el-table-column v-if="visibleColumn('receiveDocNumber')" label="收文编号" align="center" prop="receiveDocNumber" min-width="180" sortable="custom" resizable>
+      <el-table-column :width="getColumnWidth('receiveDocNumber')" column-key="receiveDocNumber" v-if="visibleColumn('receiveDocNumber')" label="收文编号" align="center" prop="receiveDocNumber" min-width="180" sortable="custom" resizable>
         <template #default="scope">
           <div class="flex items-center justify-center">
             <span>{{ scope.row.receiveDocNumber }}</span>
@@ -207,7 +208,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column v-if="visibleColumn('source')" label="来源" align="center" prop="source" width="128" sortable="custom" resizable>
+      <el-table-column column-key="source" v-if="visibleColumn('source')" label="来源" align="center" prop="source" :width="getColumnWidth('source', 128)" sortable="custom" resizable>
         <template #default="scope">
           <el-tag :style="getSourceTagStyle(scope.row.source)">
             {{ getSourceText(scope.row.source) }}
@@ -215,7 +216,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column v-if="visibleColumn('sendDept')" label="来文单位" align="center" prop="sendDept" min-width="150" sortable="custom" resizable>
+      <el-table-column :width="getColumnWidth('sendDept')" column-key="sendDept" v-if="visibleColumn('sendDept')" label="来文单位" align="center" prop="sendDept" min-width="150" sortable="custom" resizable>
         <template #default="scope">
           <template v-if="scope.row.sendDept">
             <el-tag :style="getTagStyle('sendDept', scope.row.sendDept)">
@@ -225,12 +226,12 @@
           <span v-else class="text-gray-400">—</span>
         </template>
       </el-table-column>
-      <el-table-column v-if="visibleColumn('sendDocNumber')" label="来文字号" align="center" prop="sendDocNumber" min-width="150" sortable="custom" resizable>
+      <el-table-column :width="getColumnWidth('sendDocNumber')" column-key="sendDocNumber" v-if="visibleColumn('sendDocNumber')" label="来文字号" align="center" prop="sendDocNumber" min-width="150" sortable="custom" resizable>
         <template #default="scope">
           {{ formatSendDocNumber(scope.row.sendDocNumber) }}
         </template>
       </el-table-column>
-      <el-table-column v-if="visibleColumn('docSecondClass')" label="文件类别" align="center" prop="docSecondClass" width="120" sortable="custom" resizable>
+      <el-table-column column-key="docSecondClass" v-if="visibleColumn('docSecondClass')" label="文件类别" align="center" prop="docSecondClass" :width="getColumnWidth('docSecondClass', 120)" sortable="custom" resizable>
         <template #default="scope">
           <el-tag
             v-if="String(scope.row.docSecondClass ?? '').trim()"
@@ -241,7 +242,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column v-if="visibleColumn('urgencyDegree')" label="紧急程度" align="center" prop="urgencyDegree" width="120" sortable="custom" resizable>
+      <el-table-column column-key="urgencyDegree" v-if="visibleColumn('urgencyDegree')" label="紧急程度" align="center" prop="urgencyDegree" :width="getColumnWidth('urgencyDegree', 120)" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag
             v-if="scope.row.urgencyDegree != null"
@@ -251,23 +252,23 @@
         </template>
       </el-table-column>
 
-      <el-table-column v-if="visibleColumn('receiveTime')" label="收文日期" align="center" prop="receiveTime" width="200px" sortable="custom" resizable>
+      <el-table-column column-key="receiveTime" v-if="visibleColumn('receiveTime')" label="收文日期" align="center" prop="receiveTime" :width="getColumnWidth('receiveTime', 200)" sortable="custom" resizable>
         <template #default="scope">
           {{ scope.row.receiveTime ? dateUtil(scope.row.receiveTime).format('YYYY-MM-DD HH:mm') : '' }}
         </template>
       </el-table-column>
-      <el-table-column v-if="visibleColumn('remark')" label="备注" align="center" prop="remark" min-width="180" show-overflow-tooltip resizable />
-      <el-table-column v-if="visibleColumn('zhubandate')" label="主办办结时间" align="center" prop="zhubandate" width="180" sortable="custom" resizable>
+      <el-table-column :width="getColumnWidth('remark')" column-key="remark" v-if="visibleColumn('remark')" label="备注" align="center" prop="remark" min-width="180" show-overflow-tooltip resizable />
+      <el-table-column column-key="zhubandate" v-if="visibleColumn('zhubandate')" label="主办办结时间" align="center" prop="zhubandate" :width="getColumnWidth('zhubandate', 180)" sortable="custom" resizable>
         <template #default="scope">
           {{ scope.row.zhubandate ? dateUtil(scope.row.zhubandate).format('YYYY-MM-DD HH:mm') : '' }}
         </template>
       </el-table-column>
-      <el-table-column v-if="visibleColumn('xiebandate')" label="协办办结时间" align="center" prop="xiebandate" width="180" sortable="custom" resizable>
+      <el-table-column column-key="xiebandate" v-if="visibleColumn('xiebandate')" label="协办办结时间" align="center" prop="xiebandate" :width="getColumnWidth('xiebandate', 180)" sortable="custom" resizable>
         <template #default="scope">
           {{ scope.row.xiebandate ? dateUtil(scope.row.xiebandate).format('YYYY-MM-DD HH:mm') : '' }}
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="180px" fixed="right" resizable>
+      <el-table-column column-key="operation" label="操作" align="center" :width="getColumnWidth('operation', 180)" fixed="right" resizable>
         <template #default="scope">
           <el-button
             v-if="!scope.row.processInstanceId"
@@ -312,6 +313,7 @@
 </template>
 
 <script setup lang="ts">
+import { useBpmPageSize } from '@/hooks/bpm/useBpmPageSize'
 import { getIntDictOptions, getStrDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateUtil } from '@/utils/dateUtil'
 import { defaultShortcuts } from '@/utils/formatTime'
@@ -331,9 +333,10 @@ const loading = ref(true) // 列表的加载中
 const mounted = ref(false)
 const list = ref<ReceiveDoc[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
+const pageSize = useBpmPageSize('bpm:receivedoc:pageSize')
 const queryParams = reactive({
   pageNo: 1,
-  pageSize: 10,
+  pageSize,
   docClass: undefined,
   sendDept: undefined,
   sendDocNumber: undefined,
@@ -366,7 +369,14 @@ const receiveDocStatusOptions = computed(() =>
       }
     })
 )
-const { columnOptions, checkedColumnKeys, visibleColumn, resetColumns } = useBpmColumnSetting(
+const {
+  columnOptions,
+  checkedColumnKeys,
+  visibleColumn,
+  getColumnWidth,
+  handleHeaderDragend,
+  resetColumns
+} = useBpmColumnSetting(
   'bpm:receivedoc:columns',
   [
     { key: 'subject', label: '标题' },

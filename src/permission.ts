@@ -62,6 +62,11 @@ const whiteList = [
 router.beforeEach(async (to, from, next) => {
   start()
   loadStart()
+  // SSO 回调和错误页不依赖旧登录状态，先放行再执行换票。
+  if (to.path === '/sso-redirect' || to.path === '/sso-error') {
+    next()
+    return
+  }
   if (getAccessToken()) {
     if (to.path === '/login') {
       next({ path: '/' })

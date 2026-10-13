@@ -93,5 +93,9 @@ export const smsResetPassword = (data: any) => {
 
 
 export const ssoExchangeApi = (ticket: string) => {
-  return request.post({ url: '/system/auth/sso-exchange', params: { ticket } })
+  return request.post({
+    url: '/system/auth/sso-exchange',
+    params: { ticket },
+    headers: { isToken: false }
+  })
 }

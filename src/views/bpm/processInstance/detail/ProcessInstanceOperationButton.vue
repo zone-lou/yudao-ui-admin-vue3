@@ -204,6 +204,7 @@
       <div class="approve-send-dialog__header">
         <span :id="titleId" :class="titleClass">发送</span>
         <div class="approve-send-dialog__actions" @mousedown.stop>
+          <el-checkbox v-model="sendSms" @change="saveSmsPreference">发送短信</el-checkbox>
           <button
             type="button"
             class="approve-send-dialog__action"
@@ -643,6 +644,23 @@ const closePopover = (type: string, formRef: FormInstance | undefined) => {
 const activeTab = ref('')
 const approveDialogVisible = ref(false)
 const approveDialogCollapsed = ref(false)
+// 按租户和用户保存偏好；每次请求发送当前值，不写入流程变量。
+const sendSms = ref(true)
+const getSmsPreferenceKey = () => `bpm:send-sms:${getTenantId() || 'default'}:${userId}`
+const restoreSmsPreference = () => {
+  try {
+    sendSms.value = localStorage.getItem(getSmsPreferenceKey()) !== 'false'
+  } catch {
+    sendSms.value = true
+  }
+}
+const saveSmsPreference = () => {
+  try {
+    localStorage.setItem(getSmsPreferenceKey(), String(sendSms.value))
+  } catch {
+    // 存储不可用时仍允许本次发送。
+  }
+}
 const approvalNodes = ref<any[]>([])
 
 type SendSelectionMemory = {
@@ -794,6 +812,7 @@ const handleSendClick = async () => {
 
 /** 一键直接办结节点（跳过弹窗选择） */
 const handleDirectFinish = async () => {
+  restoreSmsPreference()
   // 1. 校验流程表单
   const valid = await validateNormalForm()
   if (!valid) {
@@ -864,6 +883,7 @@ const handleDirectFinish = async () => {
     id: runningTask.value.id,
     reason: reason,
     variables: variables,
+    sendSms: sendSms.value,
     nextNodeAssignees: {} // 结束节点时无下一处理人
   } as any
 
@@ -885,6 +905,7 @@ const handleDirectFinish = async () => {
 
 /** 打开办理弹窗 */
 const openApproveDialog = async () => {
+  restoreSmsPreference()
   // 校验流程表单
   const valid = await validateNormalForm()
   if (!valid) {
@@ -1430,6 +1451,7 @@ const submitSelectedNodes = async () => {
     reason: approveReasonForm.reason,
     variables: variablesData, // 合并变量
     nextNodeAssignees,
+    sendSms: sendSms.value,
     addSignUserIds: addSignUserIds.length > 0 ? addSignUserIds : undefined
   } as any
   // 签名
