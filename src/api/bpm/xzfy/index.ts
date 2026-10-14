@@ -26,6 +26,7 @@ export interface XzfyKz {
 
 /** 行政复议信息 */
 export interface Xzfy {
+  sendSms?: boolean // 本次派发待办短信，缺省时默认发送
   id: number // 主键
   xmGuid: string // 备用主键
   swWh: string // 来文号

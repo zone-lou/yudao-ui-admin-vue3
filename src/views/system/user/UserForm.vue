@@ -57,6 +57,18 @@
         </el-col>
       </el-row>
       <el-row>
+        <el-col :span="24">
+          <el-form-item label="验证码接收手机号" prop="smsMobile">
+            <el-input
+              v-model="formData.smsMobile"
+              maxlength="11"
+              placeholder="留空使用上面的手机号码"
+              clearable
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
         <el-col :span="12">
           <el-form-item v-if="formData.id === undefined" label="用户名称" prop="username">
             <el-input v-model="formData.username" placeholder="请输入用户名称" />
@@ -136,6 +148,7 @@ const formData = ref({
   deptId: '',
   deptIds: [] as number[],
   mobile: '',
+  smsMobile: '',
   email: '',
   id: undefined,
   username: '',
@@ -155,6 +168,13 @@ const formRules = reactive<FormRules>({
       type: 'email',
       message: '请输入正确的邮箱地址',
       trigger: ['blur', 'change']
+    }
+  ],
+  smsMobile: [
+    {
+      pattern: /^1[3-9]\d{9}$/,
+      message: '请输入正确的验证码接收手机号',
+      trigger: 'blur'
     }
   ],
   mobile: [
@@ -235,6 +255,7 @@ const resetForm = () => {
     deptId: '',
     deptIds: [] as number[],
     mobile: '',
+    smsMobile: '',
     email: '',
     id: undefined,
     username: '',

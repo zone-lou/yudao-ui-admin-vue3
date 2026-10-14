@@ -17,12 +17,6 @@ const router = useRouter()
 const route = useRoute()
 // const userStore = useUserStore()
 
-//获取租户ID
-const getTenantId = async () => {
-  const res = await LoginApi.getTenantIdByName('芋道源码')
-  authUtil.setTenantId(res)
-}
-
 onMounted(async () => {
   // 1. 获取 URL 中的 ticket 参数
   const ticket = route.query.ticket as string
@@ -34,7 +28,8 @@ onMounted(async () => {
   }
 
   try {
-    await getTenantId()
+    // 与后端 SSO 保持一致，固定使用租户 1。
+    authUtil.setTenantId(1)
     // 2. 调用后端接口，用 Ticket 换取 Token
 
     // 假设 res 已经被响应拦截器处理过，直接返回了 data 部分

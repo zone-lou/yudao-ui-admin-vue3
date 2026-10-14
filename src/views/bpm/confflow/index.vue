@@ -97,24 +97,25 @@
       :show-overflow-tooltip="true"
       border
       @sort-change="handleSortChange"
+      @header-dragend="handleHeaderDragend"
     >
-      <el-table-column type="index" label="序号" width="60" align="center" fixed="left" resizable />
+      <el-table-column column-key="index" type="index" label="序号" :width="getColumnWidth('index', 60)" align="center" fixed="left" resizable />
       <!--      <el-table-column label="申请人" align="center" prop="userName" />-->
       <!--      <el-table-column label="申请人部门" align="center" prop="deptName" />-->
 
-      <el-table-column v-if="visibleColumn('title')" label="会议名称" prop="title" min-width="280" show-overflow-tooltip sortable="custom" resizable>
+      <el-table-column :width="getColumnWidth('title')" column-key="title" v-if="visibleColumn('title')" label="会议名称" prop="title" min-width="280" show-overflow-tooltip sortable="custom" resizable>
         <template #default="scope">
           <span class="link-type" @click="handleRecord(scope.row)">{{ scope.row.title }}</span>
         </template>
       </el-table-column>
-      <el-table-column v-if="visibleColumn('startDate')" label="会议时间" align="center" prop="startDate" width="165" sortable="custom" resizable>
+      <el-table-column column-key="startDate" v-if="visibleColumn('startDate')" label="会议时间" align="center" prop="startDate" :width="getColumnWidth('startDate', 165)" sortable="custom" resizable>
         <template #default="scope">
           {{ scope.row.startDate ? dateUtil(scope.row.startDate).format('YYYY-MM-DD HH:mm') : '' }}
         </template>
       </el-table-column>
-      <el-table-column v-if="visibleColumn('venue')" label="会议地点" prop="venue" min-width="180" show-overflow-tooltip sortable="custom" resizable />
-      <el-table-column v-if="visibleColumn('joinUnit')" label="召集单位" prop="joinUnit" min-width="150" show-overflow-tooltip sortable="custom" resizable />
-      <el-table-column
+      <el-table-column :width="getColumnWidth('venue')" column-key="venue" v-if="visibleColumn('venue')" label="会议地点" prop="venue" min-width="180" show-overflow-tooltip sortable="custom" resizable />
+      <el-table-column :width="getColumnWidth('joinUnit')" column-key="joinUnit" v-if="visibleColumn('joinUnit')" label="召集单位" prop="joinUnit" min-width="150" show-overflow-tooltip sortable="custom" resizable />
+      <el-table-column :width="getColumnWidth('offerUnit')" column-key="offerUnit"
         v-if="visibleColumn('offerUnit')"
         label="我局参会科室"
         prop="offerUnit"
@@ -123,7 +124,7 @@
         sortable="custom"
         resizable
       />
-      <el-table-column v-if="visibleColumn('status')" label="办理状态" align="center" prop="status" width="110" sortable="custom" resizable>
+      <el-table-column column-key="status" v-if="visibleColumn('status')" label="办理状态" align="center" prop="status" :width="getColumnWidth('status', 110)" sortable="custom" resizable>
         <template #default="scope">
           <div class="flex items-center justify-center">
             <el-tag v-if="scope.row.status === 0 && !scope.row.processInstanceId && !(scope.row as any).projectId" type="info">
@@ -138,15 +139,15 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column v-if="visibleColumn('userName')" label="申请人" align="center" prop="userName" width="120" sortable="custom" resizable />
-      <el-table-column v-if="visibleColumn('deptName')" label="申请人部门" align="center" prop="deptName" min-width="140" show-overflow-tooltip sortable="custom" resizable />
-      <el-table-column v-if="visibleColumn('applyDate')" label="申请日期" align="center" prop="applyDate" width="165" sortable="custom" resizable>
+      <el-table-column column-key="userName" v-if="visibleColumn('userName')" label="申请人" align="center" prop="userName" :width="getColumnWidth('userName', 120)" sortable="custom" resizable />
+      <el-table-column :width="getColumnWidth('deptName')" column-key="deptName" v-if="visibleColumn('deptName')" label="申请人部门" align="center" prop="deptName" min-width="140" show-overflow-tooltip sortable="custom" resizable />
+      <el-table-column column-key="applyDate" v-if="visibleColumn('applyDate')" label="申请日期" align="center" prop="applyDate" :width="getColumnWidth('applyDate', 165)" sortable="custom" resizable>
         <template #default="scope">
           {{ scope.row.applyDate ? dateUtil(scope.row.applyDate).format('YYYY-MM-DD HH:mm') : '' }}
         </template>
       </el-table-column>
-      <el-table-column v-if="visibleColumn('offerPerson')" label="我局参会人员" prop="offerPerson" min-width="180" show-overflow-tooltip sortable="custom" resizable />
-      <el-table-column label="操作" align="center" width="180" fixed="right" resizable>
+      <el-table-column :width="getColumnWidth('offerPerson')" column-key="offerPerson" v-if="visibleColumn('offerPerson')" label="我局参会人员" prop="offerPerson" min-width="180" show-overflow-tooltip sortable="custom" resizable />
+      <el-table-column column-key="operation" label="操作" align="center" :width="getColumnWidth('operation', 180)" fixed="right" resizable>
         <template #default="scope">
           <el-button link type="primary" @click="handleDetail(scope.row)">
             详情
@@ -182,6 +183,7 @@
 </template>
 
 <script setup lang="ts">
+import { useBpmPageSize } from '@/hooks/bpm/useBpmPageSize'
 import { dateUtil } from '@/utils/dateUtil'
 import { ConfflowApi, Confflow } from '@/api/bpm/confflow'
 import { useBpmInvalidate } from '@/hooks/bpm/useBpmInvalidate'
@@ -200,9 +202,10 @@ const { push } = useRouter()
 const loading = ref(true) // 列表的加载中
 const list = ref<Confflow[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
+const pageSize = useBpmPageSize('bpm:confflow:pageSize')
 const queryParams = reactive({
   pageNo: 1,
-  pageSize: 10,
+  pageSize,
   userId: undefined,
   userName: undefined,
   deptId: undefined,
@@ -221,7 +224,14 @@ const queryParams = reactive({
   orderDirection: undefined as string | undefined
 })
 const queryFormRef = ref() // 搜索的表单
-const { columnOptions, checkedColumnKeys, visibleColumn, resetColumns } = useBpmColumnSetting(
+const {
+  columnOptions,
+  checkedColumnKeys,
+  visibleColumn,
+  getColumnWidth,
+  handleHeaderDragend,
+  resetColumns
+} = useBpmColumnSetting(
   'bpm:confflow:columns',
   [
     { key: 'title', label: '会议名称' },

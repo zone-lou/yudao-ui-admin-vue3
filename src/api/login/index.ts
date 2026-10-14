@@ -2,12 +2,13 @@ import request from '@/config/axios'
 import type { RegisterVO, UserLoginVO } from './types'
 
 export interface SmsCodeVO {
-  mobile: string
+  username?: string
+  mobile?: string
   scene: number
 }
 
 export interface SmsLoginVO {
-  mobile: string
+  username: string
   code: string
 }
 
@@ -92,5 +93,9 @@ export const smsResetPassword = (data: any) => {
 
 
 export const ssoExchangeApi = (ticket: string) => {
-  return request.post({ url: '/system/auth/sso-exchange', params: { ticket } })
+  return request.post({
+    url: '/system/auth/sso-exchange',
+    params: { ticket },
+    headers: { isToken: false }
+  })
 }

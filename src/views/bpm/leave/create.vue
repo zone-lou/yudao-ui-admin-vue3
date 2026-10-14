@@ -72,13 +72,7 @@
                       <td class="label-cell"><span class="text-red-500 mr-5px">*</span>申请日期</td>
                       <td class="input-cell">
                         <el-form-item prop="applyDate" class="mb-0">
-                          <el-date-picker
-                            v-model="formData.applyDate"
-                            type="date"
-                            value-format="x"
-                            placeholder="选择日期"
-                            style="width: 100%"
-                          />
+                          <span>{{ formatDate(formData.applyDate) }}</span>
                         </el-form-item>
                       </td>
                     </tr>
@@ -291,6 +285,7 @@
   </el-row>
 
   <ProcessSendDialog
+    :show-sms="true"
     ref="sendDialogRef"
     title="发送请假申请"
     :show-reason="false"
@@ -977,7 +972,7 @@ const handleSave = async () => {
 }
 
 // 接收弹窗返回的 assignees 和 variables
-const submitForm = async (submitData: { nextNodeAssignees: any; variables: any }) => {
+const submitForm = async (submitData: { nextNodeAssignees: any; variables: any; sendSms: boolean }) => {
   formLoading.value = true
   try {
     const data = buildRequestData()
@@ -992,6 +987,7 @@ const submitForm = async (submitData: { nextNodeAssignees: any; variables: any }
 
     // 携带下一步办理人
     data.nextNodeAssignees = submitData.nextNodeAssignees
+    data.sendSms = submitData.sendSms
 
     if (data.id) {
       await leaveApi.createFlowLeave(data)

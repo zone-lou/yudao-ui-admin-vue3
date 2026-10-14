@@ -207,6 +207,7 @@
   </el-row>
 
   <ProcessSendDialog
+    :show-sms="true"
     ref="sendDialogRef"
     title="发送会议报告单"
     :show-reason="false"
@@ -376,11 +377,12 @@ const handleOpenDialog = async () => {
 }
 
 /** 接收弹窗返回的 assignees 和 variables 并正式提交业务表单 */
-const submitProcess = async (submitData: { nextNodeAssignees: any; variables: any }) => {
+const submitProcess = async (submitData: { nextNodeAssignees: any; variables: any; sendSms: boolean }) => {
   formLoading.value = true
   try {
     const data = buildRequestData()
     data.nextNodeAssignees = submitData.nextNodeAssignees
+    data.sendSms = submitData.sendSms
     if (submitData.variables && Object.keys(submitData.variables).length > 0) {
       data.processVariablesStr = JSON.stringify(submitData.variables)
     }

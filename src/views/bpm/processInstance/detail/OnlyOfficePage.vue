@@ -6,11 +6,10 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref } from 'vue'
+import { nextTick, onMounted, onBeforeUnmount, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { getConfigKey } from '@/api/infra/config'
-
 
 defineOptions({ name: 'BpmOnlyOfficeEditor' })
 
@@ -27,24 +26,49 @@ const loading = ref(true)
 const errorMsg = ref('')
 let editorInstance: any = null
 
-function loadScript(url: string, callback: () => void) {
-  if ((window as any).DocsAPI) {
-    callback()
-    return
-  }
-  const existing = document.querySelector(`script[src="${url}"]`)
-  if (existing) {
-    existing.addEventListener('load', callback)
-    return
-  }
-  const script = document.createElement('script')
-  script.src = url
-  script.onload = callback
-  script.onerror = () => {
-    errorMsg.value = 'OnlyOffice 服务不可用，请确认服务已启动'
-    loading.value = false
-  }
-  document.head.appendChild(script)
+let editorLoadTimer: ReturnType<typeof setTimeout> | undefined
+let disposed = false
+
+function clearEditorLoadTimer() {
+  clearTimeout(editorLoadTimer)
+  editorLoadTimer = undefined
+}
+
+function loadScript(url: string): Promise<void> {
+  if ((window as any).DocsAPI?.DocEditor) return Promise.resolve()
+
+  return new Promise((resolve, reject) => {
+    const existing = Array.from(document.scripts).find(
+      (script) => script.src === new URL(url, window.location.href).href
+    )
+    const script = existing || document.createElement('script')
+    const cleanup = () => {
+      clearTimeout(timer)
+      script.removeEventListener('load', onLoad)
+      script.removeEventListener('error', onError)
+    }
+    const fail = (message: string) => {
+      cleanup()
+      script.remove()
+      reject(new Error(message))
+    }
+    const onLoad = () => {
+      if (!(window as any).DocsAPI?.DocEditor) {
+        fail('OnlyOffice SDK 无效，请检查服务地址是否返回正确的 JavaScript')
+        return
+      }
+      cleanup()
+      resolve()
+    }
+    const onError = () => fail('OnlyOffice 服务连接失败，请检查服务是否启动及网络是否可达')
+    const timer = setTimeout(() => fail('OnlyOffice SDK 加载超时，请检查服务地址和网络连接'), 15000)
+    script.addEventListener('load', onLoad)
+    script.addEventListener('error', onError)
+    if (!existing) {
+      script.src = url
+      document.head.appendChild(script)
+    }
+  })
 }
 
 function initEditor(fileUrl: string) {
@@ -57,7 +81,17 @@ function initEditor(fileUrl: string) {
 
   if (editorInstance) editorInstance.destroyEditor()
 
+  clearEditorLoadTimer()
+  editorLoadTimer = setTimeout(() => {
+    if (loading.value) {
+      loading.value = false
+      errorMsg.value = '文档加载超时，请检查 OnlyOffice 服务连接及文档下载是否正常后刷新重试'
+    }
+  }, 60000)
+
   editorInstance = new DocsAPI.DocEditor('onlyoffice-editor', {
+    width: '100%',
+    height: '100%',
     document: {
       fileType: 'docx',
       key: 'print_' + id + '_' + Date.now(),
@@ -81,21 +115,22 @@ function initEditor(fileUrl: string) {
     },
     events: {
       onDocumentReady: () => {
+        clearEditorLoadTimer()
         loading.value = false
+        errorMsg.value = ''
       },
-      onError: () => {
+      onError: (event: { data?: { errorCode?: number; errorDescription?: string } }) => {
+        clearEditorLoadTimer()
         loading.value = false
-        errorMsg.value = '编辑器加载失败'
+        const code = event.data?.errorCode
+        const description = event.data?.errorDescription
+        errorMsg.value =
+          '编辑器加载失败' +
+          (code != null ? `（错误码：${code}）` : '') +
+          (description ? ': ' + description : '')
       }
     }
   })
-
-  setTimeout(() => {
-    if (loading.value) {
-      loading.value = false
-      errorMsg.value = errorMsg.value || '编辑器加载超时，请刷新重试'
-    }
-  }, 15000)
 }
 
 onMounted(async () => {
@@ -113,6 +148,9 @@ onMounted(async () => {
     const externalPrefix = extRes?.data ?? extRes
     const internalPrefix = intRes?.data ?? intRes
     let fileUrl = await ProcessInstanceApi.getProcessInstancePrintWordFile(id)
+    if (typeof fileUrl !== 'string' || !fileUrl.trim()) {
+      throw new Error('获取文件地址失败')
+    }
     // 外网前缀替换为内网前缀，OnlyOffice 容器才能下载
     if (
       externalPrefix &&
@@ -122,21 +160,20 @@ onMounted(async () => {
     ) {
       fileUrl = fileUrl.replace(externalPrefix, internalPrefix)
     }
-    if (!fileUrl) {
-      errorMsg.value = '获取文件地址失败'
-      loading.value = false
-      return
-    }
     await nextTick()
-    loadScript(ONLYOFFICE_API_URL, () => initEditor(fileUrl))
+    await loadScript(ONLYOFFICE_API_URL)
+    if (!disposed) initEditor(fileUrl)
   } catch (e: any) {
-    console.error('加载失败:', e)
+    clearEditorLoadTimer()
+    if (disposed) return
     errorMsg.value = '加载文档失败: ' + (e?.message || '未知错误')
     loading.value = false
   }
 })
 
 onBeforeUnmount(() => {
+  disposed = true
+  clearEditorLoadTimer()
   if (editorInstance) {
     editorInstance.destroyEditor()
     editorInstance = null

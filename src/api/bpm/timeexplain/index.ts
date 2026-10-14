@@ -3,6 +3,7 @@ import type { Dayjs } from 'dayjs'
 
 /** 外出请假补假信息 */
 export interface TimeExplain {
+  sendSms?: boolean // 本次派发待办短信，缺省时默认发送
   id: number // 主键
   checkDate: string | Dayjs // 登记时间
   checkBegin: string | Dayjs // 开始时间

@@ -108,7 +108,7 @@
                       <div v-if="businessProcessKey === 'oa_review'">
                         <XzfyDetail
                           :id="processInstance.businessKey"
-                          :taskId="taskId"
+                          :taskId="editableTaskId"
                           :currentNode="currentNode"
                           :activityNodes="activityNodes"
                           ref="businessFormComponentRef"
@@ -117,7 +117,7 @@
                       <div v-else-if="businessProcessKey === 'oa_lawsuit'">
                         <XzssDetail
                           :id="processInstance.businessKey"
-                          :taskId="taskId"
+                          :taskId="editableTaskId"
                           :currentNode="currentNode"
                           :activityNodes="activityNodes"
                           ref="businessFormComponentRef"
@@ -126,7 +126,7 @@
                       <div v-else-if="BusinessFormComponent">
                         <BusinessFormComponent
                           :id="processInstance.businessKey"
-                          :taskId="taskId"
+                          :taskId="editableTaskId"
                           :currentNode="currentNode"
                           :activityNodes="activityNodes"
                           ref="businessFormComponentRef"
@@ -225,6 +225,7 @@
         <div class="b-t-solid border-t-1px border-[var(--el-border-color)]">
           <!-- 操作栏按钮 -->
           <ProcessInstanceOperationButton
+            v-if="!readOnly"
             ref="operationButtonRef"
             :process-instance="processInstance"
             :process-definition="processDefinition"
@@ -281,6 +282,7 @@ const props = defineProps<{
   id: string // 流程实例的编号
   taskId?: string // 任务编号
   activityId?: string //流程活动编号，用于抄送查看
+  readOnly?: boolean // 已办入口只读查看
 }>()
 
 const router = useRouter()
@@ -289,6 +291,10 @@ const message = useMessage() // 消息弹窗
 const processInstanceLoading = ref(false) // 流程实例的加载中
 const processInstance = ref<any>({}) // 流程实例
 const hasTodoTask = ref(false) // 仅能确认当前用户存在待办任务时显示待办图标
+// 历史任务 ID 仅用于查询；业务表单只接收当前用户可办理的任务 ID。
+const editableTaskId = computed(() =>
+  !props.readOnly && hasTodoTask.value ? props.taskId : undefined
+)
 const processDefinition = ref<any>({}) // 流程定义
 const isHistoryMode = ref(false) // 是否为迁移历史流程
 const historyProjectId = ref<string | undefined>(undefined)
@@ -345,7 +351,7 @@ const businessFormComponentRef = ref<any>(null) // 业务表单组件实例
 const editableBusinessFormRef = ref<any>(null)
 const registerSaving = ref(false)
 const isRegisterTask = computed(
-  () => Boolean(props.taskId) && (currentNode.value?.name || '').includes('登记')
+  () => Boolean(editableTaskId.value) && (currentNode.value?.name || '').includes('登记')
 )
 const saveRegisterForm = async () => {
   if (!editableBusinessFormRef.value?.getFormValues) return
@@ -414,7 +420,7 @@ const getApprovalDetail = async () => {
     }
     isHistoryMode.value = false
     processInstance.value = data.processInstance
-    hasTodoTask.value = Boolean(data.todoTask)
+    hasTodoTask.value = !props.readOnly && Boolean(data.todoTask)
     processDefinition.value = data.processDefinition
     businessProcessKey.value =
       processDefinition.value.key ||
@@ -448,7 +454,7 @@ const getApprovalDetail = async () => {
         //@ts-ignore
         fApi.value?.disabled(true)
         // 设置表单字段权限
-        if (formFieldsPermission) {
+        if (hasTodoTask.value && formFieldsPermission) {
           Object.keys(data.formFieldsPermission).forEach((item) => {
             setFieldPermission(item, formFieldsPermission[item])
           })
@@ -467,10 +473,10 @@ const getApprovalDetail = async () => {
     activityNodes.value = data.activityNodes
 
     // 获取待办任务显示操作按钮
-    operationButtonRef.value?.loadTodoTask(data.todoTask)
+    operationButtonRef.value?.loadTodoTask(hasTodoTask.value ? data.todoTask : undefined)
 
     // 只有当存在待办任务时，才去匹配当前节点和获取下一节点信息
-    if (data.todoTask) {
+    if (hasTodoTask.value) {
       currentNode.value = activityNodes.value.find((item) => {
         // 先尝试名称匹配、再尝试任务 ID 包含、最后尝试原有的 taskDefinitionKey
         return (

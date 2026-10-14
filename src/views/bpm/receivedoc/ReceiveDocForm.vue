@@ -135,7 +135,7 @@ const formData = ref<any>({
   urgencyDegree: undefined,
   remark: undefined,
   docSecondClass: undefined,
-  attachFilePath: undefined,
+  attachFilePath: '',
   zhubandate: undefined,
   xiebandate: undefined,
   fileList: [] // 附件列表
@@ -163,7 +163,11 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await ReceiveDocApi.getReceiveDoc(id)
+      const data = await ReceiveDocApi.getReceiveDoc(id)
+      data.attachFilePath = Array.isArray(data.attachFilePath)
+        ? data.attachFilePath.join(',')
+        : data.attachFilePath ?? ''
+      formData.value = data
     } finally {
       formLoading.value = false
     }
@@ -179,7 +183,12 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as any
+    const data = {
+      ...formData.value,
+      attachFilePath: Array.isArray(formData.value.attachFilePath)
+        ? formData.value.attachFilePath.join(',')
+        : formData.value.attachFilePath ?? ''
+    }
 
     // ================= 处理文件上传 fileList =================
     // 1. 获取 UploadFile 组件内部的 fileList
@@ -258,7 +267,7 @@ const resetForm = () => {
     urgencyDegree: undefined,
     remark: undefined,
     docSecondClass: undefined as string | undefined,
-    attachFilePath: undefined,
+    attachFilePath: '',
     zhubandate: undefined,
     xiebandate: undefined,
     fileList: []

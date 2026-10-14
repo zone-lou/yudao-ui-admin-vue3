@@ -388,6 +388,7 @@
 </template>
 
 <script lang="ts" setup>
+import { useBpmPageSize } from '@/hooks/bpm/useBpmPageSize'
 import { dateFormatter } from '@/utils/formatTime'
 import * as TaskApi from '@/api/bpm/task'
 import { CategoryApi, CategoryVO } from '@/api/bpm/category'
@@ -485,9 +486,10 @@ const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
 const processDefinitionList = ref<any[]>([]) // 流程定义列表
+const pageSize = useBpmPageSize('bpm:task:todo:pageSize')
 const queryParams = reactive({
   pageNo: 1,
-  pageSize: 10,
+  pageSize,
   name: '',
   category: undefined,
   processDefinitionKey: '',

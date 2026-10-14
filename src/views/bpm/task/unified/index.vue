@@ -269,7 +269,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onActivated } from 'vue'
+import { useBpmPageSize } from '@/hooks/bpm/useBpmPageSize'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import dayjs from 'dayjs'
 import { getUnifiedProcessInstancePage } from '@/api/bpm/processInstance'
@@ -282,7 +283,6 @@ import BpmOperationGuide from '@/components/BpmOperationGuide/index.vue'
 defineOptions({ name: 'BpmProcessInstanceList' })
 const router = useRouter()
 const loading = ref(false)
-const mounted = ref(false)
 const list = ref([])
 const total = ref(0)
 const processDefinitionList = ref<any[]>([])
@@ -349,9 +349,10 @@ const mergeProcessDefinitionList = (definitions: any[]) => {
   ]
 }
 
+const pageSize = useBpmPageSize('bpm:task:unified:pageSize')
 const queryParams = reactive({
   pageNo: 1,
-  pageSize: 20,
+  pageSize,
   name: '',
   processInstanceId: '',
   processDefinitionKey: '',
@@ -409,24 +410,20 @@ const handleDetail = (row: any) => {
   if (row.isHistory) {
     router.push({
       name: 'BpmHistoryWorkflowDetail',
-      query: { processInstanceId: row.id, projectId: row.projectId }
+      query: { processInstanceId: row.id, projectId: row.projectId, activeMenu: '/bpm/unified' }
     })
     return
   }
-  router.push({ path: '/bpm/process-instance/detail', query: { id: row.id } })
+  router.push({
+    path: '/bpm/process-instance/detail',
+    query: { id: row.id, activeMenu: '/bpm/unified' }
+  })
 }
 
 onMounted(async () => {
   await getList()
-  mounted.value = true
   const definitions = await DefinitionApi.getSimpleProcessDefinitionList()
   processDefinitionList.value = mergeProcessDefinitionList(definitions)
-})
-
-onActivated(() => {
-  if (mounted.value) {
-    getList()
-  }
 })
 </script>
 

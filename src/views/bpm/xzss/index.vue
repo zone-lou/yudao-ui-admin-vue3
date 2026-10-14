@@ -261,8 +261,9 @@
       :show-overflow-tooltip="true"
       border
       @sort-change="handleSortChange"
+      @header-dragend="handleHeaderDragend"
     >
-      <el-table-column type="index" label="序号" width="60" align="center" fixed="left" resizable />
+      <el-table-column column-key="index" type="index" label="序号" :width="getColumnWidth('index', 60)" align="center" fixed="left" resizable />
 <!--      <el-table-column type="expand">-->
 <!--        <template #default="scope">-->
 <!--          <el-tabs model-value="xzssKz">-->
@@ -273,7 +274,7 @@
 <!--        </template>-->
 <!--      </el-table-column>-->
 
-      <el-table-column v-if="visibleColumn('swWh')" label="来文号" align="left" prop="swWh" min-width="180px" sortable="custom" resizable>
+      <el-table-column :width="getColumnWidth('swWh')" column-key="swWh" v-if="visibleColumn('swWh')" label="来文号" align="left" prop="swWh" min-width="180px" sortable="custom" resizable>
         <template #default="scope">
           <div class="flex items-center justify-start">
             <span>{{ scope.row.swWh }}</span>
@@ -286,21 +287,21 @@
         </template>
       </el-table-column>
 
-      <el-table-column v-if="visibleColumn('swJg')" label="来文机关" align="center" prop="swJg" width="150px" sortable="custom" resizable>
+      <el-table-column column-key="swJg" v-if="visibleColumn('swJg')" label="来文机关" align="center" prop="swJg" :width="getColumnWidth('swJg', 150)" sortable="custom" resizable>
         <template #default="scope">
           {{ formatDictOrStr(scope.row.swJg, DICT_TYPE.BPM_INCOMING_AUTHORITY_XZSS) }}
         </template>
       </el-table-column>
-      <el-table-column v-if="visibleColumn('swRq')" label="收文日期" align="center" prop="swRq" width="200px" sortable="custom" resizable>
+      <el-table-column column-key="swRq" v-if="visibleColumn('swRq')" label="收文日期" align="center" prop="swRq" :width="getColumnWidth('swRq', 200)" sortable="custom" resizable>
         <template #default="scope">
           {{ scope.row.swRq ? dateUtil(scope.row.swRq).format('YYYY-MM-DD HH:mm') : '' }}
         </template>
       </el-table-column>
-      <el-table-column v-if="visibleColumn('sqr')" label="原告" align="center" prop="sqr" width="150px" sortable="custom" resizable />
-      <el-table-column v-if="visibleColumn('bsqr')" label="被告" align="center" prop="bsqr" width="150px" sortable="custom" resizable />
-      <el-table-column v-if="visibleColumn('dsr')" label="第三人" align="center" prop="dsr" width="150px" sortable="custom" resizable />
-      <el-table-column v-if="visibleColumn('tdZl')" label="土地坐落" align="center" prop="tdZl" width="200px" sortable="custom" resizable />
-      <el-table-column v-if="visibleColumn('ssLx')" label="诉讼类型" align="center" prop="ssLx" width="120px" sortable="custom" resizable>
+      <el-table-column column-key="sqr" v-if="visibleColumn('sqr')" label="原告" align="center" prop="sqr" :width="getColumnWidth('sqr', 150)" sortable="custom" resizable />
+      <el-table-column column-key="bsqr" v-if="visibleColumn('bsqr')" label="被告" align="center" prop="bsqr" :width="getColumnWidth('bsqr', 150)" sortable="custom" resizable />
+      <el-table-column column-key="dsr" v-if="visibleColumn('dsr')" label="第三人" align="center" prop="dsr" :width="getColumnWidth('dsr', 150)" sortable="custom" resizable />
+      <el-table-column column-key="tdZl" v-if="visibleColumn('tdZl')" label="土地坐落" align="center" prop="tdZl" :width="getColumnWidth('tdZl', 200)" sortable="custom" resizable />
+      <el-table-column column-key="ssLx" v-if="visibleColumn('ssLx')" label="诉讼类型" align="center" prop="ssLx" :width="getColumnWidth('ssLx', 120)" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag
             v-if="scope.row.ssLx != null"
@@ -309,7 +310,7 @@
           />
         </template>
       </el-table-column>
-      <el-table-column v-if="visibleColumn('lb1')" label="案件类别" align="center" prop="lb1" width="120px" sortable="custom" resizable>
+      <el-table-column column-key="lb1" v-if="visibleColumn('lb1')" label="案件类别" align="center" prop="lb1" :width="getColumnWidth('lb1', 120)" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag
             v-if="scope.row.lb1 != null"
@@ -318,7 +319,7 @@
           />
         </template>
       </el-table-column>
-      <el-table-column v-if="visibleColumn('lb2')" label="案件分类" align="center" prop="lb2" width="120px" sortable="custom" resizable>
+      <el-table-column column-key="lb2" v-if="visibleColumn('lb2')" label="案件分类" align="center" prop="lb2" :width="getColumnWidth('lb2', 120)" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag
             v-if="scope.row.lb2 != null"
@@ -327,7 +328,7 @@
           />
         </template>
       </el-table-column>
-      <el-table-column v-if="visibleColumn('lb3')" label="涉及事项" align="center" prop="lb3" width="120px" sortable="custom" resizable>
+      <el-table-column column-key="lb3" v-if="visibleColumn('lb3')" label="涉及事项" align="center" prop="lb3" :width="getColumnWidth('lb3', 120)" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag
             v-if="scope.row.lb3 != null"
@@ -336,7 +337,7 @@
           />
         </template>
       </el-table-column>
-      <el-table-column v-if="visibleColumn('lb4')" label="案件类型" align="center" prop="lb4" width="120px" sortable="custom" resizable>
+      <el-table-column column-key="lb4" v-if="visibleColumn('lb4')" label="案件类型" align="center" prop="lb4" :width="getColumnWidth('lb4', 120)" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag
             v-if="scope.row.lb4 != null"
@@ -345,7 +346,7 @@
           />
         </template>
       </el-table-column>
-      <el-table-column v-if="visibleColumn('lb5')" label="诉讼类别" align="center" prop="lb5" width="120px" sortable="custom" resizable>
+      <el-table-column column-key="lb5" v-if="visibleColumn('lb5')" label="诉讼类别" align="center" prop="lb5" :width="getColumnWidth('lb5', 120)" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag
             v-if="scope.row.lb5 != null"
@@ -354,25 +355,25 @@
           />
         </template>
       </el-table-column>
-      <el-table-column v-if="visibleColumn('fyAh')" label="复议案号" align="center" prop="fyAh" min-width="160" show-overflow-tooltip sortable="custom" resizable />
-      <el-table-column v-if="visibleColumn('ssAh')" label="上一审案号" align="center" prop="ssAh" min-width="160" show-overflow-tooltip sortable="custom" resizable />
-      <el-table-column v-if="visibleColumn('ssNr')" label="诉讼请求" align="center" prop="ssNr" min-width="220" show-overflow-tooltip sortable="custom" resizable />
-      <el-table-column v-if="visibleColumn('cbr')" label="承办人" align="center" prop="cbr" width="120px" sortable="custom" resizable />
-      <el-table-column v-if="visibleColumn('cbRq')" label="承办日期" align="center" prop="cbRq" width="180px" sortable="custom" resizable>
+      <el-table-column :width="getColumnWidth('fyAh')" column-key="fyAh" v-if="visibleColumn('fyAh')" label="复议案号" align="center" prop="fyAh" min-width="160" show-overflow-tooltip sortable="custom" resizable />
+      <el-table-column :width="getColumnWidth('ssAh')" column-key="ssAh" v-if="visibleColumn('ssAh')" label="上一审案号" align="center" prop="ssAh" min-width="160" show-overflow-tooltip sortable="custom" resizable />
+      <el-table-column :width="getColumnWidth('ssNr')" column-key="ssNr" v-if="visibleColumn('ssNr')" label="诉讼请求" align="center" prop="ssNr" min-width="220" show-overflow-tooltip sortable="custom" resizable />
+      <el-table-column column-key="cbr" v-if="visibleColumn('cbr')" label="承办人" align="center" prop="cbr" :width="getColumnWidth('cbr', 120)" sortable="custom" resizable />
+      <el-table-column column-key="cbRq" v-if="visibleColumn('cbRq')" label="承办日期" align="center" prop="cbRq" :width="getColumnWidth('cbRq', 180)" sortable="custom" resizable>
         <template #default="scope">
           {{ scope.row.cbRq ? dateUtil(scope.row.cbRq).format('YYYY-MM-DD HH:mm') : '' }}
         </template>
       </el-table-column>
-      <el-table-column v-if="visibleColumn('sfyjgRq')" label="送法院日期" align="center" prop="sfyjgRq" width="180px" sortable="custom" resizable>
+      <el-table-column column-key="sfyjgRq" v-if="visibleColumn('sfyjgRq')" label="送法院日期" align="center" prop="sfyjgRq" :width="getColumnWidth('sfyjgRq', 180)" sortable="custom" resizable>
         <template #default="scope">
           {{ scope.row.sfyjgRq ? dateUtil(scope.row.sfyjgRq).format('YYYY-MM-DD HH:mm') : '' }}
         </template>
       </el-table-column>
-      <el-table-column v-if="visibleColumn('ssr')" label="上诉人" align="center" prop="ssr" width="150px" sortable="custom" resizable />
-      <el-table-column v-if="visibleColumn('bssr')" label="被上诉人" align="center" prop="bssr" width="150px" sortable="custom" resizable />
-      <el-table-column v-if="visibleColumn('zssqr')" label="再审申请人" align="center" prop="zssqr" width="150px" sortable="custom" resizable />
-      <el-table-column v-if="visibleColumn('zsbsqr')" label="再审被申请人" align="center" prop="zsbsqr" width="160px" sortable="custom" resizable />
-      <el-table-column label="操作" align="center" fixed="right" width="180px" resizable>
+      <el-table-column column-key="ssr" v-if="visibleColumn('ssr')" label="上诉人" align="center" prop="ssr" :width="getColumnWidth('ssr', 150)" sortable="custom" resizable />
+      <el-table-column column-key="bssr" v-if="visibleColumn('bssr')" label="被上诉人" align="center" prop="bssr" :width="getColumnWidth('bssr', 150)" sortable="custom" resizable />
+      <el-table-column column-key="zssqr" v-if="visibleColumn('zssqr')" label="再审申请人" align="center" prop="zssqr" :width="getColumnWidth('zssqr', 150)" sortable="custom" resizable />
+      <el-table-column column-key="zsbsqr" v-if="visibleColumn('zsbsqr')" label="再审被申请人" align="center" prop="zsbsqr" :width="getColumnWidth('zsbsqr', 160)" sortable="custom" resizable />
+      <el-table-column column-key="operation" label="操作" align="center" fixed="right" :width="getColumnWidth('operation', 180)" resizable>
         <template #default="scope">
           <el-button link type="primary" @click="handleDetail(scope.row)"> 详情 </el-button>
 
@@ -409,6 +410,7 @@
 </template>
 
 <script setup lang="ts">
+import { useBpmPageSize } from '@/hooks/bpm/useBpmPageSize'
 import { getDictOptions, getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { getBusinessStatusOptions } from '@/utils/businessStatus'
 import { dateUtil } from '@/utils/dateUtil'
@@ -427,9 +429,10 @@ const router = useRouter()
 const loading = ref(true) // 列表的加载中
 const list = ref<Xzss[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
+const pageSize = useBpmPageSize('bpm:xzss:pageSize')
 const queryParams = reactive({
   pageNo: 1,
-  pageSize: 10,
+  pageSize,
   swWh: undefined,
   swJg: undefined,
   swRq: [],
@@ -456,7 +459,14 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const showMore = ref(false)
-const { columnOptions, checkedColumnKeys, visibleColumn, resetColumns } = useBpmColumnSetting(
+const {
+  columnOptions,
+  checkedColumnKeys,
+  visibleColumn,
+  getColumnWidth,
+  handleHeaderDragend,
+  resetColumns
+} = useBpmColumnSetting(
   'bpm:xzss:columns',
   [
     { key: 'swWh', label: '来文号' },

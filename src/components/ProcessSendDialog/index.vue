@@ -1,5 +1,22 @@
 <template>
-  <el-dialog v-model="dialogVisible" :title="title" width="1020px" append-to-body destroy-on-close>
+  <el-dialog v-model="dialogVisible" :title="title" width="1020px" :show-close="!showSms" append-to-body destroy-on-close>
+    <template v-if="showSms" #header="{ close: closeDialog, titleId, titleClass }">
+      <div class="process-send-dialog__header">
+        <span :id="titleId" :class="titleClass">{{ title }}</span>
+        <div class="process-send-dialog__actions">
+          <el-checkbox v-model="sendSms" @change="saveSmsPreference">发送短信</el-checkbox>
+          <button
+            type="button"
+            class="process-send-dialog__close"
+            title="关闭"
+            aria-label="关闭"
+            @click="closeDialog"
+          >
+            <Icon icon="ep:close" />
+          </button>
+        </div>
+      </div>
+    </template>
     <el-form ref="formRef" :model="formData" :rules="formRules" label-width="90px">
       <div class="mb-10px min-h-[450px]" v-loading="loading">
         <template v-if="approvalNodes.length > 0">
@@ -135,6 +152,7 @@
 
 <script lang="ts" setup>
 import { ref, reactive, computed, watch, nextTick } from 'vue'
+import { getTenantId } from '@/utils/auth'
 import { useMessage } from '@/hooks/web/useMessage'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { useUserStoreWithOut } from '@/store/modules/user'
@@ -164,6 +182,7 @@ const getSpecifiedName = (n: any) => {
 
 const props = defineProps({
   title: { type: String, default: '发送' },
+  showSms: { type: Boolean, default: false },
   showReason: { type: Boolean, default: false }, // 创建流程通常不需要填意见，审批时需要
   processDefinitionId: { type: String, default: '' },
   processInstanceId: { type: String, default: undefined },
@@ -172,6 +191,23 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['submit'])
+
+const sendSms = ref(true)
+const getSmsPreferenceKey = () => `bpm:send-sms:${getTenantId() || 'default'}:${userId}`
+const restoreSmsPreference = () => {
+  try {
+    sendSms.value = localStorage.getItem(getSmsPreferenceKey()) !== 'false'
+  } catch {
+    sendSms.value = true
+  }
+}
+const saveSmsPreference = () => {
+  try {
+    localStorage.setItem(getSmsPreferenceKey(), String(sendSms.value))
+  } catch {
+    // 存储不可用时仍允许本次发送。
+  }
+}
 
 const dialogVisible = ref(false)
 const loading = ref(false)
@@ -191,6 +227,7 @@ const userTreeRefs = ref<Record<string, any>>({})
 
 // 暴露给父组件的方法
 const open = async (variables: Record<string, any> = {}) => {
+  if (props.showSms) restoreSmsPreference()
   dialogVisible.value = true
   formData.reason = ''
   await nextTick()
@@ -531,6 +568,7 @@ const submitSelectedNodes = async () => {
 
   // 触发自定义事件，把组装好的指派人员数据传给父组件
   emit('submit', {
+    ...(props.showSms ? { sendSms: sendSms.value } : {}),
     nextNodeAssignees,
     reason: formData.reason,
     variables
@@ -539,6 +577,38 @@ const submitSelectedNodes = async () => {
 </script>
 
 <style scoped>
+.process-send-dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.process-send-dialog__actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 10px;
+}
+.process-send-dialog__actions :deep(.el-checkbox) {
+  height: 24px;
+  margin-right: 0;
+}
+.process-send-dialog__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--el-color-info);
+  cursor: pointer;
+}
+.process-send-dialog__close:hover {
+  color: var(--el-color-primary);
+}
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;

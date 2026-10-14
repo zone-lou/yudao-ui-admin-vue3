@@ -116,52 +116,53 @@
       border
       header-cell-class-name="nowrap-table-header"
       @sort-change="handleSortChange"
+      @header-dragend="handleHeaderDragend"
     >
-      <el-table-column type="index" label="序号" width="60" align="center" fixed="left" resizable />
-      <el-table-column v-if="visibleColumn('nickName')" label="申请用户" align="center" prop="nickName" width="120" sortable="custom" resizable />
-      <el-table-column
+      <el-table-column column-key="index" type="index" label="序号" :width="getColumnWidth('index', 60)" align="center" fixed="left" resizable />
+      <el-table-column column-key="nickName" v-if="visibleColumn('nickName')" label="申请用户" align="center" prop="nickName" :width="getColumnWidth('nickName', 120)" sortable="custom" resizable />
+      <el-table-column column-key="qxjStartDate"
         v-if="visibleColumn('qxjStartDate')"
         label="开始时间"
         align="center"
         prop="qxjStartDate"
         :formatter="dateTimeFormatter"
-        width="180px"
+        :width="getColumnWidth('qxjStartDate', 180)"
         sortable="custom"
         resizable
       />
-      <el-table-column
+      <el-table-column column-key="qxjEndDate"
         v-if="visibleColumn('qxjEndDate')"
         label="结束时间"
         align="center"
         prop="qxjEndDate"
         :formatter="dateTimeFormatter"
-        width="180px"
+        :width="getColumnWidth('qxjEndDate', 180)"
         sortable="custom"
         resizable
       />
-      <el-table-column v-if="visibleColumn('qxjType')" label="请(休)假种类" align="center" prop="qxjType" width="155" sortable="custom" resizable>
+      <el-table-column column-key="qxjType" v-if="visibleColumn('qxjType')" label="请(休)假种类" align="center" prop="qxjType" :width="getColumnWidth('qxjType', 155)" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.BPM_LEAVE_TYPE" :value="scope.row.qxjType" />
         </template>
       </el-table-column>
-      <el-table-column v-if="visibleColumn('sjReason')" label="请假事由" align="center" prop="sjReason" min-width="180" sortable="custom" resizable />
-      <el-table-column v-if="visibleColumn('totalTs')" label="请假天数" align="center" prop="totalTs" width="120" sortable="custom" resizable />
-      <el-table-column v-if="visibleColumn('spzt')" label="办理状态" align="center" prop="spzt" width="120" sortable="custom" resizable>
+      <el-table-column :width="getColumnWidth('sjReason')" column-key="sjReason" v-if="visibleColumn('sjReason')" label="请假事由" align="center" prop="sjReason" min-width="180" sortable="custom" resizable />
+      <el-table-column column-key="totalTs" v-if="visibleColumn('totalTs')" label="请假天数" align="center" prop="totalTs" :width="getColumnWidth('totalTs', 120)" sortable="custom" resizable />
+      <el-table-column column-key="spzt" v-if="visibleColumn('spzt')" label="办理状态" align="center" prop="spzt" :width="getColumnWidth('spzt', 120)" sortable="custom" resizable>
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="scope.row.spzt" />
         </template>
       </el-table-column>
-      <el-table-column
+      <el-table-column column-key="applyDate"
         v-if="visibleColumn('applyDate')"
         label="申请时间"
         align="center"
         prop="applyDate"
         :formatter="dateTimeFormatter"
-        width="180px"
+        :width="getColumnWidth('applyDate', 180)"
         sortable="custom"
         resizable
       />
-      <el-table-column label="操作" align="center" width="180px" fixed="right" resizable>
+      <el-table-column column-key="operation" label="操作" align="center" :width="getColumnWidth('operation', 180)" fixed="right" resizable>
         <template #default="scope">
           <el-button link type="primary" @click="handleDetail(scope.row)"> 详情 </el-button>
           <el-button
@@ -198,6 +199,7 @@
 </template>
 
 <script setup lang="ts">
+import { useBpmPageSize } from '@/hooks/bpm/useBpmPageSize'
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { getBusinessStatusOptions } from '@/utils/businessStatus'
 import { defaultShortcuts, formatDate } from '@/utils/formatTime'
@@ -220,9 +222,10 @@ const loading = ref(true) // 列表的加载中
 const mounted = ref(false)
 const list = ref<leave[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
+const pageSize = useBpmPageSize('bpm:leave:pageSize')
 const queryParams = reactive({
   pageNo: 1,
-  pageSize: 10,
+  pageSize,
   userId: undefined,
   nickName: undefined as string | undefined,
   leaveTime: [],
@@ -235,7 +238,14 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
-const { columnOptions, checkedColumnKeys, visibleColumn, resetColumns } = useBpmColumnSetting(
+const {
+  columnOptions,
+  checkedColumnKeys,
+  visibleColumn,
+  getColumnWidth,
+  handleHeaderDragend,
+  resetColumns
+} = useBpmColumnSetting(
   'bpm:leave:columns',
   [
     { key: 'nickName', label: '申请用户' },

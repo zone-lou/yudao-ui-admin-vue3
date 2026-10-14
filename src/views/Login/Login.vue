@@ -49,18 +49,8 @@
           <div
             class="m-auto h-[calc(100%-60px)] w-[100%] flex items-center at-2xl:max-w-500px at-lg:max-w-500px at-md:max-w-500px at-xl:max-w-500px"
           >
-            <!-- 账号登录 -->
-            <LoginForm class="m-auto h-auto p-20px lt-xl:(rounded-3xl light:bg-white)" />
-            <!-- 手机登录 -->
+            <!-- 短信验证码登录 -->
             <MobileForm class="m-auto h-auto p-20px lt-xl:(rounded-3xl light:bg-white)" />
-            <!-- 二维码登录 -->
-            <QrCodeForm class="m-auto h-auto p-20px lt-xl:(rounded-3xl light:bg-white)" />
-            <!-- 注册 -->
-            <RegisterForm class="m-auto h-auto p-20px lt-xl:(rounded-3xl light:bg-white)" />
-            <!-- 三方登录 -->
-            <SSOLoginVue class="m-auto h-auto p-20px lt-xl:(rounded-3xl light:bg-white)" />
-            <!-- 忘记密码 -->
-            <ForgetPasswordForm class="m-auto h-auto p-20px lt-xl:(rounded-3xl light:bg-white)" />
           </div>
         </Transition>
       </div>
@@ -75,16 +65,13 @@ import { useAppStore } from '@/store/modules/app'
 import { ThemeSwitch } from '@/layout/components/ThemeSwitch'
 import { LocaleDropdown } from '@/layout/components/LocaleDropdown'
 
-import {
-  LoginForm,
-  MobileForm,
-  QrCodeForm,
-  RegisterForm,
-  SSOLoginVue,
-  ForgetPasswordForm
-} from './components'
+import MobileForm from './components/MobileForm.vue'
+import { LoginStateEnum, useLoginState } from './components/useLogin'
 
 defineOptions({ name: 'Login' })
+
+const { setLoginState } = useLoginState()
+setLoginState(LoginStateEnum.MOBILE)
 
 const { t } = useI18n()
 const appStore = useAppStore()

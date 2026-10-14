@@ -301,6 +301,7 @@
 
 <script setup lang="ts">
 import CommentTemplatePicker from '@/components/CommentTemplatePicker/index.vue'
+import { TaskStatusEnum } from '@/api/bpm/task'
 import { ref, computed, onMounted, watch } from 'vue'
 import { dateUtil } from '@/utils/dateUtil'
 import { TimeExplainApi } from '@/api/bpm/timeexplain'
@@ -395,16 +396,26 @@ const currentTaskNode = computed(() =>
 )
 const currentTaskNodeId = computed(() => String(currentTaskNode.value?.id || ''))
 const isFilingTask = computed(() => String(currentTaskNode.value?.name || '').includes('备案'))
+const canEditOpinion = computed(() => {
+  if (props.historyMode || !props.taskId || isFilingTask.value) return false
+  const task = currentTaskNode.value?.tasks?.find(
+    (task: any) => String(task.id) === String(props.taskId)
+  )
+  return (
+    task?.status === TaskStatusEnum.RUNNING &&
+    String(task.assigneeUser?.id) === String(userStore.getUser.id)
+  )
+})
 
 /** 判断当前节点是否可编辑 */
 const isEditable = (category: string) => {
-  if (!props.taskId || isFilingTask.value) return false
+  if (!canEditOpinion.value) return false
   return OPINION_NODE_IDS[currentTaskNodeId.value] === category
 }
 
 /** 暴露给父组件的方法：获取当前填写的意见 */
 const getOpinion = () => {
-  if (!props.taskId || isFilingTask.value || !OPINION_NODE_IDS[currentTaskNodeId.value]) {
+  if (!canEditOpinion.value || !OPINION_NODE_IDS[currentTaskNodeId.value]) {
     return undefined
   }
   return currentOpinion.value

@@ -10,30 +10,19 @@
     size="large"
   >
     <el-row class="mx-[-10px]">
-      <!-- 租户名 -->
+      <!-- 登录标题 -->
       <el-col :span="24" class="px-10px">
         <el-form-item>
           <LoginFormTitle class="w-full" />
         </el-form-item>
       </el-col>
+      <!-- 用户名 -->
       <el-col :span="24" class="px-10px">
-        <el-form-item v-if="loginData.tenantEnable === 'true'" prop="tenantName">
+        <el-form-item prop="username">
           <el-input
-            v-model="loginData.loginForm.tenantName"
-            :placeholder="t('login.tenantNamePlaceholder')"
-            :prefix-icon="iconHouse"
-            type="primary"
-            link
-          />
-        </el-form-item>
-      </el-col>
-      <!-- 手机号 -->
-      <el-col :span="24" class="px-10px">
-        <el-form-item prop="mobileNumber">
-          <el-input
-            v-model="loginData.loginForm.mobileNumber"
-            :placeholder="t('login.mobileNumberPlaceholder')"
-            :prefix-icon="iconCellphone"
+            v-model="loginData.loginForm.username"
+            :placeholder="t('login.usernamePlaceholder')"
+            :prefix-icon="iconAvatar"
           />
         </el-form-item>
       </el-col>
@@ -49,17 +38,13 @@
               >
                 <!-- <el-button class="w-[100%]"> -->
                 <template #append>
-                  <span
-                    v-if="mobileCodeTimer <= 0"
-                    class="getMobileCode"
-                    style="cursor: pointer"
+                  <el-button
+                    :disabled="mobileCodeTimer > 0"
+                    :loading="smsSending"
                     @click="getSmsCode"
                   >
-                    {{ t('login.getSmsCode') }}
-                  </span>
-                  <span v-if="mobileCodeTimer > 0" class="getMobileCode" style="cursor: pointer">
-                    {{ mobileCodeTimer }}秒后可重新获取
-                  </span>
+                    {{ mobileCodeTimer > 0 ? `${mobileCodeTimer}秒后可重新获取` : t('login.getSmsCode') }}
+                  </el-button>
                 </template>
               </el-input>
               <!-- </el-button> -->
@@ -67,7 +52,7 @@
           </el-row>
         </el-form-item>
       </el-col>
-      <!-- 登录按钮 / 返回按钮 -->
+      <!-- 登录按钮 -->
       <el-col :span="24" class="px-10px">
         <el-form-item>
           <XButton
@@ -76,16 +61,6 @@
             class="w-full"
             type="primary"
             @click="signIn()"
-          />
-        </el-form-item>
-      </el-col>
-      <el-col :span="24" class="px-10px">
-        <el-form-item>
-          <XButton
-            :loading="loginLoading"
-            :title="t('login.backLogin')"
-            class="w-full"
-            @click="handleBackLogin()"
           />
         </el-form-item>
       </el-col>
@@ -98,7 +73,6 @@ import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import { useIcon } from '@/hooks/web/useIcon'
 
 import { setTenantId, setToken } from '@/utils/auth'
-import { usePermissionStore } from '@/store/modules/permission'
 import { getTenantIdByName, sendSmsCode, smsLogin } from '@/api/login'
 import LoginFormTitle from './LoginFormTitle.vue'
 import { LoginStateEnum, useFormValid, useLoginState } from './useLogin'
@@ -108,20 +82,17 @@ defineOptions({ name: 'MobileForm' })
 
 const { t } = useI18n()
 const message = useMessage()
-const permissionStore = usePermissionStore()
 const { currentRoute, push } = useRouter()
 const formSmsLogin = ref()
 const loginLoading = ref(false)
-const iconHouse = useIcon({ icon: 'ep:house' })
-const iconCellphone = useIcon({ icon: 'ep:cellphone' })
+const iconAvatar = useIcon({ icon: 'ep:avatar' })
 const iconCircleCheck = useIcon({ icon: 'ep:circle-check' })
 const { validForm } = useFormValid(formSmsLogin)
-const { handleBackLogin, getLoginState } = useLoginState()
+const { getLoginState } = useLoginState()
 const getShow = computed(() => unref(getLoginState) === LoginStateEnum.MOBILE)
 
 const rules = {
-  tenantName: [required],
-  mobileNumber: [required],
+  username: [required],
   code: [required]
 }
 const loginData = reactive({
@@ -133,37 +104,44 @@ const loginData = reactive({
   },
   loginForm: {
     uuid: '',
-    tenantName: '芋道源码',
-    mobileNumber: '',
+    username: '',
     code: ''
   }
 })
 const smsVO = reactive({
   smsCode: {
-    mobile: '',
+    username: '',
     scene: 21
   },
   loginSms: {
-    mobile: '',
+    username: '',
     code: ''
   }
 })
 const mobileCodeTimer = ref(0)
 const redirect = ref<string>('')
+const smsSending = ref(false)
+let smsTimer: ReturnType<typeof setInterval> | undefined
+onBeforeUnmount(() => clearInterval(smsTimer))
 const getSmsCode = async () => {
-  await getTenantId()
-  smsVO.smsCode.mobile = loginData.loginForm.mobileNumber
-  await sendSmsCode(smsVO.smsCode).then(async () => {
-    message.success(t('login.SmsSendMsg'))
-    // 设置倒计时
+  if (smsSending.value || mobileCodeTimer.value > 0) return
+  smsSending.value = true
+  try {
+    await formSmsLogin.value.validateField('username')
+    await getTenantId()
+    smsVO.smsCode.username = loginData.loginForm.username
+    await sendSmsCode(smsVO.smsCode)
+    message.success('验证码已发送至该账号的接收手机号')
     mobileCodeTimer.value = 60
-    let msgTimer = setInterval(() => {
-      mobileCodeTimer.value = mobileCodeTimer.value - 1
-      if (mobileCodeTimer.value <= 0) {
-        clearInterval(msgTimer)
-      }
+    smsTimer = setInterval(() => {
+      mobileCodeTimer.value -= 1
+      if (mobileCodeTimer.value <= 0) clearInterval(smsTimer)
     }, 1000)
-  })
+  } catch {
+    // 表单校验和请求拦截器负责显示错误
+  } finally {
+    smsSending.value = false
+  }
 }
 watch(
   () => currentRoute.value,
@@ -177,39 +155,34 @@ watch(
 // 获取租户 ID
 const getTenantId = async () => {
   if (loginData.tenantEnable === 'true') {
-    const res = await getTenantIdByName(loginData.loginForm.tenantName)
+    const res = await getTenantIdByName('芋道源码')
     setTenantId(res)
   }
 }
 // 登录
 const signIn = async () => {
-  await getTenantId()
+  if (loginLoading.value) return
   const data = await validForm()
   if (!data) return
-  ElLoading.service({
+  loginLoading.value = true
+  const loadingInstance = ElLoading.service({
     lock: true,
     text: '正在加载系统中...',
     background: 'rgba(0, 0, 0, 0.7)'
   })
-  loginLoading.value = true
-  smsVO.loginSms.mobile = loginData.loginForm.mobileNumber
-  smsVO.loginSms.code = loginData.loginForm.code
-  await smsLogin(smsVO.loginSms)
-    .then(async (res) => {
-      setToken(res)
-      if (!redirect.value) {
-        redirect.value = '/'
-      }
-      push({ path: redirect.value || permissionStore.addRouters[0].path })
-    })
-    .catch(() => {})
-    .finally(() => {
-      loginLoading.value = false
-      setTimeout(() => {
-        const loadingInstance = ElLoading.service()
-        loadingInstance.close()
-      }, 400)
-    })
+  try {
+    await getTenantId()
+    smsVO.loginSms.username = loginData.loginForm.username
+    smsVO.loginSms.code = loginData.loginForm.code
+    const res = await smsLogin(smsVO.loginSms)
+    setToken(res)
+    await push({ path: redirect.value || '/' })
+  } catch {
+    // 请求拦截器负责显示错误
+  } finally {
+    loginLoading.value = false
+    loadingInstance.close()
+  }
 }
 </script>
 
