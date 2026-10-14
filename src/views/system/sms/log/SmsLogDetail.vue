@@ -19,7 +19,7 @@
         {{ detailData.mobile }}
         <span v-if="detailData.userType && detailData.userId">
           <dict-tag :type="DICT_TYPE.USER_TYPE" :value="detailData.userType" />
-          ({{ detailData.userId }})
+          ({{ detailData.userName || detailData.userId }})
         </span>
       </el-descriptions-item>
       <el-descriptions-item label="短信内容">

@@ -128,7 +128,7 @@
           <div>{{ scope.row.mobile }}</div>
           <div v-if="scope.row.userType && scope.row.userId">
             <dict-tag :type="DICT_TYPE.USER_TYPE" :value="scope.row.userType" />
-            {{ '(' + scope.row.userId + ')' }}
+            {{ '(' + (scope.row.userName || scope.row.userId) + ')' }}
           </div>
         </template>
       </el-table-column>

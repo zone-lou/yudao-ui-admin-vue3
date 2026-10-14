@@ -489,6 +489,9 @@ const handleTabClick = async (tab: { paneName?: string | number }) => {
   const endNode = group?.nodes.find((node: any) => node.taskDefKey === 'end')
   if (!endNode) return
 
+  // 点击即选中结束分支；取消确认只停止提交，保留节点和人员的选择。
+  endNode.checked = true
+  refreshCurrentSelectedUsers()
   confirmSubmitting.value = true
   try {
     try {
@@ -496,9 +499,6 @@ const handleTabClick = async (tab: { paneName?: string | number }) => {
     } catch {
       return
     }
-    // 确认后选中结束节点，保留其他分支和人员的已有选择。
-    endNode.checked = true
-    refreshCurrentSelectedUsers()
     await submitSelectedNodes()
   } finally {
     confirmSubmitting.value = false

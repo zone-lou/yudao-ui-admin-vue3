@@ -12,6 +12,7 @@ export interface SmsLogVO {
   apiTemplateId: string
   mobile: string
   userId: number | null
+  userName?: string
   userType: number | null
   sendStatus: number | null
   sendTime: Date | null
