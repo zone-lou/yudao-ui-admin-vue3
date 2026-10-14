@@ -1729,6 +1729,11 @@ const filterTreeMySelf = (treeData: any[], currentUserId: number) => {
   gap: 10px;
 }
 
+.approve-send-dialog__actions :deep(.el-checkbox) {
+  height: 24px;
+  margin-right: 0;
+}
+
 .approve-send-dialog__action {
   display: flex;
   align-items: center;

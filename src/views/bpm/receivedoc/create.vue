@@ -381,6 +381,7 @@
     ref="sendDialogRef"
     title="发送收文记录"
     :show-reason="false"
+    :show-sms="true"
     :process-definition-id="processDefinitionId"
     :activity-id="receiveRegisterTaskId"
     @submit="submitProcess"
@@ -534,13 +535,14 @@ const handleOpenDialog = async () => {
 }
 
 /** 接收弹窗返回的下一步办理人和变量，并提交流程 */
-const submitProcess = async (submitData: { nextNodeAssignees: any; variables: any }) => {
+const submitProcess = async (submitData: { nextNodeAssignees: any; variables: any; sendSms: boolean }) => {
   formLoading.value = true
   try {
     const data = buildRequestData()
 
     // 绑定下一节点办理人和变量参数
     data.nextNodeAssignees = submitData.nextNodeAssignees
+    data.sendSms = submitData.sendSms
     if (submitData.variables && Object.keys(submitData.variables).length > 0) {
       data.processVariablesStr = JSON.stringify(submitData.variables)
     }

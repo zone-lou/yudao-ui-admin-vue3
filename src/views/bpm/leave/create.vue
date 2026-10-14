@@ -285,6 +285,7 @@
   </el-row>
 
   <ProcessSendDialog
+    :show-sms="true"
     ref="sendDialogRef"
     title="发送请假申请"
     :show-reason="false"
@@ -971,7 +972,7 @@ const handleSave = async () => {
 }
 
 // 接收弹窗返回的 assignees 和 variables
-const submitForm = async (submitData: { nextNodeAssignees: any; variables: any }) => {
+const submitForm = async (submitData: { nextNodeAssignees: any; variables: any; sendSms: boolean }) => {
   formLoading.value = true
   try {
     const data = buildRequestData()
@@ -986,6 +987,7 @@ const submitForm = async (submitData: { nextNodeAssignees: any; variables: any }
 
     // 携带下一步办理人
     data.nextNodeAssignees = submitData.nextNodeAssignees
+    data.sendSms = submitData.sendSms
 
     if (data.id) {
       await leaveApi.createFlowLeave(data)

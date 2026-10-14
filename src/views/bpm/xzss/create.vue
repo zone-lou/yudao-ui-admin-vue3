@@ -566,6 +566,7 @@
   </el-row>
 
   <ProcessSendDialog
+    :show-sms="true"
     ref="sendDialogRef"
     title="发送诉讼申请"
     :show-reason="false"
@@ -875,11 +876,12 @@ const handleSendClick = async () => {
 }
 
 // 弹窗确认提交
-const submitForm = async (submitData: { nextNodeAssignees: any; variables: any }) => {
+const submitForm = async (submitData: { nextNodeAssignees: any; variables: any; sendSms: boolean }) => {
   formLoading.value = true
   try {
     const data = buildRequestData()
     data.nextNodeAssignees = submitData.nextNodeAssignees
+    data.sendSms = submitData.sendSms
     data.processVariablesStr = JSON.stringify(submitData.variables || {})
 
     if (!data.id) {

@@ -3,6 +3,7 @@ import type { Dayjs } from 'dayjs';
 
 /** 会议报告单信息 */
 export interface Confflow {
+  sendSms?: boolean // 本次派发待办短信，缺省时默认发送
           id: number; // 主键
           docGuid?: string; // 办件GUID
           docType?: string; // 办件类型

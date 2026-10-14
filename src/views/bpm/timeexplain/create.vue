@@ -220,6 +220,7 @@
 
   <!-- 发送弹窗 -->
   <ProcessSendDialog
+    :show-sms="true"
     ref="processSendDialogRef"
     :process-definition-id="processDefinitionId"
     activity-id="Activity_1q86xnt"
@@ -438,7 +439,7 @@ const handleSave = async () => {
   }
 }
 
-const submitForm = async (submitData: { nextNodeAssignees: any; variables: any }) => {
+const submitForm = async (submitData: { nextNodeAssignees: any; variables: any; sendSms: boolean }) => {
   formLoading.value = true
   try {
     const data = buildRequestData()
@@ -449,6 +450,7 @@ const submitForm = async (submitData: { nextNodeAssignees: any; variables: any }
 
     // 将发送弹窗选择的下一节点审批人信息注入到表单数据中
     data.nextNodeAssignees = submitData.nextNodeAssignees
+    data.sendSms = submitData.sendSms
 
     if (data.id) {
       await TimeExplainApi.createFlowOut(data)

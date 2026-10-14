@@ -3,6 +3,7 @@ import type { Dayjs } from 'dayjs'
 
 /** 收文信息 */
 export interface ReceiveDoc {
+  sendSms?: boolean // 本次派发待办短信，缺省时默认发送
   id: number
   docClass: string // 单位类别
   sendDept: string // 来文单位

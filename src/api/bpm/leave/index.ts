@@ -3,6 +3,7 @@ import type { Dayjs } from 'dayjs'
 
 /** 假期申请审批信息 */
 export interface leave {
+  sendSms?: boolean // 本次派发待办短信，缺省时默认发送
   id: number // 假期申请审批内码
   applyDate: string | Dayjs // 申请时间
   qxjStartDate: string | Dayjs // 开始时间(请假时间段中最小的时间)

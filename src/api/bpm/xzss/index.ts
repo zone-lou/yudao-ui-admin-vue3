@@ -26,6 +26,7 @@ export interface XzssKz {
 
 /** 行政诉讼信息 */
 export interface Xzss {
+  sendSms?: boolean // 本次派发待办短信，缺省时默认发送
   id: number // 主键
   xmGuid?: string // 备用主键
   swWh: string // 来文号
