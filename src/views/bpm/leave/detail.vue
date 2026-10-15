@@ -1,7 +1,7 @@
 <template>
   <div class="oa-container">
     <div class="print-hide-row" style="display: flex; justify-content: flex-end; margin-bottom: 8px">
-      <CommentTemplatePicker v-if="['deptHead', 'office', 'deputyLeader', 'mainLeader'].some((key) => isEditable(key))" v-model="currentOpinion" :task-id="props.taskId" />
+      <CommentTemplatePicker ref="commentTemplatePickerRef" v-if="['deptHead', 'office', 'deputyLeader', 'mainLeader'].some((key) => isEditable(key))" v-model="currentOpinion" :task-id="props.taskId" />
     </div>
     <div class="doc-title">义乌市自然资源和规划局请假审批单</div>
 
@@ -88,6 +88,7 @@
             >
               <el-input
                 v-model="currentOpinion"
+                @dblclick="commentTemplatePickerRef?.open()"
                 type="textarea"
                 :rows="1"
                 placeholder="请输入科室(单位)负责人意见"
@@ -130,6 +131,7 @@
             <div v-if="isEditable('office')" class="w-full h-full print-hide-row">
               <el-input
                 v-model="currentOpinion"
+                @dblclick="commentTemplatePickerRef?.open()"
                 type="textarea"
                 :rows="1"
                 placeholder="请输入办公室意见"
@@ -177,6 +179,7 @@
             >
               <el-input
                 v-model="currentOpinion"
+                @dblclick="commentTemplatePickerRef?.open()"
                 type="textarea"
                 :rows="1"
                 placeholder="请输入局分管领导意见"
@@ -226,6 +229,7 @@
             >
               <el-input
                 v-model="currentOpinion"
+                @dblclick="commentTemplatePickerRef?.open()"
                 type="textarea"
                 :rows="1"
                 placeholder="请输入局主要领导意见"
@@ -347,6 +351,7 @@ const props = defineProps({
 const detailLoading = ref(false) // 表单的加载中
 const detailData = ref<any>({}) // 详情数据
 const queryId = query.id as unknown as number
+const commentTemplatePickerRef = ref<InstanceType<typeof CommentTemplatePicker>>()
 const currentOpinion = ref('') // 当前正在填写的办理意见
 
 // 历史审批意见分类

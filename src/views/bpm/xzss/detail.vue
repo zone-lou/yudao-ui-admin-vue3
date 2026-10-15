@@ -8,7 +8,7 @@
             class="absolute print-hide-row flex items-center gap-3"
             style="top: 40px; right: 40px"
           >
-            <CommentTemplatePicker v-if="['拟办', '法规科交办', '局长', '主要领导', '分管领导', '分管局长', '相关单位', '法规科办理', '科室'].some((key) => isEditable(key))" v-model="currentOpinion" :task-id="props.taskId" />
+            <CommentTemplatePicker ref="commentTemplatePickerRef" v-if="['拟办', '法规科交办', '局长', '主要领导', '分管领导', '分管局长', '相关单位', '法规科办理', '科室'].some((key) => isEditable(key))" v-model="currentOpinion" :task-id="props.taskId" />
             <el-upload
               action="#"
               :http-request="customUpload"
@@ -146,6 +146,7 @@
                   >
                     <el-input
                       v-model="currentOpinion"
+                      @dblclick="commentTemplatePickerRef?.open()"
                       type="textarea"
                       placeholder="请输入拟办意见..."
                       :rows="3"
@@ -226,6 +227,7 @@
                   >
                     <el-input
                       v-model="currentOpinion"
+                      @dblclick="commentTemplatePickerRef?.open()"
                       type="textarea"
                       placeholder="请输入局长意见..."
                       :rows="3"
@@ -308,6 +310,7 @@
                   <div class="w-full h-full relative" style="padding: 6px 8px">
                     <el-input
                       v-model="currentOpinion"
+                      @dblclick="commentTemplatePickerRef?.open()"
                       type="textarea"
                       :rows="2"
                       placeholder="请输入分管局长意见"
@@ -380,6 +383,7 @@
                   <div class="w-full h-full relative" style="padding: 6px 8px">
                     <el-input
                       v-model="currentOpinion"
+                      @dblclick="commentTemplatePickerRef?.open()"
                       type="textarea"
                       autosize
                       placeholder="请输入科室办理意见..."
@@ -1041,6 +1045,7 @@ const formatSsLx = (val: any) => {
 }
 
 // ============== 审批意见内联填报设置 =================
+const commentTemplatePickerRef = ref<InstanceType<typeof CommentTemplatePicker>>()
 const currentOpinion = ref('')
 
 /** 检查节点是否出于当前激活环节 */

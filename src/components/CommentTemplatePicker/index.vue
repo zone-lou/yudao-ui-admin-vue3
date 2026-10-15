@@ -131,6 +131,7 @@ const refresh = async () => {
   }
 }
 const open = async () => {
+  if (!props.taskId || visible.value) return
   visible.value = true
   preview.value = ''
   selectedKey.value = ''
@@ -143,6 +144,8 @@ const open = async () => {
     loading.value = false
   }
 }
+defineExpose({ open })
+
 const rememberSelection = () => {
   if (!editor.value) return
   selectionStart = editor.value.selectionStart

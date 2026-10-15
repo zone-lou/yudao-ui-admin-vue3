@@ -2,7 +2,7 @@
   <div id="printDivTag" v-loading="detailLoading">
     <div class="oa-container">
       <div class="print-hide-row" style="display: flex; justify-content: flex-end; margin-bottom: 8px">
-        <CommentTemplatePicker v-if="nodeBlocks.some((block) => isEditable(block.keywords))" v-model="currentOpinion" :task-id="props.taskId" />
+        <CommentTemplatePicker ref="commentTemplatePickerRef" v-if="nodeBlocks.some((block) => isEditable(block.keywords))" v-model="currentOpinion" :task-id="props.taskId" />
       </div>
       <div class="doc-title">义乌市自然资源和规划局发文拟稿单</div>
 
@@ -126,6 +126,7 @@
                 <div class="w-full h-full relative" style="padding: 6px 8px">
                   <el-input
                     v-model="currentOpinion"
+                    @dblclick="commentTemplatePickerRef?.open()"
                     type="textarea"
                     :rows="2"
                     :placeholder="`请输入${block.title}意见`"
@@ -244,6 +245,7 @@ const userStore = useUserStore()
 const detailLoading = ref(false)
 const detailData = ref<any>({ openMethod: 1 })
 const fileList = ref<any[]>([])
+const commentTemplatePickerRef = ref<InstanceType<typeof CommentTemplatePicker>>()
 const currentOpinion = ref('')
 
 const fileViewBaseUrl = ref('')

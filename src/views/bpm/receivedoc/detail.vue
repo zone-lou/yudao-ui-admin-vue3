@@ -25,6 +25,7 @@
         style="gap: 12px"
       >
         <CommentTemplatePicker
+          ref="commentTemplatePickerRef"
           v-if="
             [
               '拟办',
@@ -159,6 +160,7 @@
               >
                 <el-input
                   v-model="currentOpinion"
+                  @dblclick="commentTemplatePickerRef?.open()"
                   type="textarea"
                   :rows="3"
                   placeholder="请输入拟办意见"
@@ -198,6 +200,7 @@
               >
                 <el-input
                   v-model="currentOpinion"
+                  @dblclick="commentTemplatePickerRef?.open()"
                   type="textarea"
                   :rows="3"
                   placeholder="请输入局长批示"
@@ -301,6 +304,7 @@
             <td colspan="2" class="data-text" style="padding: 4px 8px; text-align: left">
               <el-input
                 v-model="currentOpinion"
+                @dblclick="commentTemplatePickerRef?.open()"
                 type="textarea"
                 :rows="2"
                 placeholder="请输入您的意见"
@@ -352,6 +356,7 @@
             <td colspan="2" class="data-text" style="padding: 4px 8px; text-align: left">
               <el-input
                 v-model="currentOpinion"
+                @dblclick="commentTemplatePickerRef?.open()"
                 type="textarea"
                 :rows="2"
                 placeholder="请输入您的意见"
@@ -404,6 +409,7 @@
             <td colspan="2" class="data-text" style="padding: 4px 8px; text-align: left">
               <el-input
                 v-model="currentOpinion"
+                @dblclick="commentTemplatePickerRef?.open()"
                 type="textarea"
                 :rows="2"
                 placeholder="请输入领导意见"
@@ -483,6 +489,7 @@ const detailData = ref({
   issupervise: false
 })
 const fileList = ref<any[]>([])
+const commentTemplatePickerRef = ref<InstanceType<typeof CommentTemplatePicker>>()
 const currentOpinion = ref('') // 当前正在填写的办理意见
 const fileViewBaseUrl = ref('')
 const RECEIVE_REGISTER_TASK_ID = 'Activity_04ykbd0'

@@ -135,7 +135,7 @@
             class="absolute print-hide-row flex items-center gap-3"
             style="top: 40px; right: 40px"
           >
-            <CommentTemplatePicker v-if="['法规科交办', '局长', '分管局长', '相关单位', '法规科办理', '科室'].some((key) => isEditable(key))" v-model="currentOpinion" :task-id="props.taskId" />
+            <CommentTemplatePicker ref="commentTemplatePickerRef" v-if="['法规科交办', '局长', '分管局长', '相关单位', '法规科办理', '科室'].some((key) => isEditable(key))" v-model="currentOpinion" :task-id="props.taskId" />
             <el-upload
               action="#"
               :http-request="customUpload"
@@ -256,6 +256,7 @@
                   >
                     <el-input
                       v-model="currentOpinion"
+                      @dblclick="commentTemplatePickerRef?.open()"
                       type="textarea"
                       :rows="3"
                       placeholder="请输入拟办意见"
@@ -331,6 +332,7 @@
                   >
                     <el-input
                       v-model="currentOpinion"
+                      @dblclick="commentTemplatePickerRef?.open()"
                       type="textarea"
                       :rows="3"
                       placeholder="请输入局长意见"
@@ -410,6 +412,7 @@
                   <div class="w-full h-full relative" style="padding: 6px 8px">
                     <el-input
                       v-model="currentOpinion"
+                      @dblclick="commentTemplatePickerRef?.open()"
                       type="textarea"
                       :rows="2"
                       placeholder="请输入分管局长意见"
@@ -486,6 +489,7 @@
                   <div class="w-full h-full relative" style="padding: 6px 8px">
                     <el-input
                       v-model="currentOpinion"
+                      @dblclick="commentTemplatePickerRef?.open()"
                       type="textarea"
                       :rows="2"
                       placeholder="请输入办理意见"
@@ -969,6 +973,7 @@ const formatFyJg = (val: any) => {
   return val
 }
 
+const commentTemplatePickerRef = ref<InstanceType<typeof CommentTemplatePicker>>()
 const currentOpinion = ref('')
 
 const isEditable = (keyword: string) => {

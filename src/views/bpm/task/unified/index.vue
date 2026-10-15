@@ -128,7 +128,6 @@
       :data="list"
       stripe
       highlight-current-row
-      height="600"
       style="width: 100%"
       border
       @sort-change="handleSortChange"
