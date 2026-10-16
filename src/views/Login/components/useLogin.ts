@@ -9,6 +9,10 @@ export enum LoginStateEnum {
   SSO
 }
 
+// 本地开发默认开启；正式构建始终不显示密码登录。
+export const passwordLoginEnabled =
+  import.meta.env.DEV && import.meta.env.VITE_APP_PASSWORD_LOGIN_ENABLE !== 'false'
+
 const currentState = ref(LoginStateEnum.LOGIN)
 
 export function useLoginState() {

@@ -171,3 +171,43 @@ export const finishProcessInstanceByAdmin = async (processInstanceId: string, re
     }
   })
 }
+
+// 本人已办任务追加
+export interface AppendTarget {
+  executionId: string
+  nodeId: string
+  nodeName: string
+  flowName?: string
+  flowSort?: number
+  sequential: boolean
+  newRound: boolean
+  candidates: { id: number; nickname: string; deptId?: number; deptName?: string; disabled: boolean; disabledReason?: string }[]
+}
+export const getAppendTargets = (sourceTaskId: string) =>
+  request.get<AppendTarget[]>({ url: '/bpm/task/append-targets', params: { sourceTaskId } })
+export const appendTask = (data: {
+  sourceTaskId: string
+  targets: { targetExecutionId: string; userIds: number[] }[]
+  reason?: string
+  sendSms: boolean
+}) => request.post({ url: '/bpm/task/append', data })
+
+// 按已办来源的具体会签成员撤回
+export interface WithdrawTarget {
+  executionId: string
+  nodeId: string
+  nodeName: string
+  userId: number
+  nickname: string
+  taskId?: string
+  queued: boolean
+  withdrawable: boolean
+  disabledReason?: string
+}
+export const getWithdrawTargets = (sourceTaskId: string) =>
+  request.get<WithdrawTarget[]>({ url: '/bpm/task/withdraw-targets', params: { sourceTaskId } })
+export const withdrawMembers = (data: {
+  sourceTaskId: string
+  members: { executionId: string; userId: number }[]
+  reason?: string
+}) => request.post({ url: '/bpm/task/withdraw-members', data })

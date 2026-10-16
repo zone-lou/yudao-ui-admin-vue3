@@ -333,14 +333,22 @@
         </template>
       </el-table-column>
 
-      <el-table-column column-key="operation" align="center" label="操作" fixed="right" :width="getColumnWidth('operation', 150)" resizable>
+      <el-table-column column-key="operation" align="center" label="操作" fixed="right" :width="getColumnWidth('operation', 200)" resizable>
         <template #default="scope">
           <el-button link type="primary" @click="handleDetail(scope.row)">详情</el-button>
           <el-button
             v-if="scope.row.status === 2 && !scope.row.isHistory"
+            v-hasPermi="['bpm:task:update']"
+            link
+            type="primary"
+            @click="appendDialogRef.open(scope.row.id)"
+          >追加</el-button>
+          <el-button
+            v-if="scope.row.status === 2 && !scope.row.isHistory"
             link
             type="warning"
-            @click="handleWithdraw(scope.row)"
+            v-hasPermi="['bpm:task:update']"
+            @click="withdrawDialogRef.open(scope.row.id)"
             >撤回</el-button
           >
         </template>
@@ -354,6 +362,8 @@
       @pagination="getList"
     />
   </ContentWrap>
+  <TaskAppendDialog ref="appendDialogRef" @success="getList" />
+  <TaskWithdrawDialog ref="withdrawDialogRef" @success="getList" />
 </template>
 
 <script lang="ts" setup>
@@ -368,7 +378,12 @@ import BpmColumnSetting from '@/views/bpm/components/BpmColumnSetting.vue'
 import { useBpmColumnSetting } from '@/hooks/bpm/useBpmColumnSetting'
 import BpmOperationGuide from '@/components/BpmOperationGuide/index.vue'
 
+import TaskAppendDialog from './TaskAppendDialog.vue'
+import TaskWithdrawDialog from './TaskWithdrawDialog.vue'
+
 defineOptions({ name: 'BpmDoneTask' })
+const appendDialogRef = ref()
+const withdrawDialogRef = ref()
 
 const { push } = useRouter()
 const message = useMessage()
@@ -537,22 +552,6 @@ const handleDetail = (row: any) => {
       mode: 'view' // 已办入口统一只读
     }
   })
-}
-
-/** 撤回操作 */
-const handleWithdraw = async (row: any) => {
-  try {
-    await message.confirm('是否确认撤回该任务？')
-    await TaskApi.withdrawTask(row.id)
-    message.success('撤回成功')
-    getList()
-    push({
-      name: 'BpmProcessInstanceDetail',
-      query: {
-        id: row.processInstance.id
-      }
-    })
-  } catch {}
 }
 
 onActivated(() => {

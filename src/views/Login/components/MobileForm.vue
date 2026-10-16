@@ -64,6 +64,15 @@
           />
         </el-form-item>
       </el-col>
+      <el-col v-if="passwordLoginEnabled" :span="24" class="px-10px">
+        <el-form-item>
+          <XButton
+            title="账号密码登录"
+            class="w-full"
+            @click="setLoginState(LoginStateEnum.LOGIN)"
+          />
+        </el-form-item>
+      </el-col>
     </el-row>
   </el-form>
 </template>
@@ -75,7 +84,7 @@ import { useIcon } from '@/hooks/web/useIcon'
 import { setTenantId, setToken } from '@/utils/auth'
 import { getTenantIdByName, sendSmsCode, smsLogin } from '@/api/login'
 import LoginFormTitle from './LoginFormTitle.vue'
-import { LoginStateEnum, useFormValid, useLoginState } from './useLogin'
+import { LoginStateEnum, passwordLoginEnabled, useFormValid, useLoginState } from './useLogin'
 import { ElLoading } from 'element-plus'
 
 defineOptions({ name: 'MobileForm' })
@@ -88,7 +97,7 @@ const loginLoading = ref(false)
 const iconAvatar = useIcon({ icon: 'ep:avatar' })
 const iconCircleCheck = useIcon({ icon: 'ep:circle-check' })
 const { validForm } = useFormValid(formSmsLogin)
-const { getLoginState } = useLoginState()
+const { getLoginState, setLoginState } = useLoginState()
 const getShow = computed(() => unref(getLoginState) === LoginStateEnum.MOBILE)
 
 const rules = {

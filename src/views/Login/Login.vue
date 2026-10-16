@@ -49,6 +49,10 @@
           <div
             class="m-auto h-[calc(100%-60px)] w-[100%] flex items-center at-2xl:max-w-500px at-lg:max-w-500px at-md:max-w-500px at-xl:max-w-500px"
           >
+            <LoginForm
+              v-if="passwordLoginEnabled"
+              class="m-auto h-auto p-20px lt-xl:(rounded-3xl light:bg-white)"
+            />
             <!-- 短信验证码登录 -->
             <MobileForm class="m-auto h-auto p-20px lt-xl:(rounded-3xl light:bg-white)" />
           </div>
@@ -66,12 +70,13 @@ import { ThemeSwitch } from '@/layout/components/ThemeSwitch'
 import { LocaleDropdown } from '@/layout/components/LocaleDropdown'
 
 import MobileForm from './components/MobileForm.vue'
-import { LoginStateEnum, useLoginState } from './components/useLogin'
+import LoginForm from './components/LoginForm.vue'
+import { LoginStateEnum, passwordLoginEnabled, useLoginState } from './components/useLogin'
 
 defineOptions({ name: 'Login' })
 
 const { setLoginState } = useLoginState()
-setLoginState(LoginStateEnum.MOBILE)
+setLoginState(passwordLoginEnabled ? LoginStateEnum.LOGIN : LoginStateEnum.MOBILE)
 
 const { t } = useI18n()
 const appStore = useAppStore()
