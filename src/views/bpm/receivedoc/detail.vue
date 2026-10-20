@@ -484,6 +484,15 @@ const detailData = ref({
 })
 const fileList = ref<any[]>([])
 const currentOpinion = ref('') // 当前正在填写的办理意见
+let hasOpinionDraft = false
+// 接口重新加载意见时，保留当前页面中已经填写或主动清空的内容。
+watch(
+  currentOpinion,
+  () => {
+    hasOpinionDraft = true
+  },
+  { flush: 'sync' }
+)
 const fileViewBaseUrl = ref('')
 const RECEIVE_REGISTER_TASK_ID = 'Activity_04ykbd0'
 
@@ -594,8 +603,6 @@ const AUTO_REGISTER_REASONS = new Set(['系统自动完成来文登记', '提交
 
 /** 分类处理办理节点意见 */
 const processActivityNodes = () => {
-  if (!props.activityNodes || props.activityNodes.length === 0) return
-
   // 清空
   nibanList.value = []
   directorList.value = []
@@ -604,70 +611,87 @@ const processActivityNodes = () => {
   readerList.value = []
   otherOpinionList.value = []
 
-  const userId = userStore.getUser.id
-  props.activityNodes.forEach((node: any) => {
-    // 遍历任务
-    if (node.tasks && node.tasks.length > 0) {
-      node.tasks.forEach((task: any) => {
-        if (AUTO_REGISTER_REASONS.has(task.reason)) {
-          return
-        }
-        // 状态 1 为处理中，2 为通过/结束
-        if (task.status === 1) {
-          // 如果是当前用户的待办任务，则将草稿意见赋值给 currentOpinion
-          if (task.assigneeUser?.id === userId && task.reason) {
-            currentOpinion.value = task.reason
-          }
-          // 处理中的任务不展示在历史记录中
-          return
-        }
+  // 撤回、退回会在同一节点生成新任务，同一办理人仅展示最新一轮意见。
+  // 待办任务也参与选择，避免再次办理时旧意见与当前输入行同时出现。
+  const latestTasks = new Map<string, { node: any; task: any; startTime: number }>()
+  ;(props.activityNodes || []).forEach((node: any) => {
+    ;(node.tasks || []).forEach((task: any, index: number) => {
+      const nodeId = task.taskDefinitionKey || node.id
+      const userId = task.assigneeUser?.id
+      const key =
+        nodeId != null && userId != null
+          ? JSON.stringify([String(nodeId), String(userId)])
+          : JSON.stringify([nodeId, task.id || index, node.startTime])
+      const startTime = new Date(
+        task.createTime || node.startTime || task.endTime || node.endTime || 0
+      ).getTime()
+      const previous = latestTasks.get(key)
+      if (!previous || startTime >= previous.startTime) {
+        latestTasks.set(key, { node, task, startTime })
+      }
+    })
+  })
 
-        if (task.reason) {
-          // 只要有 reason 就展示
-          const name = node.name || ''
-          if (name.includes('收文登记') || name.includes('来文登记')) {
-            return
-          }
-          const info = {
-            name: name,
-            comment: task.reason,
-            assigneeUser: task.assigneeUser,
-            endTime: node.endTime || task.endTime // 优先使用节点的结束时间，或者任务的结束时间
-          }
+  latestTasks.forEach(({ node, task }) => {
+    if (AUTO_REGISTER_REASONS.has(task.reason)) {
+      return
+    }
+    // 状态 1 为处理中，2 为通过/结束
+    if (task.status === 1) {
+      // 如果是当前用户的待办任务，则将草稿意见赋值给 currentOpinion
+      if (task.id === props.taskId && task.reason && !hasOpinionDraft) {
+        currentOpinion.value = task.reason
+      }
+      // 处理中的任务不展示在历史记录中
+      return
+    }
 
-          if (name.includes('拟办') || name.includes('发起')) {
-            nibanList.value.push(info)
-          } else if (name.includes('局长') || name.includes('主要领导')) {
-            directorList.value.push(info)
-          } else if (name.includes('分管领导') || name.includes('局领导')) {
-            deputyLeaderList.value.push(info)
-          } else if (name.includes('领导意见')) {
-            leaderOpinionList.value.push(info)
-          } else if (
-            name.includes('阅办') ||
-            name.includes('全局阅') ||
-            name.includes('全局阅批') ||
-            name.includes('全局阅审批') ||
-            name.includes('全局传阅') ||
-            name.includes('科室') ||
-            name.includes('办公室转发') ||
-            name.includes('办公室确认') ||
-            name.includes('主办') ||
-            name.includes('协办')
-          ) {
-            readerList.value.push(info)
-          } else {
-            otherOpinionList.value.push(info)
-          }
-        }
-      })
+    // 取消、退回等流转原因不作为阅办单的正式办理意见。
+    if (task.status != null && task.status !== 2) return
+
+    if (task.reason) {
+      const name = node.name || ''
+      if (name.includes('收文登记') || name.includes('来文登记')) {
+        return
+      }
+      const info = {
+        name: name,
+        comment: task.reason,
+        assigneeUser: task.assigneeUser,
+        endTime: node.endTime || task.endTime // 优先使用节点的结束时间，或者任务的结束时间
+      }
+
+      if (name.includes('拟办') || name.includes('发起')) {
+        nibanList.value.push(info)
+      } else if (name.includes('局长') || name.includes('主要领导')) {
+        directorList.value.push(info)
+      } else if (name.includes('分管领导') || name.includes('局领导')) {
+        deputyLeaderList.value.push(info)
+      } else if (name.includes('领导意见')) {
+        leaderOpinionList.value.push(info)
+      } else if (
+        name.includes('阅办') ||
+        name.includes('全局阅') ||
+        name.includes('全局阅批') ||
+        name.includes('全局阅审批') ||
+        name.includes('全局传阅') ||
+        name.includes('科室') ||
+        name.includes('办公室转发') ||
+        name.includes('办公室确认') ||
+        name.includes('主办') ||
+        name.includes('协办')
+      ) {
+        readerList.value.push(info)
+      } else {
+        otherOpinionList.value.push(info)
+      }
     }
   })
 }
 
 // 监听 activityNodes 变化
 watch(
-  () => props.activityNodes,
+  () => [props.activityNodes, props.taskId],
   () => {
     processActivityNodes()
   },
@@ -770,30 +794,12 @@ const handleDownload = async (file: any) => {
   }
 }
 
-const isSubmitted = ref(false) // Whether the task has been submitted
-
-const processInstanceSuccess = () => {
-  isSubmitted.value = true
-}
-
-defineExpose({ open: getInfo, getOpinion, processInstanceSuccess })
+defineExpose({ open: getInfo, getOpinion })
 
 onMounted(() => {
   getInfo()
 })
 
-// onBeforeUnmount(async () => {
-//   if (currentOpinion.value && props.taskId && !isSubmitted.value) {
-//     try {
-//       await addComment({
-//         id: props.taskId,
-//         reason: currentOpinion.value
-//       })
-//     } catch (e) {
-//       console.error('Auto save draft failed', e)
-//     }
-//   }
-// })
 </script>
 
 <style scoped>
