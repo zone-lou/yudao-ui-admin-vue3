@@ -122,8 +122,8 @@ export const copyTask = async (data: any) => {
 }
 
 // 撤回
-export const withdrawTask = async (taskId: string) => {
-  return await request.put({ url: '/bpm/task/withdraw', params: { taskId } })
+export const withdrawTask = async (taskId: string, expectedMode?: 'LEGACY' | 'MEMBERS' | 'ALL') => {
+  return await request.put({ url: '/bpm/task/withdraw', params: { taskId, expectedMode } })
 }
 
 // 获取我的待办任务
@@ -211,3 +211,6 @@ export const withdrawMembers = (data: {
   members: { executionId: string; userId: number }[]
   reason?: string
 }) => request.post({ url: '/bpm/task/withdraw-members', data })
+
+export const getWithdrawMode = (sourceTaskId: string) =>
+  request.get<'LEGACY' | 'MEMBERS' | 'ALL'>({ url: '/bpm/task/withdraw-mode', params: { sourceTaskId } })

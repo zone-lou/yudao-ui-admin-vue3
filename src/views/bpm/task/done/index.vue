@@ -337,7 +337,7 @@
         <template #default="scope">
           <el-button link type="primary" @click="handleDetail(scope.row)">详情</el-button>
           <el-button
-            v-if="scope.row.status === 2 && !scope.row.isHistory"
+            v-if="scope.row.status === 2 && !scope.row.isHistory && scope.row.appendAllowed"
             v-hasPermi="['bpm:task:update']"
             link
             type="primary"
