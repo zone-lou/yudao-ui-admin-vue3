@@ -101,13 +101,19 @@
           label-width="100px"
         >
           <el-form-item label="退回节点" prop="targetTaskDefinitionKey">
-            <el-select v-model="returnForm.targetTaskDefinitionKey" clearable style="width: 100%">
+            <el-select v-model="returnForm.targetTaskDefinitionKey" clearable style="width: 100%" @change="handleReturnNodeChange">
               <el-option
                 v-for="item in returnList"
                 :key="item.taskDefinitionKey"
                 :label="item.name"
                 :value="item.taskDefinitionKey"
               />
+            </el-select>
+          </el-form-item>
+          <el-alert v-if="legacyReturn" title="旧任务按原规则整体退回关联任务，不能只退当前一人。" type="info" :closable="false" class="mb-12px" />
+          <el-form-item v-if="!legacyReturn" label="退回办理人" prop="assignee">
+            <el-select v-model="returnForm.assignee" placeholder="请选择一名办理人" style="width: 100%">
+              <el-option v-for="user in returnCandidates" :key="user.id" :label="user.name" :value="user.id" />
             </el-select>
           </el-form-item>
           <el-form-item label="退回理由" prop="returnReason">
@@ -118,6 +124,9 @@
               type="textarea"
               :rows="3"
             />
+          </el-form-item>
+          <el-form-item prop="sendSms">
+            <el-checkbox v-model="returnForm.sendSms">发送短信</el-checkbox>
           </el-form-item>
           <el-form-item>
             <el-button :disabled="formLoading" type="primary" @click="handleReturn()">
@@ -565,11 +574,25 @@ const deleteSignFormRule = reactive<FormRules<typeof deleteSignForm>>({
 // 退回表单
 const returnFormRef = ref<FormInstance>()
 const returnForm = reactive({
-  targetTaskDefinitionKey: undefined,
+  targetTaskDefinitionKey: undefined as string | undefined,
+  assignee: undefined as number | undefined,
+  sendSms: true,
   returnReason: ''
 })
+const returnMode = computed(() => returnList.value[0]?.returnMode || 'SINGLE')
+const legacyReturn = computed(() => returnMode.value === 'LEGACY')
+const returnCandidates = computed(() =>
+  returnList.value.find((node: any) => node.taskDefinitionKey === returnForm.targetTaskDefinitionKey)?.assignees || []
+)
+const handleReturnNodeChange = () => {
+  returnForm.assignee = returnCandidates.value.length === 1 ? returnCandidates.value[0].id : undefined
+}
 const returnFormRule = reactive<FormRules<typeof returnForm>>({
   targetTaskDefinitionKey: [{ required: true, message: '退回节点不能为空', trigger: 'change' }],
+  assignee: [{ validator: (_rule, value, callback) => {
+    if (!legacyReturn.value && value == null) callback(new Error('请选择一名退回办理人'))
+    else callback()
+  }, trigger: 'change' }],
   returnReason: [{ required: true, message: '退回理由不能为空', trigger: 'blur' }]
 })
 
@@ -614,6 +637,10 @@ const openPopover = async (type: string) => {
   //   }
   // }
   if (type === 'return') {
+    returnForm.targetTaskDefinitionKey = undefined
+    returnForm.assignee = undefined
+    returnForm.returnReason = ''
+    returnForm.sendSms = true
     // 获取退回节点
     returnList.value = await TaskApi.getTaskListByReturn(runningTask.value.id)
     if (returnList.value.length === 0) {
@@ -1493,11 +1520,15 @@ const handleReturn = async () => {
     // 1.1 校验表单
     if (!returnFormRef.value) return
     await returnFormRef.value.validate()
+    if (legacyReturn.value) await message.confirm('是否确认按旧版规则整体退回关联任务？')
     // 1.2 提交退回
     const data = {
       id: runningTask.value.id,
       reason: returnForm.returnReason,
-      targetTaskDefinitionKey: returnForm.targetTaskDefinitionKey
+      targetTaskDefinitionKey: returnForm.targetTaskDefinitionKey,
+      returnAssignees: legacyReturn.value ? undefined : [returnForm.assignee],
+      expectedMode: returnMode.value,
+      sendSms: returnForm.sendSms
     }
 
     await TaskApi.returnTask(data)
