@@ -630,25 +630,25 @@ onMounted(async () => {
   getDetail()
   // 获得用户列表
   userOptions.value = await UserApi.getSimpleUserList()
-
-  // 临时覆写全局内容内边距 (hack)
-  const style = document.createElement('style')
-  style.id = 'temp-padding-override'
-  style.innerHTML = `
-    :root {
-      --app-content-padding: 5px !important;
-
-    }
-  `
-  document.head.appendChild(style)
 })
 
-onUnmounted(() => {
-  const style = document.getElementById('temp-padding-override')
-  if (style) {
-    style.remove()
+let detailPaddingStyle: HTMLStyleElement | undefined
+const applyDetailPadding = () => {
+  if (!detailPaddingStyle) {
+    detailPaddingStyle = document.createElement('style')
+    detailPaddingStyle.textContent = ':root { --app-content-padding: 5px !important; }'
   }
-})
+  if (!detailPaddingStyle.isConnected) document.head.appendChild(detailPaddingStyle)
+}
+const removeDetailPadding = () => {
+  detailPaddingStyle?.remove()
+}
+
+// 缓存页面切走后停止影响全局布局，返回时恢复办理页样式。
+onMounted(applyDetailPadding)
+onActivated(applyDetailPadding)
+onDeactivated(removeDetailPadding)
+onUnmounted(removeDetailPadding)
 </script>
 
 <style lang="scss" scoped>

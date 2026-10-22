@@ -242,9 +242,9 @@ const submitForm = async () => {
       return
     }
 
-    // 拼接完整时间 YYYY-MM-DD HH:mm:ss
-    const fullStart = `${formData.value.dateStr} ${formData.value.startTime}:00`
-    const fullEnd = `${formData.value.dateStr} ${formData.value.endTime}:00`
+    // 将用户选择的日期和时间明确按北京时间转换为时间戳
+    const fullStart = `${formData.value.dateStr}T${formData.value.startTime}:00+08:00`
+    const fullEnd = `${formData.value.dateStr}T${formData.value.endTime}:00+08:00`
 
     const startTimestamp = dayjs(fullStart).valueOf()
     const endTimestamp = dayjs(fullEnd).valueOf()

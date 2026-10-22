@@ -7,6 +7,7 @@
         <el-date-picker
           v-model="queryDate"
           type="month"
+          value-format="YYYY-MM"
           placeholder="选择月份"
           :clearable="false"
           style="width: 180px"
@@ -88,13 +89,17 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
 import * as BookingApi from '@/api/system/meeting' // 确保路径正确
 import download from '@/utils/download' // 引入下载工具
 import { ElMessage } from 'element-plus'
+// 会议预约统一使用北京时间，避免客户端系统时区影响。
+dayjs.extend(utc)
+
 defineOptions({ name: 'MonthlySheet' })
 const loading = ref(false)
 const exportLoading = ref(false)
-const queryDate = ref(new Date()) // 默认当前月
+const queryDate = ref(dayjs().utcOffset(8).format('YYYY-MM')) // 默认当前月
 const tableData = ref([])
 
 // --- 计算当月天数逻辑 ---
@@ -165,12 +170,12 @@ const roomInfo = (row: any) => {
 
 const getDayBookings = (list: any[], dateStr: string) => {
   if (!list) return []
-  return list.filter((b) => dayjs(b.startTime).format('YYYY-MM-DD') === dateStr)
+  return list.filter((b) => dayjs(b.startTime).utcOffset(8).format('YYYY-MM-DD') === dateStr)
 }
 
 const formatTime = (time: number) => {
   if (!time) return ''
-  return dayjs(time).format('HH:mm')
+  return dayjs(time).utcOffset(8).format('HH:mm')
 }
 
 // 初始化

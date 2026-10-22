@@ -300,7 +300,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
         component: () => import('@/views/bpm/processInstance/detail/index.vue'),
         name: 'BpmProcessInstanceDetail',
         meta: {
-          noCache: true,
+          noCache: false, // 保留未关闭的办理页，切换标签时不丢失阅办单输入。
           hidden: true,
           canTo: true,
           title: '流程详情',

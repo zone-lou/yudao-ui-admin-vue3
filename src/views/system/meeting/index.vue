@@ -118,9 +118,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
 import weekOfYear from 'dayjs/plugin/weekOfYear'
 import isoWeek from 'dayjs/plugin/isoWeek'
 import { Plus } from '@element-plus/icons-vue' // 【新增】 记得引入图标
+
+// 会议预约统一使用北京时间，避免客户端系统时区影响。
+dayjs.extend(utc)
 
 dayjs.extend(weekOfYear)
 dayjs.extend(isoWeek)
@@ -133,7 +137,7 @@ import download from '@/utils/download' //
 
 const loading = ref(false)
 const exportLoading = ref(false)
-const currentDate = ref(dayjs())
+const currentDate = ref(dayjs().utcOffset(8))
 const scheduleData = ref<any[]>([])
 const formRef = ref()
 
@@ -147,8 +151,8 @@ const weekDays = computed(() => {
       dateStr: d.format('MM-DD'),
       fullDate: d.format('YYYY-MM-DD'),
       weekName: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'][i],
-      isToday: d.isSame(dayjs(), 'day'),
-      isPast: d.isBefore(dayjs(), 'day')
+      isToday: d.isSame(dayjs().utcOffset(8), 'day'),
+      isPast: d.isBefore(dayjs().utcOffset(8), 'day')
     })
   }
   return days
@@ -201,12 +205,12 @@ const goToExportPage = () => {
 
 const getDayBookings = (list: any[], dateStr: string) => {
   if (!list) return []
-  return list.filter((b) => dayjs(b.startTime).format('YYYY-MM-DD') === dateStr)
+  return list.filter((b) => dayjs(b.startTime).utcOffset(8).format('YYYY-MM-DD') === dateStr)
 }
 
 const formatTime = (time: number) => {
   if (!time) return ''
-  return dayjs(time).format('HH:mm')
+  return dayjs(time).utcOffset(8).format('HH:mm')
 }
 
 // 交互
@@ -215,7 +219,7 @@ const changeWeek = (offset: number) => {
   loadData()
 }
 const resetToToday = () => {
-  currentDate.value = dayjs()
+  currentDate.value = dayjs().utcOffset(8)
   loadData()
 }
 
@@ -238,8 +242,8 @@ const handleBookingClick = (booking: any, room: any) => {
   formRef.value.open({
     ...booking,
     roomName: room.room.roomName, // 修正：这里根据你的数据结构可能需要确认是 room.roomName 还是 room.room.roomName
-    startTime: dayjs(booking.startTime).format('YYYY-MM-DD HH:mm:ss'),
-    endTime: dayjs(booking.endTime).format('YYYY-MM-DD HH:mm:ss')
+    startTime: dayjs(booking.startTime).utcOffset(8).format('YYYY-MM-DD HH:mm:ss'),
+    endTime: dayjs(booking.endTime).utcOffset(8).format('YYYY-MM-DD HH:mm:ss')
   })
 }
 
