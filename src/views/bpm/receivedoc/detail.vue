@@ -443,6 +443,8 @@
 </template>
 
 <script setup lang="ts">
+import { useTaskOpinionDraft } from '@/hooks/bpm/useTaskOpinionDraft'
+import { selectOpinionTasks } from '@/hooks/bpm/taskOpinion'
 import CommentTemplatePicker from '@/components/CommentTemplatePicker/index.vue'
 import { getStrDictOptions, DICT_TYPE } from '@/utils/dict'
 import * as ReceiveDocApi from '@/api/bpm/receivedoc'
@@ -490,16 +492,7 @@ const detailData = ref({
 })
 const fileList = ref<any[]>([])
 const commentTemplatePickerRef = ref<InstanceType<typeof CommentTemplatePicker>>()
-const currentOpinion = ref('') // 当前正在填写的办理意见
-let hasOpinionDraft = false
-// 接口重新加载意见时，保留当前页面中已经填写或主动清空的内容。
-watch(
-  currentOpinion,
-  () => {
-    hasOpinionDraft = true
-  },
-  { flush: 'sync' }
-)
+const currentOpinion = useTaskOpinionDraft(() => props.taskId, () => props.activityNodes || []) // 当前正在填写的办理意见
 const fileViewBaseUrl = ref('')
 const RECEIVE_REGISTER_TASK_ID = 'Activity_04ykbd0'
 
@@ -618,37 +611,15 @@ const processActivityNodes = () => {
   readerList.value = []
   otherOpinionList.value = []
 
-  // 撤回、退回会在同一节点生成新任务，同一办理人仅展示最新一轮意见。
-  // 待办任务也参与选择，避免再次办理时旧意见与当前输入行同时出现。
-  const latestTasks = new Map<string, { node: any; task: any; startTime: number }>()
-  ;(props.activityNodes || []).forEach((node: any) => {
-    ;(node.tasks || []).forEach((task: any, index: number) => {
-      const nodeId = task.taskDefinitionKey || node.id
-      const userId = task.assigneeUser?.id
-      const key =
-        nodeId != null && userId != null
-          ? JSON.stringify([String(nodeId), String(userId)])
-          : JSON.stringify([nodeId, task.id || index, node.startTime])
-      const startTime = new Date(
-        task.createTime || node.startTime || task.endTime || node.endTime || 0
-      ).getTime()
-      const previous = latestTasks.get(key)
-      if (!previous || startTime >= previous.startTime) {
-        latestTasks.set(key, { node, task, startTime })
-      }
-    })
-  })
+  // 只隐藏明确被恢复任务替代的原意见，其他来源派给同一人的任务分别展示。
+  const opinionTasks = selectOpinionTasks(props.activityNodes)
 
-  latestTasks.forEach(({ node, task }) => {
+  opinionTasks.forEach(({ node, task }) => {
     if (AUTO_REGISTER_REASONS.has(task.reason)) {
       return
     }
     // 状态 1 为处理中，2 为通过/结束
     if (task.status === 1) {
-      // 如果是当前用户的待办任务，则将草稿意见赋值给 currentOpinion
-      if (task.id === props.taskId && task.reason && !hasOpinionDraft) {
-        currentOpinion.value = task.reason
-      }
       // 处理中的任务不展示在历史记录中
       return
     }

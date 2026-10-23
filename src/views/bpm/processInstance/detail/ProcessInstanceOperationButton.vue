@@ -110,7 +110,6 @@
               />
             </el-select>
           </el-form-item>
-          <el-alert v-if="legacyReturn" title="旧任务按原规则整体退回关联任务，不能只退当前一人。" type="info" :closable="false" class="mb-12px" />
           <el-form-item v-if="!legacyReturn" label="退回办理人" prop="assignee">
             <el-select v-model="returnForm.assignee" placeholder="请选择一名办理人" style="width: 100%">
               <el-option v-for="user in returnCandidates" :key="user.taskId || user.id" :label="user.name" :value="user.taskId || user.id" />
@@ -954,7 +953,6 @@ const openApproveDialog = async () => {
 
       // （已剥离特定的请假、公出、外出模块的直接放行代码，均一脉相承走下方 Dialog 加载可选节点）
     } else {
-      approveReasonForm.reason = ''
       requireDialogReasonInput.value = true
     }
   }
@@ -1520,7 +1518,7 @@ const handleReturn = async () => {
     // 1.1 校验表单
     if (!returnFormRef.value) return
     await returnFormRef.value.validate()
-    if (legacyReturn.value) await message.confirm('是否确认按旧版规则整体退回关联任务？')
+    if (legacyReturn.value) await message.confirm('是否退回任务？')
     // 1.2 提交退回
     const selected = returnCandidates.value.find((user: any) => (user.taskId || user.id) === returnForm.assignee)
     const data = {
@@ -1669,6 +1667,7 @@ const getButtonDisplayName = (btnType: OperationButtonType) => {
 }
 
 const loadTodoTask = (task: any) => {
+  if (runningTask.value?.id !== task?.id) approveReasonForm.reason = task?.reason || ''
   approveForm.value = {}
   runningTask.value = task
   approveFormFApi.value = {}

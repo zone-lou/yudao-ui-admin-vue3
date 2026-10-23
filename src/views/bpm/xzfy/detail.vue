@@ -596,6 +596,7 @@
 </template>
 
 <script setup lang="ts">
+import { useTaskOpinionDraft } from '@/hooks/bpm/useTaskOpinionDraft'
 import CommentTemplatePicker from '@/components/CommentTemplatePicker/index.vue'
 import { dateUtil } from '@/utils/dateUtil'
 import { XzfyApi } from '@/api/bpm/xzfy'
@@ -974,7 +975,7 @@ const formatFyJg = (val: any) => {
 }
 
 const commentTemplatePickerRef = ref<InstanceType<typeof CommentTemplatePicker>>()
-const currentOpinion = ref('')
+const currentOpinion = useTaskOpinionDraft(() => props.taskId, () => props.activityNodes || [])
 
 const isEditable = (keyword: string) => {
   if (!props.taskId) return false
@@ -1030,6 +1031,7 @@ const processActivityNodes = () => {
   props.activityNodes.forEach((node: any) => {
     if (node.tasks && node.tasks.length > 0) {
       node.tasks.forEach((task: any) => {
+        if (task.status === 1) return // 待办草稿仅回填当前任务意见栏
         if (AUTO_REGISTER_REASONS.has(task.reason)) {
           return
         }

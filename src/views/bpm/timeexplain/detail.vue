@@ -304,6 +304,7 @@
 </template>
 
 <script setup lang="ts">
+import { useTaskOpinionDraft } from '@/hooks/bpm/useTaskOpinionDraft'
 import CommentTemplatePicker from '@/components/CommentTemplatePicker/index.vue'
 import { TaskStatusEnum } from '@/api/bpm/task'
 import { ref, computed, onMounted, watch } from 'vue'
@@ -387,7 +388,7 @@ const officeList = ref<any[]>([]) // 办公室意见
 const deputyLeaderList = ref<any[]>([]) // 局分管领导意见
 const mainLeaderList = ref<any[]>([]) // 局主要领导意见
 const commentTemplatePickerRef = ref<InstanceType<typeof CommentTemplatePicker>>()
-const currentOpinion = ref('') // 当前正在填写的办理意见
+const currentOpinion = useTaskOpinionDraft(() => props.taskId, () => props.activityNodes || []) // 当前正在填写的办理意见
 // 与移动端公出详情的节点 ID 保持一致；登记节点不属于审批意见。
 const OPINION_NODE_IDS: Record<string, string> = {
   Activity_0578ggz: 'deptHead',
@@ -523,9 +524,6 @@ const processActivityNodes = () => {
         }
         // 状态 1 为处理中，2 为通过/结束
         if (task.status === 1) {
-          if (task.assigneeUser?.id === userId && task.reason) {
-            currentOpinion.value = task.reason
-          }
           return
         }
 

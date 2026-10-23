@@ -228,6 +228,7 @@
 </template>
 
 <script setup lang="ts">
+import { useTaskOpinionDraft } from '@/hooks/bpm/useTaskOpinionDraft'
 import CommentTemplatePicker from '@/components/CommentTemplatePicker/index.vue'
 import { ref, computed, onMounted, watch } from 'vue'
 import { dateUtil } from '@/utils/dateUtil'
@@ -255,7 +256,7 @@ const detailLoading = ref(false)
 const detailData = ref<Partial<Confflow>>({})
 const userStore = useUserStore()
 const commentTemplatePickerRef = ref<InstanceType<typeof CommentTemplatePicker>>()
-const currentOpinion = ref('') // 当前正在填写的办理意见
+const currentOpinion = useTaskOpinionDraft(() => props.taskId, () => props.activityNodes || []) // 当前正在填写的办理意见
 
 /** 格式化日期 */
 const formatDate = (val: any) => {
@@ -365,9 +366,6 @@ const processActivityNodes = () => {
         }
         // 遇到进行中的自己节点，如果是草稿，就给 currentOpinion
         if (task.status === 1) {
-          if (task.assigneeUser?.id === userId && task.reason) {
-            currentOpinion.value = task.reason
-          }
           return // 处理中的任务不渲染到已完成列表里
         }
 

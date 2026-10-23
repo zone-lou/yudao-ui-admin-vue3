@@ -271,6 +271,7 @@
 </template>
 
 <script setup lang="ts">
+import { useTaskOpinionDraft } from '@/hooks/bpm/useTaskOpinionDraft'
 import CommentTemplatePicker from '@/components/CommentTemplatePicker/index.vue'
 import { TaskStatusEnum } from '@/api/bpm/task'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
@@ -352,7 +353,7 @@ const detailLoading = ref(false) // 表单的加载中
 const detailData = ref<any>({}) // 详情数据
 const queryId = query.id as unknown as number
 const commentTemplatePickerRef = ref<InstanceType<typeof CommentTemplatePicker>>()
-const currentOpinion = ref('') // 当前正在填写的办理意见
+const currentOpinion = useTaskOpinionDraft(() => props.taskId, () => props.activityNodes || []) // 当前正在填写的办理意见
 
 // 历史审批意见分类
 const deptHeadList = ref<any[]>([]) // 科室(单位)负责人意见
@@ -438,9 +439,6 @@ const processActivityNodes = () => {
         }
         // 状态 1 为处理中，2 为通过/结束
         if (task.status === 1) {
-          if (task.assigneeUser?.id === userId && task.reason) {
-            currentOpinion.value = task.reason
-          }
           return
         }
 
