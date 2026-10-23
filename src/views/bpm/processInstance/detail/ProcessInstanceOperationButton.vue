@@ -113,7 +113,7 @@
           <el-alert v-if="legacyReturn" title="旧任务按原规则整体退回关联任务，不能只退当前一人。" type="info" :closable="false" class="mb-12px" />
           <el-form-item v-if="!legacyReturn" label="退回办理人" prop="assignee">
             <el-select v-model="returnForm.assignee" placeholder="请选择一名办理人" style="width: 100%">
-              <el-option v-for="user in returnCandidates" :key="user.id" :label="user.name" :value="user.id" />
+              <el-option v-for="user in returnCandidates" :key="user.taskId || user.id" :label="user.name" :value="user.taskId || user.id" />
             </el-select>
           </el-form-item>
           <el-form-item label="退回理由" prop="returnReason">
@@ -575,7 +575,7 @@ const deleteSignFormRule = reactive<FormRules<typeof deleteSignForm>>({
 const returnFormRef = ref<FormInstance>()
 const returnForm = reactive({
   targetTaskDefinitionKey: undefined as string | undefined,
-  assignee: undefined as number | undefined,
+  assignee: undefined as number | string | undefined,
   sendSms: true,
   returnReason: ''
 })
@@ -585,7 +585,7 @@ const returnCandidates = computed(() =>
   returnList.value.find((node: any) => node.taskDefinitionKey === returnForm.targetTaskDefinitionKey)?.assignees || []
 )
 const handleReturnNodeChange = () => {
-  returnForm.assignee = returnCandidates.value.length === 1 ? returnCandidates.value[0].id : undefined
+  returnForm.assignee = returnCandidates.value.length === 1 ? (returnCandidates.value[0].taskId || returnCandidates.value[0].id) : undefined
 }
 const returnFormRule = reactive<FormRules<typeof returnForm>>({
   targetTaskDefinitionKey: [{ required: true, message: '退回节点不能为空', trigger: 'change' }],
@@ -1522,11 +1522,13 @@ const handleReturn = async () => {
     await returnFormRef.value.validate()
     if (legacyReturn.value) await message.confirm('是否确认按旧版规则整体退回关联任务？')
     // 1.2 提交退回
+    const selected = returnCandidates.value.find((user: any) => (user.taskId || user.id) === returnForm.assignee)
     const data = {
       id: runningTask.value.id,
       reason: returnForm.returnReason,
       targetTaskDefinitionKey: returnForm.targetTaskDefinitionKey,
-      returnAssignees: legacyReturn.value ? undefined : [returnForm.assignee],
+      returnAssignees: legacyReturn.value ? undefined : [selected?.id],
+      targetTaskId: legacyReturn.value ? undefined : selected?.taskId,
       expectedMode: returnMode.value,
       sendSms: returnForm.sendSms
     }
