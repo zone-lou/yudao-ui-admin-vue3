@@ -2,7 +2,7 @@
   <el-row :gutter="20">
     <el-col :span="24">
       <ContentWrap title="会议报告单申请信息">
-        <template #header>
+        <template v-if="!props.embedded" #header>
           <el-button
             v-if="!isManagementEdit && !formData.projectId"
             type="primary"
@@ -207,6 +207,7 @@
   </el-row>
 
   <ProcessSendDialog
+    v-if="!props.embedded"
     :show-sms="true"
     ref="sendDialogRef"
     title="发送会议报告单"
@@ -233,6 +234,11 @@ import ProcessSendDialog from '@/components/ProcessSendDialog/index.vue'
 
 defineOptions({ name: 'BpmConfflowCreate' })
 
+const props = defineProps<{
+  embedded?: boolean
+  businessId?: string | number
+}>()
+
 const message = useMessage()
 const { delView } = useTagsViewStore()
 const userStore = useUserStore()
@@ -249,6 +255,7 @@ const processDefinitionId = ref('')
 const processDefineKey = 'conference_report'
 
 const formLoading = ref(false)
+const formReady = ref(false)
 const formRef = ref()
 const uploadFileRef = ref()
 
@@ -351,6 +358,32 @@ const handleSaveDraft = async () => {
   }
 }
 
+/** 登记办理页保存，发送前由流程操作组件调用。 */
+const getFormValues = async () => {
+  if (!formReady.value || formLoading.value || !formData.value.id || !formRef.value) {
+    throw new Error('会议报告单尚未加载完成')
+  }
+  const files = uploadFileRef.value?.fileList || []
+  if (files.some((file: any) => file.status === 'ready' || file.status === 'uploading')) {
+    message.warning('还有文件正在上传中，请稍后保存或发送')
+    throw new Error('附件上传中')
+  }
+  await formRef.value.validate()
+  formLoading.value = true
+  try {
+    await ConfflowApi.updateConfflow(buildRequestData())
+    // 重新载入业务附件 ID，避免保存后再次发送时将新附件重复新增。
+    formReady.value = false
+    await loadAttachments(formData.value.id)
+    formReady.value = true
+    return {}
+  } finally {
+    formLoading.value = false
+  }
+}
+
+defineExpose({ getFormValues })
+
 /** 点击发送打开弹窗 */
 const handleOpenDialog = async () => {
   try {
@@ -416,6 +449,23 @@ const submitProcess = async (submitData: { nextNodeAssignees: any; variables: an
   }
 }
 
+/** 用业务附件 ID 回填上传控件，保留原附件。 */
+const loadAttachments = async (id: number) => {
+  const attachments = await ConfflowApi.getConfflowAttachList(id)
+  await nextTick()
+  if (uploadFileRef.value) {
+    uploadFileRef.value.fileList = (attachments || []).map((item: any) => ({
+      name: item.fileName,
+      url: item.fileUrl || item.filePath,
+      id: item.confflowAttachId,
+      confflowAttachId: item.confflowAttachId,
+      response: {
+        data: { name: item.fileName, url: item.fileUrl || item.filePath, path: item.filePath }
+      }
+    }))
+  }
+}
+
 /** 初始化 */
 onMounted(async () => {
   formLoading.value = true
@@ -427,45 +477,28 @@ onMounted(async () => {
       formData.value.offerUnit = currentUser.dept?.name || currentUser.deptName || ''
     }
 
-    const processDefinitionDetail = await DefinitionApi.getProcessDefinition(
-      undefined,
-      processDefineKey
-    )
+    if (!props.embedded) {
+      const processDefinitionDetail = await DefinitionApi.getProcessDefinition(
+        undefined,
+        processDefineKey
+      )
 
-    if (processDefinitionDetail) {
-      processDefinitionId.value = processDefinitionDetail.id
-    } else {
-      message.error(`流程(${processDefineKey})未配置`)
+      if (processDefinitionDetail) {
+        processDefinitionId.value = processDefinitionDetail.id
+      } else {
+        message.error(`流程(${processDefineKey})未配置`)
+      }
     }
 
-    // 编辑模式：加载已有数据和附件
-    const queryId = route.query.id
+    // 内嵌办理页使用业务 ID，路由中的 id 是流程实例 ID。
+    const queryId = props.embedded ? props.businessId : route.query.id
     if (queryId) {
       const detail = await ConfflowApi.getConfflow(Number(queryId))
       if (detail) {
         Object.assign(formData.value, detail)
 
-        const attachList = await ConfflowApi.getConfflowAttachList(Number(queryId))
-        if (attachList && attachList.length > 0) {
-          const files = attachList.map((item: any) => ({
-            name: item.fileName,
-            url: item.fileUrl,
-            id: item.confflowAttachId,
-            confflowAttachId: item.confflowAttachId,
-            response: {
-              data: {
-                name: item.fileName,
-                url: item.fileUrl,
-                path: item.filePath
-              }
-            }
-          }))
-          nextTick(() => {
-            if (uploadFileRef.value) {
-              uploadFileRef.value.fileList = files
-            }
-          })
-        }
+        await loadAttachments(Number(queryId))
+        formReady.value = true
       }
     }
   } catch (error) {

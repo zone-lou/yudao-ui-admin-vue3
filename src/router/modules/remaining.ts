@@ -358,6 +358,31 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
+        path: 'land/create',
+        component: () => import('@/views/bpm/land/create.vue'),
+        name: 'BpmLandCreate',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '土地用途认定登记',
+          activeMenu: '/bpm/unified'
+        }
+      },
+      {
+        path: 'land/detail',
+        component: () => import('@/views/bpm/land/detail.vue'),
+        name: 'BpmLandDetail',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '土地用途认定阅办单',
+          activeMenu: '/bpm/unified'
+        },
+        props: (route) => ({ id: route.query.id })
+      },
+      {
         path: 'leave/create',
         component: () => import('@/views/bpm/leave/create.vue'),
         name: 'OALeaveCreate',

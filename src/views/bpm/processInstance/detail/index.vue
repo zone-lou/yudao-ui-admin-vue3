@@ -123,6 +123,22 @@
                           ref="businessFormComponentRef"
                         />
                       </div>
+                      <div v-else-if="isConfflowRegisterTask">
+                        <el-button
+                          type="primary"
+                          :loading="registerSaving"
+                          class="mb-12px"
+                          @click="saveRegisterForm"
+                        >
+                          保存修改
+                        </el-button>
+                        <ConfflowCreate
+                          :key="processInstance.businessKey"
+                          ref="businessFormComponentRef"
+                          embedded
+                          :business-id="processInstance.businessKey"
+                        />
+                      </div>
                       <div v-else-if="BusinessFormComponent">
                         <BusinessFormComponent
                           :id="processInstance.businessKey"
@@ -276,6 +292,7 @@ import XzfyDetail from '@/views/bpm/xzfy/detail.vue'
 import XzssDetail from '@/views/bpm/xzss/detail.vue'
 import XzfyCreate from '@/views/bpm/xzfy/create.vue'
 import XzssCreate from '@/views/bpm/xzss/create.vue'
+import ConfflowCreate from '@/views/bpm/confflow/create.vue'
 
 defineOptions({ name: 'BpmProcessInstanceDetail' })
 const props = defineProps<{
@@ -353,11 +370,21 @@ const registerSaving = ref(false)
 const isRegisterTask = computed(
   () => Boolean(editableTaskId.value) && (currentNode.value?.name || '').includes('登记')
 )
+const isConfflowRegisterTask = computed(
+  () =>
+    businessProcessKey.value === 'conference_report' &&
+    !props.readOnly &&
+    hasTodoTask.value &&
+    (currentNode.value?.id === 'Activity_02rawmy' || currentNode.value?.name === '科室登记')
+)
 const saveRegisterForm = async () => {
-  if (!editableBusinessFormRef.value?.getFormValues) return
+  const form = isConfflowRegisterTask.value
+    ? businessFormComponentRef.value
+    : editableBusinessFormRef.value
+  if (!form?.getFormValues) return
   registerSaving.value = true
   try {
-    await editableBusinessFormRef.value.getFormValues()
+    await form.getFormValues()
     message.success('登记信息修改成功')
   } catch {
     // 表单组件已提示具体校验信息

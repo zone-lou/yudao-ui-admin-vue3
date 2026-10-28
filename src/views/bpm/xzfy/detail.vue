@@ -135,7 +135,7 @@
             class="absolute print-hide-row flex items-center gap-3"
             style="top: 40px; right: 40px"
           >
-            <CommentTemplatePicker ref="commentTemplatePickerRef" v-if="['法规科交办', '局长', '分管局长', '相关单位', '法规科办理', '科室'].some((key) => isEditable(key))" v-model="currentOpinion" :task-id="props.taskId" />
+            <CommentTemplatePicker ref="commentTemplatePickerRef" v-if="['法规科交办', '局长', '分管局长', '相关单位', '法规科办理', '法规科人员办理', '科室'].some((key) => isEditable(key))" v-model="currentOpinion" :task-id="props.taskId" />
             <el-upload
               action="#"
               :http-request="customUpload"
@@ -474,7 +474,7 @@
               <tr>
                 <td
                   class="label-cell"
-                  :rowspan="getDynamicRowspan(['相关单位', '法规科办理', '科室'], keshiList)"
+                  :rowspan="getDynamicRowspan(['相关单位', '法规科办理', '法规科人员办理', '科室'], keshiList)"
                   >科室单位<br />办理意见</td
                 >
                 <td class="sub-header"><div class="sub-header-text">办理意见</div></td>
@@ -482,7 +482,7 @@
                 <td class="sub-header"><div class="sub-header-text">办理日期</div></td>
               </tr>
               <tr
-                v-if="isEditable('相关单位') || isEditable('法规科办理') || isEditable('科室')"
+                v-if="isEditable('相关单位') || isEditable('法规科办理') || isEditable('法规科人员办理') || isEditable('科室')"
                 class="print-hide-row"
               >
                 <td class="h-60 data-text" style="padding: 0; vertical-align: top">
@@ -544,7 +544,7 @@
               </template>
               <tr
                 v-else-if="
-                  !(isEditable('相关单位') || isEditable('法规科办理') || isEditable('科室'))
+                  !(isEditable('相关单位') || isEditable('法规科办理') || isEditable('法规科人员办理') || isEditable('科室'))
                 "
               >
                 <td class="h-60 data-text"></td>
@@ -709,7 +709,7 @@ const isBaseAttach = (taskId: any) => {
 
   const opinionKeys = [
     '拟办', '法规科交办', '局长', '分管局长', '相关单位', 
-    '局领导', '法规科办理', '科室', '科室单位', '法规科审核', '分管领导', '协助人员'
+    '局领导', '法规科办理', '法规科人员办理', '科室', '科室单位', '法规科审核', '分管领导', '协助人员'
   ]
 
   // 1. 当前正在办理的任务
@@ -997,6 +997,7 @@ const getOpinion = () => {
     '分管局长',
     '相关单位',
     '法规科办理',
+    '法规科人员办理',
     '科室',
     '法规科审核',
     '分管领导',
@@ -1064,6 +1065,7 @@ const processActivityNodes = () => {
           } else if (
             taskName.includes('相关单位') ||
             taskName.includes('法规科办理') ||
+            taskName.includes('法规科人员办理') ||
             taskName.includes('科室')
           ) {
             tempKeshi.push(info)

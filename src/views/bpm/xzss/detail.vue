@@ -8,7 +8,7 @@
             class="absolute print-hide-row flex items-center gap-3"
             style="top: 40px; right: 40px"
           >
-            <CommentTemplatePicker ref="commentTemplatePickerRef" v-if="['拟办', '法规科交办', '局长', '主要领导', '分管领导', '分管局长', '相关单位', '法规科办理', '科室'].some((key) => isEditable(key))" v-model="currentOpinion" :task-id="props.taskId" />
+            <CommentTemplatePicker ref="commentTemplatePickerRef" v-if="['拟办', '法规科交办', '局长', '主要领导', '分管领导', '分管局长', '相关单位', '法规科办理', '法规科人员办理', '科室'].some((key) => isEditable(key))" v-model="currentOpinion" :task-id="props.taskId" />
             <el-upload
               action="#"
               :http-request="customUpload"
@@ -368,7 +368,7 @@
               <tr>
                 <td
                   class="label-cell"
-                  :rowspan="getDynamicRowspan(['相关单位', '法规科办理', '科室'], keshiList)"
+                  :rowspan="getDynamicRowspan(['相关单位', '法规科办理', '法规科人员办理', '科室'], keshiList)"
                   >科室单位<br />办理意见</td
                 >
                 <td class="sub-header"><div class="sub-header-text">办理意见</div></td>
@@ -376,7 +376,7 @@
                 <td class="sub-header"><div class="sub-header-text">办理日期</div></td>
               </tr>
               <tr
-                v-if="isEditable('相关单位') || isEditable('法规科办理') || isEditable('科室')"
+                v-if="isEditable('相关单位') || isEditable('法规科办理') || isEditable('法规科人员办理') || isEditable('科室')"
                 class="print-hide-row"
               >
                 <td class="h-60 data-text" style="padding: 0; vertical-align: top">
@@ -433,7 +433,7 @@
               </template>
               <tr
                 v-else-if="
-                  !(isEditable('相关单位') || isEditable('法规科办理') || isEditable('科室'))
+                  !(isEditable('相关单位') || isEditable('法规科办理') || isEditable('法规科人员办理') || isEditable('科室'))
                 "
               >
                 <td class="h-60 data-text"></td>
@@ -782,8 +782,8 @@ const isBaseAttach = (taskId: any) => {
   if (normalizedTaskId === normalizeTaskId(props.taskId)) {
     const nodeName = props.currentNode?.name || ''
 
-    // 排除掉不展示在办理单中的特定节点（如上诉、结果录入），强制将它们的附件整合到顶部
-    if (nodeName.includes('(上诉)') || nodeName.includes('法规科(结果录入)')) {
+    // 上诉人员办理的附件跟随意见，其他上诉节点和结果录入仍整合到顶部
+    if ((nodeName.includes('(上诉)') && !nodeName.includes('法规科人员办理')) || nodeName.includes('法规科(结果录入)')) {
       return true
     }
 
@@ -796,7 +796,7 @@ const isBaseAttach = (taskId: any) => {
       isEditable('分管领导') ||
       isEditable('分管局长') ||
       isEditable('相关单位') ||
-      isEditable('法规科办理') ||
+      isEditable('法规科办理') || isEditable('法规科人员办理') ||
       isEditable('科室')
 
     // 如果不属于这四大分类，就整合到顶部
@@ -1054,8 +1054,8 @@ const isEditable = (keyword: string) => {
   if (!props.taskId) return false
   const nodeName = props.currentNode?.name || ''
 
-  // 屏蔽带有“(上诉)”的办理节点，强制它们使用全局原生弹窗处理
-  if (nodeName.includes('(上诉)')) return false
+  // 新增的上诉人员办理支持内联意见，其他上诉节点仍使用原生弹窗
+  if (nodeName.includes('(上诉)') && !nodeName.includes('法规科人员办理')) return false
 
   // 特殊逻辑：排除“分管局长”对“局长”关键词的干扰
   if (keyword === '局长' && nodeName.includes('分管')) {
@@ -1080,6 +1080,7 @@ const getOpinion = () => {
     '法规科承办',
     '相关单位',
     '法规科办理',
+    '法规科人员办理',
     '科室'
   ]
   if (!keys.some((key) => isEditable(key))) {
@@ -1132,8 +1133,8 @@ const processActivityNodes = () => {
           if (taskName.includes('法规科(结果录入)')) {
             return
           }
-          // 排除所有带有“(上诉)”关键字的特定审批环节，交由弹窗处理
-          if (taskName.includes('(上诉)')) {
+          // 上诉人员办理归入科室单位意见，其他上诉节点沿用原展示规则
+          if (taskName.includes('(上诉)') && !taskName.includes('法规科人员办理')) {
             return
           }
 
@@ -1150,6 +1151,7 @@ const processActivityNodes = () => {
           } else if (
             taskName.includes('相关单位') ||
             taskName.includes('法规科办理') ||
+            taskName.includes('法规科人员办理') ||
             taskName.includes('科室')
           ) {
             tempKeshi.push(info)
