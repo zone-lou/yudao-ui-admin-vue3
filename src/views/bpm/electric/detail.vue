@@ -80,7 +80,7 @@ import { DICT_TYPE } from '@/utils/dict'
 import { dateUtil } from '@/utils/dateUtil'
 import { ReceiveDocApi, ReceiveDoc } from '@/api/bpm/receivedoc'
 import { propTypes } from '@/utils/propTypes'
-import { buildFilePreviewUrl } from '@/utils/filePreview'
+import { openFilePreview } from '@/utils/filePreview'
 import * as ConfigApi from '@/api/infra/config'
 
 defineOptions({ name: 'BpmReceiveDocDetail' })
@@ -100,7 +100,6 @@ const fileViewBaseUrl = ref('')
 // const previewUrl = ref('') // 已移除
 // const previewType = ref('image') // 已移除
 
-const externalPrefix = ref('') // 外网地址前缀
 const internalPrefix = ref('') // 内网地址前缀
 
 /** 获取详情数据 */
@@ -111,7 +110,6 @@ const getInfo = async () => {
   detailLoading.value = true
   try {
     fileViewBaseUrl.value = await ConfigApi.getConfigKey('url.fileview.address')
-    externalPrefix.value = await ConfigApi.getConfigKey('url.external.prefix')
     internalPrefix.value = await ConfigApi.getConfigKey('url.internal.prefix')
     const res = await ReceiveDocApi.getReceiveDoc(queryId)
     detailData.value = res
@@ -162,52 +160,15 @@ const formatCommaData = (val: any) => {
   return val
 }
 
-const DIRECT_RENDER_EXTENSIONS = [
-  'pdf',
-  'jpg', 'jpeg', 'png', 'gif', 'bmp', 'ico', 'webp', 'svg', 'tif', 'tiff',
-  'mp4', 'webm', 'mkv', 'avi', 'flv', 'mov', 'wmv', 
-  'mp3', 'wav', 'flac', 'ogg', 'aac',
-  'txt', 'json', 'xml', 'md', 'java', 'js', 'css', 'html', 'sql'
-]
-
-/**
- * 处理预览 (修改版)
- * 逻辑：使用 Base64 编码文件地址，拼接预览服务地址，打开新窗口
- */
-const handlePreview = (file: any) => {
-  if (!file || !file.url) {
-    return
-  }
-
-  // 1. 准备基础数据
-  const kkBaseUrl = fileViewBaseUrl.value || 'http://192.168.50.239:8012/onlinePreview?url='
-  let fullUrl = file.url.trim()
-
-  if (fullUrl.startsWith('/')) {
-     fullUrl = window.location.origin + fullUrl
-  }
-
-  const fileName = file.name || fullUrl
-  const ext = fileName.split('.').pop().toLowerCase()
-
-  if (DIRECT_RENDER_EXTENSIONS.includes(ext)) {
-    // 规定格式：走外网地址
-    if (internalPrefix.value && externalPrefix.value && fullUrl.includes(internalPrefix.value)) {
-      fullUrl = fullUrl.replace(internalPrefix.value, externalPrefix.value)
-    }
-  } else {
-    // 规定格式外：交给后端去下载转换，走内网地址
-    if (externalPrefix.value && internalPrefix.value && fullUrl.includes(externalPrefix.value)) {
-      fullUrl = fullUrl.replace(externalPrefix.value, internalPrefix.value)
-    }
-  }
-
-  // 2. 将文件链接进行 Base64 编码 (使用 js-base64 库处理，支持中文更友好)
+/** 通过后端流式接口预览附件。 */
+const handlePreview = async (file: any) => {
   try {
-    const previewUrl = buildFilePreviewUrl(fullUrl, kkBaseUrl, ext)
-    window.open(previewUrl, '_blank')
-  } catch {
-    ElMessage.error('文件预览地址格式错误，请联系管理员')
+    await openFilePreview(file, {
+      previewBase: fileViewBaseUrl.value,
+      internalPrefix: internalPrefix.value
+    })
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '文件预览失败，请稍后重试')
   }
 }
 

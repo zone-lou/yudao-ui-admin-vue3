@@ -449,7 +449,7 @@ import CommentTemplatePicker from '@/components/CommentTemplatePicker/index.vue'
 import { getStrDictOptions, DICT_TYPE } from '@/utils/dict'
 import * as ReceiveDocApi from '@/api/bpm/receivedoc'
 import { dateUtil } from '@/utils/dateUtil'
-import { buildFilePreviewUrl } from '@/utils/filePreview'
+import { openFilePreview } from '@/utils/filePreview'
 import { propTypes } from '@/utils/propTypes'
 import { useUserStore } from '@/store/modules/user'
 import * as ConfigApi from '@/api/infra/config'
@@ -556,7 +556,6 @@ const ensureMinRows = (list: any[], minRows: number) => {
   return res
 }
 
-const externalPrefix = ref('') // 外网地址前缀
 const internalPrefix = ref('') // 内网地址前缀
 
 /** 获取详情 */
@@ -568,7 +567,6 @@ const getInfo = async () => {
   detailLoading.value = true
   try {
     fileViewBaseUrl.value = await ConfigApi.getConfigKey('url.fileview.address')
-    externalPrefix.value = await ConfigApi.getConfigKey('url.external.prefix')
     internalPrefix.value = await ConfigApi.getConfigKey('url.internal.prefix')
     const data = await ReceiveDocApi.ReceiveDocApi.getReceiveDoc(Number(queryId))
     if (!data) {
@@ -695,70 +693,14 @@ const formatDate = (val: any) => {
   return dateUtil(val).format('YYYY-MM-DD HH:mm')
 }
 
-const DIRECT_RENDER_EXTENSIONS = [
-  'pdf',
-  'jpg',
-  'jpeg',
-  'png',
-  'gif',
-  'bmp',
-  'ico',
-  'webp',
-  'svg',
-  'tif',
-  'tiff',
-  'mp4',
-  'webm',
-  'mkv',
-  'avi',
-  'flv',
-  'mov',
-  'wmv',
-  'mp3',
-  'wav',
-  'flac',
-  'ogg',
-  'aac',
-  'txt',
-  'json',
-  'xml',
-  'md',
-  'java',
-  'js',
-  'css',
-  'html',
-  'sql'
-]
-
-const handlePreview = (file: any) => {
-  if (!file || !file.url) return
-  const kkBaseUrl = fileViewBaseUrl.value || 'http://192.168.50.239:8012'
-  let fullUrl = file.url.trim()
-
-  if (fullUrl.startsWith('/')) {
-    fullUrl = window.location.origin + fullUrl
-  }
-
-  const fileName = file.name || fullUrl.split(/[?#]/)[0]
-  const ext = fileName.split('.').pop()?.toLowerCase() || ''
-
-  if (DIRECT_RENDER_EXTENSIONS.includes(ext)) {
-    // 规定格式：走外网地址
-    if (internalPrefix.value && externalPrefix.value && fullUrl.includes(internalPrefix.value)) {
-      fullUrl = fullUrl.replace(internalPrefix.value, externalPrefix.value)
-    }
-  } else {
-    // 规定格式外：交给后端去下载转换，走内网地址
-    if (externalPrefix.value && internalPrefix.value && fullUrl.includes(externalPrefix.value)) {
-      fullUrl = fullUrl.replace(externalPrefix.value, internalPrefix.value)
-    }
-  }
-
+const handlePreview = async (file: any) => {
   try {
-    const previewUrl = buildFilePreviewUrl(fullUrl, kkBaseUrl, ext)
-    window.open(previewUrl, '_blank')
-  } catch {
-    message.error('文件预览地址格式错误，请联系管理员')
+    await openFilePreview(file, {
+      previewBase: fileViewBaseUrl.value,
+      internalPrefix: internalPrefix.value
+    })
+  } catch (error) {
+    message.error(error instanceof Error ? error.message : '文件预览失败，请稍后重试')
   }
 }
 
