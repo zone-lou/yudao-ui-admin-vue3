@@ -1,7 +1,17 @@
 <template>
   <div class="oa-container">
-    <div class="print-hide-row" style="display: flex; justify-content: flex-end; margin-bottom: 8px">
+    <div
+      v-if="canEditConferenceInfo || ['科室负责人', '分管领导', '局领导', '局长', '主要领导'].some((key) => isEditable(key))"
+      class="print-hide-row edit-toolbar"
+      style="gap: 12px"
+    >
       <CommentTemplatePicker ref="commentTemplatePickerRef" v-if="['科室负责人', '分管领导', '局领导', '局长', '主要领导'].some((key) => isEditable(key))" v-model="currentOpinion" :task-id="props.taskId" />
+      <el-button
+        v-if="canEditConferenceInfo"
+        type="primary"
+        size="small"
+        @click="handleEditConferenceInfo"
+      >修改会议报告单信息</el-button>
     </div>
     <div class="doc-title">义乌市自然资源和规划局会议报告单</div>
 
@@ -231,6 +241,7 @@
 import { useTaskOpinionDraft } from '@/hooks/bpm/useTaskOpinionDraft'
 import CommentTemplatePicker from '@/components/CommentTemplatePicker/index.vue'
 import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { dateUtil } from '@/utils/dateUtil'
 import { useUserStore } from '@/store/modules/user'
 import { ConfflowApi, Confflow } from '@/api/bpm/confflow' // 引入API
@@ -252,6 +263,7 @@ const props = defineProps({
 })
 
 const { query } = useRoute()
+const router = useRouter()
 const detailLoading = ref(false)
 const detailData = ref<Partial<Confflow>>({})
 const userStore = useUserStore()
@@ -346,6 +358,25 @@ const isEditable = (keyword: string) => {
   if (!props.taskId) return false
   const nodeName = props.currentNode?.name || ''
   return nodeName.indexOf(keyword) !== -1
+}
+
+// 与收文登记一致：只向当前登记任务办理人展示修改入口。
+const canEditConferenceInfo = computed(() =>
+  !props.historyMode && Boolean(props.taskId) &&
+  (props.currentNode?.id === 'Activity_02rawmy' || props.currentNode?.name === '科室登记')
+)
+
+const handleEditConferenceInfo = () => {
+  const id = props.id || query.id
+  if (!id) return
+  router.push({
+    name: 'OAconfflowCreate',
+    query: {
+      id,
+      returnProcessInstanceId: query.id,
+      returnTaskId: props.taskId
+    }
+  })
 }
 
 const AUTO_REGISTER_REASONS = new Set(['系统自动完成来文登记', '提交业务表单并完成登记'])
@@ -529,6 +560,18 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.edit-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+@media print {
+  .edit-toolbar {
+    display: none;
+  }
+}
+
 .oa-container {
   width: 1040px !important;
   max-width: 100% !important;

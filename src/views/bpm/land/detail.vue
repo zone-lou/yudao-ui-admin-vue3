@@ -4,12 +4,14 @@
       <template #extra><el-button @click="load">重新加载</el-button></template>
     </el-result>
     <template v-else>
-      <div v-if="canEditRegistration" class="registration-actions"
-        ><el-button type="primary" :loading="saving" @click="saveRegistration"
-          >保存登记信息</el-button
-        ></div
-      >
       <LandSheet :ref="setSheetRef" v-model="record" :editable="canEditRegistration">
+        <template #toolbar>
+          <div v-if="canEditRegistration" class="registration-actions">
+            <el-button type="primary" size="small" :loading="saving" @click="saveRegistration">
+              保存修改
+            </el-button>
+          </div>
+        </template>
         <tr v-for="section in sections" :key="section.nodeId">
           <th scope="row">{{ section.label }}</th>
           <td colspan="3" class="opinion-content">
@@ -63,6 +65,7 @@ import CommentTemplatePicker from '@/components/CommentTemplatePicker/index.vue'
 import LandSheet from './components/LandSheet.vue'
 
 defineOptions({ name: 'BpmLandDetail' })
+const emit = defineEmits<{ 'title-updated': [title: string] }>()
 interface LandTask {
   id: string
   taskDefinitionKey?: string
@@ -177,6 +180,7 @@ const persistRegistration = async () => {
   const data = { ...record.value, fileList: sheetRef.value?.getFiles() || [] }
   await landApi.update(data)
   record.value = data
+  emit('title-updated', data.projectName.trim())
 }
 const saveRegistration = async () => {
   if (saving.value) return
@@ -208,8 +212,7 @@ defineExpose({
 <style scoped>
 .registration-actions {
   display: flex;
-  max-width: 1040px;
-  margin: 0 auto 12px;
+  margin-bottom: 12px;
   justify-content: flex-end;
 }
 

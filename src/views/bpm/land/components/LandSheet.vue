@@ -1,5 +1,8 @@
 <template>
   <article class="land-sheet">
+    <div v-if="$slots.toolbar" class="sheet-toolbar">
+      <slot name="toolbar"></slot>
+    </div>
     <header class="sheet-heading">
       <h1>义乌市自然资源和规划局土地用途认定阅办单</h1>
     </header>
@@ -243,8 +246,33 @@ h1 {
   margin-bottom: 0;
 }
 
-.sheet-table :deep(.el-form-item.is-error) {
-  padding-bottom: 16px;
+.sheet-table :deep(.el-form-item__error) {
+  position: absolute;
+  top: -20px;
+  left: 0;
+  z-index: 1000;
+  padding: 2px 8px;
+  font-family: Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-size: 11px;
+  font-weight: normal;
+  line-height: 1.2;
+  color: #fff;
+  white-space: nowrap;
+  pointer-events: none;
+  background: #f56c6c;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgb(0 0 0 / 20%);
+}
+
+.sheet-table :deep(.el-form-item__error)::after {
+  position: absolute;
+  top: 100%;
+  left: 10px;
+  display: block;
+  border-color: #f56c6c transparent transparent;
+  border-style: solid;
+  border-width: 4px 4px 0;
+  content: '';
 }
 
 .sheet-table :deep(.el-input__wrapper),
@@ -265,14 +293,24 @@ h1 {
   resize: none;
 }
 
-.sheet-table :deep(.el-input__wrapper.is-focus),
+.sheet-table :deep(.el-input__inner::placeholder),
+.sheet-table :deep(.el-textarea__inner::placeholder) {
+  font-size: 14px;
+  color: var(--el-text-color-placeholder);
+}
+
+.sheet-table :deep(.el-input__wrapper) {
+  border: none;
+  box-shadow: none !important;
+}
+
 .sheet-table :deep(.el-textarea__inner:focus) {
   box-shadow: 0 0 0 1px #8cb4e0 inset;
 }
 
 .sheet-table :deep(.el-form-item.is-error .el-input__wrapper),
 .sheet-table :deep(.el-form-item.is-error .el-textarea__inner) {
-  box-shadow: 0 0 0 1px var(--el-color-danger) inset;
+  box-shadow: 0 0 0 1px var(--el-color-danger) inset !important;
 }
 
 .opinion-cell {
@@ -327,6 +365,10 @@ h1 {
 }
 
 @media print {
+  .sheet-toolbar {
+    display: none;
+  }
+
   .land-sheet {
     width: 100%;
     max-width: none;
