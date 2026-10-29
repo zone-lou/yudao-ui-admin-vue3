@@ -38,10 +38,32 @@ export interface LandSubmitData extends LandRecord {
   sendSms?: boolean
 }
 
-// 土地用途认定业务接口契约；后端业务接口接入后可进行保存、发送联调。
+export interface LandPageParams extends PageParam {
+  projectName?: string
+  location?: string
+  startUserName?: string
+  status?: number
+  applyDate?: string[]
+}
+
+export interface LandPageItem {
+  id: number
+  projectName: string
+  location: string
+  startUserName: string
+  deptName: string
+  applyDate: number | string
+  status: number
+  processInstanceId?: string
+}
 export const landApi = {
+  getPage: (params: LandPageParams) =>
+    request.get<PageResult<LandPageItem>>({ url: '/bpm/land/page', params }),
   get: (id: number) => request.get<LandRecord>({ url: '/bpm/land/get', params: { id } }),
   save: (data: LandRecord) => request.post<LandSaveResult>({ url: '/bpm/land/save', data }),
+  managementUpdate: (data: LandRecord) => request.put({ url: '/bpm/land/management-update', data }),
+  delete: (params: { id: number; reason: string }) =>
+    request.delete({ url: '/bpm/land/delete', params }),
   update: (data: LandRecord) => request.put({ url: '/bpm/land/update', data }),
   submit: (data: LandSubmitData) => request.post({ url: '/bpm/land/create-flow', data })
 }

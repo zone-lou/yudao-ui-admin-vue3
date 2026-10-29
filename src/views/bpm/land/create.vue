@@ -1,5 +1,8 @@
 <template>
-  <ContentWrap title="土地用途认定登记" v-loading="loading">
+  <ContentWrap
+    :title="isManagementEdit ? '土地用途认定修改' : '土地用途认定登记'"
+    v-loading="loading"
+  >
     <template #header>
       <el-button
         v-if="!isManagementEdit"
@@ -84,7 +87,8 @@ const validate = async () => {
 }
 const persist = async () => {
   const data = { ...record.value, fileList: sheetRef.value?.getFiles() || [] }
-  if (data.id) await landApi.update(data)
+  if (isManagementEdit.value) await landApi.managementUpdate(data)
+  else if (data.id) await landApi.update(data)
   else {
     const result = await landApi.save(data)
     if (!result?.id) throw new Error('保存未返回业务编号，请重新加载后核实')
@@ -107,6 +111,7 @@ const save = async () => {
   }
 }
 const openSend = async () => {
+  if (isManagementEdit.value) return
   if (loading.value || !(await validate())) return
   if (!definitionId.value) {
     message.warning('未找到土地用途认定流程，请检查流程配置')
@@ -120,6 +125,7 @@ interface SendData {
   sendSms: boolean
 }
 const submit = async (selection: SendData) => {
+  if (isManagementEdit.value) return
   if (loading.value) return
   if (!(await validate())) {
     if (sendRef.value) sendRef.value.submitLoading = false
@@ -164,9 +170,11 @@ const initialize = async () => {
       const profile = await getUserProfile()
       record.value.deptName = profile.dept?.name || userStore.getUser.deptName
     }
-    const definition = await getProcessDefinition(undefined, LAND_PROCESS_KEY)
-    definitionId.value = definition?.id || ''
-    if (!definitionId.value) message.warning('土地用途认定流程尚未配置，暂不能发送')
+    if (!isManagementEdit.value) {
+      const definition = await getProcessDefinition(undefined, LAND_PROCESS_KEY)
+      definitionId.value = definition?.id || ''
+      if (!definitionId.value) message.warning('土地用途认定流程尚未配置，暂不能发送')
+    }
     await nextTick()
     ready.value = true
   } catch (error) {
