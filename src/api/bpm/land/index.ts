@@ -56,7 +56,25 @@ export interface LandPageItem {
   status: number
   processInstanceId?: string
 }
+export interface LandTaskAttachment {
+  id: number
+  taskId: string
+  filename: string
+  filepath: string
+  fileextension?: string
+  creator?: string
+}
+
 export const landApi = {
+  getTaskAttachments: (landId: number) =>
+    request.get<LandTaskAttachment[]>({
+      url: '/bpm/land/task-attachment/list',
+      params: { landId }
+    }),
+  createTaskAttachment: (data: { landId: number; taskId: string; fileId: number }) =>
+    request.post<number>({ url: '/bpm/land/task-attachment/create', data }),
+  deleteTaskAttachment: (id: number) =>
+    request.delete({ url: '/bpm/land/task-attachment/delete', params: { id } }),
   getPage: (params: LandPageParams) =>
     request.get<PageResult<LandPageItem>>({ url: '/bpm/land/page', params }),
   get: (id: number) => request.get<LandRecord>({ url: '/bpm/land/get', params: { id } }),

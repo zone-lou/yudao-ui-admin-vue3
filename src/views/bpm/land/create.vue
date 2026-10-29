@@ -22,12 +22,15 @@
       <template #extra><el-button @click="initialize">重新加载</el-button></template>
     </el-result>
     <LandSheet v-else :ref="setSheetRef" v-model="record" editable>
-      <tr v-for="label in opinionLabels" :key="label"
-        ><th scope="row">{{ label }}</th
-        ><td colspan="3" class="blank-opinion"
-          ><span>办理人：　　　　　　　　　日期：</span></td
-        ></tr
-      >
+      <template v-for="label in opinionLabels" :key="label">
+        <tr>
+          <th scope="row" rowspan="2">{{ label }}</th>
+          <td colspan="3" class="opinion-heading">办理意见</td>
+          <td class="opinion-heading">办理人员</td>
+          <td class="opinion-heading">办理日期</td>
+        </tr>
+        <tr class="blank-opinion"><td colspan="3"></td><td></td><td></td></tr>
+      </template>
     </LandSheet>
     <ProcessSendDialog
       :ref="setSendRef"
@@ -189,13 +192,10 @@ onMounted(initialize)
 
 <style scoped>
 .blank-opinion {
-  height: 140px;
-  text-align: right;
-  vertical-align: bottom;
+  height: 70px;
 }
 
-.blank-opinion span {
-  font-size: 16px;
-  color: #555;
+.opinion-heading {
+  text-align: center;
 }
 </style>

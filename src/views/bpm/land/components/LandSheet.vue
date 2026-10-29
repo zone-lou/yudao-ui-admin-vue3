@@ -10,26 +10,26 @@
       <table class="sheet-table">
         <colgroup>
           <col class="label-column" />
-          <col />
-          <col class="label-column" />
-          <col />
+          <col /><col /><col />
+          <col class="handler-column" />
+          <col class="date-column" />
         </colgroup>
         <tbody>
           <tr>
             <th scope="row">发起单位</th>
-            <td>登记中心</td>
+            <td colspan="2">登记中心</td>
             <th scope="row">登记日期</th>
-            <td>{{ formatDate(modelValue.applyDate) }}</td>
+            <td colspan="2">{{ formatDate(modelValue.applyDate) }}</td>
           </tr>
           <tr>
             <th scope="row">发起人</th>
-            <td>{{ modelValue.startUserName || '—' }}</td>
+            <td colspan="2">{{ modelValue.startUserName || '' }}</td>
             <th scope="row">所属科室</th>
-            <td>{{ modelValue.deptName || '—' }}</td>
+            <td colspan="2">{{ modelValue.deptName || '' }}</td>
           </tr>
           <tr>
             <th scope="row"><span v-if="editable" class="required">*</span>项目名称</th>
-            <td colspan="3">
+            <td colspan="5">
               <el-form-item v-if="editable" prop="projectName">
                 <el-input
                   :model-value="modelValue.projectName"
@@ -39,12 +39,12 @@
                   @update:model-value="patch({ projectName: $event })"
                 />
               </el-form-item>
-              <div v-else class="text-value">{{ modelValue.projectName || '—' }}</div>
+              <div v-else class="text-value">{{ modelValue.projectName || '' }}</div>
             </td>
           </tr>
           <tr>
             <th scope="row"><span v-if="editable" class="required">*</span>坐落</th>
-            <td colspan="3">
+            <td colspan="5">
               <el-form-item v-if="editable" prop="location">
                 <el-input
                   :model-value="modelValue.location"
@@ -54,12 +54,12 @@
                   @update:model-value="patch({ location: $event })"
                 />
               </el-form-item>
-              <div v-else class="text-value">{{ modelValue.location || '—' }}</div>
+              <div v-else class="text-value">{{ modelValue.location || '' }}</div>
             </td>
           </tr>
           <tr>
             <th scope="row">科室意见</th>
-            <td colspan="3" class="opinion-cell">
+            <td colspan="5" class="opinion-cell">
               <el-input
                 v-if="editable"
                 :model-value="modelValue.deptOpinion"
@@ -71,12 +71,12 @@
                 show-word-limit
                 @update:model-value="patch({ deptOpinion: $event })"
               />
-              <div v-else class="text-value">{{ modelValue.deptOpinion || '—' }}</div>
+              <div v-else class="text-value">{{ modelValue.deptOpinion || '' }}</div>
             </td>
           </tr>
           <tr>
             <th scope="row">附件</th>
-            <td colspan="3">
+            <td colspan="5">
               <div class="screen-attachments">
                 <UploadFile
                   :ref="setUploadRef"
@@ -124,7 +124,7 @@ const setUploadRef = (element: Element | ComponentPublicInstance | null) => {
 }
 const patch = (value: Partial<LandRecord>) =>
   emit('update:modelValue', { ...props.modelValue, ...value })
-const formatDate = (value: number | string) => (value ? dayjs(value).format('YYYY年MM月DD日') : '—')
+const formatDate = (value: number | string) => (value ? dayjs(value).format('YYYY年MM月DD日') : '')
 const rules: FormRules = {
   projectName: [{ required: true, whitespace: true, message: '请填写项目名称', trigger: 'blur' }],
   location: [{ required: true, whitespace: true, message: '请填写坐落', trigger: 'blur' }]
@@ -187,6 +187,7 @@ defineExpose({ validate, getFiles })
 
 <style scoped>
 .land-sheet {
+  position: relative;
   width: 1040px;
   max-width: 100%;
   min-height: 1123px;
@@ -209,20 +210,35 @@ h1 {
   font-size: 30px;
   font-weight: bold;
   line-height: 1.5;
-  letter-spacing: 1px;
-  color: #b1351e;
+  letter-spacing: 2px;
+  color: #d71920;
 }
 
 .sheet-table {
   width: 100%;
   font-size: 17px;
-  border: 1px solid #8cb4e0;
+  color: #000;
+  border: 2px solid #8cb4e0;
   border-collapse: collapse;
   table-layout: fixed;
 }
 
 .label-column {
-  width: 160px;
+  width: 16%;
+}
+
+.handler-column {
+  width: 16%;
+}
+
+.date-column {
+  width: 21%;
+}
+
+.screen-attachments :deep(.file-list-item) {
+  padding: 0;
+  border: none;
+  border-radius: 0;
 }
 
 .sheet-table :deep(th),
@@ -230,8 +246,9 @@ h1 {
   padding: 18px 14px;
   font-size: 17px;
   line-height: 1.6;
+  vertical-align: middle;
   border: 1px solid #8cb4e0;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .sheet-table :deep(th) {
@@ -240,6 +257,20 @@ h1 {
   text-align: center;
   white-space: nowrap;
   background: #dbe9f8;
+}
+
+.sheet-table :deep(.opinion-column-heading),
+.sheet-table :deep(.opinion-heading) {
+  height: 36px;
+  padding: 6px 12px;
+  font-size: 17px;
+  font-weight: normal;
+  text-align: center;
+}
+
+.sheet-table :deep(.opinion-row .opinion-cell) {
+  padding: 0;
+  vertical-align: top;
 }
 
 .sheet-table :deep(.el-form-item) {
