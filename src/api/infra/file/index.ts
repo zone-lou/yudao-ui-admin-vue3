@@ -48,3 +48,24 @@ export const updateFile = (data: any, onUploadProgress?: Function) => {
 export const uploadReturnInfo = (data: any, onUploadProgress?: Function) => {
   return request.upload({ url: '/infra/file/uploadReturnInfo', data, onUploadProgress })
 }
+
+export interface FilePreviewRequest {
+  fileId?: number | string
+  configId?: number
+  path?: string
+}
+
+export interface FilePreviewInfo {
+  previewPath: string
+  cacheName: string
+  name: string
+  expiresIn: number
+}
+
+// 与移动端共用预览接口，原始文件路径通过 JSON 提交。
+export const prepareFilePreview = (data: FilePreviewRequest) => {
+  return request.post<FilePreviewInfo>({
+    url: '/infra/file/preview/prepare',
+    data
+  })
+}

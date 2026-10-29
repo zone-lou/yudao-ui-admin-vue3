@@ -603,7 +603,7 @@ import { XzfyApi } from '@/api/bpm/xzfy'
 import { CommentAttachApi } from '@/api/bpm/commentattach'
 import { uploadReturnInfo } from '@/api/infra/file'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { buildFilePreviewUrl } from '@/utils/filePreview'
+import { openFilePreview } from '@/utils/filePreview'
 import * as ConfigApi from '@/api/infra/config'
 import { propTypes } from '@/utils/propTypes'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
@@ -650,7 +650,6 @@ const allDocAttachments = ref<any[]>([])
 const attachDialogVisible = ref(false)
 const currentAttachments = ref<any[]>([])
 const fileViewBaseUrl = ref('')
-const externalPrefix = ref('') // 外网地址前缀
 const internalPrefix = ref('') // 内网地址前缀
 const normalizeTaskId = (value: any) =>
   value === undefined || value === null || value === '' ? '' : String(value)
@@ -779,27 +778,14 @@ const showAttachments = (taskId?: string) => {
 }
 
 // 预览附件
-const handlePreview = (file: any) => {
-  const filepath = typeof file === 'string' ? file : file.filepath
-  if (!filepath) return ElMessage.warning('文件路径不存在')
-
-  const kkBaseUrl = fileViewBaseUrl.value || 'http://192.168.50.239:8012'
-  let fullUrl = filepath
-
-  if (fullUrl.startsWith('/')) {
-    fullUrl = window.location.origin + fullUrl
-  }
-
-  // 内外网预览地址转换
-  if (externalPrefix.value && internalPrefix.value && fullUrl.includes(externalPrefix.value)) {
-    fullUrl = fullUrl.replace(externalPrefix.value, internalPrefix.value)
-  }
-
+const handlePreview = async (file: any) => {
   try {
-    const previewUrl = buildFilePreviewUrl(fullUrl, kkBaseUrl)
-    window.open(previewUrl, '_blank')
-  } catch {
-    ElMessage.error('文件预览地址格式错误，请联系管理员')
+    await openFilePreview(file, {
+      previewBase: fileViewBaseUrl.value,
+      internalPrefix: internalPrefix.value
+    })
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '文件预览失败，请稍后重试')
   }
 }
 
@@ -924,7 +910,6 @@ const getInfo = async (id?: number) => {
   try {
     // 获取预览/地址前缀配置
     fileViewBaseUrl.value = await ConfigApi.getConfigKey('url.fileview.address')
-    externalPrefix.value = await ConfigApi.getConfigKey('url.external.prefix')
     internalPrefix.value = await ConfigApi.getConfigKey('url.internal.prefix')
 
     const res = await XzfyApi.getXzfy(queryId)
