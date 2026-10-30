@@ -39,6 +39,8 @@ export interface LandSubmitData extends LandRecord {
 }
 
 export interface LandPageParams extends PageParam {
+  orderField?: 'projectName' | 'location' | 'startUserName' | 'deptName' | 'applyDate' | 'status'
+  orderDirection?: 'asc' | 'desc'
   projectName?: string
   location?: string
   startUserName?: string

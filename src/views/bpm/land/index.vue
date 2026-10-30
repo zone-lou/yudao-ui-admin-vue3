@@ -1,6 +1,12 @@
 <template>
   <ContentWrap>
-    <el-form :ref="setQueryFormRef" :model="queryParams" :inline="true" label-width="90px">
+    <el-form
+      class="search-form"
+      :ref="setQueryFormRef"
+      :model="queryParams"
+      :inline="true"
+      label-width="90px"
+    >
       <el-form-item label="项目名称" prop="projectName">
         <el-input
           v-model="queryParams.projectName"
@@ -56,29 +62,113 @@
         />
       </el-form-item>
     </el-form>
-    <div class="flex justify-end">
+    <div class="search-actions">
       <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" />重置</el-button>
       <el-button type="primary" :loading="loading" @click="handleQuery"
-        ><Icon icon="ep:search" class="mr-5px" />搜索</el-button
+        ><Icon icon="ep:search" class="mr-5px" />查询</el-button
       >
     </div>
   </ContentWrap>
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" row-key="id" border stripe show-overflow-tooltip>
-      <el-table-column type="index" label="序号" width="60" align="center" />
-      <el-table-column label="项目名称" prop="projectName" min-width="220" />
-      <el-table-column label="坐落" prop="location" min-width="220" />
-      <el-table-column label="发起人" prop="startUserName" width="120" align="center" />
-      <el-table-column label="发起科室" prop="deptName" min-width="150" align="center" />
-      <el-table-column label="登记时间" prop="applyDate" width="180" align="center">
+    <div class="mb-15px flex items-center justify-end gap-8px">
+      <BpmColumnSetting
+        v-model="checkedColumnKeys"
+        :columns="columnOptions"
+        @reset="resetColumns"
+      />
+    </div>
+    <el-table
+      :ref="setTableRef"
+      v-loading="loading"
+      :data="list"
+      row-key="id"
+      border
+      stripe
+      show-overflow-tooltip
+      @sort-change="handleSortChange"
+      @header-dragend="handleHeaderDragend"
+    >
+      <el-table-column
+        column-key="index"
+        type="index"
+        label="序号"
+        :width="getColumnWidth('index', 60)"
+        align="center"
+        fixed="left"
+        resizable
+      />
+      <el-table-column
+        column-key="projectName"
+        v-if="visibleColumn('projectName')"
+        label="项目名称"
+        prop="projectName"
+        :width="getColumnWidth('projectName', 220)"
+        sortable="custom"
+        resizable
+      />
+      <el-table-column
+        column-key="location"
+        v-if="visibleColumn('location')"
+        label="坐落"
+        prop="location"
+        :width="getColumnWidth('location', 220)"
+        sortable="custom"
+        resizable
+      />
+      <el-table-column
+        column-key="startUserName"
+        v-if="visibleColumn('startUserName')"
+        label="发起人"
+        prop="startUserName"
+        align="center"
+        :width="getColumnWidth('startUserName', 120)"
+        sortable="custom"
+        resizable
+      />
+      <el-table-column
+        column-key="deptName"
+        v-if="visibleColumn('deptName')"
+        label="发起科室"
+        prop="deptName"
+        align="center"
+        :width="getColumnWidth('deptName', 150)"
+        sortable="custom"
+        resizable
+      />
+      <el-table-column
+        column-key="applyDate"
+        v-if="visibleColumn('applyDate')"
+        label="登记时间"
+        prop="applyDate"
+        align="center"
+        :width="getColumnWidth('applyDate', 180)"
+        sortable="custom"
+        resizable
+      >
         <template #default="scope">{{ formatDate(scope.row.applyDate) }}</template>
       </el-table-column>
-      <el-table-column label="办理状态" prop="status" width="110" align="center">
+      <el-table-column
+        column-key="status"
+        v-if="visibleColumn('status')"
+        label="办理状态"
+        prop="status"
+        align="center"
+        :width="getColumnWidth('status', 110)"
+        sortable="custom"
+        resizable
+      >
         <template #default="scope"
           ><dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="scope.row.status"
         /></template>
       </el-table-column>
-      <el-table-column label="操作" width="210" align="center" fixed="right">
+      <el-table-column
+        column-key="operation"
+        label="操作"
+        :width="getColumnWidth('operation', 210)"
+        align="center"
+        fixed="right"
+        resizable
+      >
         <template #default="scope">
           <el-button
             v-hasPermi="['bpm:land:query']"
@@ -118,12 +208,14 @@
 <script setup lang="ts">
 import { onActivated, onMounted, reactive, ref } from 'vue'
 import type { ComponentPublicInstance } from 'vue'
-import type { FormInstance } from 'element-plus'
+import type { FormInstance, TableInstance } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { landApi } from '@/api/bpm/land'
 import type { LandPageItem, LandPageParams } from '@/api/bpm/land'
 import { useBpmInvalidate } from '@/hooks/bpm/useBpmInvalidate'
 import { useBpmPageSize } from '@/hooks/bpm/useBpmPageSize'
+import { useBpmColumnSetting } from '@/hooks/bpm/useBpmColumnSetting'
+import BpmColumnSetting from '@/views/bpm/components/BpmColumnSetting.vue'
 import { getBusinessStatusOptions } from '@/utils/businessStatus'
 import { DICT_TYPE } from '@/utils/dict'
 import { defaultShortcuts, formatDate } from '@/utils/formatTime'
@@ -142,8 +234,35 @@ const queryParams = reactive({
   location: '',
   startUserName: '',
   status: undefined as number | undefined,
-  applyDate: [] as string[]
+  applyDate: [] as string[],
+  orderField: undefined as LandPageParams['orderField'],
+  orderDirection: undefined as LandPageParams['orderDirection']
 })
+const {
+  columnOptions,
+  checkedColumnKeys,
+  visibleColumn,
+  getColumnWidth,
+  handleHeaderDragend,
+  resetColumns
+} = useBpmColumnSetting('bpm:land:columns', [
+  { key: 'projectName', label: '项目名称' },
+  { key: 'location', label: '坐落' },
+  { key: 'startUserName', label: '发起人' },
+  { key: 'deptName', label: '发起科室' },
+  { key: 'applyDate', label: '登记时间' },
+  { key: 'status', label: '办理状态' }
+])
+const tableRef = ref<TableInstance>()
+const setTableRef = (element: Element | ComponentPublicInstance | null) => {
+  tableRef.value = element as TableInstance | undefined
+}
+const handleSortChange = ({ prop, order }: { prop?: string; order: string | null }) => {
+  queryParams.orderField = order ? (prop as LandPageParams['orderField']) : undefined
+  queryParams.orderDirection =
+    order === 'ascending' ? 'asc' : order === 'descending' ? 'desc' : undefined
+  handleQuery()
+}
 const queryFormRef = ref<FormInstance>()
 const setQueryFormRef = (element: Element | ComponentPublicInstance | null) => {
   queryFormRef.value = element as FormInstance | undefined
@@ -169,6 +288,9 @@ const handleQuery = () => {
 }
 const resetQuery = () => {
   queryFormRef.value?.resetFields()
+  queryParams.orderField = undefined
+  queryParams.orderDirection = undefined
+  tableRef.value?.clearSort()
   handleQuery()
 }
 const { handleInvalidate: handleDelete } = useBpmInvalidate(landApi.delete, getList)
@@ -177,7 +299,10 @@ const handleUpdate = (row: LandPageItem) => {
 }
 const handleDetail = (row: LandPageItem) => {
   if (!row.processInstanceId) return
-  router.push({ name: 'BpmProcessInstanceDetail', query: { id: row.processInstanceId } })
+  router.push({
+    name: 'BpmProcessInstanceDetail',
+    query: { id: row.processInstanceId }
+  })
 }
 onMounted(async () => {
   try {
@@ -190,3 +315,38 @@ onActivated(() => {
   if (mounted.value) getList()
 })
 </script>
+
+<style scoped>
+.search-form {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 16px;
+  margin-bottom: -18px;
+}
+.search-form :deep(.el-form-item) {
+  margin-right: 0;
+}
+.search-form :deep(.el-form-item__content > .el-input),
+.search-form :deep(.el-form-item__content > .el-select),
+.search-form :deep(.el-form-item__content > .el-date-editor) {
+  width: 240px !important;
+  max-width: 100%;
+}
+.search-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  padding-top: 16px;
+}
+@media (max-width: 1200px) {
+  .search-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 640px) {
+  .search-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+</style>
