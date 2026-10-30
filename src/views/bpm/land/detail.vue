@@ -86,6 +86,7 @@ import { emptyLandRecord, landApi, LAND_REGISTER_NODE } from '@/api/bpm/land'
 import { useUserStore } from '@/store/modules/user'
 import { useMessage } from '@/hooks/web/useMessage'
 import { useTaskOpinionDraft } from '@/hooks/bpm/useTaskOpinionDraft'
+import { selectOpinionTasks } from '@/hooks/bpm/taskOpinion'
 import CommentTemplatePicker from '@/components/CommentTemplatePicker/index.vue'
 import LandSheet from './components/LandSheet.vue'
 import LandTaskAttachments from './components/LandTaskAttachments.vue'
@@ -101,6 +102,7 @@ interface LandTask {
   startTime?: number | string
   createTime?: number | string
   attachmentTaskIds?: string[]
+  restoredFromTaskId?: string
   assigneeUser?: { id?: number; nickname?: string; deptName?: string }
 }
 interface LandNode {
@@ -197,10 +199,18 @@ const tasksFor = (nodeId: string) => {
     }
   return [...unique.values()]
 }
+// 恢复任务替代其精确来源；不能按人员去重，避免吞掉同一人的其他独立办理意见。
+const visibleApprovedTaskIds = computed(
+  () => new Set(selectOpinionTasks(props.activityNodes).map(({ task }) => String(task.id)))
+)
 const completedTasks = (nodeId: string) =>
   tasksFor(nodeId)
     .filter((task) =>
       [TaskStatusEnum.APPROVE, TaskStatusEnum.REJECT, TaskStatusEnum.RETURN].includes(task.status)
+    )
+    .filter(
+      (task) =>
+        task.status !== TaskStatusEnum.APPROVE || visibleApprovedTaskIds.value.has(String(task.id))
     )
     .sort((a, b) => dayjs(a.endTime || 0).valueOf() - dayjs(b.endTime || 0).valueOf())
 const formatDate = (value?: number | string) =>
