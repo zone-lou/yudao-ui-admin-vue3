@@ -128,7 +128,7 @@ import { Confflow, ConfflowApi } from '@/api/bpm/confflow'
 import { useUserStore } from '@/store/modules/user'
 import { dateUtil } from '@/utils/dateUtil'
 
-defineOptions({ name: 'BpmConfflowCreate' })
+defineOptions({ name: 'OAelectricCreate' })
 
 const userStore = useUserStore()
 const message = useMessage()

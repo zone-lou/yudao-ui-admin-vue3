@@ -670,7 +670,7 @@ import { XzfyApi } from '@/api/bpm/xzfy'
 import { dateUtil } from '@/utils/dateUtil'
 import { uploadReturnInfo } from '@/api/infra/file'
 
-defineOptions({ name: 'BpmXzssCreate' })
+defineOptions({ name: 'OAxzssCreate' })
 
 const props = defineProps({
   embedded: { type: Boolean, default: false },

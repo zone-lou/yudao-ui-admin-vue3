@@ -362,7 +362,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
         component: () => import('@/views/bpm/land/create.vue'),
         name: 'BpmLandCreate',
         meta: {
-          noCache: true,
+          noCache: false,
           hidden: true,
           canTo: true,
           title: '土地用途认定登记',
@@ -387,7 +387,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
         component: () => import('@/views/bpm/leave/create.vue'),
         name: 'OALeaveCreate',
         meta: {
-          noCache: true,
+          noCache: false,
           hidden: true,
           canTo: true,
           title: '发起 OA 请假',
@@ -411,7 +411,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
         component: () => import('@/views/bpm/timeexplain/create.vue'),
         name: 'OAtimeexplainCreate',
         meta: {
-          noCache: true,
+          noCache: false,
           hidden: true,
           canTo: true,
           title: '发起 OA 公出',
@@ -435,7 +435,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
         component: () => import('@/views/bpm/electric/create.vue'),
         name: 'OAelectricCreate',
         meta: {
-          noCache: true,
+          noCache: false,
           hidden: true,
           canTo: true,
           title: '发起电子公告',
@@ -459,7 +459,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
         component: () => import('@/views/bpm/xzfy/create.vue'),
         name: 'OAxzfyCreate',
         meta: {
-          noCache: true,
+          noCache: false,
           hidden: true,
           canTo: true,
           title: '发起行政复议',
@@ -483,7 +483,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
         component: () => import('@/views/bpm/xzss/create.vue'),
         name: 'OAxzssCreate',
         meta: {
-          noCache: true,
+          noCache: false,
           hidden: true,
           canTo: true,
           title: '发起行政诉讼',
@@ -507,7 +507,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
         component: () => import('@/views/bpm/receivedoc/create.vue'),
         name: 'OAReceiveDocCreate',
         meta: {
-          noCache: true,
+          noCache: false,
           hidden: true,
           canTo: true,
           title: '发起收文',
@@ -531,7 +531,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
         component: () => import('@/views/bpm/senddoc/create.vue'),
         name: 'OAsenddocCreate',
         meta: {
-          noCache: true,
+          noCache: false,
           hidden: true,
           canTo: true,
           title: '发起发文',
@@ -555,7 +555,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
         component: () => import('@/views/bpm/confflow/create.vue'),
         name: 'OAconfflowCreate',
         meta: {
-          noCache: true,
+          noCache: false,
           hidden: true,
           canTo: true,
           title: '会议报告单',

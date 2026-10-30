@@ -386,7 +386,7 @@ import { Base64 } from 'js-base64'
 import ProcessSendDialog from '@/components/ProcessSendDialog/index.vue'
 import { NodeId } from '@/components/SimpleProcessDesignerV2/src/consts'
 
-defineOptions({ name: 'BpmSendDocCreate' })
+defineOptions({ name: 'OAsenddocCreate' })
 
 const message = useMessage()
 const { delView } = useTagsViewStore()

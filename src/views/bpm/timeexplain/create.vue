@@ -243,7 +243,7 @@ import { useUserStore } from '@/store/modules/user'
 import { getUserProfile } from '@/api/system/user/profile'
 import { useMessage } from '@/hooks/web/useMessage'
 
-defineOptions({ name: 'BpmTimeExplainCreate' })
+defineOptions({ name: 'OAtimeexplainCreate' })
 
 const userStore = useUserStore()
 const nickname = computed(() => userStore.user.nickname)

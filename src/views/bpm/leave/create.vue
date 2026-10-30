@@ -312,7 +312,7 @@ import * as DictDataApi from '@/api/system/dict/dict.data'
 import { uploadReturnInfo } from '@/api/infra/file'
 import ProcessSendDialog from '@/components/ProcessSendDialog/index.vue'
 
-defineOptions({ name: 'BpmLeaveCreate' })
+defineOptions({ name: 'OALeaveCreate' })
 
 const userStore = useUserStore()
 const nickname = computed(() => userStore.user.nickname)

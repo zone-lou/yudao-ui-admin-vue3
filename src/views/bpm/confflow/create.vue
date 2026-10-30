@@ -231,7 +231,7 @@ import { uploadReturnInfo } from '@/api/infra/file'
 
 import ProcessSendDialog from '@/components/ProcessSendDialog/index.vue'
 
-defineOptions({ name: 'BpmConfflowCreate' })
+defineOptions({ name: 'OAconfflowCreate' })
 
 const message = useMessage()
 const { delView } = useTagsViewStore()

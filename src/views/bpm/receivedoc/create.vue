@@ -404,7 +404,7 @@ import { uploadReturnInfo } from '@/api/infra/file'
 // 引入弹窗组件及常量
 import ProcessSendDialog from '@/components/ProcessSendDialog/index.vue'
 
-defineOptions({ name: 'BpmReceiveDocCreate' })
+defineOptions({ name: 'OAReceiveDocCreate' })
 
 const deptName = ref('')
 const message = useMessage()

@@ -499,7 +499,7 @@ import { useUserStore } from '@/store/modules/user'
 import { dateUtil } from '@/utils/dateUtil'
 import { uploadReturnInfo } from '@/api/infra/file'
 
-defineOptions({ name: 'BpmXzfyCreate' })
+defineOptions({ name: 'OAxzfyCreate' })
 
 const props = defineProps({
   embedded: { type: Boolean, default: false },
