@@ -8,10 +8,11 @@
           </el-select>
         </el-form-item>
         <el-form-item label="请假时间">
-          <el-date-picker v-model="filters.leaveTime" type="daterange"
-            value-format="YYYY-MM-DD HH:mm:ss" start-placeholder="开始日期" end-placeholder="结束日期"
-            :default-time="[new Date(2000, 0, 1, 0, 0, 0), new Date(2000, 0, 1, 23, 59, 59)]"
-            class="!w-280px" />
+          <el-date-picker v-model="filters.leaveTimeStart" type="date" clearable
+            value-format="YYYY-MM-DD" placeholder="开始日期" class="!w-160px" />
+          <span class="mx-8px">至</span>
+          <el-date-picker v-model="filters.leaveTimeEnd" type="date" clearable
+            value-format="YYYY-MM-DD" placeholder="不限结束日期" class="!w-160px" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" native-type="submit"><Icon icon="ep:search" class="mr-5px" />查询</el-button>
@@ -21,16 +22,8 @@
       <el-alert v-if="historyError" type="error" :closable="false" title="请假记录加载失败">
         <el-button link type="primary" @click="retryLoad">重新加载</el-button>
       </el-alert>
-      <el-table v-else v-loading="historyLoading" :data="historyList" border empty-text="暂无请假记录">
-        <el-table-column width="36" align="center" class-name="record-marker-column">
-          <template #default="{ row }">
-            <el-tooltip v-if="String(row.id) === String(leaveId)" content="本次申请" placement="top">
-              <span class="record-marker" tabindex="0" aria-label="本次申请">
-                <el-badge is-dot type="danger" />
-              </span>
-            </el-tooltip>
-          </template>
-        </el-table-column>
+      <el-table v-else v-loading="historyLoading" :data="historyList" :row-class-name="getRowClassName"
+        @cell-mouse-enter="handleCellMouseEnter" border empty-text="暂无请假记录">
         <el-table-column label="请假类型" min-width="130" align="center">
           <template #default="{ row }">
             <dict-tag :type="DICT_TYPE.BPM_LEAVE_TYPE" :value="row.qxjType" />
@@ -65,6 +58,12 @@ import * as LeaveApi from '@/api/bpm/leave'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 const props = defineProps<{ leaveId: string | number }>()
+const isCurrentApplication = (row: LeaveApi.leave) => String(row.id) === String(props.leaveId)
+const getRowClassName = ({ row }: { row: LeaveApi.leave }) =>
+  isCurrentApplication(row) ? 'current-application-row' : ''
+const handleCellMouseEnter = (row: LeaveApi.leave, _column: unknown, cell: HTMLTableCellElement) => {
+  cell.title = isCurrentApplication(row) ? '本次申请' : ''
+}
 const getPeriod = (value: any) => new Date(value).getHours() < 12 ? '上午' : '下午'
 const defaultsReady = ref(false)
 const defaultLeaveType = ref<number>()
@@ -73,26 +72,25 @@ const historyError = ref(false)
 const historyList = ref<LeaveApi.leave[]>([])
 const historyTotal = ref(0)
 const historyPage = reactive({ pageNo: 1, pageSize: 10 })
-const filters = reactive<{ qxjType?: number; leaveTime: string[] | null }>({
-  qxjType: undefined, leaveTime: null
+const filters = reactive<{ qxjType?: number; leaveTimeStart: string | null; leaveTimeEnd: string | null }>({
+  qxjType: undefined, leaveTimeStart: null, leaveTimeEnd: null
 })
-const appliedFilters = ref<{ qxjType?: number; leaveTime?: string[] }>({})
+const appliedFilters = ref<{ qxjType?: number; leaveTimeStart?: string; leaveTimeEnd?: string }>({})
 const handleQuery = () => {
   if (!defaultsReady.value) return
   historyPage.pageNo = 1
   appliedFilters.value = {
     qxjType: filters.qxjType,
-    leaveTime: filters.leaveTime?.length === 2 ? [...filters.leaveTime] : undefined
+    leaveTimeStart: filters.leaveTimeStart ? `${filters.leaveTimeStart} 00:00:00` : undefined,
+    leaveTimeEnd: filters.leaveTimeEnd ? `${filters.leaveTimeEnd} 23:59:59` : undefined
   }
   void getApplicantHistory()
 }
 const resetQuery = () => {
   const today = dayjs()
   filters.qxjType = defaultLeaveType.value
-  filters.leaveTime = [
-    today.subtract(1, 'year').startOf('day').format('YYYY-MM-DD HH:mm:ss'),
-    today.endOf('day').format('YYYY-MM-DD HH:mm:ss')
-  ]
+  filters.leaveTimeStart = today.subtract(1, 'year').format('YYYY-MM-DD')
+  filters.leaveTimeEnd = null
   handleQuery()
 }
 let historyRequestId = 0
@@ -157,6 +155,13 @@ watch(() => props.leaveId, initializeFilters, { immediate: true })
 <style scoped>
 .applicant-history { padding: 16px; display: flow-root; }
 .history-filters :deep(.el-form-item) { margin-bottom: 16px; }
-.record-marker { display: inline-flex; align-items: center; justify-content: center; cursor: help; }
-:deep(.record-marker-column .cell) { padding: 0; }
+:deep(.current-application-row) {
+  --el-table-tr-bg-color: var(--el-color-primary-light-9);
+}
+:deep(.current-application-row > td.el-table__cell:first-child) {
+  box-shadow: inset 3px 0 0 var(--el-color-primary);
+}
+:deep(.el-table--enable-row-hover .current-application-row:hover > td.el-table__cell) {
+  background-color: var(--el-color-primary-light-8);
+}
 </style>

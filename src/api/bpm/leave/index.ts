@@ -90,7 +90,7 @@ export const leaveApi = {
   getLeaveHistoryPage: async (params: any) => {
     return await request.get({ url: `/bpm/leave/history`, params })
   },
-  getApplicantHistoryPage: async (params: { leaveId: number; pageNo: number; pageSize: number; qxjType?: number; leaveTime?: string[] }) => {
+  getApplicantHistoryPage: async (params: { leaveId: number; pageNo: number; pageSize: number; qxjType?: number; leaveTime?: string[]; leaveTimeStart?: string; leaveTimeEnd?: string }) => {
     return await request.get({ url: '/bpm/leave/applicant-history', params })
   },
   //获取年度统计

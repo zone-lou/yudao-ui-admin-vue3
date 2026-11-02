@@ -364,7 +364,7 @@ const leaveLimitHint = computed(() => {
     case '6':
       return '直系亲属（祖父母、外祖父母、父母、配偶和子女）、岳父母及公婆去世时，给予丧假1－3天'
     case '10':
-      return '至多请2次，每次至少2天'
+      return `每年至多请3次，当前剩余${Math.max(0, 3 - Number(stat.leaveCount || 0))}次，剩余${Math.max(0, 5 - Number(stat.totalDays || 0))}天`
     case '11':
       return `独生子女陪护假每年享受5天，剩余${Math.max(0, 5 - stat.totalDays)}天`
     case '12':

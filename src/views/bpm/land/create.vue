@@ -51,6 +51,7 @@ import { computed, nextTick, onMounted, ref } from 'vue'
 import type { ComponentPublicInstance } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/store/modules/user'
+import { useTagsViewStore } from '@/store/modules/tagsView'
 import { useMessage } from '@/hooks/web/useMessage'
 import { getUserProfile } from '@/api/system/user/profile'
 import { getProcessDefinition } from '@/api/bpm/definition'
@@ -62,6 +63,7 @@ defineOptions({ name: 'BpmLandCreate' })
 const route = useRoute()
 const isManagementEdit = computed(() => Boolean(route.query.id))
 const router = useRouter()
+const { delView } = useTagsViewStore()
 const message = useMessage()
 const userStore = useUserStore()
 const record = ref(emptyLandRecord())
@@ -153,6 +155,9 @@ const submit = async (selection: SendData) => {
     sendRef.value?.close()
     ready.value = false
     message.success('土地用途认定已发送')
+    // 已发送的创建页不再复用，避免再次发起时带上上一件的业务和流程编号。
+    delView(route)
+    await nextTick()
     if (data.processInstanceId)
       await router.replace({
         name: 'BpmProcessInstanceDetail',

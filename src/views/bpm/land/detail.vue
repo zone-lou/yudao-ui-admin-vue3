@@ -207,9 +207,8 @@ const visibleApprovedTaskIds = computed(
 )
 const completedTasks = (nodeId: string) =>
   tasksFor(nodeId)
-    .filter((task) =>
-      [TaskStatusEnum.APPROVE, TaskStatusEnum.REJECT, TaskStatusEnum.RETURN].includes(task.status)
-    )
+    // 退回原因保留在流转记录中，不作为阅办单的正式办理意见。
+    .filter((task) => [TaskStatusEnum.APPROVE, TaskStatusEnum.REJECT].includes(task.status))
     .filter(
       (task) =>
         task.status !== TaskStatusEnum.APPROVE || visibleApprovedTaskIds.value.has(String(task.id))

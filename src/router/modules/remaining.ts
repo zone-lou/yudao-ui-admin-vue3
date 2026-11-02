@@ -377,7 +377,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
           noCache: true,
           hidden: true,
           canTo: true,
-          title: '土地用途认定阅办单',
+          title: '用途认定阅办单',
           activeMenu: '/bpm/unified'
         },
         props: (route) => ({ id: route.query.id })

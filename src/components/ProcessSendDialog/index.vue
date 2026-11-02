@@ -299,6 +299,8 @@ const loadApprovalNodes = async (variables: Record<string, any>) => {
     await nextTick()
     approvalNodes.value.forEach((node) => {
       if (node.extensionProperties?.same_dept_candidate_filter !== '1') return
+      // 土地主任、副主任必须手动选人，不随同部门过滤自动勾选。
+      if (['Activity_0b2tn42', 'Activity_0fg3i6w'].includes(node.taskDefKey)) return
       const treeRef = userTreeRefs.value[node.taskDefKey]
       if (!treeRef || treeRef.getCheckedKeys().length > 0) return
       const candidateIds = getCandidateUserIds(node.candidateUsers || [])
