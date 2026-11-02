@@ -28,6 +28,18 @@ let editorInstance: any = null
 
 let editorLoadTimer: ReturnType<typeof setTimeout> | undefined
 let disposed = false
+let loadStartedAt = 0
+let editorStartedAt = 0
+const loadTimings: Record<string, number> = {}
+
+async function measureLoad<T>(stage: string, action: () => Promise<T>): Promise<T> {
+  const startedAt = performance.now()
+  try {
+    return await action()
+  } finally {
+    loadTimings[stage] = Math.round(performance.now() - startedAt)
+  }
+}
 
 function clearEditorLoadTimer() {
   clearTimeout(editorLoadTimer)
@@ -89,6 +101,7 @@ function initEditor(fileUrl: string) {
     }
   }, 60000)
 
+  editorStartedAt = performance.now()
   editorInstance = new DocsAPI.DocEditor('onlyoffice-editor', {
     width: '100%',
     height: '100%',
@@ -118,6 +131,11 @@ function initEditor(fileUrl: string) {
         clearEditorLoadTimer()
         loading.value = false
         errorMsg.value = ''
+        console.info('[OnlyOffice] 加载耗时（毫秒）', {
+          ...loadTimings,
+          editor: Math.round(performance.now() - editorStartedAt),
+          total: Math.round(performance.now() - loadStartedAt)
+        })
       },
       onError: (event: { data?: { errorCode?: number; errorDescription?: string } }) => {
         clearEditorLoadTimer()
@@ -139,15 +157,21 @@ onMounted(async () => {
     loading.value = false
     return
   }
+  loadStartedAt = performance.now()
   try {
-    // 获取内外网前缀配置，跟 UploadFile 预览保持一致
-    const [extRes, intRes] = await Promise.all([
-      getConfigKey('url.external.prefix'),
-      getConfigKey('url.internal.prefix')
+    // 三项准备工作互不依赖，同时启动；全部就绪后再创建可编辑文档。
+    const [[extRes, intRes], generatedFileUrl] = await Promise.all([
+      measureLoad('config', () => Promise.all([
+        getConfigKey('url.external.prefix'),
+        getConfigKey('url.internal.prefix')
+      ])),
+      measureLoad('document', () => ProcessInstanceApi.getProcessInstancePrintWordFile(id)),
+      measureLoad('sdk', () => loadScript(ONLYOFFICE_API_URL))
     ])
+    if (disposed) return
     const externalPrefix = extRes?.data ?? extRes
     const internalPrefix = intRes?.data ?? intRes
-    let fileUrl = await ProcessInstanceApi.getProcessInstancePrintWordFile(id)
+    let fileUrl = generatedFileUrl
     if (typeof fileUrl !== 'string' || !fileUrl.trim()) {
       throw new Error('获取文件地址失败')
     }
@@ -161,7 +185,6 @@ onMounted(async () => {
       fileUrl = fileUrl.replace(externalPrefix, internalPrefix)
     }
     await nextTick()
-    await loadScript(ONLYOFFICE_API_URL)
     if (!disposed) initEditor(fileUrl)
   } catch (e: any) {
     clearEditorLoadTimer()
