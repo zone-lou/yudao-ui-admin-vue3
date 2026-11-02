@@ -415,6 +415,26 @@ const validateLeaveLimits = (_rule: any, _value: any, callback: any) => {
   const dts = formData.value.totalTs
   const stat = yearlyStatsMap.value[typeStr] || { leaveCount: 0, totalDays: 0 }
 
+  if (typeStr === '10') {
+    const requestedDays = Number(dts)
+    if (!Number.isFinite(requestedDays) || requestedDays <= 0 || requestedDays % 0.5 !== 0) {
+      return callback(new Error('疗养假申请天数必须大于0，且以半天为单位'))
+    }
+    if (requestedDays > 5) {
+      return callback(new Error('疗养假每年合计不超过5天，本次申请超限'))
+    }
+    // 当前接口统计登录人的本年度数据；编辑及其他年度由后端按申请人、开始年份校验。
+    if (!formData.value.id && dayjs(formData.value.qxjStartDate).year() === dayjs().year()) {
+      if (Number(stat.leaveCount || 0) >= 3) {
+        return callback(new Error('疗养假每年最多申请3次，本年度次数已用完'))
+      }
+      const remaining = Math.max(0, 5 - Number(stat.totalDays || 0))
+      if (requestedDays > remaining) {
+        return callback(new Error(`疗养假本年度剩余${remaining}天，本次申请${requestedDays}天，超过年度额度`))
+      }
+    }
+  }
+
   if (typeStr === '6' && dts > 3) {
     return callback(new Error('丧假限制为 1－3 天，申请超限'))
   }

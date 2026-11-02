@@ -21,7 +21,6 @@
     <el-form-item label="流程名称" prop="name" class="mb-20px">
       <el-input
         v-model="modelData.name"
-        :disabled="!!modelData.id"
         clearable
         placeholder="请输入流程名称"
       />
