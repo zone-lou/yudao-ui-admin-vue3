@@ -267,6 +267,11 @@
         </tr>
       </tbody>
     </table>
+    <ApplicantHistory
+      v-if="!historyMode && showApplicantHistory && detailData.id"
+      :leave-id="detailData.id"
+      class="print-hide-row applicant-history"
+    />
   </div>
 </template>
 
@@ -279,7 +284,8 @@ import { formatDate } from '@/utils/formatTime'
 import { propTypes } from '@/utils/propTypes'
 import * as LeaveApi from '@/api/bpm/leave'
 import { useUserStore } from '@/store/modules/user'
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
+import ApplicantHistory from './ApplicantHistory.vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import * as ConfigApi from '@/api/infra/config'
@@ -337,7 +343,7 @@ const endSession = computed(() => getPeriod(detailData.value.qxjEndDate))
 const leaveDays = computed(() => detailData.value.totalTs)
 const reason = computed(() => detailData.value.sjReason)
 
-const { query } = useRoute() // 查询参数
+const route = useRoute() // 查询参数
 
 const props = defineProps({
   id: propTypes.oneOfType([Number, String]).def(undefined),
@@ -345,13 +351,13 @@ const props = defineProps({
   activityNodes: propTypes.array.def([]),
   attachments: propTypes.array.def([]),
   historyMode: propTypes.bool.def(false),
+  showApplicantHistory: propTypes.bool.def(true),
   taskId: propTypes.string.def(undefined), // 当前任务ID
   currentNode: propTypes.object.def({}) // 当前节点信息
 })
 
 const detailLoading = ref(false) // 表单的加载中
 const detailData = ref<any>({}) // 详情数据
-const queryId = query.id as unknown as number
 const commentTemplatePickerRef = ref<InstanceType<typeof CommentTemplatePicker>>()
 const currentOpinion = useTaskOpinionDraft(() => props.taskId, () => props.activityNodes || []) // 当前正在填写的办理意见
 
@@ -581,12 +587,16 @@ const handleDownload = async (file: any) => {
 const internalPrefix = ref('') // 内网地址前缀
 
 /** 获得数据 */
+let detailRequestId = 0
 const getInfo = async () => {
+  const requestId = ++detailRequestId
+  detailData.value = {}
   detailLoading.value = true
   try {
     fileViewBaseUrl.value = await ConfigApi.getConfigKey('url.fileview.address')
     internalPrefix.value = await ConfigApi.getConfigKey('url.internal.prefix')
-    const res = await LeaveApi.leaveApi.getleave(Number(props.id || queryId))
+    const res = await LeaveApi.leaveApi.getleave(Number(props.id || route.query.id))
+    if (requestId !== detailRequestId) return
     if (!res) {
       ElMessage.error('未找到相关请假详情')
       detailLoading.value = false
@@ -596,7 +606,7 @@ const getInfo = async () => {
   } catch (error) {
     console.error('获取请假详情失败:', error)
   } finally {
-    detailLoading.value = false
+    if (requestId === detailRequestId) detailLoading.value = false
   }
 }
 
@@ -609,9 +619,7 @@ const getPeriod = (val: any) => {
 }
 
 /** 初始化 **/
-onMounted(() => {
-  getInfo()
-})
+watch(() => props.id || route.query.id, () => getInfo(), { immediate: true })
 
 // 为外部开放必需的属性
 defineExpose({
@@ -620,6 +628,17 @@ defineExpose({
 })
 </script>
 <style scoped>
+.applicant-history {
+  margin-top: 24px;
+  display: flow-root;
+}
+
+@media print {
+  .applicant-history {
+    display: none !important;
+  }
+}
+
 @keyframes rotating {
   from {
     transform: rotate(0deg);

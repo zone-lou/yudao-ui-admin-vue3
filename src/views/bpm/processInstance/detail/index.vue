@@ -125,6 +125,7 @@
                       </div>
                       <div v-else-if="BusinessFormComponent">
                         <BusinessFormComponent
+                          :show-applicant-history="false"
                           :id="processInstance.businessKey"
                           :taskId="editableTaskId"
                           :currentNode="currentNode"
@@ -183,6 +184,15 @@
                   :initialData="sharedBusinessDetail"
                 />
               </el-scrollbar>
+            </div>
+          </el-tab-pane>
+
+          <el-tab-pane
+            v-if="applicantLeaveId"
+            label="请假记录" name="leaveHistory" lazy
+          >
+            <div class="form-scroll-area">
+              <ApplicantHistory :leave-id="applicantLeaveId" />
             </div>
           </el-tab-pane>
 
@@ -254,6 +264,7 @@ import { DICT_TYPE } from '@/utils/dict'
 import { BpmModelType, BpmModelFormType } from '@/utils/constants'
 import { setConfAndFields2 } from '@/utils/formCreate'
 import { registerComponent } from '@/utils/routerHelper'
+import ApplicantHistory from '@/views/bpm/leave/ApplicantHistory.vue'
 import type { ApiAttrs } from '@form-create/element-ui/types/config'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import * as UserApi from '@/api/system/user'
@@ -367,6 +378,14 @@ const saveRegisterForm = async () => {
   }
 }
 const businessProcessKey = ref('')
+const applicantLeaveId = computed(() => {
+  const route = router.currentRoute.value
+  const explicitId = String(route.query.id || '') === String(props.id) ? route.query.leaveId : undefined
+  if (typeof explicitId === 'string' && /^\d+$/.test(explicitId)) return explicitId
+  return ['leave', 'oa_leave'].includes(businessProcessKey.value)
+    ? processInstance.value.businessKey
+    : undefined
+})
 const updateLandTitle = (title: string) => {
   processInstance.value.name = title
 }

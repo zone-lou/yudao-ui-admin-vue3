@@ -259,6 +259,10 @@ h1 {
   background: #dbe9f8;
 }
 
+.sheet-table :deep(th.opinion-label) {
+  white-space: normal;
+}
+
 .sheet-table :deep(.opinion-column-heading),
 .sheet-table :deep(.opinion-heading) {
   height: 36px;

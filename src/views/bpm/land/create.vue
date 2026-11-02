@@ -24,7 +24,7 @@
     <LandSheet v-else :ref="setSheetRef" v-model="record" editable>
       <template v-for="label in opinionLabels" :key="label">
         <tr>
-          <th scope="row" rowspan="2">{{ label }}</th>
+          <th scope="row" rowspan="2" class="opinion-label">{{ label }}</th>
           <td colspan="3" class="opinion-heading">办理意见</td>
           <td class="opinion-heading">办理人员</td>
           <td class="opinion-heading">办理日期</td>
@@ -78,7 +78,14 @@ const setSheetRef = (element: Element | ComponentPublicInstance | null) => {
 const setSendRef = (element: Element | ComponentPublicInstance | null) => {
   sendRef.value = element as InstanceType<typeof ProcessSendDialog> | undefined
 }
-const opinionLabels = ['主办科室意见', '协办科室意见', '科室人员办理意见', '登记中心汇总意见']
+const opinionLabels = [
+  '登记中心主任意见',
+  '登记中心副主任意见',
+  '主办科室意见',
+  '协办科室意见',
+  '科室人员办理意见',
+  '登记中心汇总意见'
+]
 
 const validate = async () => {
   try {

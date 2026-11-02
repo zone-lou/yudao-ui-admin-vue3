@@ -31,7 +31,7 @@
         </template>
         <template v-for="section in sections" :key="section.nodeId">
           <tr>
-            <th scope="row" :rowspan="opinionRows(section.nodeId).length + 1">{{
+            <th scope="row" :rowspan="opinionRows(section.nodeId).length + 1" class="opinion-label">{{
               section.label
             }}</th>
             <td colspan="3" class="opinion-column-heading">办理意见</td>
@@ -152,6 +152,8 @@ const currentOpinion = useTaskOpinionDraft(
   () => props.activityNodes
 )
 const sections = [
+  { nodeId: 'Activity_0fg3i6w', label: '登记中心主任意见' },
+  { nodeId: 'Activity_0b2tn42', label: '登记中心副主任意见' },
   { nodeId: 'Activity_09u6oi7', label: '主办科室意见' },
   { nodeId: 'Activity_0nu44fi', label: '协办科室意见' },
   { nodeId: 'Activity_0knvtxp', label: '科室人员办理意见' },

@@ -108,7 +108,7 @@
         </tr>
 
         <tr>
-          <td class="label-cell" rowspan="2">科室(单位)负责人意见</td>
+          <td class="label-cell dept-head-opinion-label" rowspan="2">科室(单位)负责人意见</td>
           <td
             class="input-cell h-large"
             colspan="3"
@@ -744,5 +744,9 @@ onMounted(() => {
 :deep(.el-input__inner) {
   font-family: SimSun, 'Songti SC', STSong, serif !important;
   font-size: 16px !important;
+}
+.label-cell.dept-head-opinion-label {
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 </style>
