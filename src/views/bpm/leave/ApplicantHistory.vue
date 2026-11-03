@@ -1,6 +1,6 @@
 <template>
     <section class="applicant-history">
-      <el-form :inline="true" :model="filters" :disabled="!defaultsReady" class="history-filters" @submit.prevent="handleQuery">
+      <el-form :inline="true" :model="filters" class="history-filters" @submit.prevent="handleQuery">
         <el-form-item label="请假类型">
           <el-select v-model="filters.qxjType" clearable placeholder="全部类型" class="!w-180px">
             <el-option v-for="item in getIntDictOptions(DICT_TYPE.BPM_LEAVE_TYPE)"
@@ -20,7 +20,7 @@
         </el-form-item>
       </el-form>
       <el-alert v-if="historyError" type="error" :closable="false" title="请假记录加载失败">
-        <el-button link type="primary" @click="retryLoad">重新加载</el-button>
+        <el-button link type="primary" @click="getApplicantHistory">重新加载</el-button>
       </el-alert>
       <el-table v-else v-loading="historyLoading" :data="historyList" :row-class-name="getRowClassName"
         @cell-mouse-enter="handleCellMouseEnter" border empty-text="暂无请假记录">
@@ -65,8 +65,6 @@ const handleCellMouseEnter = (row: LeaveApi.leave, _column: unknown, cell: HTMLT
   cell.title = isCurrentApplication(row) ? '本次申请' : ''
 }
 const getPeriod = (value: any) => new Date(value).getHours() < 12 ? '上午' : '下午'
-const defaultsReady = ref(false)
-const defaultLeaveType = ref<number>()
 const historyLoading = ref(false)
 const historyError = ref(false)
 const historyList = ref<LeaveApi.leave[]>([])
@@ -77,7 +75,6 @@ const filters = reactive<{ qxjType?: number; leaveTimeStart: string | null; leav
 })
 const appliedFilters = ref<{ qxjType?: number; leaveTimeStart?: string; leaveTimeEnd?: string }>({})
 const handleQuery = () => {
-  if (!defaultsReady.value) return
   historyPage.pageNo = 1
   appliedFilters.value = {
     qxjType: filters.qxjType,
@@ -88,7 +85,7 @@ const handleQuery = () => {
 }
 const resetQuery = () => {
   const today = dayjs()
-  filters.qxjType = defaultLeaveType.value
+  filters.qxjType = undefined
   filters.leaveTimeStart = today.subtract(1, 'year').format('YYYY-MM-DD')
   filters.leaveTimeEnd = null
   handleQuery()
@@ -123,34 +120,10 @@ const getApplicantHistory = async () => {
   }
 }
 
-let defaultsRequestId = 0
-const initializeFilters = async () => {
-  const requestId = ++defaultsRequestId
-  ++historyRequestId
-  defaultsReady.value = false
-  historyLoading.value = true
-  historyError.value = false
-  historyList.value = []
+watch(() => props.leaveId, () => {
   historyTotal.value = 0
-  historyPage.pageNo = 1
-  try {
-    const detail = await LeaveApi.leaveApi.getleave(Number(props.leaveId))
-    if (requestId !== defaultsRequestId) return
-    if (detail?.qxjType == null || !Number.isFinite(Number(detail.qxjType))) {
-      throw new Error('未获取到本次申请的请假类型')
-    }
-    defaultLeaveType.value = Number(detail.qxjType)
-    defaultsReady.value = true
-    resetQuery()
-  } catch {
-    if (requestId === defaultsRequestId) {
-      historyError.value = true
-      historyLoading.value = false
-    }
-  }
-}
-const retryLoad = () => defaultsReady.value ? getApplicantHistory() : initializeFilters()
-watch(() => props.leaveId, initializeFilters, { immediate: true })
+  resetQuery()
+}, { immediate: true })
 </script>
 <style scoped>
 .applicant-history { padding: 16px; display: flow-root; }

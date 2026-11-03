@@ -1,4 +1,5 @@
 <template>
+  <BpmTaskListLayout>
   <ContentWrap>
     <div class="flex justify-between items-start">
       <div class="flex gap-2"> </div>
@@ -138,7 +139,9 @@
         @reset="resetColumns"
       />
     </div>
+    <div class="bpm-task-table">
     <el-table
+      height="100%"
       class="bpm-task-single-line-table"
       v-loading="loading"
       :data="list"
@@ -354,6 +357,7 @@
         </template>
       </el-table-column>
     </el-table>
+    </div>
 
     <Pagination
       v-model:limit="queryParams.pageSize"
@@ -362,11 +366,13 @@
       @pagination="getList"
     />
   </ContentWrap>
+  </BpmTaskListLayout>
   <TaskAppendDialog ref="appendDialogRef" @success="getList" />
   <TaskWithdrawDialog ref="withdrawDialogRef" @success="getList" />
 </template>
 
 <script lang="ts" setup>
+import BpmTaskListLayout from '@/views/bpm/components/BpmTaskListLayout.vue'
 import { useBpmPageSize } from '@/hooks/bpm/useBpmPageSize'
 import { dateFormatter, formatPast2 } from '@/utils/formatTime'
 import * as TaskApi from '@/api/bpm/task'

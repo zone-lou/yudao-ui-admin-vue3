@@ -1,4 +1,5 @@
 <template>
+  <BpmTaskListLayout>
   <ContentWrap>
     <el-form :model="queryParams" ref="queryFormRef" :inline="true" label-width="auto">
       <el-row :gutter="20">
@@ -123,7 +124,9 @@
         @reset="resetColumns"
       />
     </div>
+    <div class="bpm-task-table">
     <el-table
+      height="100%"
       v-loading="loading"
       :data="list"
       stripe
@@ -256,6 +259,7 @@
         </template>
       </el-table-column>
     </el-table>
+    </div>
 
     <pagination
       v-show="total > 0"
@@ -265,9 +269,11 @@
       @pagination="getList"
     />
   </ContentWrap>
+  </BpmTaskListLayout>
 </template>
 
 <script setup lang="ts">
+import BpmTaskListLayout from '@/views/bpm/components/BpmTaskListLayout.vue'
 import { useBpmPageSize } from '@/hooks/bpm/useBpmPageSize'
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'

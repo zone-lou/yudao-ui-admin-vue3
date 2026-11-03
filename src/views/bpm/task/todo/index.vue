@@ -1,4 +1,5 @@
 <template>
+  <BpmTaskListLayout>
   <!--  <doc-alert title="审批通过、不通过、驳回" url="https://doc.iocoder.cn/bpm/task-todo-done/" />-->
   <!--  <doc-alert title="审批加签、减签" url="https://doc.iocoder.cn/bpm/sign/" />-->
   <!--  <doc-alert-->
@@ -152,7 +153,9 @@
         @reset="resetColumns"
       />
     </div>
+    <div class="bpm-task-table">
     <el-table
+      height="100%"
       class="bpm-task-single-line-table"
       v-loading="loading"
       :data="list"
@@ -377,6 +380,7 @@
         </template>
       </el-table-column>
     </el-table>
+    </div>
     <!-- 分页 -->
     <Pagination
       v-model:limit="queryParams.pageSize"
@@ -385,9 +389,11 @@
       @pagination="getList"
     />
   </ContentWrap>
+  </BpmTaskListLayout>
 </template>
 
 <script lang="ts" setup>
+import BpmTaskListLayout from '@/views/bpm/components/BpmTaskListLayout.vue'
 import { useBpmPageSize } from '@/hooks/bpm/useBpmPageSize'
 import { dateFormatter } from '@/utils/formatTime'
 import * as TaskApi from '@/api/bpm/task'
