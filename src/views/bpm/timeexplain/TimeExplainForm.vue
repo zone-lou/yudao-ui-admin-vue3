@@ -10,6 +10,8 @@
       <el-form-item label="登记时间" prop="checkDate">
         <el-date-picker
           v-model="formData.checkDate"
+          readonly
+          :clearable="false"
           type="date"
           value-format="x"
           placeholder="选择登记时间"
@@ -82,7 +84,7 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
-  checkDate: undefined,
+  checkDate: Date.now(),
   checkBegin: undefined,
   checkEnd: undefined,
   reason: undefined,
@@ -134,6 +136,7 @@ const submitForm = async () => {
       return
     }
     data.days = days
+    delete data.checkDate
     delete data.startPeriod
     delete data.endPeriod
 
@@ -202,7 +205,7 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    checkDate: undefined,
+    checkDate: Date.now(),
     checkBegin: undefined,
     checkEnd: undefined,
     reason: undefined,

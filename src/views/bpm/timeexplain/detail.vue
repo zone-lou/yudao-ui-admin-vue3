@@ -29,12 +29,16 @@
 
         <tr>
           <td class="label-cell">公出开始 从</td>
-          <td class="input-cell" colspan="3">{{ startTime }}</td>
+          <td class="input-cell">{{ startTime }}</td>
+          <td class="label-cell">时段</td>
+          <td class="input-cell">{{ startSession }}</td>
         </tr>
 
         <tr>
           <td class="label-cell">公出结束 至</td>
-          <td class="input-cell" colspan="3">{{ endTime }}</td>
+          <td class="input-cell">{{ endTime }}</td>
+          <td class="label-cell">时段</td>
+          <td class="input-cell">{{ endSession }}</td>
         </tr>
 
         <tr>
@@ -369,8 +373,10 @@ const startUser = computed(() => {
 })
 const leaveType = computed(() => '因公外出')
 const applyDate = computed(() => formatDate(detailData.value.checkDate))
-const startTime = computed(() => detailData.value.checkBegin ? dateUtil(detailData.value.checkBegin).format('YYYY-MM-DD HH:mm') : '')
-const endTime = computed(() => detailData.value.checkEnd ? dateUtil(detailData.value.checkEnd).format('YYYY-MM-DD HH:mm') : '')
+const startTime = computed(() => detailData.value.checkBegin ? dateUtil(detailData.value.checkBegin).format('YYYY-MM-DD') : '')
+const startSession = computed(() => detailData.value.checkBegin ? dateUtil(detailData.value.checkBegin).format('HH:mm') : '')
+const endTime = computed(() => detailData.value.checkEnd ? dateUtil(detailData.value.checkEnd).format('YYYY-MM-DD') : '')
+const endSession = computed(() => detailData.value.checkEnd ? dateUtil(detailData.value.checkEnd).format('HH:mm') : '')
 const leaveDays = computed(() => detailData.value.days)
 const reason = computed(() => detailData.value.reason)
 const startPlace = computed(() => detailData.value.startPlace)

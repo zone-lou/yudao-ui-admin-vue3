@@ -50,6 +50,8 @@
                     <el-form-item prop="checkDate" class="mb-0">
                       <el-date-picker
                         v-model="formData.checkDate"
+                        readonly
+                        :clearable="false"
                         type="date"
                         value-format="x"
                         placeholder="请选择登记日期"
@@ -304,7 +306,6 @@ const formRules = reactive({
   checkBegin: [{ required: true, message: '开始时间不能为空', trigger: 'blur' }],
   checkEnd: [{ required: true, message: '结束时间不能为空', trigger: 'blur' }],
   reason: [{ required: true, message: '原因说明不能为空', trigger: 'blur' }],
-  checkDate: [{ required: true, message: '登记时间不能为空', trigger: 'blur' }],
   startPlace: [{ required: true, message: '出发地不能为空', trigger: 'blur' }],
   endPlace: [{ required: true, message: '目的地不能为空', trigger: 'blur' }]
 })
@@ -358,6 +359,7 @@ const maxPermissionRole = computed(() => {
 /** 构建请求数据 */
 const buildRequestData = () => {
   const data = { ...formData.value } as any
+  delete data.checkDate
   delete data.startPeriod
   delete data.endPeriod
 
