@@ -64,8 +64,9 @@
                   <td class="input-cell">
                     <el-form-item prop="checkBegin" class="mb-0">
                       <el-date-picker
-                        v-model="formData.checkBegin"
+                        v-model="startDate"
                         type="date"
+                        format="YYYY-MM-DD"
                         value-format="x"
                         placeholder="选择开始时间"
                         @change="calculateDuration"
@@ -75,17 +76,15 @@
                   </td>
                   <td class="label-cell">时段</td>
                   <td class="input-cell">
-                    <el-form-item prop="startPeriod" class="mb-0">
-                      <el-select
-                        v-model="formData.startPeriod"
-                        placeholder="时段"
-                        @change="calculateDuration"
-                        style="width: 100%"
-                      >
-                        <el-option label="上午" :value="1" />
-                        <el-option label="下午" :value="2" />
-                      </el-select>
-                    </el-form-item>
+                    <el-time-picker
+                      v-model="startClock"
+                      format="HH:mm"
+                      value-format="HH:mm"
+                      :clearable="false"
+                      placeholder="选择时间"
+                      @change="calculateDuration"
+                      style="width: 100%"
+                    />
                   </td>
                 </tr>
 
@@ -94,8 +93,9 @@
                   <td class="input-cell">
                     <el-form-item prop="checkEnd" class="mb-0">
                       <el-date-picker
-                        v-model="formData.checkEnd"
+                        v-model="endDate"
                         type="date"
+                        format="YYYY-MM-DD"
                         value-format="x"
                         placeholder="选择结束时间"
                         @change="calculateDuration"
@@ -105,17 +105,15 @@
                   </td>
                   <td class="label-cell">时段</td>
                   <td class="input-cell">
-                    <el-form-item prop="endPeriod" class="mb-0">
-                      <el-select
-                        v-model="formData.endPeriod"
-                        placeholder="时段"
-                        @change="calculateDuration"
-                        style="width: 100%"
-                      >
-                        <el-option label="上午" :value="1" />
-                        <el-option label="下午" :value="2" />
-                      </el-select>
-                    </el-form-item>
+                    <el-time-picker
+                      v-model="endClock"
+                      format="HH:mm"
+                      value-format="HH:mm"
+                      :clearable="false"
+                      placeholder="选择时间"
+                      @change="calculateDuration"
+                      style="width: 100%"
+                    />
                   </td>
                 </tr>
 
@@ -230,6 +228,9 @@
 </template>
 
 <script setup lang="ts">
+import { calculateOutingDays } from './time'
+import { useOutingCalendar } from './calendar'
+import dayjs from 'dayjs'
 import { ref, reactive, computed, unref, onMounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useTagsViewStore } from '@/store/modules/tagsView'
@@ -238,7 +239,6 @@ import BpmOperationGuide from '@/components/BpmOperationGuide/index.vue'
 import { TimeExplainApi } from '@/api/bpm/timeexplain'
 import { uploadReturnInfo } from '@/api/infra/file'
 import ProcessSendDialog from '@/components/ProcessSendDialog/index.vue'
-import dayjs from 'dayjs'
 import { useUserStore } from '@/store/modules/user'
 import { getUserProfile } from '@/api/system/user/profile'
 import { useMessage } from '@/hooks/web/useMessage'
@@ -266,12 +266,39 @@ const formData = ref<any>({
   days: 0,
   filepath: '',
   status: 0,
-  startPeriod: 1,
-  endPeriod: 2,
   startPlace: '义乌',
   endPlace: undefined,
   processInstanceId: undefined
 })
+
+// 保留日期、时段两列，提交时仍合并为完整时间戳。
+const createDateTimeFields = (field: 'checkBegin' | 'checkEnd', defaultClock: string) => {
+  const selectedClock = ref(defaultClock)
+  const parse = (value: string | number) =>
+    dayjs(/^\d+$/.test(String(value)) ? Number(value) : value)
+  const merge = (value: string | number, clock: string) => {
+    const [hour, minute] = clock.split(':').map(Number)
+    return parse(value).hour(hour).minute(minute).second(0).millisecond(0).valueOf()
+  }
+  const clock = computed({
+    get: () => formData.value[field] ? parse(formData.value[field]).format('HH:mm') : selectedClock.value,
+    set: (value: string) => {
+      selectedClock.value = value
+      if (formData.value[field]) formData.value[field] = merge(formData.value[field], value)
+    }
+  })
+  const date = computed({
+    get: () => formData.value[field],
+    set: (value: string | number | null) => {
+      const time = clock.value
+      selectedClock.value = time
+      formData.value[field] = value ? merge(value, time) : undefined
+    }
+  })
+  return { date, clock }
+}
+const { date: startDate, clock: startClock } = createDateTimeFields('checkBegin', '08:30')
+const { date: endDate, clock: endClock } = createDateTimeFields('checkEnd', '13:30')
 
 const formRules = reactive({
   checkBegin: [{ required: true, message: '开始时间不能为空', trigger: 'blur' }],
@@ -288,43 +315,28 @@ const processSendDialogRef = ref()
 const processDefineKey = 'oa_out'
 const processDefinitionId = ref('')
 
-const AM = 1
-const PM = 2
-
-const calculateDuration = () => {
+const { ensureCalendar } = useOutingCalendar()
+let durationRequestId = 0
+const calculateDuration = async () => {
+  const requestId = ++durationRequestId
+  const begin = formData.value.checkBegin
+  const end = formData.value.checkEnd
   formData.value.days = 0
-  if (!formData.value.checkBegin || !formData.value.checkEnd) return
-
-  const start = dayjs(formData.value.checkBegin).startOf('day')
-  const end = dayjs(formData.value.checkEnd).startOf('day')
-
-  if (end.isBefore(start)) {
-    message.error('结束日期不能早于开始日期')
-    return
-  }
-  if (end.isSame(start) && formData.value.startPeriod === PM && formData.value.endPeriod === AM) {
-    message.error('结束时段不能早于开始时段')
-    return
-  }
-
-  let totalDays = 0
-  let currentDate = start.clone()
-
-  while (currentDate.isBefore(end) || currentDate.isSame(end)) {
-    if (currentDate.isSame(start) && currentDate.isSame(end)) {
-      if (formData.value.startPeriod === AM && formData.value.endPeriod === AM) totalDays = 0.5
-      else if (formData.value.startPeriod === PM && formData.value.endPeriod === PM) totalDays = 0.5
-      else totalDays = 1
-    } else if (currentDate.isSame(start)) {
-      totalDays += formData.value.startPeriod === PM ? 0.5 : 1
-    } else if (currentDate.isSame(end)) {
-      totalDays += formData.value.endPeriod === AM ? 0.5 : 1
-    } else {
-      totalDays += 1
+  if (!begin || !end) return false
+  try {
+    const calendar = await ensureCalendar()
+    if (requestId !== durationRequestId || begin !== formData.value.checkBegin || end !== formData.value.checkEnd) return false
+    const days = calculateOutingDays(begin, end, calendar)
+    if (days === null) {
+      message.error('请选择有效的起止时间，结束时间不能早于开始时间')
+      return false
     }
-    currentDate = currentDate.add(1, 'day')
+    formData.value.days = days
+    return true
+  } catch {
+    if (requestId === durationRequestId) message.error('节假日配置加载失败，请重试后再提交')
+    return false
   }
-  formData.value.days = totalDays
 }
 
 const getRoleLevel = (roleStr: string): number => {
@@ -346,6 +358,8 @@ const maxPermissionRole = computed(() => {
 /** 构建请求数据 */
 const buildRequestData = () => {
   const data = { ...formData.value } as any
+  delete data.startPeriod
+  delete data.endPeriod
 
   const rawFileList = uploadFileRef.value?.fileList || []
 
@@ -405,15 +419,15 @@ const handleSendClick = async () => {
   }
   const isValid = await formRef.value.validate().catch(() => false)
   if (!isValid) return
-  calculateDuration()
+  if (!(await calculateDuration())) return
   const variables = { role_condition: maxPermissionRole.value }
   processSendDialogRef.value.open(variables)
 }
 
 const handleSave = async () => {
   if (!formRef.value) return
-  calculateDuration()
   if (!(await formRef.value.validate().catch(() => false))) return
+  if (!(await calculateDuration())) return
   formLoading.value = true
   try {
     const data = buildRequestData()
@@ -440,6 +454,7 @@ const handleSave = async () => {
 }
 
 const submitForm = async (submitData: { nextNodeAssignees: any; variables: any; sendSms: boolean }) => {
+  if (!(await calculateDuration())) return
   formLoading.value = true
   try {
     const data = buildRequestData()

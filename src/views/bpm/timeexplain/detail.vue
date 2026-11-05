@@ -29,16 +29,12 @@
 
         <tr>
           <td class="label-cell">公出开始 从</td>
-          <td class="input-cell">{{ startTime }}</td>
-          <td class="label-cell">时段</td>
-          <td class="input-cell">{{ startSession }}</td>
+          <td class="input-cell" colspan="3">{{ startTime }}</td>
         </tr>
 
         <tr>
           <td class="label-cell">公出结束 至</td>
-          <td class="input-cell">{{ endTime }}</td>
-          <td class="label-cell">时段</td>
-          <td class="input-cell">{{ endSession }}</td>
+          <td class="input-cell" colspan="3">{{ endTime }}</td>
         </tr>
 
         <tr>
@@ -373,10 +369,8 @@ const startUser = computed(() => {
 })
 const leaveType = computed(() => '因公外出')
 const applyDate = computed(() => formatDate(detailData.value.checkDate))
-const startTime = computed(() => formatDate(detailData.value.checkBegin))
-const startSession = computed(() => getPeriod(detailData.value.checkBegin))
-const endTime = computed(() => formatDate(detailData.value.checkEnd))
-const endSession = computed(() => getPeriod(detailData.value.checkEnd))
+const startTime = computed(() => detailData.value.checkBegin ? dateUtil(detailData.value.checkBegin).format('YYYY-MM-DD HH:mm') : '')
+const endTime = computed(() => detailData.value.checkEnd ? dateUtil(detailData.value.checkEnd).format('YYYY-MM-DD HH:mm') : '')
 const leaveDays = computed(() => detailData.value.days)
 const reason = computed(() => detailData.value.reason)
 const startPlace = computed(() => detailData.value.startPlace)
@@ -443,16 +437,6 @@ const ensureMinRows = (list: any[], minRows: number) => {
 const formatDate = (val: any) => {
   if (!val) return ''
   return dateUtil(val).format('YYYY-MM-DD')
-}
-
-/** * 新增：根据时间戳计算时段 (上午/下午)
- * 逻辑：12点之前为上午，12点及以后为下午
- */
-const getPeriod = (val: any) => {
-  if (!val) return ''
-  const date = new Date(val)
-  const hours = date.getHours()
-  return hours < 12 ? '上午' : '下午'
 }
 
 const internalPrefix = ref('') // 内网地址前缀

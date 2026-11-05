@@ -163,10 +163,10 @@ const preparePrintData = (rawData: any) => {
     // 公出
     if (rawData.checkBegin) {
       data.leaveType = '因公外出'
-      data.startTime = dateUtil(rawData.checkBegin).format('YYYY-MM-DD')
-      data.startSession = getPeriod(rawData.checkBegin)
-      data.endTime = dateUtil(rawData.checkEnd).format('YYYY-MM-DD')
-      data.endSession = getPeriod(rawData.checkEnd)
+      data.startTime = dateUtil(rawData.checkBegin).format('YYYY-MM-DD HH:mm')
+      data.startSession = dateUtil(rawData.checkBegin).format('HH:mm')
+      data.endTime = dateUtil(rawData.checkEnd).format('YYYY-MM-DD HH:mm')
+      data.endSession = dateUtil(rawData.checkEnd).format('HH:mm')
       data.leaveDays = rawData.days
       data.reason = rawData.reason
     }

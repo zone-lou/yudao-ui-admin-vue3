@@ -29,14 +29,14 @@
 
         <tr>
           <td class="label-cell">请假开始 从</td>
-          <td class="input-cell">{{ startTime }}</td>
+          <td class="input-cell">{{ startTime }} {{ startSession }}</td>
           <td class="label-cell">时段</td>
           <td class="input-cell">{{ startSession }}</td>
         </tr>
 
         <tr>
           <td class="label-cell">请假结束 至</td>
-          <td class="input-cell">{{ endTime }}</td>
+          <td class="input-cell">{{ endTime }} {{ endSession }}</td>
           <td class="label-cell">时段</td>
           <td class="input-cell">{{ endSession }}</td>
         </tr>
@@ -336,9 +336,9 @@ const leaveType = computed(() => {
   return dict ? dict.label : detailData.value.qxjType
 })
 const applyDate = computed(() => formatDate(detailData.value.applyDate))
-const startTime = computed(() => formatDate(detailData.value.qxjStartDate))
+const startTime = computed(() => formatDate(detailData.value.qxjStartDate, 'YYYY-MM-DD'))
 const startSession = computed(() => getPeriod(detailData.value.qxjStartDate))
-const endTime = computed(() => formatDate(detailData.value.qxjEndDate))
+const endTime = computed(() => formatDate(detailData.value.qxjEndDate, 'YYYY-MM-DD'))
 const endSession = computed(() => getPeriod(detailData.value.qxjEndDate))
 const leaveDays = computed(() => detailData.value.totalTs)
 const reason = computed(() => detailData.value.sjReason)

@@ -18,7 +18,8 @@
       <el-form-item label="开始时间" prop="checkBegin">
         <el-date-picker
           v-model="formData.checkBegin"
-          type="date"
+          type="datetime"
+          format="YYYY-MM-DD HH:mm"
           value-format="x"
           placeholder="选择开始时间"
         />
@@ -26,7 +27,8 @@
       <el-form-item label="结束时间" prop="checkEnd">
         <el-date-picker
           v-model="formData.checkEnd"
-          type="date"
+          type="datetime"
+          format="YYYY-MM-DD HH:mm"
           value-format="x"
           placeholder="选择结束时间"
         />
@@ -44,8 +46,8 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="请假天数" prop="days">
-        <el-input v-model="formData.days" placeholder="请输入请假天数" />
+      <el-form-item label="公出天数" prop="days">
+        <el-input :model-value="calendar ? (calculateOutingDays(formData.checkBegin, formData.checkEnd, calendar) ?? 0) : '待加载节假日配置'" readonly />
       </el-form-item>
       <el-form-item label="附件" prop="filepath">
         <UploadFile
@@ -62,6 +64,8 @@
   </Dialog>
 </template>
 <script setup lang="ts">
+import { calculateOutingDays } from './time'
+import { useOutingCalendar } from './calendar'
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { TimeExplainApi, TimeExplain } from '@/api/bpm/timeexplain'
 import { uploadReturnInfo } from '@/api/infra/file'
@@ -87,6 +91,7 @@ const formData = ref({
   filepath: undefined,
   fileList: []
 })
+const { calendar, ensureCalendar } = useOutingCalendar()
 const formRules = reactive({})
 const formRef = ref() // 表单 Ref
 const uploadFileRef = ref() // 上传组件 Ref
@@ -97,6 +102,11 @@ const open = async (type: string, id?: number) => {
   dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
+  try {
+    await ensureCalendar()
+  } catch {
+    message.error('节假日配置加载失败，保存时将重试')
+  }
   // 修改时，设置数据
   if (id) {
     formLoading.value = true
@@ -117,7 +127,15 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as any
+    const data = { ...formData.value } as any
+    const days = calculateOutingDays(data.checkBegin, data.checkEnd, await ensureCalendar())
+    if (days === null) {
+      message.error('请选择有效的起止时间，结束时间不能早于开始时间')
+      return
+    }
+    data.days = days
+    delete data.startPeriod
+    delete data.endPeriod
 
     // 处理文件上传 fileList
     const rawFileList = uploadFileRef.value?.fileList || []
