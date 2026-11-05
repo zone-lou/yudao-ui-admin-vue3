@@ -199,6 +199,7 @@
 </template>
 
 <script lang="ts" setup>
+import { formatTaskOpinion } from '@/utils/bpmOpinion'
 import { dateFormatter, formatDate } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 import { registerComponent } from '@/utils/routerHelper'
@@ -254,7 +255,7 @@ const activityNodesWithComments = computed(() => {
             commentId: comment.id,
             closed: comment.closed,
             status: 2,
-            reason: comment.commentDetail || '已阅',
+            reason: formatTaskOpinion(comment.commentDetail) || '已阅',
             endTime: comment.commentDate,
             name: group.name,
             assigneeUser: {

@@ -220,6 +220,7 @@
 </template>
 
 <script setup lang="ts">
+import { formatTaskOpinion } from '@/utils/bpmOpinion'
 import CommentTemplatePicker from '@/components/CommentTemplatePicker/index.vue'
 import { dateUtil } from '@/utils/dateUtil'
 import { SendDocApi } from '@/api/bpm/senddoc'
@@ -337,7 +338,7 @@ const processActivityNodes = () => {
           const name = node.name || ''
           const info = {
             name: name,
-            comment: task.reason,
+            comment: formatTaskOpinion(task.reason),
             assigneeUser: task.assigneeUser,
             endTime: node.endTime || task.endTime
           }

@@ -665,6 +665,7 @@
 </template>
 
 <script setup lang="ts">
+import { formatTaskOpinion } from '@/utils/bpmOpinion'
 import { useTaskOpinionDraft } from '@/hooks/bpm/useTaskOpinionDraft'
 import CommentTemplatePicker from '@/components/CommentTemplatePicker/index.vue'
 import { ref, watch, onMounted } from 'vue'
@@ -1100,7 +1101,7 @@ const processActivityNodes = () => {
         if (task.reason) {
           // 仅拉取已填写的意见，补充 taskId 和 taskName 以便绑定附件
           const info = {
-            comment: task.reason,
+            comment: formatTaskOpinion(task.reason),
             assigneeUser: task.assigneeUser,
             endTime: node.endTime || task.endTime,
             taskName: task.name,

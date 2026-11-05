@@ -50,7 +50,7 @@
                   @dblclick="pickerRef?.open()"
                 />
               </div>
-              <div v-else-if="row.task" class="opinion-text">{{ row.task.reason || '' }}</div>
+              <div v-else-if="row.task" class="opinion-text">{{ formatTaskOpinion(row.task.reason) }}</div>
             </td>
             <td class="handler-cell">{{
               row.task?.assigneeUser?.nickname || (row.editing ? userStore.getUser.nickname : '')
@@ -78,6 +78,7 @@
 </template>
 
 <script setup lang="ts">
+import { formatTaskOpinion } from '@/utils/bpmOpinion'
 import { computed, ref, watch } from 'vue'
 import type { ComponentPublicInstance } from 'vue'
 import dayjs from 'dayjs'

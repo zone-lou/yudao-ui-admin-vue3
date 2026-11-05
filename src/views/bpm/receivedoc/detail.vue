@@ -443,6 +443,7 @@
 </template>
 
 <script setup lang="ts">
+import { formatTaskOpinion } from '@/utils/bpmOpinion'
 import { useTaskOpinionDraft } from '@/hooks/bpm/useTaskOpinionDraft'
 import { selectOpinionTasks } from '@/hooks/bpm/taskOpinion'
 import CommentTemplatePicker from '@/components/CommentTemplatePicker/index.vue'
@@ -632,7 +633,7 @@ const processActivityNodes = () => {
       }
       const info = {
         name: name,
-        comment: task.reason,
+        comment: formatTaskOpinion(task.reason),
         assigneeUser: task.assigneeUser,
         endTime: node.endTime || task.endTime // 优先使用节点的结束时间，或者任务的结束时间
       }

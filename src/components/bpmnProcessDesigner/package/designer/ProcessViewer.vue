@@ -100,7 +100,7 @@
             v-if="selectActivityType === 'bpmn:UserTask'"
           >
             <template #default="scope">
-              {{ shouldHideTaskReason(scope.row) ? '' : scope.row.reason }}
+              {{ shouldHideTaskReason(scope.row) ? '' : formatTaskOpinion(scope.row.reason) }}
             </template>
           </el-table-column>
           <el-table-column align="center" label="耗时" prop="durationInMillis" width="100">
@@ -141,6 +141,7 @@
 </template>
 
 <script lang="ts" setup>
+import { formatTaskOpinion } from '@/utils/bpmOpinion'
 import '../theme/index.scss'
 import BpmnViewer from 'bpmn-js/lib/Viewer'
 import MoveCanvasModule from 'diagram-js/lib/navigation/movecanvas'

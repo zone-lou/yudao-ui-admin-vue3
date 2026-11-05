@@ -276,6 +276,7 @@
 </template>
 
 <script setup lang="ts">
+import { formatTaskOpinion } from '@/utils/bpmOpinion'
 import { useTaskOpinionDraft } from '@/hooks/bpm/useTaskOpinionDraft'
 import CommentTemplatePicker from '@/components/CommentTemplatePicker/index.vue'
 import { TaskStatusEnum } from '@/api/bpm/task'
@@ -465,7 +466,7 @@ const processActivityNodes = () => {
             : OPINION_NODE_IDS[nodeId]
           const info = {
             name: name,
-            comment: task.reason,
+            comment: formatTaskOpinion(task.reason),
             assigneeUser: task.assigneeUser,
             endTime: node.endTime || task.endTime
           }

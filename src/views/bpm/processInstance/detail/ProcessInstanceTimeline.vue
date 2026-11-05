@@ -153,7 +153,7 @@
                 "
                 class="text-#a5a5a5 text-13px mt-1 w-full bg-#f8f8fa p2 rounded-md"
               >
-                办理意见：{{ task.reason }}
+                办理意见：{{ formatTaskOpinion(task.reason) }}
               </div>
               <div
                 v-if="task.signPicUrl && activity.nodeType === NodeType.USER_TASK_NODE"
@@ -226,6 +226,7 @@
 </template>
 
 <script lang="ts" setup>
+import { formatTaskOpinion } from '@/utils/bpmOpinion'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { formatDate } from '@/utils/formatTime'
