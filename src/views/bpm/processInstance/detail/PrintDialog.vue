@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatTaskOpinion } from '@/utils/bpmOpinion'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { getDictDataPage } from '@/api/system/dict/dict.data'
 import { useUserStore } from '@/store/modules/user'
@@ -196,7 +197,10 @@ const preparePrintData = (rawData: any) => {
   }
 
   // ==================== 【办理任务】 统一处理 ====================
-  const tasks = printData.value.tasks || []
+  const tasks = (printData.value.tasks || []).map((task: any) => ({
+    ...task,
+    content: formatTaskOpinion(task.content)
+  }))
 
   // --- 收文/请假 ---
   const niBanTask = tasks.find((t: any) => t.name === '主任拟办' && t.approveName)

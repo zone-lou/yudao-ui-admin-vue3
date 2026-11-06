@@ -312,16 +312,12 @@
                         >
                           无需选择办理人<br />(自动分配或无需办理)
                         </div>
-                        <el-tree
+                        <CandidateUserTree
                           class="!bg-transparent"
                           v-else
                           :ref="(el) => setTreeRef(el, node.taskDefKey)"
                           :data="node.candidateUsers"
-                          :props="{ label: 'name', children: 'children' }"
-                          show-checkbox
-                          node-key="id"
-                          default-expand-all
-                          :check-strictly="false"
+                          :single="node.extensionProperties?.multiple_flag === '0'"
                           @check="
                             (data, { checkedKeys }) => handleTreeCheck(node, data, checkedKeys)
                           "
@@ -338,7 +334,7 @@
                               {{ data.name }}
                             </span>
                           </template>
-                        </el-tree>
+                        </CandidateUserTree>
                       </div>
                     </div>
                   </div>
@@ -437,6 +433,7 @@
   <SignDialog ref="signRef" @success="handleSignFinish" />
 </template>
 <script lang="ts" setup>
+import CandidateUserTree from '@/components/ProcessSendDialog/CandidateUserTree.vue'
 import CommentTemplatePicker from '@/components/CommentTemplatePicker/index.vue'
 import { useUserStoreWithOut } from '@/store/modules/user'
 import { setConfAndFields2 } from '@/utils/formCreate'
@@ -1223,41 +1220,8 @@ const buildDeptTree = (users: any[]) => {
 }
 
 /** 树节点选中回调 */
-const handleTreeCheck = (node: any, data: any, checkedKeys: any[]) => {
-  // 单选逻辑处理：如果 multiple_flag 为 0
-  if (node.extensionProperties?.multiple_flag === '0') {
-    const treeRef = userTreeRefs.value[node.taskDefKey]
-    if (treeRef) {
-      // 判断当前点击是选中还是取消选中
-      if (checkedKeys.includes(data.id)) {
-        // 如果点击的是部门（或者是带子节点的虚拟父级），在单选模式下不能直接全选子节点
-        if (data.children && data.children.length > 0) {
-          // 为了防止级联导致多人被勾，我们主动退化为：只勾选该部门下的第一个人员
-          const firstUserId = data.children[0].id
-          treeRef.setCheckedKeys([firstUserId])
-        } else {
-          // 如果点击的本来就是且只是具体人，则正常排他，强制只选中当前人
-          treeRef.setCheckedKeys([data.id])
-        }
-        node.checked = true
-      } else {
-        // 如果是取消选中，则清空勾选
-        treeRef.setCheckedKeys([])
-        node.checked = false
-      }
-      // 更新右侧实时准备发送人员展示列
-      nextTick(() => {
-        refreshCurrentSelectedUsers()
-        saveSendSelectionMemory()
-      })
-      return
-    }
-  }
-
-  // 当选中任何人员时，自动勾选父级节点；如果一个人都没选中，则自动取消该节点勾选
+const handleTreeCheck = (node: any, _data: any, checkedKeys: any[]) => {
   node.checked = checkedKeys.length > 0
-
-  // 更新右侧实时准备发送人员展示列
   nextTick(() => {
     refreshCurrentSelectedUsers()
     saveSendSelectionMemory()

@@ -300,7 +300,7 @@ const createDateTimeFields = (field: 'checkBegin' | 'checkEnd', defaultClock: st
   return { date, clock }
 }
 const { date: startDate, clock: startClock } = createDateTimeFields('checkBegin', '08:30')
-const { date: endDate, clock: endClock } = createDateTimeFields('checkEnd', '13:30')
+const { date: endDate, clock: endClock } = createDateTimeFields('checkEnd', '17:30')
 
 const formRules = reactive({
   checkBegin: [{ required: true, message: '开始时间不能为空', trigger: 'blur' }],

@@ -69,16 +69,12 @@
                         >
                           无需选择办理人<br />(自动分配或无需办理)
                         </div>
-                        <el-tree
+                        <CandidateUserTree
                           class="!bg-transparent"
                           v-else
                           :ref="(el) => setTreeRef(el, node.taskDefKey)"
                           :data="node.candidateUsers"
-                          :props="{ label: 'name', children: 'children' }"
-                          show-checkbox
-                          node-key="id"
-                          default-expand-all
-                          :check-strictly="false"
+                          :single="node.extensionProperties?.multiple_flag === '0'"
                           @check="
                             (data, { checkedKeys }) => handleTreeCheck(node, data, checkedKeys)
                           "
@@ -95,7 +91,7 @@
                               {{ data.name }}
                             </span>
                           </template>
-                        </el-tree>
+                        </CandidateUserTree>
                       </div>
                     </div>
                   </div>
@@ -151,6 +147,7 @@
 </template>
 
 <script lang="ts" setup>
+import CandidateUserTree from '@/components/ProcessSendDialog/CandidateUserTree.vue'
 import { ref, reactive, computed, watch, nextTick } from 'vue'
 import { getTenantId } from '@/utils/auth'
 import { useMessage } from '@/hooks/web/useMessage'
@@ -433,27 +430,11 @@ watch(
   { deep: true }
 )
 
-const handleTreeCheck = (node: any, data: any, checkedKeys: any[]) => {
-  if (node.extensionProperties?.multiple_flag === '0') {
-    const treeRef = userTreeRefs.value[node.taskDefKey]
-    if (treeRef) {
-      if (checkedKeys.includes(data.id)) {
-        if (data.children && data.children.length > 0) {
-          treeRef.setCheckedKeys([data.children[0].id])
-        } else {
-          treeRef.setCheckedKeys([data.id])
-        }
-        node.checked = true
-      } else {
-        treeRef.setCheckedKeys([])
-        node.checked = false
-      }
-      nextTick(() => refreshCurrentSelectedUsers())
-      return
-    }
-  }
+const handleTreeCheck = (node: any, _data: any, checkedKeys: any[]) => {
   node.checked = checkedKeys.length > 0
-  nextTick(() => refreshCurrentSelectedUsers())
+  nextTick(() => {
+    refreshCurrentSelectedUsers()
+  })
 }
 
 const handleNodeCheckboxChange = (val: boolean | string | number, node: any) => {
