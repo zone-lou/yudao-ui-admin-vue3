@@ -29,6 +29,7 @@
             <dict-tag :type="DICT_TYPE.BPM_LEAVE_TYPE" :value="row.qxjType" />
           </template>
         </el-table-column>
+        <el-table-column label="请假事由" prop="sjReason" min-width="220" show-overflow-tooltip />
         <el-table-column label="开始时间" min-width="170" align="center">
           <template #default="{ row }">{{ formatHistoryTime(row.qxjStartDate) }}</template>
         </el-table-column>
