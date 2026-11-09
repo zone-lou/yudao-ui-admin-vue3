@@ -150,7 +150,7 @@
       @sort-change="handleSortChange"
       @header-dragend="handleHeaderDragend"
     >
-      <el-table-column column-key="index" type="index" label="序号" :width="getColumnWidth('index', 60)" align="center" fixed="left" resizable />
+      <el-table-column column-key="index" type="index" :index="(index) => (queryParams.pageNo - 1) * queryParams.pageSize + index + 1" label="序号" :width="getColumnWidth('index', 60)" align="center" fixed="left" resizable />
       <!--      <el-table-column v-if="visibleColumn('timeout')" label="状态" width="80" align="center" resizable>-->
       <!--        <template #header>-->
       <!--          <el-icon><Clock /></el-icon>-->

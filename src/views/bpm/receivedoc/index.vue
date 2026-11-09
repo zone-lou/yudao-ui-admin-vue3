@@ -172,7 +172,7 @@
       @sort-change="handleSortChange"
       @header-dragend="handleHeaderDragend"
     >
-      <el-table-column column-key="index" type="index" label="序号" :width="getColumnWidth('index', 60)" align="center" fixed="left" resizable />
+      <el-table-column column-key="index" type="index" :index="(index) => (queryParams.pageNo - 1) * queryParams.pageSize + index + 1" label="序号" :width="getColumnWidth('index', 60)" align="center" fixed="left" resizable />
       <el-table-column column-key="subject" v-if="visibleColumn('subject')" label="标题" align="left" prop="subject" show-overflow-tooltip :width="getColumnWidth('subject', 355)" sortable="custom" resizable>
         <template #default="scope">
           <span

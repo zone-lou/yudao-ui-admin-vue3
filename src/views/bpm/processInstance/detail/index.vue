@@ -56,6 +56,16 @@
           >
             <Icon icon="ep:printer" class="mr-5px" /> 打印
           </el-button>
+          <el-button
+            size="small"
+            type="primary"
+            class="process-print-button"
+            :loading="downloadLoading"
+            :disabled="processInstanceLoading || !processInstance.id"
+            @click="handleDownloadReviewSheet"
+          >
+            <Icon icon="ep:download" class="mr-5px" /> 下载
+          </el-button>
         </div>
         <!-- <el-divider class="!my-8px" /> -->
         <!-- <div class="flex items-center gap-5 mb-10px h-40px">
@@ -260,6 +270,7 @@
 </template>
 <script lang="ts" setup>
 import { formatDate } from '@/utils/formatTime'
+import download from '@/utils/download'
 import { DICT_TYPE } from '@/utils/dict'
 import { BpmModelType, BpmModelFormType } from '@/utils/constants'
 import { setConfAndFields2 } from '@/utils/formCreate'
@@ -623,6 +634,22 @@ const onlyOfficeRef = ref()
 const handleOnlyOffice = () => {
   const url = router.resolve({ path: '/office-editor', query: { id: props.id } }).href
   window.open(url, '_blank')
+}
+
+/** 下载阅办单 */
+const downloadLoading = ref(false)
+const handleDownloadReviewSheet = async () => {
+  if (downloadLoading.value) return
+  downloadLoading.value = true
+  try {
+    const data = await ProcessInstanceApi.downloadProcessInstancePrintWord(props.id)
+    const name = String(processInstance.value.name || props.id).replace(/[\\/:*?"<>|]/g, '_')
+    download.word(data, `${name}_阅办单.docx`)
+  } catch {
+    message.error('阅办单下载失败，请稍后重试')
+  } finally {
+    downloadLoading.value = false
+  }
 }
 
 /** 当前的 Tab */

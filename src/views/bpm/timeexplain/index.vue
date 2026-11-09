@@ -109,7 +109,7 @@
       @sort-change="handleSortChange"
       @header-dragend="handleHeaderDragend"
     >
-      <el-table-column column-key="index" type="index" label="序号" :width="getColumnWidth('index', 60)" align="center" fixed="left" resizable />
+      <el-table-column column-key="index" type="index" :index="(index) => (queryParams.pageNo - 1) * queryParams.pageSize + index + 1" label="序号" :width="getColumnWidth('index', 60)" align="center" fixed="left" resizable />
       <el-table-column column-key="nickName" v-if="visibleColumn('nickName')" label="申请用户" align="center" prop="nickName" :width="getColumnWidth('nickName', 120)" sortable="custom" resizable />
       <el-table-column column-key="checkBegin"
         v-if="visibleColumn('checkBegin')"

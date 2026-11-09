@@ -165,7 +165,7 @@
       @header-dragend="handleHeaderDragend"
     >
       <el-table-column column-key="selection" type="selection" :width="getColumnWidth('selection', 55)" resizable />
-      <el-table-column column-key="index" type="index" label="序号" :width="getColumnWidth('index', 60)" align="center" fixed="left" resizable />
+      <el-table-column column-key="index" type="index" :index="(index) => (queryParams.pageNo - 1) * queryParams.pageSize + index + 1" label="序号" :width="getColumnWidth('index', 60)" align="center" fixed="left" resizable />
 
       <!-- 1. 标签 (超时标识) -->
       <el-table-column

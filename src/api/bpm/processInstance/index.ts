@@ -136,6 +136,14 @@ export const getProcessInstancePrintData = async (id: string) => {
     url: '/bpm/process-instance/get-print-data?processInstanceId=' + id
   })
 }
+// 下载流程实例阅办单 Word 文档
+export const downloadProcessInstancePrintWord = async (id: string) => {
+  return await request.download<Blob>({
+    url: '/bpm/process-instance/get-print-word',
+    params: { processInstanceId: id }
+  })
+}
+
 // 获取流程实例 Word 文件地址（供 OnlyOffice 打开）
 export const getProcessInstancePrintWordFile = async (id: string) => {
   return await request.get({
