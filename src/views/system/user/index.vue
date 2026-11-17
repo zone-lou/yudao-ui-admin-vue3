@@ -191,6 +191,7 @@
                     'system:user:delete',
                     'system:user:update-password',
                     'system:permission:assign-user-role',
+                    'bpm:user-group:update',
                     'system:user:query'
                   ]"
                 >
@@ -214,6 +215,12 @@
                         v-if="checkPermi(['system:permission:assign-user-role'])"
                       >
                         <Icon icon="ep:circle-check" />分配角色
+                      </el-dropdown-item>
+                      <el-dropdown-item
+                        command="handleCopyRole"
+                        v-if="checkPermi(['system:permission:assign-user-role', 'bpm:user-group:update'])"
+                      >
+                        <Icon icon="ep:copy-document" />复制角色与用户组
                       </el-dropdown-item>
                       <el-dropdown-item
                         command="handleMembership"
@@ -247,6 +254,7 @@
   <UserImportForm ref="importFormRef" @success="getList" />
   <!-- 分配角色 -->
   <UserAssignRoleForm ref="assignRoleFormRef" @success="getList" />
+  <UserCopyRoleForm ref="copyRoleFormRef" @success="getList" />
   <UserMembershipForm ref="membershipFormRef" />
 
   <UserAssignDeptForm ref="assignDeptFormRef" />
@@ -262,6 +270,7 @@ import * as UserApi from '@/api/system/user'
 import UserForm from './UserForm.vue'
 import UserImportForm from './UserImportForm.vue'
 import UserAssignRoleForm from './UserAssignRoleForm.vue'
+import UserCopyRoleForm from './UserCopyRoleForm.vue'
 import UserMembershipForm from './UserMembershipForm.vue'
 import DeptTree from './DeptTree.vue'
 import UserAssignDeptForm from './UserAssignDeptForm.vue'
@@ -439,6 +448,9 @@ const handleCommand = (command: string, row: UserApi.UserVO) => {
     case 'handleRole':
       handleRole(row)
       break
+    case 'handleCopyRole':
+      copyRoleFormRef.value.open(row)
+      break
     case 'handleMembership':
       openMembership(row)
       break
@@ -499,6 +511,7 @@ const handleResetPwd = async (row: UserApi.UserVO) => {
 
 /** 分配角色 */
 const assignRoleFormRef = ref()
+const copyRoleFormRef = ref()
 const handleRole = (row: UserApi.UserVO) => {
   assignRoleFormRef.value.open(row)
 }

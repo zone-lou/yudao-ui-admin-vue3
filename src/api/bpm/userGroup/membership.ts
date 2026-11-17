@@ -26,3 +26,13 @@ export const getRoleGroups = (roleId: number): Promise<number[]> =>
 
 export const updateRoleGroups = (roleId: number, groupIds: number[]) =>
   request.put({ url: '/bpm/user-group/membership/role-groups', data: { roleId, groupIds } })
+
+export interface UserMembershipCopyRequest {
+  sourceUserId: number
+  targetUserIds: number[]
+  roleIds: number[]
+  groupIds: number[]
+}
+
+export const copyUserMembership = (data: UserMembershipCopyRequest) =>
+  request.post({ url: '/bpm/user-group/membership/copy', data })

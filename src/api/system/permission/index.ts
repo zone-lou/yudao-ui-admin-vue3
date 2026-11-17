@@ -56,3 +56,13 @@ export const getRoleMembers = (roleId: number): Promise<RoleMemberVO[]> => {
 export const updateRoleMember = (roleId: number, userId: number, assigned: boolean) => {
   return request.put({ url: '/system/permission/role-member', data: { roleId, userId, assigned } })
 }
+
+export interface PermissionCopyUserRolesReqVO {
+  sourceUserId: number
+  targetUserIds: number[]
+  roleIds: number[]
+}
+
+export const copyUserRoles = (data: PermissionCopyUserRolesReqVO) => {
+  return request.post({ url: '/system/permission/copy-user-roles', data })
+}
