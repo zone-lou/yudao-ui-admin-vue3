@@ -137,6 +137,14 @@
             >
               删除
             </el-button>
+            <el-button
+              v-hasPermi="['system:role:query', 'system:permission:assign-user-role']"
+              link
+              type="primary"
+              @click="memberFormRef.open(scope.row)"
+            >
+              成员管理
+            </el-button>
             <el-dropdown
               v-hasPermi="[
                 'system:permission:assign-role-menu',
@@ -191,6 +199,7 @@
   <RoleDataPermissionForm ref="dataPermissionFormRef" @success="getList" />
   <RoleProcessViewForm ref="processViewFormRef" />
   <RoleGroupMappingForm ref="roleGroupMappingFormRef" />
+  <RoleMemberForm ref="memberFormRef" />
 </template>
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
@@ -203,6 +212,7 @@ import RoleAssignMenuForm from './RoleAssignMenuForm.vue'
 import RoleDataPermissionForm from './RoleDataPermissionForm.vue'
 import RoleProcessViewForm from './RoleProcessViewForm.vue'
 import RoleGroupMappingForm from './RoleGroupMappingForm.vue'
+import RoleMemberForm from './RoleMemberForm.vue'
 
 defineOptions({ name: 'SystemRole' })
 
@@ -264,6 +274,7 @@ const openProcessViewForm = (row: RoleApi.RoleVO) => {
   processViewFormRef.value.open(row)
 }
 
+const memberFormRef = ref()
 const roleGroupMappingFormRef = ref()
 const openRoleGroupMappingForm = (row: RoleApi.RoleVO) => {
   roleGroupMappingFormRef.value.open(row)

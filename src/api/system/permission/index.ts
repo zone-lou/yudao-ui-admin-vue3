@@ -40,3 +40,19 @@ export const getUserRoleList = async (userId: number) => {
 export const assignUserRole = async (data: PermissionAssignUserRoleReqVO) => {
   return await request.post({ url: '/system/permission/assign-user-role', data })
 }
+
+export interface RoleMemberVO {
+  id: number
+  username: string
+  nickname: string
+  deptName?: string
+  status: number
+}
+
+export const getRoleMembers = (roleId: number): Promise<RoleMemberVO[]> => {
+  return request.get({ url: '/system/permission/role-members', params: { roleId } })
+}
+
+export const updateRoleMember = (roleId: number, userId: number, assigned: boolean) => {
+  return request.put({ url: '/system/permission/role-member', data: { roleId, userId, assigned } })
+}
