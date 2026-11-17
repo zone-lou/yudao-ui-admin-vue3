@@ -3,76 +3,19 @@
     v-model="visible"
     title="复制角色与用户组"
     width="min(760px, calc(100vw - 32px))"
-    scroll
-    max-height="min(520px, 55vh)"
     :before-close="handleClose"
   >
     <div v-loading="loading">
-      <el-form label-width="100px">
+      <el-form label-width="100px" class="copy-membership-form">
         <el-form-item label="来源人员">
           <span>{{ sourceName }}（{{ sourceUsername }}）</span>
-        </el-form-item>
-        <el-form-item v-if="canCopyRoles" label="复制角色">
-          <div class="w-full">
-            <div v-if="roles.length" class="mb-2">
-              <el-checkbox
-                :model-value="selectedRoleIds.length === roles.length"
-                :indeterminate="selectedRoleIds.length > 0 && selectedRoleIds.length < roles.length"
-                :disabled="saving"
-                @change="toggleAll"
-                >全选</el-checkbox
-              >
-              <span class="ml-3 text-gray-500">已选 {{ selectedRoleIds.length }} 个角色</span>
-            </div>
-            <el-checkbox-group v-model="selectedRoleIds" :disabled="saving">
-              <el-checkbox v-for="role in roles" :key="role.id" :label="role.id">
-                {{ role.name }}
-              </el-checkbox>
-            </el-checkbox-group>
-            <el-empty
-              v-if="ready && !roles.length"
-              description="该人员没有可复制的启用角色"
-              :image-size="60"
-            />
-            <div v-if="skippedCount" class="text-gray-500">
-              {{ skippedCount }} 个已停用或不可用角色不参与复制。
-            </div>
-          </div>
-        </el-form-item>
-        <el-form-item v-if="canCopyGroups" label="复制用户组">
-          <div class="w-full">
-            <div v-if="groups.length" class="mb-2">
-              <el-checkbox
-                :model-value="selectedGroupIds.length === groups.length"
-                :indeterminate="
-                  selectedGroupIds.length > 0 && selectedGroupIds.length < groups.length
-                "
-                :disabled="saving"
-                @change="toggleAllGroups"
-                >全选</el-checkbox
-              >
-              <span class="ml-3 text-gray-500">已选 {{ selectedGroupIds.length }} 个用户组</span>
-            </div>
-            <el-checkbox-group v-model="selectedGroupIds" :disabled="saving">
-              <el-checkbox v-for="group in groups" :key="group.id" :label="group.id">
-                {{ group.name }}
-              </el-checkbox>
-            </el-checkbox-group>
-            <el-empty
-              v-if="ready && !groups.length"
-              description="该人员没有可复制的启用用户组"
-              :image-size="60"
-            />
-            <div v-if="skippedGroupCount" class="text-gray-500">
-              {{ skippedGroupCount }} 个已停用或不可用用户组不参与复制。
-            </div>
-          </div>
         </el-form-item>
         <el-form-item label="目标人员">
           <el-select
             v-model="targetUserIds"
             multiple
             filterable
+            :reserve-keyword="false"
             clearable
             collapse-tags
             collapse-tags-tooltip
@@ -91,6 +34,66 @@
           </el-select>
           <span class="text-gray-500">已选 {{ targetUserIds.length }} 人，每次最多 50 人</span>
         </el-form-item>
+        <div class="copy-membership-options">
+          <el-form-item v-if="canCopyRoles" label="复制角色">
+            <div class="w-full">
+              <div v-if="roles.length" class="mb-2">
+                <el-checkbox
+                  :model-value="selectedRoleIds.length === roles.length"
+                  :indeterminate="
+                    selectedRoleIds.length > 0 && selectedRoleIds.length < roles.length
+                  "
+                  :disabled="saving"
+                  @change="toggleAll"
+                  >全选</el-checkbox
+                >
+                <span class="ml-3 text-gray-500">已选 {{ selectedRoleIds.length }} 个角色</span>
+              </div>
+              <el-checkbox-group v-model="selectedRoleIds" :disabled="saving">
+                <el-checkbox v-for="role in roles" :key="role.id" :label="role.id">
+                  {{ role.name }}
+                </el-checkbox>
+              </el-checkbox-group>
+              <el-empty
+                v-if="ready && !roles.length"
+                description="该人员没有可复制的启用角色"
+                :image-size="60"
+              />
+              <div v-if="skippedCount" class="text-gray-500">
+                {{ skippedCount }} 个已停用或不可用角色不参与复制。
+              </div>
+            </div>
+          </el-form-item>
+          <el-form-item v-if="canCopyGroups" label="复制用户组">
+            <div class="w-full">
+              <div v-if="groups.length" class="mb-2">
+                <el-checkbox
+                  :model-value="selectedGroupIds.length === groups.length"
+                  :indeterminate="
+                    selectedGroupIds.length > 0 && selectedGroupIds.length < groups.length
+                  "
+                  :disabled="saving"
+                  @change="toggleAllGroups"
+                  >全选</el-checkbox
+                >
+                <span class="ml-3 text-gray-500">已选 {{ selectedGroupIds.length }} 个用户组</span>
+              </div>
+              <el-checkbox-group v-model="selectedGroupIds" :disabled="saving">
+                <el-checkbox v-for="group in groups" :key="group.id" :label="group.id">
+                  {{ group.name }}
+                </el-checkbox>
+              </el-checkbox-group>
+              <el-empty
+                v-if="ready && !groups.length"
+                description="该人员没有可复制的启用用户组"
+                :image-size="60"
+              />
+              <div v-if="skippedGroupCount" class="text-gray-500">
+                {{ skippedGroupCount }} 个已停用或不可用用户组不参与复制。
+              </div>
+            </div>
+          </el-form-item>
+        </div>
       </el-form>
     </div>
     <template #footer>
@@ -215,3 +218,21 @@ const submit = async () => {
 }
 defineExpose({ open })
 </script>
+
+<style scoped lang="scss">
+.copy-membership-form {
+  display: flex;
+  flex-direction: column;
+  height: min(520px, 55vh);
+
+  > :deep(.el-form-item) {
+    flex-shrink: 0;
+  }
+}
+
+.copy-membership-options {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+</style>
