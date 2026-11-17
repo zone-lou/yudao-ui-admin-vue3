@@ -76,7 +76,7 @@
         </tr>
 
         <tr>
-          <td class="label-cell" rowspan="2">科室(单位)负责人意见</td>
+          <td class="label-cell dept-head-opinion-label" rowspan="2">科室(单位)负责人意见</td>
           <td
             colspan="3"
             class="input-cell h-large"
@@ -704,6 +704,11 @@ defineExpose({
   background-color: #dbe9f8;
   padding: 16px 6px !important;
   box-sizing: border-box !important;
+}
+
+.label-cell.dept-head-opinion-label {
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 
 .input-cell {

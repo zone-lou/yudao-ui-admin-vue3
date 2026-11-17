@@ -8,7 +8,12 @@
     </el-table-column>
     <el-table-column align="center" label="办理状态" prop="status" width="100">
       <template #default="scope">
-        <dict-tag :type="DICT_TYPE.BPM_TASK_STATUS" :value="scope.row.status" />
+        <dict-tag
+          v-if="scope.row.status != null"
+          :type="DICT_TYPE.BPM_TASK_STATUS"
+          :value="scope.row.status"
+        />
+        <span v-else>未知</span>
       </template>
     </el-table-column>
     <el-table-column
@@ -71,7 +76,12 @@
         <el-table-column prop="assigneeName" label="办理人员" align="center" width="120" />
         <el-table-column prop="status" label="办理状态" align="center" width="120">
           <template #default="scope">
-            <dict-tag :type="DICT_TYPE.BPM_TASK_STATUS" :value="scope.row.status" />
+            <dict-tag
+              v-if="scope.row.status != null"
+              :type="DICT_TYPE.BPM_TASK_STATUS"
+              :value="scope.row.status"
+            />
+            <span v-else>未知</span>
           </template>
         </el-table-column>
         <el-table-column prop="startTime" label="开始时间" align="center" width="180">

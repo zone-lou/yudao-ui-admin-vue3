@@ -125,7 +125,7 @@
         label="开始时间"
         align="center"
         prop="qxjStartDate"
-        :formatter="dateTimeFormatter"
+        :formatter="leaveTimeFormatter"
         :width="getColumnWidth('qxjStartDate', 180)"
         sortable="custom"
         resizable
@@ -135,7 +135,7 @@
         label="结束时间"
         align="center"
         prop="qxjEndDate"
-        :formatter="dateTimeFormatter"
+        :formatter="leaveTimeFormatter"
         :width="getColumnWidth('qxjEndDate', 180)"
         sortable="custom"
         resizable
@@ -199,6 +199,7 @@
 </template>
 
 <script setup lang="ts">
+import dayjs from 'dayjs'
 import { useBpmPageSize } from '@/hooks/bpm/useBpmPageSize'
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { getBusinessStatusOptions } from '@/utils/businessStatus'
@@ -268,6 +269,13 @@ const {
     'applyDate'
   ]
 )
+
+const leaveTimeFormatter = (_row: any, _column: any, cellValue: any) => {
+  if (!cellValue) return ''
+  const date = dayjs(cellValue)
+  if (!date.isValid()) return ''
+  return `${date.format('YYYY-MM-DD')} ${date.hour() < 12 ? '上午' : '下午'}`
+}
 
 const dateTimeFormatter = (_row: any, _column: any, cellValue: any) => {
   return cellValue ? formatDate(cellValue, 'YYYY-MM-DD HH:mm') : ''
